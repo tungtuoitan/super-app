@@ -61,11 +61,8 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
     const { isAuthenticated } = useAuthStore();
     const { moduleName } = useSideBarStore();
 
-    // Only show modules that have a defined sidebar view (i.e. intended for ActivityBar)
-    // note and ws are registered but hidden by default (no activityBar flag)
-    const visibleModules = moduleRegistry.getAll().filter(
-        (m) => m.id !== "Note" && m.id !== "Ws"
-    );
+    // Only show modules that have not opted out of the ActivityBar via hideFromActivityBar
+    const visibleModules = moduleRegistry.getAll().filter((m) => !m.hideFromActivityBar);
 
     const accountButton = (
         <TooltipProvider>

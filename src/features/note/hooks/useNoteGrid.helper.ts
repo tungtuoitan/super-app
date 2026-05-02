@@ -187,7 +187,7 @@ export const useNoteGridHelper = () => {
 
             const noteGridFilters = $user.filters?.noteGrid;
 
-            const createdAtRange = filterUtils._parseDateRange(noteGridFilters?.createdAt);
+            const createdAtRange = filterUtils.parseDateRange(noteGridFilters?.createdAt);
 
             const filterParams = {
                 searchText: searchQuery || undefined,

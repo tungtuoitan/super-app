@@ -9,7 +9,7 @@ import { useSideBarStore } from "../store/SideBar.store";
 import { filterUtils } from "./filter.utils";
 import { userProfileService } from "@/shared";
 import { STORAGE_KEYS, storageService } from "@/shared";
-import { parseApiError } from "../../shared/fetch/api-error.utils";
+import { parseApiError } from "@/shared";
 import {useConsoleHelper} from "@/shared";
 import {FilterFieldConfig, UserFilters, ViewFilter} from "./filter.types";
 import { filterRegistry } from "./filterRegistry";
@@ -32,7 +32,7 @@ export function useGenericFilterHelper() {
      * @param fieldKey Field key (statusCode, deletedAt, createdAt, etc.)
      * @param value New filter value
      */
-    const applyFilter = async (usingDefaultFilter: boolean = false): Promise<void> => {
+    const applyFilter = async (resetToDefault: boolean = false): Promise<void> => {
         try {
             // ---------
             // STEP 1: Upsert filters to backend
@@ -46,7 +46,7 @@ export function useGenericFilterHelper() {
                 throw new Error("User not authenticated");
             }
             const newUserFilters: UserFilters = $user.filters || ({} as UserFilters);
-            newUserFilters[filterViewKey as keyof UserFilters] = usingDefaultFilter
+            newUserFilters[filterViewKey as keyof UserFilters] = resetToDefault
                 ? filterRegistry.getDefaultFilters(filterViewKey) as ViewFilter
                 : uiFilters;
 
@@ -86,7 +86,7 @@ export function useGenericFilterHelper() {
      */
     const isPendingValueActive = (fieldKey: string, value: string): boolean => {
         const filterValue = (uiFilters as any)[fieldKey];
-        return filterUtils._hasValue(filterValue, value);
+        return filterUtils.hasValue(filterValue, value);
     };
 
     /**
@@ -97,7 +97,7 @@ export function useGenericFilterHelper() {
     const handleCheckboxToggle = (fieldKey: string, value: string) => {
         setUIFilters((prev) => {
             const currentValue = (prev as any)[fieldKey];
-            const newValue = filterUtils._toggle(currentValue, value);
+            const newValue = filterUtils.toggle(currentValue, value);
             return {
                 ...prev,
                 [fieldKey]: newValue,

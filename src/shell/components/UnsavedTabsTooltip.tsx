@@ -3,9 +3,11 @@
  * Used in ActivityBar and WorkspaceView to prevent navigation with unsaved changes
  */
 
-import { useMemo, ReactNode } from "react";
+import { ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
+import { isTabNewEntity } from "../types/tab.types";
+import { shellConstants } from "../shell.constants";
 
 interface UnsavedTabsTooltipProps {
     children: ReactNode;
@@ -29,14 +31,11 @@ export function UnsavedTabsTooltip({
     const { openTabs } = useEditorTabBarStore();
     // const { currentWorkspace } = useWorkspaceStore();
 
-    // Check if there are unsaved tabs (exclude multiProject tabs which don't have id)
-    const hasUnsavedTabs = (() => {
-        return openTabs.some((tab) => {
-            // MultiProject tabs don't have an id property
-            if (tab.type === "multiProject") return false;
-            return (tab.data as { id: number }).id < 0;
-        });
-    })()
+    // Check if there are unsaved tabs (exclude multiProject tabs which don't have an entity id)
+    const hasUnsavedTabs = openTabs.some((tab) => {
+        if (tab.type === shellConstants.vscode.tab.tabTypes.multiProject) return false;
+        return isTabNewEntity(tab);
+    });
 
 
     // Show tooltip with unsaved tabs warning

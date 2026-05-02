@@ -7,8 +7,9 @@ export const wsModule: ModuleDefinition = {
     id: "Ws",
     icon: RulerDimensionLine,
     label: "All Workspaces",
+    hideFromActivityBar: true,
 
-    SidebarView: WsView, 
+    SidebarView: WsView,
 
     editorPanels: {},
 

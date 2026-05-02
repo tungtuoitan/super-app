@@ -1,7 +1,7 @@
 ﻿import { Panel, PanelGroup } from "react-resizable-panels";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { useDeviceStore } from "@/shared";
-import { Console } from "../../../shared/console/Console";
+import { Console } from "@/shared";
 import { moduleRegistry } from "@/shell";
 import {RightSideBar} from "./RightSideBar";
 import {useActivityBarStore} from "@/shell/store/ActivityBar.store";

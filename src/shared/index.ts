@@ -23,6 +23,7 @@ export type { User, UserData } from "./auth/auth.types";
 
 // ── checkDevice ───────────────────────────────────────────────────────────
 export { useDeviceStore, DeviceProvider } from "./device/Device.store";
+export { useDetectDevice } from "./device/useDetectDevice";
 
 // ── components ────────────────────────────────────────────────────────────
 export { Button } from "./components/ui/Button";
@@ -91,6 +92,8 @@ export { richTextEditorConstants } from "./components/RichTextEditor/richTextEdi
 // ── console ───────────────────────────────────────────────────────────────
 export { ConsoleProvider } from "./console/useConsole.store";
 export { useConsoleHelper } from "./console/useConsole.helper";
+export { Console } from "./console/Console";
+export { ConsoleTab } from "./console/ConsoleTab";
 
 // ── debug ─────────────────────────────────────────────────────────────────
 // export { debugLogStore } from "./debug/debugLog.store";

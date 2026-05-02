@@ -8,6 +8,7 @@ import { useEditorTabBarStore } from "../store/EditorTab.store";
 import { useEditorTabBarHelper } from "@/shell";
 import { useMenuContext, useMenuContextHelper } from "@/shared";
 import type { BaseTab } from "@/shell";
+import { shellConstants } from "../shell.constants";
 import { moduleRegistry } from "../moduleRegistry";
 
 /** Returns true if this tab is a child of a tab group (its openedBy.link matches a leader's group key) */
@@ -31,7 +32,7 @@ export const useTabBarMenuHelper = () => {
     const savePinnedStateToStorage = (tabs: typeof openTabs) => {
         const pinnedState: Record<string, boolean> = {};
         tabs.forEach((tab) => { pinnedState[tab.id] = !!tab.isPinned; });
-        localStorage.setItem("tabPinnedState", JSON.stringify(pinnedState));
+        localStorage.setItem(shellConstants.storage.tabPinnedState, JSON.stringify(pinnedState));
     };
 
     /**

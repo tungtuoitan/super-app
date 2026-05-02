@@ -1,8 +1,7 @@
 import { X, Terminal } from "lucide-react";
 import { useState } from "react";
 import { Panel } from "react-resizable-panels";
-import { useDeviceStore } from "@/shared";
-import { ConsoleTab } from "../../../../shared/console/ConsoleTab";
+import { useDeviceStore, ConsoleTab } from "@/shared";
 import { TabNameList } from "./TabNameList";
 import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 import {useSideBarStore} from "@/shell/store/SideBar.store";
@@ -47,14 +46,14 @@ export function VSPanel({ onClose }: VSPanelProps) {
 
     const [activeTabId, setActiveTabId] = useState<string>(allTabs[0]?.id ?? "");
 
-    const changeTab = (id: string) => {
-        const prevTab = allTabs.find((t) => t.id === resolvedTabId);
-        if ("onLeave" in prevTab! && prevTab?.onLeave) prevTab.onLeave();
-        setActiveTabId(id);
-    };
-
     const currentTabExists = allTabs.some((t) => t.id === activeTabId);
     const resolvedTabId = currentTabExists ? activeTabId : (allTabs[0]?.id ?? "");
+
+    const changeTab = (id: string) => {
+        const prevTab = allTabs.find((t) => t.id === resolvedTabId);
+        if (prevTab && "onLeave" in prevTab && prevTab.onLeave) prevTab.onLeave();
+        setActiveTabId(id);
+    };
 
     return (
         <Panel

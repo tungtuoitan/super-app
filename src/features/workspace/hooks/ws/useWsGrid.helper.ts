@@ -237,7 +237,7 @@ export const useWsGridHelper = () => {
             const wsGridFilters = $user.filters?.wsGrid;
 
             // Parse date range filters
-            const createdAtRange = filterUtils._parseDateRange(wsGridFilters?.createdAt);
+            const createdAtRange = filterUtils.parseDateRange(wsGridFilters?.createdAt);
 
             // Build filter params for API (matching NoteGrid pattern)
             const filterParams = {

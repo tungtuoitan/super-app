@@ -1,68 +1,20 @@
-import { MouseEvent, useEffect, useState } from "react";
 import { constants } from "@/shared";
 import { envConfig } from "config/env.config";
 import { useDeviceStore } from "@/shared";
-import {CommandPalette} from "@/shell/commandPallete/CommandPalette";
-import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
-import {useCommandPaletteStore} from "@/shell/commandPallete/useCommandPalette.store";
+import { CommandPalette } from "@/shell/commandPallete/CommandPalette";
+import { useActivityBarStore } from "@/shell/store/ActivityBar.store";
 
 /**
- * Top navigation component.
- *
- * This component renders the application's top navigation bar, providing
- * navigation elements and user interaction features. It includes:
- * - App bar with sticky positioning for consistent visibility
- * - Integration with authentication context for user-specific features
- * - Snackbar notifications for user feedback
- *
- * Currently in development with placeholder content ('xxx').
- *
- * @returns The top navigation component
+ * TopNav — application top bar.
+ * Ctrl+P is handled by useCommandPaletteKeyDown inside <CommandPalette />.
  */
 export function TopNav() {
     const showDevBadge = envConfig.REACT_APP_ENVIRONMENT?.toLowerCase() !== constants.environments.production.toLowerCase();
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
     const { isMobile } = useDeviceStore();
-    const { setIsOpen } = useCommandPaletteStore();
-
-    // Handle Ctrl+P to open command palette
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            // Check for Ctrl+P (Windows/Linux) or Cmd+P (Mac)
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
-                e.preventDefault();
-                setIsOpen(true);
-            }
-        };
-
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, []);
 
     const handleToggleSidebar = () => {
-        // logger.log("Toggle Sidebar Clicked", {
-        //     currentIsSideBarVisible: isSideBarVisible,
-        //     newIsSideBarVisible: !isSideBarVisible,
-        //     isMobile,
-        // });
-
         setIsSideBarVisible(!isSideBarVisible);
-
-        // Check position after toggle
-        setTimeout(() => {
-            const topNavElement = document.querySelector(".top-navigation") as HTMLElement;
-            if (topNavElement) {
-                const rect = topNavElement.getBoundingClientRect();
-                // logger.log("TopNav Position After Toggle", {
-                //     top: rect.top,
-                //     bottom: rect.bottom,
-                //     height: rect.height,
-                //     isVisible: rect.top >= 0 && rect.top < window.innerHeight,
-                //     scrollY: window.scrollY,
-                //     pageYOffset: window.pageYOffset,
-                // });
-            }
-        }, 100);
     };
 
     return (
@@ -71,13 +23,11 @@ export function TopNav() {
 
             <div className="top-navigation w-full bg-black h-[36px] sticky top-0 z-50">
                 <nav className="bg-[#1B1D23] h-[36px] flex items-center px-4 gap-2 w-full">
-                    {/* Left side - Logo */}
-                    <div className=" flex items-center">
+                    <div className="flex items-center">
                         <img src="/logo-32x32-web.png" alt="Logo" className="w-4 h-4 mr-1 rounded-sm filter invert" />
                         <span className="text-white text-[10px] text-white/80 uppercase tracking-wide">S  u  p  e  r   A  p  p</span>
                     </div>
 
-                    {/* Mobile sidebar toggle button */}
                     {isMobile && (
                         <button
                             onClick={handleToggleSidebar}
@@ -86,13 +36,11 @@ export function TopNav() {
                             aria-label={isSideBarVisible ? "Hide sidebar" : "Show sidebar"}
                         >
                             {isSideBarVisible ? (
-                                /* Close (X) icon when sidebar is visible */
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <line x1="18" y1="6" x2="6" y2="18" />
                                     <line x1="6" y1="6" x2="18" y2="18" />
                                 </svg>
                             ) : (
-                                /* Hamburger menu icon when sidebar is hidden */
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <line x1="3" y1="6" x2="21" y2="6" />
                                     <line x1="3" y1="12" x2="21" y2="12" />
@@ -102,12 +50,7 @@ export function TopNav() {
                         </button>
                     )}
 
-                    {/* <DevDetail /> */}
-
-                    {/* Spacer to push content to right */}
                     <div className="flex-1"></div>
-
-                    {/* Right side - DEV badge */}
                     {showDevBadge && <div className="text-red-500 font-bold text-sm uppercase">DEV</div>}
                 </nav>
             </div>

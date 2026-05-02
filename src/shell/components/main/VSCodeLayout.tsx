@@ -7,13 +7,14 @@ import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
 import { useLocation } from "react-router-dom";
 import { useDeviceStore } from "@/shared";
-import {useDetectDevice} from "../../../shared/device/useDetectDevice";
+import { useDetectDevice } from "@/shared";
 import {useSideBarStore} from "@/shell/store/SideBar.store";
 import {RightSideBar} from "./RightSideBar";
 import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 import {useModuleRegisterHelper} from "@/shell/hooks/useModuleRegister.helper";
 import { GlobalModuleInit } from "../GlobalModuleInit";
 import {moduleRegistry} from "@/shell/moduleRegistry";
+import { shellConstants } from "@/shell/shell.constants";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -41,8 +42,8 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                 if (panel && panel.getSize() < 50) panel.resize(75);
             }
         };
-        window.addEventListener("lifelog-tab-opened", handler);
-        return () => window.removeEventListener("lifelog-tab-opened", handler);
+        window.addEventListener(shellConstants.events.mobileTabOpened, handler);
+        return () => window.removeEventListener(shellConstants.events.mobileTabOpened, handler);
     }, [isMobile]);
 
     if (isMobile) {

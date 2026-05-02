@@ -4,6 +4,22 @@
  */
 
 export const shellConstants = {
+    appName: "SuperApp" as const,
+
+    /** localStorage keys owned by the shell */
+    storage: {
+        tabPinnedState: "tabPinnedState",
+    } as const,
+
+    /** Custom DOM events dispatched between shell and features */
+    events: {
+        /**
+         * Dispatched by a feature when it opens a tab on mobile.
+         * VSCodeLayout listens to expand the editor panel.
+         * Use: window.dispatchEvent(new CustomEvent(shellConstants.events.mobileTabOpened))
+         */
+        mobileTabOpened: "shell:mobile-tab-opened",
+    } as const,
     navigation: {
         path: {
             home: "/",

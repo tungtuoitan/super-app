@@ -33,12 +33,12 @@ export function TaskFilterPopup() {
     const isPendingEmpty = !pending.status?.trim() || !pending.priority?.trim();
 
     const isChecked = (field: string, value: string) =>
-        filterUtils._hasValue((pending as any)[field], value);
+        filterUtils.hasValue((pending as any)[field], value);
 
     const toggle = (field: string, value: string) => {
         setPending((prev) => ({
             ...prev,
-            [field]: filterUtils._toggle((prev as any)[field], value),
+            [field]: filterUtils.toggle((prev as any)[field], value),
         }));
     };
 

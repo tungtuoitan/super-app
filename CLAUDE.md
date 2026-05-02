@@ -19,7 +19,7 @@ Validate all new/modified code against these rules before committing.
 
 ## File Size
 
-- Maximum 400 lines per file
+- Maximum 300 lines per file
 
 ## Single Responsibility (each file type exports ONLY its own concern)
 

@@ -6,17 +6,14 @@
  */
 
 import { useEditorTabBarHelper } from "./useEditorTabBar.helper";
-import { parseApiError, isUnauthorizedError } from "@/shared";
-import { useConsoleHelper } from "@/shared";
+import { parseApiError, isUnauthorizedError, useConsoleHelper, useKeywordHelper } from "@/shared";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 import { useEditorTabBarStore } from "../store/EditorTab.store";
-import { useKeywordHelper } from "../../shared/keyword/useKeyword.helper";
 
 export const useEditorToolbarHelper = () => {
     const _console = useConsoleHelper();
     const { getActiveTab } = useEditorTabBarHelper();
-    const { isSaving, setIsSaving } = useEditorTabBarStore();
-    const { setOpenTabs } = useEditorTabBarStore();
+    const { isSaving, setIsSaving, setOpenTabs } = useEditorTabBarStore();
     const { loadKeywords } = useKeywordHelper();
 
     const activeTab = getActiveTab();
@@ -32,7 +29,7 @@ export const useEditorToolbarHelper = () => {
 
     const _deleteStatusText = (() => {
         if (!activeTab) return "No Tab";
-        const data = activeTab.data as { deletedAt?: any } | null;
+        const data = activeTab.data as { deletedAt?: unknown } | null;
         return data?.deletedAt ? "Deleted" : "Existing";
     })();
 
@@ -43,7 +40,7 @@ export const useEditorToolbarHelper = () => {
 
     // ── Save orchestrator ────────────────────────────────────────────────────
 
-    const upsertOrchestraitor = async () => {
+    const upsertOrchestrator = async () => {
         if (!activeTab) return;
         setIsSaving(true);
 
@@ -87,7 +84,7 @@ export const useEditorToolbarHelper = () => {
     };
 
     return {
-        upsertOrchestraitor,
+        upsertOrchestrator,
         commonCancel,
         _deleteStatusText,
         _itemId,

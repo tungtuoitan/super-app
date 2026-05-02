@@ -2,6 +2,7 @@ import { useEditorTabBarStore } from "../store/EditorTab.store";
 import { moduleRegistry } from "../moduleRegistry";
 import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import {BaseTab, TabOpenMeta, TabType} from "../types/tab.types";
+import { shellConstants } from "../shell.constants";
 
 export const useEditorTabBarHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId, isLoadingTab, setIsLoadingTab } = useEditorTabBarStore();
@@ -301,7 +302,7 @@ export const useEditorTabBarHelper = () => {
 
     const processTabAfterDelete = (deletedIds: number[], type: string) => {
         const newTabs = openTabs.filter((tab) => {
-            if (tab.type === "multiProject") return true;
+            if (tab.type === shellConstants.vscode.tab.tabTypes.multiProject) return true;
             return !(tab.type === type && deletedIds.includes((tab.data as { id: number }).id));
         });
         setOpenTabs(newTabs);

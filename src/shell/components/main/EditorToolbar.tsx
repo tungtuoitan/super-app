@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Editor Toolbar
  * Shared toolbar for all editor panel types (Note, Workspace, etc.)
  * Displays status info and action buttons based on tab type and state
@@ -16,6 +16,7 @@ import {useEditorToolbarHelper} from "@/shell/hooks/useEditorToolbar.helper";
 import {useEditorTabBarHelper} from "@/shell/hooks/useEditorTabBar.helper";
 import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
 import {moduleRegistry} from "@/shell/moduleRegistry";
+import { getTabDeleteState } from "@/shell/types/tab.types";
 
 export function EditorToolbar() {
     const { getActiveTab } = useEditorTabBarHelper();
@@ -23,8 +24,11 @@ export function EditorToolbar() {
     const { $user } = useAuthStore();
 
     const activeTab = getActiveTab();
+    const { isDeleted, isPermanentlyDeleted } = activeTab
+        ? getTabDeleteState(activeTab)
+        : { isDeleted: false, isPermanentlyDeleted: false };
 
-    // â”€â”€ Back button via registry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Back button via registry ───────────────────────────────────────────────
     // Sync: hook-based resolvers read from store (e.g. projects already loaded)
     // eslint-disable-next-line react-hooks/rules-of-hooks -- registry is immutable after startup; hook count is stable
     const backButtonGetters = moduleRegistry.getAll()
@@ -62,18 +66,18 @@ export function EditorToolbar() {
 
     const effectiveOpenedBy = activeTab?.openedBy ?? registryBackButton ?? asyncBackButton;
 
-    // â”€â”€ Toolbar actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    const { upsertOrchestraitor, commonCancel } = useEditorToolbarHelper();
+    // ── Toolbar actions ────────────────────────────────────────────────────────
+    const { upsertOrchestrator, commonCancel } = useEditorToolbarHelper();
 
-    // â”€â”€ Keyboard shortcut: Ctrl+S / Alt+S â†’ save â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Keyboard shortcut: Ctrl+S / Alt+S → save ──────────────────────────────
     const activeTabRef = useRef(activeTab);
     const isSavingRef = useRef(isSaving);
-    const upsertRef = useRef(upsertOrchestraitor);
+    const upsertRef = useRef(upsertOrchestrator);
     activeTabRef.current = activeTab;
     isSavingRef.current = isSaving;
-    upsertRef.current = upsertOrchestraitor;
+    upsertRef.current = upsertOrchestrator;
 
-    // Default handler (priority 0) â€” saves current tab when no inline editor is active.
+    // Default handler (priority 0) — saves current tab when no inline editor is active.
     // No `enabled` condition: always registered so browser default is always suppressed.
     // The callback guards internally with refs to avoid stale closure.
     useGlobalShortcut("ctrl+s", { id: "editor-toolbar-save" }, () => {
@@ -103,14 +107,14 @@ export function EditorToolbar() {
             {/* Action Buttons */}
             <TooltipProvider>
                 <div className="flex gap-1">
-                    {(activeTab?.data as any)?.deletedAt && !(activeTab?.data as any).isHardDeleted ? (
+                    {isDeleted && !isPermanentlyDeleted ? (
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <span>
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={upsertOrchestraitor}
+                                        onClick={upsertOrchestrator}
                                         disabled={isSaving}
                                         className="h-8 w-8 text-green-500 hover:bg-green-500/10 disabled:text-white/20"
                                     >
@@ -122,7 +126,7 @@ export function EditorToolbar() {
                                 <p>Restore</p>
                             </TooltipContent>
                         </Tooltip>
-                    ) : activeTab && (activeTab.data as any).isHardDeleted ? (
+                    ) : isPermanentlyDeleted ? (
                         <span className="text-xs text-red-500 flex items-center px-2">Permanently deleted - cannot restore</span>
                     ) : (
                         <Tooltip>
@@ -131,7 +135,7 @@ export function EditorToolbar() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={upsertOrchestraitor}
+                                        onClick={upsertOrchestrator}
                                         disabled={!activeTab?.hasUnsavedChanges || isSaving}
                                         className={`h-8 w-8 ${activeTab?.hasUnsavedChanges ? "text-[#4FC3F7] hover:bg-[#4FC3F7]/10" : "text-white/40"} disabled:text-white/20`}
                                     >
@@ -145,7 +149,7 @@ export function EditorToolbar() {
                         </Tooltip>
                     )}
 
-                    {activeTab && !(activeTab.data as any).isHardDeleted && (
+                    {activeTab && !isPermanentlyDeleted && (
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <span>
@@ -153,7 +157,7 @@ export function EditorToolbar() {
                                         variant="ghost"
                                         size="icon"
                                         onClick={commonCancel}
-                                        disabled={!activeTab?.hasUnsavedChanges || !!(activeTab?.data as any)?.deletedAt}
+                                        disabled={!activeTab?.hasUnsavedChanges || isDeleted}
                                         className="h-8 w-8 text-white/60 hover:bg-white/10 disabled:text-white/20"
                                     >
                                         <RotateCcw className="h-[18px] w-[18px]" />
@@ -162,7 +166,7 @@ export function EditorToolbar() {
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>
-                                    {(activeTab?.data as any)?.deletedAt
+                                    {isDeleted
                                         ? "Cannot edit deleted item"
                                         : "Discard Changes"}
                                 </p>
@@ -174,4 +178,3 @@ export function EditorToolbar() {
         </div>
     );
 }
-

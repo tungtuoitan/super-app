@@ -14,7 +14,7 @@ const TRACK_TYPE = shellConstants.vscode.tab.tabTypes.lifeLogTrack;
 const GRAPH_TYPE = shellConstants.vscode.tab.tabTypes.lifeLogGraph;
 
 const dispatchOpened = () =>
-    window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
+    window.dispatchEvent(new CustomEvent(shellConstants.events.mobileTabOpened));
 
 export function useLifeLogTabHelper() {
     const { openTab, openSingletonTab, closeTab, updateTabData } = useEditorTabBarHelper();

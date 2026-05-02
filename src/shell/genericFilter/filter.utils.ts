@@ -11,7 +11,7 @@ import {FilterValue} from "@/shell";
  * @param filterValue - Comma-separated string (e.g., "active,inactive")
  * @returns Array of values (e.g., ["active", "inactive"])
  */
-const _parse = (filterValue?: FilterValue): string[] => {
+const parse = (filterValue?: FilterValue): string[] => {
     if (!filterValue) return [];
     return filterValue.split(",").filter((v) => v.trim() !== "");
 };
@@ -21,7 +21,7 @@ const _parse = (filterValue?: FilterValue): string[] => {
  * @param values - Array of values (e.g., ["active", "inactive"])
  * @returns Comma-separated string (e.g., "active,inactive")
  */
-const _stringify = (values: string[]): FilterValue => {
+const stringify = (values: string[]): FilterValue => {
     return values.filter((v) => v.trim() !== "").join(",");
 };
 
@@ -31,8 +31,8 @@ const _stringify = (values: string[]): FilterValue => {
  * @param value - Value to check (e.g., "active")
  * @returns True if the filter value contains the value
  */
-const _hasValue = (filterValue: FilterValue | undefined, value: string): boolean => {
-    const values = _parse(filterValue);
+const hasValue = (filterValue: FilterValue | undefined, value: string): boolean => {
+    const values = parse(filterValue);
     return values.includes(value);
 };
 
@@ -42,12 +42,12 @@ const _hasValue = (filterValue: FilterValue | undefined, value: string): boolean
  * @param value - Value to add (e.g., "inactive")
  * @returns Updated filter value (e.g., "active,inactive")
  */
-const _add = (filterValue: FilterValue | undefined, value: string): FilterValue => {
-    const values = _parse(filterValue);
+const add = (filterValue: FilterValue | undefined, value: string): FilterValue => {
+    const values = parse(filterValue);
     if (!values.includes(value)) {
         values.push(value);
     }
-    return _stringify(values);
+    return stringify(values);
 };
 
 /**
@@ -56,10 +56,10 @@ const _add = (filterValue: FilterValue | undefined, value: string): FilterValue 
  * @param value - Value to remove (e.g., "inactive")
  * @returns Updated filter value (e.g., "active")
  */
-const _remove = (filterValue: FilterValue | undefined, value: string): FilterValue => {
-    const values = _parse(filterValue);
+const remove = (filterValue: FilterValue | undefined, value: string): FilterValue => {
+    const values = parse(filterValue);
     const filteredValues = values.filter((v) => v !== value);
-    return _stringify(filteredValues);
+    return stringify(filteredValues);
 };
 
 /**
@@ -68,11 +68,11 @@ const _remove = (filterValue: FilterValue | undefined, value: string): FilterVal
  * @param value - Value to toggle (e.g., "inactive")
  * @returns Updated filter value (e.g., "active,inactive" or "active")
  */
-const _toggle = (filterValue: FilterValue | undefined, value: string): FilterValue => {
-    if (_hasValue(filterValue, value)) {
-        return _remove(filterValue, value);
+const toggle = (filterValue: FilterValue | undefined, value: string): FilterValue => {
+    if (hasValue(filterValue, value)) {
+        return remove(filterValue, value);
     }
-    return _add(filterValue, value);
+    return add(filterValue, value);
 };
 
 /**
@@ -80,25 +80,21 @@ const _toggle = (filterValue: FilterValue | undefined, value: string): FilterVal
  * @param filterValue - Date range string (e.g., "2024-01-01,2024-12-31")
  * @returns Object with from and to dates
  */
-const _parseDateRange = (filterValue?: FilterValue): { from?: string; to?: string } => {
+const parseDateRange = (filterValue?: FilterValue): { from?: string; to?: string } => {
     if (!filterValue) return {};
-    const dates = _parse(filterValue);
+    const dates = parse(filterValue);
     return {
         from: dates[0] || undefined,
         to: dates[1] || undefined,
     };
 };
 
-
-
-
-// Export as namespace for compatibility
 export const filterUtils = {
-    _parse,
-    _stringify,
-    _hasValue,
-    _add,
-    _remove,
-    _toggle,
-    _parseDateRange,
+    parse,
+    stringify,
+    hasValue,
+    add,
+    remove,
+    toggle,
+    parseDateRange,
 };

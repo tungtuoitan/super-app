@@ -24,6 +24,7 @@ export const noteModule: ModuleDefinition = {
     id: "Note",
     icon: FileText,
     label: "Notes",
+    hideFromActivityBar: true,
 
     useSaveActions: useNoteSaveActions,
 

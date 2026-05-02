@@ -8,6 +8,7 @@ import { useTabBarShortcuts } from "./useTabBarShortcuts";
 import { BaseTab } from "@/shell";
 import { constants } from "@/shared";
 import {useEditorTabBarStore} from "../store/EditorTab.store";
+import { shellConstants } from "../shell.constants";
 
 /**
  * TabBar - VS Code style tab bar component
@@ -28,7 +29,7 @@ export function useTabBarHelper() {
     } = useEditorTabBarStore();
     const { closeTab, updateActiveTab, getActiveTab } = useEditorTabBarHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
-    const { upsertOrchestraitor } = useEditorToolbarHelper();
+    const { upsertOrchestrator } = useEditorToolbarHelper();
     const { showContextMenu } = useMenuContextHelper();
 
     // Enable keyboard shortcuts
@@ -63,11 +64,11 @@ export function useTabBarHelper() {
                 anchorEl: event.currentTarget as HTMLElement,
                 onConfirm: async () => {
                     try {
-                        await upsertOrchestraitor();
+                        await upsertOrchestrator();
                         closeTab(tabId);
                     } catch (error) {
                         console.error("Failed to save:", error);
-                        // KhÃ´ng Ä‘Ã³ng tab náº¿u save tháº¥t báº¡i
+                        // Do not close the tab if save failed
                     }
                 },
                 onThirdButton: () => {
@@ -207,7 +208,7 @@ export function useTabBarHelper() {
         tabs.forEach((tab) => {
             pinnedState[tab.id] = !!tab.isPinned;
         });
-        localStorage.setItem("tabPinnedState", JSON.stringify(pinnedState));
+        localStorage.setItem(shellConstants.storage.tabPinnedState, JSON.stringify(pinnedState));
     };
 
     return {

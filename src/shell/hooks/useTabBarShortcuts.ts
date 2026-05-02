@@ -14,6 +14,7 @@ import { useEffect, useRef } from "react";
 import { useEditorTabBarStore } from "../store/EditorTab.store";
 import { useEditorTabBarHelper } from "@/shell";
 import { moduleRegistry } from "../moduleRegistry";
+import { shellConstants } from "../shell.constants";
 
 export const useTabBarShortcuts = () => {
     const { openTabs, setOpenTabs, activeTabId } = useEditorTabBarStore();
@@ -70,7 +71,7 @@ export const useTabBarShortcuts = () => {
 
                     const pinnedState: Record<string, boolean> = {};
                     newTabs.forEach((tab) => { pinnedState[tab.id] = !!tab.isPinned; });
-                    localStorage.setItem("tabPinnedState", JSON.stringify(pinnedState));
+                    localStorage.setItem(shellConstants.storage.tabPinnedState, JSON.stringify(pinnedState));
                 }
                 return;
             }

@@ -2,13 +2,13 @@
 import { X, FileText, Pin } from "lucide-react";
 import { constants, useKeywordSelector } from "@/shared";
 import { useDeviceStore } from "@/shared";
-import {useTabBarHelper} from "@/shell/hooks/useTabBarHelper";
-import {useTabBarShortcuts} from "@/shell/hooks/useTabBarShortcuts";
-import {moduleRegistry} from "@/shell/moduleRegistry";
-import {BaseTab} from "@/shell/types/tab.types";
-import {useEditorTabBarStore} from "@/shell/store/EditorTab.store";
-import {useEditorTabBarHelper} from "@/shell/hooks/useEditorTabBar.helper";
-import {shellConstants} from "@/shell/shell.constants";
+import { useTabBarHelper } from "@/shell/hooks/useTabBarHelper";
+import { moduleRegistry } from "@/shell/moduleRegistry";
+import { BaseTab, getTabDeleteState } from "@/shell/types/tab.types";
+import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
+import { useEditorTabBarHelper } from "@/shell/hooks/useEditorTabBar.helper";
+import { shellConstants } from "@/shell/shell.constants";
+// useTabBarShortcuts is registered inside useTabBarHelper — no separate call needed here.
 
 // ── Breadcrumb trigger key ────────────────────────────────────────────────────
 // TabBar is the only component that needs this reactivity, so module
@@ -64,8 +64,7 @@ export function TabBar() {
     const { handleDrop, handleDragOver, handleDragLeave, handleDragEnter, handleDragEnd, handleDragStart, handleTabRightClick, handleCloseTab, isInCurrentModule } =
         useTabBarHelper();
     const { isMobile } = useDeviceStore();
-
-    useTabBarShortcuts();
+    // useTabBarShortcuts is already called inside useTabBarHelper above.
 
     // â”€â”€ Task grouping (driven by registry, not hardcoded) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Group leader: any tab where moduleRegistry.getTabGroupKey returns a key
@@ -87,7 +86,7 @@ export function TabBar() {
 
     // â”€â”€ Pinned state from localStorage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     useEffect(() => {
-        const savedState = localStorage.getItem("tabPinnedState");
+        const savedState = localStorage.getItem(shellConstants.storage.tabPinnedState);
         if (savedState && openTabs.length > 0) {
             try {
                 const pinnedState: Record<string, boolean> = JSON.parse(savedState);
@@ -126,8 +125,7 @@ export function TabBar() {
     // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     const renderTab = (tab: BaseTab, isPinned: boolean = false) => {
-        const isDeleted = !!(tab.data as any)?.deletedAt;
-        const isHardDeleted = !!(tab.data as any)?.isHardDeleted;
+        const { isDeleted, isPermanentlyDeleted: isHardDeleted } = getTabDeleteState(tab);
         const isDragging = draggedTabId === tab.id;
         const isDropTarget = dragOverTabId === tab.id && !isDragging;
         const isActive = activeTabId === tab.id;

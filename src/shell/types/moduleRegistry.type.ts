@@ -189,6 +189,12 @@ export interface ModuleDefinition {
     icon: LucideIcon;
     label: string;
     /**
+     * When true, this module is not shown as a button in ActivityBar.
+     * Use for modules accessible from other entry points (e.g. sidebar sub-views).
+     * Defaults to false (visible).
+     */
+    hideFromActivityBar?: boolean;
+    /**
      * Optional hook that returns a badge count (e.g. daily review due count).
      * Called as a React hook inside a per-module component, so hooks rules apply.
      */

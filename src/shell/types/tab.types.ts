@@ -103,3 +103,31 @@ export interface EditorState {
     openTabs: BaseTab[];
     activeTabId: string | null;
 }
+
+// ── Tab state helpers — eliminate `as any` casts in shell components ──────────
+
+/**
+ * Read soft-delete display state from a tab's data payload.
+ * Features that support soft-delete set `deletedAt` / `isHardDeleted` on their
+ * entity data. Shell uses this to drive strikethrough styling and Restore button.
+ */
+export function getTabDeleteState(tab: BaseTab): {
+    isDeleted: boolean;
+    isPermanentlyDeleted: boolean;
+} {
+    const data = tab.data as { deletedAt?: unknown; isHardDeleted?: unknown } | null;
+    return {
+        isDeleted: !!data?.deletedAt,
+        isPermanentlyDeleted: !!data?.isHardDeleted,
+    };
+}
+
+/**
+ * Returns true when the tab represents a brand-new entity not yet persisted to
+ * the backend (i.e. `data.id < 0`).
+ * Used by UnsavedTabsTooltip to block navigation while unsaved new entities exist.
+ */
+export function isTabNewEntity(tab: BaseTab): boolean {
+    const data = tab.data as { id?: unknown } | null;
+    return typeof data?.id === "number" && data.id < 0;
+}
