@@ -7,7 +7,7 @@ import type { NoteDTO } from "../types/note.types";
 import type { ResultOptions } from "@/shared";
 import { apiFetch } from "@/shared";
 
-const _getNotes = async (
+const getNotes = async (
     _token: string,
     params?: {
         searchText?: string;
@@ -45,7 +45,7 @@ const _getNotes = async (
     return Promise.reject(res);
 };
 
-const _getNoteById = async (_token: string, noteId: number) => {
+const getNoteById = async (_token: string, noteId: number) => {
     const res = await apiFetch(`${config.api.baseURL}/api/notes/${noteId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -55,7 +55,7 @@ const _getNoteById = async (_token: string, noteId: number) => {
     return Promise.reject(res);
 };
 
-const _upsertNotes = async (
+const upsertNotes = async (
     _token: string,
     requests: Array<{
         id: number;
@@ -77,7 +77,7 @@ const _upsertNotes = async (
     return Promise.reject(res);
 };
 
-const _deleteNote = async (_token: string, noteId: number | string) => {
+const deleteNote = async (_token: string, noteId: number | string) => {
     const res = await apiFetch(`${config.api.baseURL}/api/notes/${noteId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -88,8 +88,8 @@ const _deleteNote = async (_token: string, noteId: number | string) => {
 };
 
 export const noteService = {
-    _getNotes,
-    _getNoteById,
-    _upsertNotes,
-    _deleteNote,
+    getNotes,
+    getNoteById,
+    upsertNotes,
+    deleteNote,
 };

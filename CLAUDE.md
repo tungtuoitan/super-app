@@ -69,5 +69,12 @@ Dependency direction: `features → shell`, `features → shared`, `shell → sh
 - **shell**: same as a feature — can import from feature indexes and `@/shared` index; no subdirectory imports
 - **shared**: fully independent — CANNOT import from any feature or shell at all
 - **Cross-boundary imports MUST go through the index barrel file** — never import from subdirectories (`@/features/X/store/foo`, `@/shell/hooks/bar`, etc.)
-- **Exception**: `index.ts` barrel files themselves may import freely for re-exporting
+- **Exception 1**: `index.ts` barrel files themselves may import freely for re-exporting
+- **Exception 2**: `import type` may always be imported directly from subdirectories — types are erased at runtime and never cause circular deps (ESLint allows this via `allowTypeImports: true`)
+- **Exception 3**: `*.constants.ts` and `*.types.ts` files may be imported directly cross-feature — no barrel required, no eslint-disable needed. ESLint automatically permits these. Example:
+  ```ts
+  import { workspaceConstants } from "@/features/workspace/workspace.constants";
+  import type { Ws } from "@/features/workspace/types/workspace.types";
+  ```
+  Rule: `*.constants.ts` and `*.types.ts` files MUST NOT import from other features — otherwise this exception is unsafe.
 - **To add a new feature**: add its name to `FEATURES` array in `.eslintrc.js`

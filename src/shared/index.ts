@@ -81,6 +81,8 @@ export { ConfirmationPopoverProvider } from "./confirmPopover/ConfirmationPopove
 // export type { ConfirmationPopoverOptions } from "./confirmPopover/ConfirmationPopover.store";
 export { ConfirmationPopoverContainer } from "./confirmPopover/ConfirmationPopoverContainer";
 export type { ConfirmMessage, DeleteType } from "./confirmPopover/types";
+export { getGenericConfirmMessage } from "./confirmPopover/confirmMessage.utils";
+export type { GenericConfirmMessageParams } from "./confirmPopover/confirmMessage.utils";
 
 // ── console ───────────────────────────────────────────────────────────────
 export { ConsoleProvider } from "./console/useConsole.store";
@@ -146,6 +148,21 @@ export { useOrchestratorContextMenuHelper } from "./menuContexts/useOrchestrator
 export { useMenuContext } from "./menuContexts/useMenuContext";
 export { contextMenuRegistry } from "./menuContexts/contextMenu.registry";
 export type { ContextMenuPlugin } from "./menuContexts/contextMenu.registry";
+export { MENU_CONTEXT_TYPES } from "./menuContexts/menuContext.constants";
+export type { MenuContextId } from "./menuContexts/menuContext.constants";
+export type {
+    NoteGridMenuData,
+    ProjectGridMenuData,
+    TaskGridMenuData,
+    TaskFlowMenuData,
+    WsGridMenuData,
+    WorkspaceSelectorMenuData,
+    LogListMenuData,
+    TrackPanelMenuData,
+    KKnowledgeSelectorMenuData,
+    KTestFlowMenuData,
+    RichTextEditorMenuData,
+} from "./menuContexts/menuContext.types";
 
 // ── standardRegistry ──────────────────────────────────────────────────────
 export { StandardRegistryProvider } from "./standardRegistry/StandardRegistry.store";

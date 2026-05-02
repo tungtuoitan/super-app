@@ -6,15 +6,17 @@ import {useOrchestratorContextMenuStore} from "@/shared";
 
 export function KNodePanelCardMenu() {
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctxData = contextData as any;
     const { dhr_items } = useKMenuHelper();
     const _TREESTATUS = useKTreeStatusHelper();
 
-    const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData);
+    const _ITEMSTATUS = _TREESTATUS.getItemStatus(ctxData);
 
     const handleNewCard = () => {
         setIsContextMenuOpen(false);
         window.dispatchEvent(new CustomEvent("k-node-inline-create", {
-            detail: { knowledgeId: contextData?.knowledgeId, parentId: contextData?.id ?? null },
+            detail: { knowledgeId: ctxData?.knowledgeId, parentId: ctxData?.id ?? null },
         }));
     };
 

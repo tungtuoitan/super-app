@@ -22,20 +22,20 @@ export interface OrchestratorContextMenuStoreData {
     setAnchorPoint: Dispatch<SetStateAction<ContextMenuPosition>>;
     contextType: OrchestratorContextMenuType;
     setContextType: Dispatch<SetStateAction<OrchestratorContextMenuType>>;
-    contextData: any | null;
-    setContextData: Dispatch<SetStateAction<any | null>>;
+    contextData: unknown;
+    setContextData: Dispatch<SetStateAction<unknown>>;
 
     // Edit dialog state
     isEditDialogOpen: boolean;
     setIsEditDialogOpen: Dispatch<SetStateAction<boolean>>;
-    editItemData: any | null;
-    setEditItemData: Dispatch<SetStateAction<any | null>>;
+    editItemData: unknown;
+    setEditItemData: Dispatch<SetStateAction<unknown>>;
 
     // Note dialog state
     isNoteDialogOpen: boolean;
     setIsNoteDialogOpen: Dispatch<SetStateAction<boolean>>;
-    noteDialogParentFolder: any | null;
-    setNoteDialogParentFolder: Dispatch<SetStateAction<any | null>>;
+    noteDialogParentFolder: unknown;
+    setNoteDialogParentFolder: Dispatch<SetStateAction<unknown>>;
 }
 
 export const contextMenuStoreDefaultValue: OrchestratorContextMenuStoreData = {
@@ -65,11 +65,11 @@ export const OrchestratorContextMenuStoreProvider: React.FC<React.PropsWithChild
     const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
     const [anchorPoint, setAnchorPoint] = useState<ContextMenuPosition>({ x: 0, y: 0 });
     const [contextType, setContextType] = useState<OrchestratorContextMenuType>(constants.contextMenu.contextMenuTypes.default);
-    const [contextData, setContextData] = useState<any | null>(null);
+    const [contextData, setContextData] = useState<unknown>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
-    const [editItemData, setEditItemData] = useState<any | null>(null);
+    const [editItemData, setEditItemData] = useState<unknown>(null);
     const [isNoteDialogOpen, setIsNoteDialogOpen] = useState<boolean>(false);
-    const [noteDialogParentFolder, setNoteDialogParentFolder] = useState<any | null>(null);
+    const [noteDialogParentFolder, setNoteDialogParentFolder] = useState<unknown>(null);
 
     return (
         <OrchestratorContextMenuStore.Provider

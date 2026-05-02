@@ -194,7 +194,7 @@ export const useOpenTabSync = () => {
                 if (missingNoteIds.length > 0) {
                     const idsString = missingNoteIds.join(",");
                     try {
-                        const result = await noteService._getNotes($user.userToken, { ids: idsString });
+                        const result = await noteService.getNotes($user.userToken, { ids: idsString });
                         if (result.success && result.data) {
                             // Convert DTOs to domain models
                             fetchedNotes = transformNotes(result.data as NoteDTO[]);

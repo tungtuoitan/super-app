@@ -32,7 +32,8 @@ export const useTabBarMenuHelper = () => {
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
 
     // Get the context tab ID from the context menu store
-    const contextTabId = contextData?.tabId || null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const contextTabId = (contextData as any)?.tabId || null;
 
     // Get the context tab (the tab that was right-clicked)
     const contextTab = openTabs.find((tab) => tab.id === contextTabId);

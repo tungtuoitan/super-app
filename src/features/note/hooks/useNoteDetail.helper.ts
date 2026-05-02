@@ -92,7 +92,7 @@ export const useNoteDetailHelper = () => {
                     deletedAt: isRestoreMode ? null : undefined,
                 };
 
-                const result = await noteService._upsertNotes(token, [upsertData]);
+                const result = await noteService.upsertNotes(token, [upsertData]);
                 if (!result.success) {
                     throw new Error(result.message || "Failed to save note");
                 }

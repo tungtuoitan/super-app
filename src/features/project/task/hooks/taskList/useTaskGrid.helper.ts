@@ -14,6 +14,7 @@ import { parseAsLocalDate, toLocalISOString } from "@/shared";
 import { constants } from "@/shared";
 import {usePTaskStore} from "@/features/project/store/usePTask.store";
 import {generateTempId} from "@/features/workspace";
+import type { TaskGridMenuData } from "@/shared";
 
 /**
  * Transform task DTOs (dates as strings) to domain models (dates as Date objects)
@@ -190,88 +191,36 @@ export const useTaskGridHelper = () => {
      * @param event - Mouse event
      * @param row - Table row (optional)
      * @param projectId - Project ID for filtering
-     * @param onTaskCreated - Callback when a new task is created
+     * @param onTaskCreated - Callback to notify caller of newly created task
      */
-    const openTaskContextMenu = (event: React.MouseEvent, row?: any, projectId?: number, onTaskCreated?: (task: Task) => void) => {
+    const openTaskContextMenu = (
+        event: React.MouseEvent,
+        row?: { id: string },
+        projectId?: number,
+        onTaskCreated?: (task: Task) => void,
+    ) => {
         event.preventDefault();
         event.stopPropagation();
 
         let selectedIds = Object.keys(taskGridRowSelection).map((id) => parseInt(id));
 
-        // If no selection and row provided, use the hovered row
         if (selectedIds.length === 0 && row) {
             selectedIds = [parseInt(row.id)];
         }
 
         const selectedTasks = tasks.filter((t) => selectedIds.includes(t.id));
+        const hoveredTask   = row ? (tasks.find((t) => t.id === parseInt(row.id)) ?? null) : null;
 
-        // Get the hovered task for subtask creation (only if single task hovered)
-        const hoveredTask = row ? tasks.find((t) => t.id === parseInt(row.id)) : null;
-
-        // Determine the parent task ID for subtask creation:
-        // - If hovering a subtask, use its parent task ID
-        // - If hovering a parent task, use that task's ID
-        // - Task with subtasks cannot become a subtask (depth=1)
-        const getParentTaskIdForSubtask = (): number | null => {
-            if (!hoveredTask) return null;
-            if (hoveredTask.id <= 0) return null; // Cannot create subtask for unsaved task
-
-            // If hovering a subtask, create subtask for its parent
-            if (hoveredTask.parentTaskId) {
-                return hoveredTask.parentTaskId;
-            }
-
-            // Check if hovered task already has subtasks (depth=1 constraint)
-            const hasSubtasks = tasks.some((t) => t.parentTaskId === hoveredTask.id);
-            if (hasSubtasks) {
-                // Task with subtasks can still have more subtasks added
-                return hoveredTask.id;
-            }
-
-            // Regular parent task
-            return hoveredTask.id;
-        };
-
-        // Check if task can be parent (for disabling menu option)
-        const canBeParent = (taskId: number): boolean => {
-            const task = tasks.find((t) => t.id === taskId);
-            if (!task || task.id <= 0) return false;
-            // A subtask cannot be a parent (depth=1)
-            if (task.parentTaskId) return false;
-            return true;
-        };
-
-        showContextMenu(event, "task-grid", {
+        const data: TaskGridMenuData = {
             selectedTasks,
             selectedIds,
-            hoveredTask, // Pass hovered task for subtask creation
-            onSoftDelete: () => deleteRestoreTasks(selectedIds, "soft-delete", projectId),
-            onRestore: () => deleteRestoreTasks(selectedIds, "restore", projectId),
-            onAddTask: () => {
-                if (projectId) {
-                    const newTask = createNewTask(projectId);
-                    if (newTask && onTaskCreated) {
-                        onTaskCreated(newTask);
-                    }
-                }
-            },
-            onAddSubTask: (parentTaskId: number) => {
-                // Use the smart parent task ID calculation
-                const actualParentId = parentTaskId || getParentTaskIdForSubtask();
-                if (projectId && actualParentId && actualParentId > 0 && canBeParent(actualParentId)) {
-                    const newSubTask = createSubTask(projectId, actualParentId);
-                    if (newSubTask && onTaskCreated) {
-                        onTaskCreated(newSubTask);
-                    }
-                } else if (hoveredTask?.parentTaskId) {
-                    // If clicking on a subtask, create subtask for the parent
-                    const newSubTask = createSubTask(projectId!, hoveredTask.parentTaskId);
-                    if (newSubTask && onTaskCreated) {
-                        onTaskCreated(newSubTask);
-                    }
-                }
-            },
-        });
+            hoveredTask: hoveredTask
+                ? { id: hoveredTask.id, deletedAt: hoveredTask.deletedAt, parentTaskId: hoveredTask.parentTaskId ?? null }
+                : null,
+            projectId,
+            onTaskCreated,
+        };
+        showContextMenu(event, "task-grid", data);
     };
 
     /**

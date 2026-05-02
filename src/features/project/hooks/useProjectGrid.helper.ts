@@ -14,6 +14,7 @@ import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { parseAsLocalDate } from "@/shared";
 import {Project} from "../types/project.types";
 import {generateTempId, generateUnsavedName} from "@/features/workspace";
+import type { ProjectGridMenuData } from "@/shared";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
@@ -52,7 +53,7 @@ export const useProjectGridHelper = () => {
     const { setShouldFocusProjectName } = useProjectDetailStore();
 
     // Create new project (temporary with negative ID) and open tab
-    const __createNewProject = () => {
+    const createNewProject = () => {
         // Generate sequential temporary negative ID
         const existingIds = projects.map((p) => p.id);
         const tempId = generateTempId(existingIds);
@@ -86,7 +87,7 @@ export const useProjectGridHelper = () => {
     /**
      * Toggle delete/restore for selected projects (soft delete)
      */
-    const __deleteRestore_Projects = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
+    const deleteRestoreProjects = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
         const selectedIds = ids ?? Object.keys(projectGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
 
@@ -148,7 +149,7 @@ export const useProjectGridHelper = () => {
     };
 
     // Handle context menu
-    const openProjectContextMenu = (event: React.MouseEvent, row?: any) => {
+    const openProjectContextMenu = (event: React.MouseEvent, row?: { id: string }) => {
         event.preventDefault();
         event.stopPropagation();
 
@@ -163,23 +164,8 @@ export const useProjectGridHelper = () => {
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .filter((p) => selectedIds.includes(p.id));
 
-        showContextMenu(event, "project-grid", {
-            selectedProjects,
-            selectedIds,
-            onSoftDelete: () => __deleteRestore_Projects(selectedIds, "soft-delete"),
-            onRestore: () => __deleteRestore_Projects(selectedIds, "restore"),
-            onAddProject: __createNewProject,
-            onOpenMultiProjectView: () => {
-                // Open multi-project tab - it will use its own chip selector to choose projects
-                // Default will be all active projects (handled in MultiProjectDetailContent)
-                openMultiProjectTab([]);
-            },
-            onOpenProjectView: () => {
-                if (selectedProjects.length === 1) {
-                    openProjectTab(selectedProjects[0]);
-                }
-            },
-        });
+        const data: ProjectGridMenuData = { selectedProjects, selectedIds };
+        showContextMenu(event, "project-grid", data);
     };
 
     // Load projects with filters
@@ -223,6 +209,9 @@ export const useProjectGridHelper = () => {
     return {
         openProjectContextMenu,
         loadProjects,
-        createNewProject: __createNewProject,
+        createNewProject,
+        deleteRestoreProjects,
+        openProjectTab,
+        openMultiProjectTab,
     };
 };

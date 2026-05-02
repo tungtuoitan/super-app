@@ -524,9 +524,11 @@ export const useWorkspaceFolderMenuHelper = () => {
         // STEP 1: Validate context data and workspace root check
         // ----------------
         if (!contextData) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ctxData = contextData as any;
 
         // Check if this is a workspace root node (negative ID)
-        if (contextData.tagId < 0) {
+        if (ctxData.tagId < 0) {
             console.warn("⚠️ Cannot delete workspace root node");
             setIsContextMenuOpen(false);
             return;
@@ -543,8 +545,8 @@ export const useWorkspaceFolderMenuHelper = () => {
         // ----------------
         // STEP 3: Build confirmation message based on delete type and selection
         // ----------------
-        const childCount = isMultipleSelected ? 0 : $countChildren(contextData);
-        const entityName = isMultipleSelected ? undefined : contextData.name;
+        const childCount = isMultipleSelected ? 0 : $countChildren(ctxData);
+        const entityName = isMultipleSelected ? undefined : ctxData.name;
         
         const confirmMsg = getWorkspaceConfirmMessage({
             type: isHardDelete ? "hard-delete" : "soft-delete",
@@ -573,16 +575,16 @@ export const useWorkspaceFolderMenuHelper = () => {
                     if (isMultipleSelected) {
                         __bulkDeleteFolders(selectedItemIds, isHardDelete);
                     } else {
-                        __deleteItems(contextData, isHardDelete);
+                        __deleteItems(ctxData as any, isHardDelete);
                     }
                 } else {
                     // Soft delete/restore - use NEW batch API
                     // Determine operation type based on current deletedAt status
-                    const isCurrentlyDeleted = contextData.deletedAt !== null && contextData.deletedAt !== undefined;
+                    const isCurrentlyDeleted = ctxData.deletedAt !== null && ctxData.deletedAt !== undefined;
                     const operationType: "soft-delete" | "restore" = isCurrentlyDeleted ? "restore" : "soft-delete";
 
                     // For single item, pass the specific item ID; for multiple, use selected IDs
-                    const idsToProcess = isMultipleSelected ? selectedItemIds : [contextData.id];
+                    const idsToProcess = isMultipleSelected ? selectedItemIds : [ctxData.id];
                     __deleteRestore_SelectedItems(idsToProcess, operationType);
                 }
             },

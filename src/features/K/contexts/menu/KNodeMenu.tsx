@@ -25,17 +25,19 @@ import {useOrchestratorContextMenuStore} from "@/shared";
  */
 export function KNodeMenu() {
     const { contextData } = useOrchestratorContextMenuStore();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctxData = contextData as any;
     const { selectedItemIds, currentK, allK, setPendingImportNodeId } = useKStore();
     const { createFolder, editFolder, dhr_items } = useKMenuHelper();
     const { openKnowledgeTab } = useKTabHelper();
     const _TREESTATUS = useKTreeStatusHelper();
 
     // Calculate derived values
-    const entityId = contextData?.entityId
-    const isWorkspaceRoot = contextData && entityId < 0;
+    const entityId = ctxData?.entityId;
+    const isWorkspaceRoot = ctxData && entityId < 0;
 
     // Check deleted status (including inherited from parent)
-    const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData)
+    const _ITEMSTATUS = _TREESTATUS.getItemStatus(ctxData);
 
     const addMenuItems = [
         { type: kconstants.workspace.itemTypes.folder, icon: AddIcon, label: "New Card", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
@@ -43,7 +45,7 @@ export function KNodeMenu() {
 
     const handleImportMarkdown = () => {
         // Store the target parent node in KStore so KKnowledgeEditorPanel can read it even if not yet mounted
-        setPendingImportNodeId(contextData?.id ?? null);
+        setPendingImportNodeId(ctxData?.id ?? null);
         // Ensure the knowledge tab is open
         const ks = allK.find(k => k.id === currentK?.id);
         if (ks) openKnowledgeTab(ks);
@@ -56,7 +58,7 @@ export function KNodeMenu() {
                 const Icon = item.icon;
                 const handleClick = () => {
                     if (item.type === kconstants.workspace.itemTypes.folder) {
-                        createFolder(item.type, contextData);
+                        createFolder(item.type, ctxData);
                     }
                     // Other types not implemented yet
                 };
@@ -74,7 +76,7 @@ export function KNodeMenu() {
                     <MenuDivider />
 
                     {/* Edit - disabled if multiple items selected or deleted */}
-                    <MenuItem onClick={() => editFolder(contextData)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple || _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>
+                    <MenuItem onClick={() => editFolder(ctxData)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple || _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>
                         <EditIcon className="w-4 h-4 mr-2" />
                         Edit
                     </MenuItem>

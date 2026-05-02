@@ -151,7 +151,7 @@ export const useKeywordNavigationHelper = () => {
                         }
                     }
                 } else {
-                    const result = await noteService._getNotes($user.userToken, {
+                    const result = await noteService.getNotes($user.userToken, {
                         workspaceItemIds: parsed.noteWorkspaceItemId.toString(),
                     });
 

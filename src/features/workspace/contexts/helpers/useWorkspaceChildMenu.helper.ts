@@ -71,7 +71,7 @@ export const useWorkspaceChildMenuHelper = () => {
             const token = $user.userToken;
 
             // ✅ Use entityId (notes.id) for note service
-            const result = await noteService._deleteNote(token ?? "", noteEntityId.toString());
+            const result = await noteService.deleteNote(token ?? "", noteEntityId.toString());
             // ---------
             // STEP 3: Handle success response
             // ---------
@@ -285,6 +285,8 @@ export const useWorkspaceChildMenuHelper = () => {
         // STEP 1: Validate context data
         // ----------------
         if (!contextData) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ctxData = contextData as any;
 
         // Close context menu
         setIsContextMenuOpen(false);
@@ -298,7 +300,7 @@ export const useWorkspaceChildMenuHelper = () => {
         // ----------------
         // STEP 3: Build confirmation message based on delete type and selection
         // ----------------
-        const entityName = isMultipleSelected ? undefined : (contextData.data?.name || contextData.name || "this item");
+        const entityName = isMultipleSelected ? undefined : (ctxData.data?.name || ctxData.name || "this item");
 
         const confirmMsg = getWorkspaceConfirmMessage({
             type: isHardDelete ? "hard-delete" : "soft-delete",
@@ -325,18 +327,18 @@ export const useWorkspaceChildMenuHelper = () => {
                     // Hard delete - use old API (TODO: implement batch hard delete later)
                     // NOTE: For now, hard delete still uses old API that deletes the note entity
                     if (isNote) {
-                        __deleteNote(contextData, isHardDelete);
+                        __deleteNote(ctxData, isHardDelete);
                     } else if (isFile) {
-                        __deleteFile(contextData, isHardDelete);
+                        __deleteFile(ctxData, isHardDelete);
                     }
                 } else {
                     // Soft delete/restore - use NEW batch API
                     // Determine operation type based on current deletedAt status
-                    const isCurrentlyDeleted = contextData.deletedAt !== null && contextData.deletedAt !== undefined;
+                    const isCurrentlyDeleted = ctxData.deletedAt !== null && ctxData.deletedAt !== undefined;
                     const operationType: "soft-delete" | "restore" = isCurrentlyDeleted ? "restore" : "soft-delete";
 
                     // For single item, pass the specific item ID; for multiple, use selected IDs
-                    const idsToProcess = isMultipleSelected ? selectedItemIds : [contextData.id];
+                    const idsToProcess = isMultipleSelected ? selectedItemIds : [ctxData.id];
                     __deleteRestore_SelectedItems(idsToProcess, operationType);
                 }
             },

@@ -23,7 +23,6 @@ import { MultiTaskFlowProvider, useMultiTaskFlowStore } from "@/features/multiPr
 import { useMultiProjectTaskFlowHeadless } from "../hooks/mpTaskFlow/useMultiProjectTaskFlow.headless";
 import { useMultiProjectTaskFlowSelector } from "../Selectors/useMultiProjectTaskFlow.selector";
 import { useMultiProjectTaskFlowHelper } from "../hooks/mpTaskFlow/useMultiProjectTaskFlow.helper";
-import { useMultiProjectTaskFlowNodeHelper } from "../hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
 import { useOrchestratorContextMenuHelper } from "@/shared";
 import { constants } from "@/shared";
 import { cn } from "@/lib/utils";
@@ -42,7 +41,6 @@ function TaskFlowCanvas() {
     const { flowNodes, flowEdges } = useMultiProjectTaskFlowSelector();
     const { isTaskFlowLoading, lockOldNodes, setLockOldNodes } = useMultiTaskFlowStore();
     const { handleNodesChange, handleEdgesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop, handleConnect, handleConnectStart, handleConnectEnd, handleReconnectStart, handleReconnectEnd, handleReconnect, handleAutoLayout, loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
-    const { handleAddTaskAtPosition } = useMultiProjectTaskFlowNodeHelper();
     const { showContextMenu } = useOrchestratorContextMenuHelper();
     const rfInstance = useReactFlow();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -73,14 +71,14 @@ function TaskFlowCanvas() {
 
     // ── Right-click context menu (orchestrator) ─────────────────────────────
     const handlePaneContextMenu = (event: MouseEvent | React.MouseEvent) => {
-            event.preventDefault();
-            const flowPos = rfInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
-            showContextMenu(
-                event as React.MouseEvent,
-                constants.contextMenu.contextMenuTypes.taskFlow,
-                { onAddTask: () => handleAddTaskAtPosition(flowPos.x, flowPos.y) },
-            );
-        };
+        event.preventDefault();
+        const flowPos = rfInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
+        showContextMenu(
+            event as React.MouseEvent,
+            constants.contextMenu.contextMenuTypes.taskFlow,
+            { flowPosition: { x: flowPos.x, y: flowPos.y } },
+        );
+    };
 
     useEffect(() => {
         const el = containerRef.current;

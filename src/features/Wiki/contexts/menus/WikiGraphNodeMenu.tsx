@@ -5,9 +5,11 @@ import { useConfirmationPopoverHelper } from "@/shared";
 
 export function WikiGraphNodeMenu() {
     const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctxData = contextData as any;
     const { showConfirmation }                  = useConfirmationPopoverHelper();
 
-    const name = contextData?.keyword?.name ?? "this keyword";
+    const name = ctxData?.keyword?.name ?? "this keyword";
 
     const handleDelete = (e: any) => {
         setIsContextMenuOpen(false);
@@ -20,7 +22,7 @@ export function WikiGraphNodeMenu() {
             cancelText:   "Cancel",
             confirmColor: "destructive",
             zIndex:       20000,
-            onConfirm:    () => contextData?.onDelete?.(),
+            onConfirm:    () => ctxData?.onDelete?.(),
         });
     };
 

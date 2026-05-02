@@ -12,6 +12,7 @@ import {useConsoleHelper} from "@/shared";
 import {Ws} from "../../types/workspace.types";
 import {useEditorTabBarStore} from "@/shell";
 import {collectIdsFromTabs, generateTempId, generateUnsavedName} from "../../utils/temp-id.utils";
+import type { WsGridMenuData } from "@/shared";
 
 /**
  * Transform workspace DTOs (dates as strings) to domain models (dates as Date objects)
@@ -40,7 +41,7 @@ export const useWsGridHelper = () => {
     const { setShouldFocusWsName } = useWsDetailStore();
 
     // Create new workspace (temporary with negative ID)
-    const __createNewWorkspace = () => {
+    const createNewWorkspace = () => {
         // Generate sequential temporary negative ID from open tabs
         const existingIds = collectIdsFromTabs(openTabs);
         const tempId = generateTempId(existingIds);
@@ -73,7 +74,7 @@ export const useWsGridHelper = () => {
      * - type = 'soft-delete': Set deletedAt timestamp (soft delete)
      * - type = 'restore': Clear deletedAt (restore)
      */
-    const __deleteRestore_Wses = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
+    const deleteRestoreWorkspaces = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
         // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(wsGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
@@ -160,7 +161,7 @@ export const useWsGridHelper = () => {
      * Permanently delete selected workspaces (hard delete)
      * Uses DELETE API to remove from database completely
      */
-    const __hardDeleteSelectedWorkspaces = async (ids?: number[]) => {
+    const hardDeleteWorkspaces = async (ids?: number[]) => {
         // Use provided ids or fall back to current selection
         const selectedIds = ids ?? Object.keys(wsGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
@@ -210,14 +211,12 @@ export const useWsGridHelper = () => {
     };
 
     // Handle context menu
-    const openWsContextMenu = (event: React.MouseEvent, row?: any) => {
+    const openWsContextMenu = (event: React.MouseEvent, row?: { id: string }) => {
         event.preventDefault();
         event.stopPropagation();
 
-        // Use current selection from store, or use hovered row if no selection
         let selectedIds = Object.keys(wsGridRowSelection).map((id) => parseInt(id));
-        
-        // If no selection and row provided, use the hovered row
+
         if (selectedIds.length === 0 && row) {
             selectedIds = [parseInt(row.id)];
         }
@@ -226,14 +225,8 @@ export const useWsGridHelper = () => {
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .filter((ws) => selectedIds.includes(ws.id));
 
-        showContextMenu(event, "workspace-grid", {
-            selectedWorkspaces,
-            selectedIds,
-            onSoftDelete: () => __deleteRestore_Wses(selectedIds, "soft-delete"),
-            onHardDelete: () => __hardDeleteSelectedWorkspaces(selectedIds),
-            onRestore: () => __deleteRestore_Wses(selectedIds, "restore"),
-            onAddWorkspace: __createNewWorkspace,
-        });
+        const data: WsGridMenuData = { selectedWorkspaces, selectedIds };
+        showContextMenu(event, "workspace-grid", data);
     };
     // =============================================================================
     // =============================================================================
@@ -289,5 +282,8 @@ export const useWsGridHelper = () => {
     return {
         openWsContextMenu,
         loadWorkspaces,
+        createNewWorkspace,
+        deleteRestoreWorkspaces,
+        hardDeleteWorkspaces,
     };
 };
