@@ -4,14 +4,15 @@
  * No callbacks stored in contextData.
  */
 
-import { useOrchestratorContextMenuStore } from "@/shared";
+import { useMenuContext, useMenuContextHelper } from "@/shared";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { getGenericConfirmMessage } from "@/shared";
 import type { ProjectGridMenuData } from "@/shared";
 import { useProjectGridHelper } from "../../hooks/useProjectGrid.helper";
 
 export const useProjectGridMenuHelper = () => {
-    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { createNewProject, deleteRestoreProjects, openProjectTab, openMultiProjectTab } = useProjectGridHelper();
 
@@ -26,17 +27,17 @@ export const useProjectGridMenuHelper = () => {
     );
 
     const addProject = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         createNewProject();
     };
 
     const openMultiProjectView = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         openMultiProjectTab([]);
     };
 
     const softDelete = (anchorEl: HTMLElement | null) => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         if (allAreTempProjects) {
             deleteRestoreProjects(selectedIds, "soft-delete");
             return;
@@ -61,7 +62,7 @@ export const useProjectGridMenuHelper = () => {
     };
 
     const restore = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         deleteRestoreProjects(selectedIds, "restore");
     };
 

@@ -4,14 +4,15 @@
  * No callbacks stored in contextData.
  */
 
-import { useOrchestratorContextMenuStore } from "@/shared";
+import { useMenuContext, useMenuContextHelper } from "@/shared";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { getGenericConfirmMessage } from "@/shared";
 import type { NoteGridMenuData } from "@/shared";
 import { useNoteGridHelper } from "../../hooks/useNoteGrid.helper";
 
 export const useNoteGridMenuHelper = () => {
-    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { createNewNote, deleteRestoreSelectedNotes, hardDeleteSelectedNotes } = useNoteGridHelper();
 
@@ -26,12 +27,12 @@ export const useNoteGridMenuHelper = () => {
     );
 
     const addNote = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         createNewNote();
     };
 
     const softDelete = (anchorEl: HTMLElement | null) => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         if (allAreTempNotes) {
             deleteRestoreSelectedNotes(selectedIds, "soft-delete");
             return;
@@ -56,7 +57,7 @@ export const useNoteGridMenuHelper = () => {
     };
 
     const hardDelete = (anchorEl: HTMLElement | null) => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         const msg = getGenericConfirmMessage({
             type: "hard-delete",
             entityType: "note",
@@ -77,7 +78,7 @@ export const useNoteGridMenuHelper = () => {
     };
 
     const restore = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         deleteRestoreSelectedNotes(selectedIds, "restore");
     };
 

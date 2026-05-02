@@ -78,7 +78,7 @@ export function TaskFlowCanvas() {
         showContextMenu(
             event as React.MouseEvent,
             "task-flow",
-            { onAddTask: () => handleAddTaskAtPosition(flowPos.x, flowPos.y) },
+            { flowPosition: { x: flowPos.x, y: flowPos.y } },
         );
     };
 

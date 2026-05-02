@@ -4,14 +4,15 @@
  * No callbacks stored in contextData.
  */
 
-import { useOrchestratorContextMenuStore } from "@/shared";
+import { useMenuContext, useMenuContextHelper } from "@/shared";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { getGenericConfirmMessage } from "@/shared";
 import type { WsGridMenuData } from "@/shared";
 import { useWsGridHelper } from "../../hooks/ws/useWsGrid.helper";
 
 export const useWsGridMenuHelper = () => {
-    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { createNewWorkspace, deleteRestoreWorkspaces, hardDeleteWorkspaces } = useWsGridHelper();
 
@@ -26,12 +27,12 @@ export const useWsGridMenuHelper = () => {
     );
 
     const addWorkspace = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         createNewWorkspace();
     };
 
     const softDelete = (anchorEl: HTMLElement | null) => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         if (allAreTempWorkspaces) {
             deleteRestoreWorkspaces(selectedIds, "soft-delete");
             return;
@@ -56,7 +57,7 @@ export const useWsGridMenuHelper = () => {
     };
 
     const hardDelete = (anchorEl: HTMLElement | null) => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         const msg = getGenericConfirmMessage({
             type: "hard-delete",
             entityType: "workspace",
@@ -77,7 +78,7 @@ export const useWsGridMenuHelper = () => {
     };
 
     const restore = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         deleteRestoreWorkspaces(selectedIds, "restore");
     };
 

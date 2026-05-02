@@ -4,14 +4,15 @@
  * No callbacks stored in contextData.
  */
 
-import { useOrchestratorContextMenuStore } from "@/shared";
+import { useMenuContext, useMenuContextHelper } from "@/shared";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { getGenericConfirmMessage } from "@/shared";
 import type { TaskGridMenuData } from "@/shared";
 import { useTaskGridHelper } from "../../hooks/taskList/useTaskGrid.helper";
 
 export const useTaskGridMenuHelper = () => {
-    const { contextData, setIsContextMenuOpen } = useOrchestratorContextMenuStore();
+    const { contextData } = useMenuContext();
+    const { setIsMenuContextOpen } = useMenuContextHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { createNewTask, createSubTask, deleteRestoreTasks } = useTaskGridHelper();
 
@@ -30,14 +31,14 @@ export const useTaskGridMenuHelper = () => {
     const canAddSubTask = hoveredTask && hoveredTask.id > 0 && !hoveredTask.deletedAt;
 
     const addTask = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         if (!projectId) return;
         const newTask = createNewTask(projectId);
         if (newTask && onTaskCreated) onTaskCreated(newTask);
     };
 
     const addSubTask = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         if (!hoveredTask || !projectId) return;
 
         // Smart parent: if hoveredTask is a subtask, use its parent; otherwise use itself
@@ -49,7 +50,7 @@ export const useTaskGridMenuHelper = () => {
     };
 
     const softDelete = (anchorEl: HTMLElement | null) => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         if (allAreTempTasks) {
             deleteRestoreTasks(selectedIds, "soft-delete", projectId);
             return;
@@ -74,7 +75,7 @@ export const useTaskGridMenuHelper = () => {
     };
 
     const restore = () => {
-        setIsContextMenuOpen(false);
+        setIsMenuContextOpen(false);
         deleteRestoreTasks(selectedIds, "restore", projectId);
     };
 
