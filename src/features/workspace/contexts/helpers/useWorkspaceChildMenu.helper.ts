@@ -73,7 +73,7 @@ export const useWorkspaceChildMenuHelper = () => {
             const token = $user.userToken;
 
             // âœ… Use entityId (notes.id) for note service
-            const result = await noteService._deleteNote(token ?? "", noteEntityId.toString());
+            const result = await noteService.deleteNote(token ?? "", noteEntityId.toString());
             // ---------
             // STEP 3: Handle success response
             // ---------
