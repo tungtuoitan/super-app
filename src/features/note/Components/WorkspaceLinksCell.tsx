@@ -4,9 +4,7 @@
  */
 
 import React, { useState } from "react";
-import { shellConstants } from "@/shell";
 import type { WorkspaceLink } from "../types/note.types";
-import { constants } from "@/shared";
 import { useWorkspaceStore } from "@/features/workspace";
 
 interface WorkspaceLinksCellProps {

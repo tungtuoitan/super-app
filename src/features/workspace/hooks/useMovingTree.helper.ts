@@ -10,10 +10,9 @@ import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/worksp
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
-import { constants } from "@/shared";
 import { treeMiniHelper, TreeFolder } from "./tree.miniHelper";
 import {useConsoleHelper} from "@/shared";
-import {useKLoader} from "@/features/K";
+import { useWorkspaceLoader } from "./useWorkspace.loader";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
 export const useMovingTreeHelper = () => {
@@ -35,7 +34,7 @@ export const useMovingTreeHelper = () => {
     const { allWorkspaces, currentWorkspace, selectedItemIds, setSelectedItemIds } = useWorkspaceStore();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { loadTree } = useKLoader();
+    const { loadTree } = useWorkspaceLoader();
     const manager = useDragDropManager();
 
     // Track highlight timeout to clear previous ones

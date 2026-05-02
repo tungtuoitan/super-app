@@ -7,7 +7,6 @@ import React, { useMemo, useState, useEffect, useRef } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import type * as _monaco from "monaco-editor";
 import { useWorkspaceStore } from "@/features/workspace";
-import { useKeywordNavigationHelper } from "@/shell";
 import { useEditorTabBarHelper } from "@/shell";
 import { useNoteDetailHelper } from "@/features/note/hooks/useNoteDetail.helper";
 import { useTreeStatusHelper } from "@/features/workspace";
@@ -31,7 +30,6 @@ import {useMarkdownEditorViewStateSync} from "../hooks/useMarkdownEditorViewStat
 
 export function MarkdownEditor() {
     const { allKeywords } = useKeywordSelector();
-    const { navigateLink } = useKeywordNavigationHelper();
     const { currentWorkspace } = useWorkspaceStore();
     const { getActiveTab, isLoadingTab } = useEditorTabBarHelper();
     const { handleNoteFieldChange } = useNoteDetailHelper();

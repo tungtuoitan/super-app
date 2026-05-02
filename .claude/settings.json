@@ -1,6 +1,6 @@
 {
   "permissions": {
     "defaultMode": "bypassPermissions",
-    "allow": ["*"]
+    "allow": ["Bash(*)", "Edit(*)", "Write(*)", "mcp__*", "WebFetch(*)", "WebSearch(*)"]
   }
 }

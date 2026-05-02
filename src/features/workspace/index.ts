@@ -1,7 +1,34 @@
 ﻿/**
- * Workspace Feature - Public API
- * Only export what other features/layers need to use.
- * Internal implementation details stay private.
+ * Workspace Feature Public API
+ * Only import from this file when crossing feature boundaries.
+ * Internal imports within the workspace feature should use relative paths.
+ *
+ * ─── Cluster note ────────────────────────────────────────────────────────────
+ * `workspace` and `note` form a tightly-coupled cluster:
+ *
+ *  • `workspace` is the **host**: it owns the tree UI, item CRUD, and the
+ *    moving-tree panel. It imports `noteService`, `useNoteDetailStore`, and
+ *    `Note` type from `note` to render note nodes inside the tree.
+ *
+ *  • `note` is the **content**: NoteDetailContent, NoteBodyInPanel and the
+ *    note save pipeline all reach into `workspace` for `useWorkspaceStore`,
+ *    `useWorkspaceItemHelper`, `useWorkspaceLoader`, and `WorkspaceItemAction`
+ *    to link saved notes to workspace items.
+ *
+ *  • The coupling is domain-inherent — a note is a workspace item; you cannot
+ *    meaningfully render or save a note without workspace context. Trying to
+ *    fully decouple them would require an event/callback inversion layer that
+ *    adds more complexity than it removes.
+ *
+ *  • Cross-imports within the cluster are intentional and expected.
+ *    The ESLint "no-restricted-imports" rule still enforces barrel-only access
+ *    (`@/features/workspace`, `@/features/note`) to prevent deep coupling to
+ *    internal file paths.
+ *
+ *  • Any refactor that tries to fully decouple the two features should treat
+ *    them as a single bounded context and extract a shared `workspaceCore`
+ *    layer rather than trying to sever individual imports one by one.
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 // Stores
@@ -11,6 +38,7 @@ export { useTreeStatusHelper } from "./hooks/useTreeStatusHelper";
 // Types
 export type { Ws } from "./types/workspace.types";
 export { WorkspaceItemAction } from "./types/workspace.types";
+export type { Folder } from "./types/folder.types";
 
 
 // Providers / Stores

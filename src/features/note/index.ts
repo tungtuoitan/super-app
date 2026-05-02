@@ -1,7 +1,21 @@
 ﻿/**
- * Note Feature - Public API
- * Only export what other features/layers need to use.
- * Internal implementation details stay private.
+ * Note Feature Public API
+ * Only import from this file when crossing feature boundaries.
+ * Internal imports within the note feature should use relative paths.
+ *
+ * ─── Cluster note ────────────────────────────────────────────────────────────
+ * `note` and `workspace` form a tightly-coupled cluster.
+ * See `@/features/workspace` (index.ts) for the full cluster description.
+ *
+ *  • `note` consumes `useWorkspaceStore`, `useWorkspaceItemHelper`,
+ *    `useWorkspaceLoader`, and `WorkspaceItemAction` from `workspace` to link
+ *    saved notes to workspace items and reflect status in the tree.
+ *
+ *  • `workspace` consumes `noteService`, `useNoteDetailStore`, and `Note`
+ *    type from `note` to render and manage note nodes inside the workspace tree.
+ *
+ *  • Cross-imports within the cluster are intentional and expected.
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 // Components (used by VSEditorArea, VSSideBar)
