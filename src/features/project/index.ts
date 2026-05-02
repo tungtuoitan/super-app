@@ -9,6 +9,10 @@ export { ProjectGridMenu } from "./contexts/ProjectGridMenu";
 export { StatusCell } from "./Components/StatusCell";
 export { PriorityCell } from "./Components/PriorityCell";
 export { DateRangeCell } from "./Components/DateRangeCell";
+
+export { TaskSearchInput } from "./task/Components/TaskSearchInput";
+export { TaskFilterPopup } from "./task/Components/TaskFilterPopup";
+
 // Types
 export type { Project } from "./types/project.types";
 

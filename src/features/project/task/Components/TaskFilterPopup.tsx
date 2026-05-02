@@ -15,9 +15,9 @@ import { userProfileService } from "@/shared";
 import {parseApiError} from "@/shared";
 import {UserFilters, ViewFilter} from "@/shell";
 import {useAuthStore} from "@/shared";
-import {TaskFilterGroup} from "./TaskFilterGroup";
 // eslint-disable-next-line no-restricted-imports -- direct import to break project ? taskDetail circular dep
 import {projectConstants} from "@/features/project/project.constants";
+import {TaskFilterGroup} from "@/features/project/task/Components/TaskFilterGroup";
 
 const DEFAULT_FILTERS = projectConstants.filters.defaults.taskGrid as ViewFilter;
 const GROUPS = projectConstants.filters.taskGroups;

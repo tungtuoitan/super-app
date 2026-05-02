@@ -13,12 +13,12 @@ import { MultiProjectKanbanView } from "./MultiProjectKanbanView";
 import { MultiProjectProTimelineView } from "./MultiProjectProTimelineView";
 import { MultiProjectTimelineView } from "./MultiProjectTimelineView";
 import { MultiProjectTaskFlowView } from "./MultiProjectTaskFlowView";
-import { TaskFilterPopup, TaskSearchInput } from "@/features/taskDetail";
 import { ProjectChip } from "./small/ProjectChip";
 import { useMultiProjectDetailHeadless } from "../hooks/mpDetail/useMultiProjectDetail.headless";
 import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
 import { useMultiProjectDetailHelper } from "../hooks/mpDetail/useMultiProjectDetail.helper";
 import type { TabType, TabConfig } from "../types/multiProjectDetail.type";
+import {TaskFilterPopup, TaskSearchInput} from "@/features/project";
 
 const TABS: TabConfig[] = [
     { id: "proTimeline", label: "PROJECT TIMELINE", icon: <CalendarRange className="h-4 w-4" /> },

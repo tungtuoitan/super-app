@@ -12,11 +12,12 @@ import { ProjectGeneral } from "./ProjectGeneral";
 import { TaskGrid } from "@/features/project/task/Components/TaskGrid";
 import { TaskKanbanView } from "@/features/project/task/Components/TaskKanbanView";
 import { TaskTimelineView } from "@/features/project/task/Components/TaskTimelineView";
-import { TaskFilterPopup, TaskSearchInput } from "@/features/taskDetail";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import { useProjectDetailHelper } from "../hooks/useProjectDetail.helper";
 import type { TabConfig } from "../types/projectDetail.type";
 import {useProjectDetailHeadless} from "../hooks/useProjectDetail.headless";
+import {TaskFilterPopup} from "../task/Components/TaskFilterPopup";
+import {TaskSearchInput} from "../task/Components/TaskSearchInput";
 
 const TABS: TabConfig[] = [
     { id: "general", label: "GENERAL", icon: <Settings className="h-4 w-4" /> },

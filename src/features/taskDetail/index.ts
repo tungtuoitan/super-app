@@ -5,8 +5,6 @@
  */
 
 // Components
-export { TaskFilterPopup } from "./Components/TaskFilterPopup";
-export { TaskSearchInput } from "./Components/small/TaskSearchInput";
 export { TaskEditorPanel } from "./Components/TaskEditorPanel";
 
 // Types
@@ -50,9 +48,9 @@ export {
 } from "./utils/TaskGrid.utils";
 
 // Stores / Providers (only expose what other features/shell need)
-export { useTaskDetailStore, TaskDetailProvider } from "./store/useTaskDetail.store";
-export { TaskDetailSectionProvider } from "./store/useTaskDetailSection.store";
+export { TaskDetailProvider } from "./store/useTaskDetail.store";
 export { TaskSectionProvider } from "./store/useTaskSection.store";
+export { TaskDetailSectionProvider } from "./store/useTaskDetailSection.store";
 
 // Helpers (only expose hooks needed by other features)
 export { useTaskTabHelper } from "./hooks/useTaskTab.helper";

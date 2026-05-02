@@ -1,4 +1,3 @@
-import { constants } from "@/shared";
 import { shellConstants } from "@/shell";
 import { useProjectDetailHelper } from "./useProjectDetail.helper";
 import { useTaskDetailHelper } from "@/features/taskDetail";
@@ -28,6 +27,7 @@ export function useProjectSaveActions(): SaveActions {
                 folderWorkspaceItemId: (tab.data as Task).folderWorkspaceItemId,
                 source: "useProjectSaveActions",
             });
+            // TODO: tại sao lại upsert task ở đây nhỉ?
             const savedTask = await upsertTask(tab.id);
             if (isNewTask && savedTask) {
                 await createTaskFolder(savedTask);
