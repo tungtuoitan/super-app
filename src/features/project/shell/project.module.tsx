@@ -19,6 +19,10 @@ import type { ProjectDTO } from "../service/project.service";
 import type { Project } from "..";
 import { useProjectSaveActions } from "../hooks/useProjectSaveActions";
 import { useProjectStore } from "../store/useProject.store";
+import { useProjectGridHelper } from "../hooks/useProjectGrid.helper";
+import { useProjectTabHelper } from "../hooks/useProjectTab.helper";
+import { useAuthStore } from "@/shared";
+import { useEffect } from "react";
 
 /** Transform a single ProjectDTO to domain model */
 const _transformProject = (dto: ProjectDTO): Project => ({
@@ -163,6 +167,26 @@ export const projectModule: ModuleDefinition = {
     },
 
     filterViewKey: "projectGrid",
+
+    useGlobalInit: () => {
+        const { $user } = useAuthStore();
+        const { projectGridPagination } = useProjectStore();
+        const { loadProjects } = useProjectGridHelper();
+        const { openMultiProjectTab } = useProjectTabHelper();
+
+        // Auto-open pinned MultiProject tab on mount
+        useEffect(() => {
+            openMultiProjectTab([]);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, []);
+
+        // Load project data whenever user or pagination changes
+        useEffect(() => {
+            if (!$user.userId) return;
+            loadProjects();
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [$user.userId, $user.userToken, $user.filters?.projectGrid, projectGridPagination.pageIndex, projectGridPagination.pageSize]);
+    },
 };
 
 // ─── Keyword Navigator Plugin ─────────────────────────────────────────────────

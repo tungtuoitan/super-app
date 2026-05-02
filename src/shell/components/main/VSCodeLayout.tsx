@@ -13,6 +13,7 @@ import {useSideBarStore} from "@/shell/store/SideBar.store";
 import {RightSideBar} from "./RightSideBar";
 import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 import {useModuleRegisterHelper} from "@/shell/hooks/useModuleRegister.helper";
+import { GlobalModuleInit } from "../GlobalModuleInit";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -46,36 +47,41 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
 
     if (isMobile) {
         return (
-            <div
-                className={`w-full h-full flex flex-col overflow-hidden ${className || ""}`}
-                style={{ backgroundColor: "rgb(30, 30, 30)", color: "#cccccc" }}
-            >
-                <ActivityBar horizontal />
+            <>
+                <GlobalModuleInit />
+                <div
+                    className={`w-full h-full flex flex-col overflow-hidden ${className || ""}`}
+                    style={{ backgroundColor: "rgb(30, 30, 30)", color: "#cccccc" }}
+                >
+                    <ActivityBar horizontal />
 
-                <PanelGroup direction="vertical" autoSaveId="mobile-layout-vertical" className="flex-1">
-                    <Panel id="mobile-sidebar" defaultSize={40} minSize={15}>
-                        <div className="h-full overflow-hidden bg-editor-sidebar flex flex-col">
-                            <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
-                                <span>{moduleName}</span>
-                                {moduleName === "LifeLog" && (
-                                    <RightSideBar hideFilter />
-                                )}
+                    <PanelGroup direction="vertical" autoSaveId="mobile-layout-vertical" className="flex-1">
+                        <Panel id="mobile-sidebar" defaultSize={40} minSize={15}>
+                            <div className="h-full overflow-hidden bg-editor-sidebar flex flex-col">
+                                <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
+                                    <span>{moduleName}</span>
+                                    {moduleName === "LifeLog" && (
+                                        <RightSideBar hideFilter />
+                                    )}
+                                </div>
+                                <div className="flex-1 overflow-hidden">
+                                    <MobileSidebarContent moduleName={moduleName} />
+                                </div>
                             </div>
-                            <div className="flex-1 overflow-hidden">
-                                <MobileSidebarContent moduleName={moduleName} />
-                            </div>
-                        </div>
-                    </Panel>
-                    <VSCodeResizeHandle direction="vertical" id="mobile-split-resize" />
-                    <Panel id="mobile-editor" ref={mobileEditorRef} defaultSize={60} minSize={15}>
-                        <VSEditorArea />
-                    </Panel>
-                </PanelGroup>
-            </div>
+                        </Panel>
+                        <VSCodeResizeHandle direction="vertical" id="mobile-split-resize" />
+                        <Panel id="mobile-editor" ref={mobileEditorRef} defaultSize={60} minSize={15}>
+                            <VSEditorArea />
+                        </Panel>
+                    </PanelGroup>
+                </div>
+            </>
         );
     }
 
     return (
+        <>
+        <GlobalModuleInit />
         <div
             className={`w-full h-full flex flex-col overflow-hidden ${className || ""}`}
             style={{ backgroundColor: "rgb(30, 30, 30)", color: "#cccccc" }}
@@ -101,6 +107,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                 </PanelGroup>
             </div>
         </div>
+        </>
     );
 }
 

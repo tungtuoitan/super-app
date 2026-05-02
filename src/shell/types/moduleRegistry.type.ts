@@ -1,12 +1,12 @@
-﻿/**
- * Module Registry â€” VSCode Shell Extension Points
+/**
+ * Module Registry — VSCode Shell Extension Points
  *
  * Shell (ActivityBar, VSSideBar, VSEditorArea, VSPanel, TabBar) does NOT import features directly.
  * Instead, each feature registers a ModuleDefinition here.
  * Shell reads from this registry at render time.
  *
  * Dependency direction:
- *   features/xxx/shell/xxx.module.tsx  â†’  moduleRegistry  â†  shell components
+ *   features/xxx/shell/xxx.module.tsx  →  moduleRegistry  ←  shell components
  */
 
 import type { ComponentType, ReactNode } from "react";
@@ -14,9 +14,9 @@ import type { LucideIcon } from "lucide-react";
 import type { BaseTab } from "@/shell";
 import type { SaveActions } from "@/shell/types/actions.types";
 
-// ─── Contract ─────────────────────────────────────────────────────────────────
+// --- Contract -----------------------------------------------------------------
 
-// ── TabPersistence ────────────────────────────────────────────────────────────
+// -- TabPersistence ------------------------------------------------------------
 
 /** Shape of one persisted tab entry in localStorage */
 export interface TabStorage {
@@ -31,7 +31,7 @@ export interface OpenTabsStorage {
     tabs: TabStorage[];
 }
 
-/** Per-module contract for tab persistence (serialize ↔ restore). Plain functions, no React. */
+/** Per-module contract for tab persistence (serialize ? restore). Plain functions, no React. */
 export interface TabPersistence {
     /** Return the dataId to persist. Return null to skip saving this tab (e.g. temp/unsaved). */
     getDataId(tab: BaseTab): number | string | null;
@@ -39,7 +39,7 @@ export interface TabPersistence {
     restoreTab(persisted: TabStorage, userToken: string): Promise<BaseTab | null>;
 }
 
-// ── ShortcutDefinition ────────────────────────────────────────────────────────
+// -- ShortcutDefinition --------------------------------------------------------
 
 /** A keyboard shortcut contributed by a feature module. */
 export interface ShortcutDefinition {
@@ -73,21 +73,21 @@ export interface TabMeta {
 }
 
 export interface ModuleDefinition {
-    /** Unique module ID â€” must match shellConstants.modules.* value */
+    /** Unique module ID — must match shellConstants.modules.* value */
     id: string;
 
-    // ── SaveActions ──────────────────────────────────────────────────────────
+    // -- SaveActions ----------------------------------------------------------
     /**
      * Hook returning save/handles for this module's tab types.
      * Called as a React hook inside the editor toolbar coordinator.
      */
     useSaveActions?: () => SaveActions;
 
-    // ── TabPersistence ───────────────────────────────────────────────────────
-    /** Serialize / restore tabs for this module. Plain object — no React hooks. */
+    // -- TabPersistence -------------------------------------------------------
+    /** Serialize / restore tabs for this module. Plain object � no React hooks. */
     tabPersistence?: TabPersistence;
 
-    // ── Tab close ────────────────────────────────────────────────────────────
+    // -- Tab close ------------------------------------------------------------
     /**
      * Hook returning a per-tab-close callback.
      * Called once per render; the returned callback fires for every tab that closes.
@@ -95,7 +95,7 @@ export interface ModuleDefinition {
      */
     useOnTabClose?: () => (tab: BaseTab) => void;
 
-    // ── Tab flags ────────────────────────────────────────────────────────────
+    // -- Tab flags ------------------------------------------------------------
     /**
      * Static flags that customize shell rendering for this module's tab types.
      * Replaces hardcoded `tab.type === shellConstants.xxx` checks in shell components.
@@ -105,22 +105,22 @@ export interface ModuleDefinition {
         noDeletedStyle?: boolean;
     };
 
-    // ── Shortcuts ────────────────────────────────────────────────────────────
+    // -- Shortcuts ------------------------------------------------------------
     /**
      * Hook returning keyboard shortcuts contributed by this module.
      * Called once per render inside useTabBarShortcuts.
      */
     useShortcuts?: () => ShortcutDefinition[];
 
-    // ── IsInModule ───────────────────────────────────────────────────────────
+    // -- IsInModule -----------------------------------------------------------
     /**
-     * Hook returning a predicate: “is this tab currently active in the sidebar module?”
+     * Hook returning a predicate: �is this tab currently active in the sidebar module?�
      * Used by TabBar to highlight tabs that belong to the current module view.
      * Each handler should return false for tab types it doesn't own.
      */
     useIsInModule?: () => (tab: BaseTab) => boolean;
 
-    // ── TabActivate ──────────────────────────────────────────────────────────
+    // -- TabActivate ----------------------------------------------------------
     /**
      * Hook returning a callback fired when the active tab changes (via updateActiveTab).
      * Use for feature-specific side-effects: e.g. workspace tree selection + scroll.
@@ -129,7 +129,7 @@ export interface ModuleDefinition {
      */
     useOnTabActivate?: () => (tab: BaseTab | null) => void;
 
-    // ── BreadcrumbBuilder ────────────────────────────────────────────────────
+    // -- BreadcrumbBuilder ----------------------------------------------------
     /**
      * Hook returning a breadcrumb builder for this module's tab types.
      * Return undefined to skip (shell tries the next module, then produces nothing).
@@ -143,7 +143,16 @@ export interface ModuleDefinition {
      */
     useBreadcrumbTrigger?: () => unknown;
 
-    // ── BeforeModuleSwitch ───────────────────────────────────────────────────
+    // -- GlobalInit ---------------------------------------------------------------
+    /**
+     * Hook called unconditionally at app startup, regardless of which sidebar module is active.
+     * Use for data fetching or tab initialization that must run even when this module's
+     * sidebar view is not mounted (e.g. loading projects for a pinned MultiProject tab).
+     * Runs inside GlobalModuleInit which is always mounted in VSCodeLayout.
+     */
+    useGlobalInit?: () => void;
+
+    // -- BeforeModuleSwitch ---------------------------------------------------
     /**
      * Hook returning a guard called before the active sidebar module changes.
      * Return false (or a Promise resolving to false) to cancel the switch.
@@ -151,7 +160,7 @@ export interface ModuleDefinition {
      */
     useOnBeforeModuleSwitch?: () => () => unknown;
 
-    // ── PanelTabs (hook-based) ───────────────────────────────────────────────
+    // -- PanelTabs (hook-based) -----------------------------------------------
     /**
      * Hook returning bottom-panel tab definitions for this module.
      * Use instead of the static `panelTabs` when tab definitions need
@@ -160,21 +169,21 @@ export interface ModuleDefinition {
      */
     usePanelTabs?: () => PanelTabDefinition[];
 
-    // ── BackButton (hook-based) ──────────────────────────────────────────────
+    // -- BackButton (hook-based) ----------------------------------------------
     /**
      * Hook returning a synchronous back-button resolver for the active tab.
-     * Called with hook access — can read from stores (e.g. projects list).
+     * Called with hook access � can read from stores (e.g. projects list).
      * Return null if this module doesn't own the active tab.
      */
     useGetBackButton?: () => (tab: BaseTab) => { link: string; label: string } | null;
 
     /**
      * Plain async fallback for back-button resolution when store data is not yet loaded.
-     * No React hooks — receives userToken, fetches from API, returns result or null.
+     * No React hooks � receives userToken, fetches from API, returns result or null.
      */
     getBackButtonAsync?: (tab: BaseTab, userToken: string) => Promise<{ link: string; label: string } | null>;
 
-    // â”€â”€ ActivityBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── ActivityBar ──────────────────────────────────────────────────────────
     icon: LucideIcon;
     label: string;
     /**
@@ -183,12 +192,12 @@ export interface ModuleDefinition {
      */
     useBadge?: () => number;
 
-    // â”€â”€ VSSideBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── VSSideBar ────────────────────────────────────────────────────────────
     /** Component rendered inside the sidebar when this module is active */
     SidebarView: ComponentType;
 
-    // â”€â”€ VSEditorArea â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    /** Map of tab.type â†’ EditorPanel component */
+    // ── VSEditorArea ─────────────────────────────────────────────────────────
+    /** Map of tab.type → EditorPanel component */
     editorPanels: Partial<Record<string, ComponentType<{ tab: BaseTab }>>>;
 
     /**
@@ -197,11 +206,11 @@ export interface ModuleDefinition {
      */
     keepAliveTabTypes?: string[];
 
-    // â”€â”€ VSPanel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── VSPanel ──────────────────────────────────────────────────────────────
     /** Bottom-panel tabs contributed by this module */
     panelTabs?: PanelTabDefinition[];
 
-    // â”€â”€ TabBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── TabBar ───────────────────────────────────────────────────────────────
     /**
      * Returns the visual metadata (icon + color) for a tab button.
      * Called for every tab whose type belongs to this module's editorPanels.
@@ -212,14 +221,14 @@ export interface ModuleDefinition {
     /**
      * If this tab acts as a group header (e.g. a Task tab groups its child note/ws tabs),
      * return a unique group key string. Return null/undefined otherwise.
-     * Child membership is already encoded in tab.openedBy.link â€” TabBar matches them automatically.
+     * Child membership is already encoded in tab.openedBy.link — TabBar matches them automatically.
      */
     getTabGroupKey?: (tab: BaseTab) => string | null;
 
-    // â”€â”€ EditorToolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── EditorToolbar ────────────────────────────────────────────────────────
     /**
      * Derive a back button for a tab that doesn't have tab.openedBy set.
-     * Pure function â€” receives tab + context (e.g. projects array).
+     * Pure function — receives tab + context (e.g. projects array).
      * Return null if this module doesn't provide a back button.
      */
     getBackButton?: (tab: BaseTab, context: { projects: any[] }) => { link: string; label: string } | null;

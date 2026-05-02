@@ -1,26 +1,17 @@
 /**
  * ProjectGrid Headless
  * Side-effects only (useEffect). No UI.
- * Handles container resize observation and initial data loading.
+ * Handles container resize observation (sidebar-local side-effect).
+ *
+ * Data loading and MultiProject tab initialization live in projectModule.useGlobalInit
+ * so they run regardless of which sidebar module is currently active.
  */
 
 import { useEffect } from "react";
 import { useProjectStore } from "../store/useProject.store";
-import { useProjectGridHelper } from "./useProjectGrid.helper";
-import { useProjectTabHelper } from "./useProjectTab.helper";
-import {useAuthStore} from "@/shared";
 
 export const useProjectGridHeadless = () => {
-    const { containerRef, setContainerWidth, projectGridPagination } = useProjectStore();
-    const { $user } = useAuthStore();
-    const { loadProjects } = useProjectGridHelper();
-    const { openMultiProjectTab } = useProjectTabHelper();
-
-    // Auto-open pinned MultiProject tab on mount
-    useEffect(() => {
-        openMultiProjectTab([]);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const { containerRef, setContainerWidth } = useProjectStore();
 
     // Update container width on resize
     useEffect(() => {
@@ -35,11 +26,4 @@ export const useProjectGridHeadless = () => {
         resizeObserver.observe(containerRef.current);
         return () => resizeObserver.disconnect();
     }, []);
-
-    // Load data when user is ready
-    useEffect(() => {
-        if (!$user.userId) return;
-        loadProjects();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [$user.userId, $user.userToken, $user.filters?.projectGrid, projectGridPagination.pageIndex, projectGridPagination.pageSize]);
 };
