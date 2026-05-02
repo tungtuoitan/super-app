@@ -17,6 +17,7 @@ import { KTestService } from "../../service/kTest.service";
 import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { KTreeNode } from "../../hooks/kTree/Ktree.miniHelper";
 import { useSideBarHelper } from "@/shell";
+import { dispatchKTestMoved } from "../../utils/kEvents.utils";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;
@@ -114,7 +115,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
         drop: (item) => {
             const targetNodeId = nodeItem.id; // k.node.id
             KTestService._updateTest(item.knowledgeId, item.testId, { nodeId: targetNodeId }).then(() => {
-                window.dispatchEvent(new CustomEvent("k-test-moved", { detail: { sourceNodeId: item.sourceNodeId, knowledgeId: item.knowledgeId } }));
+                dispatchKTestMoved({ sourceNodeId: item.sourceNodeId, knowledgeId: item.knowledgeId });
             });
         },
         collect: monitor => ({ isTestOver: monitor.isOver() && monitor.canDrop() }),

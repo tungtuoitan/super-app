@@ -1,6 +1,7 @@
 import {useMenuContext, useMenuContextHelper} from "@/shared";
 import { MenuItem } from "@szhsin/react-menu";
 import { Plus } from "lucide-react";
+import { dispatchKNodeInlineCreate } from "../../utils/kEvents.utils";
 
 export function KNodePanelBlankMenu() {
     const { contextData } = useMenuContext();
@@ -8,9 +9,7 @@ export function KNodePanelBlankMenu() {
 
     const handleNewCard = () => {
         setIsMenuContextOpen(false);
-        window.dispatchEvent(new CustomEvent("k-node-inline-create", {
-            detail: { knowledgeId: contextData?.knowledgeId, parentId: contextData?.id ?? null },
-        }));
+        dispatchKNodeInlineCreate({ knowledgeId: contextData?.knowledgeId, parentId: contextData?.id ?? null });
     };
 
     return (

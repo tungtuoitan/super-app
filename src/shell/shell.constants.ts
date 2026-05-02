@@ -3,6 +3,14 @@
  * Navigation, tab types, module definitions, view types
  */
 
+// ── WindowEventMap augmentation ───────────────────────────────────────────
+declare global {
+    interface WindowEventMap {
+        /** Dispatched by a feature when it opens a tab on mobile */
+        "shell:mobile-tab-opened": CustomEvent<never>;
+    }
+}
+
 export const shellConstants = {
     appName: "SuperApp" as const,
 

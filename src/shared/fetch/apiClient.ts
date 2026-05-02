@@ -7,6 +7,7 @@
 import { getDeviceFingerprint } from "../device/deviceFingerprint";
 import { authApi } from "../auth/auth.service";
 import { debugLog } from "../debug/useDebugLog";
+import { dispatchAuthUnauthorized, dispatchAuthSpecialSuccess } from "../auth/auth.events";
 
 type ApiClientConfig = {
     getToken: () => string;
@@ -100,7 +101,7 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
     try {
         const newToken = await acquireRefreshToken();
         setToken(newToken);
-        window.dispatchEvent(new Event("auth:special-success"));
+        dispatchAuthSpecialSuccess();
 
         const retryHeaders = new Headers(options.headers);
         retryHeaders.set("Authorization", `Bearer ${newToken}`);
@@ -115,7 +116,7 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
         // Don't trigger logout during OAuth callback — exchange is still in progress
         if (!window.location.pathname.includes("/auth/callback")) {
             onAuthFailed();
-            window.dispatchEvent(new Event("auth:unauthorized"));
+            dispatchAuthUnauthorized();
         } else {
             debugLog.log("apiClient", "auth-failed-suppressed-oauth", { url, device });
         }

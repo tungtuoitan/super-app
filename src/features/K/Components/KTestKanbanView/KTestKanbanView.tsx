@@ -16,6 +16,8 @@ import { QuestionScoreBar } from "../small/QuestionScoreBar";
 import type { KTestDetail, KTestQuestion, KTestSummary } from "../../types/kTest.type";
 import type { KItemV2 } from "../../types/K-v2.types";
 import { KANBAN_TEST_TO_TREE, type KanbanTestToTreeItem } from "../KTestDetail/kTestDrag";
+import { kEvents } from "../../utils/kEvents.utils";
+import type { KTestMovedDetail } from "../../utils/kEvents.utils";
 
 const KANBAN_DND  = "kanban-question-card";
 const COLUMN_DND  = "kanban-column";
@@ -53,14 +55,12 @@ export function KTestKanbanView({ knowledgeId, onQuickTest }: KTestKanbanViewPro
 
     // Reload when a test is moved to another node via tree drop
     useEffect(() => {
-        const handler = (e: Event) => {
-            const { sourceNodeId, knowledgeId: kId } = (e as CustomEvent).detail;
-            if (kId === knowledgeId && sourceNodeId === activeNodeId) {
+        const handler = (e: CustomEvent<KTestMovedDetail>) => {
+            if (e.detail.knowledgeId === knowledgeId && e.detail.sourceNodeId === activeNodeId)
                 loadTests(knowledgeId, activeNodeId ?? undefined);
-            }
         };
-        window.addEventListener("k-test-moved", handler);
-        return () => window.removeEventListener("k-test-moved", handler);
+        window.addEventListener(kEvents.testMoved, handler);
+        return () => window.removeEventListener(kEvents.testMoved, handler);
     }, [knowledgeId, activeNodeId]);
 
     useEffect(() => {

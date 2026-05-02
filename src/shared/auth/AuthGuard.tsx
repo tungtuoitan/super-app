@@ -17,6 +17,7 @@ import {useAuthHelper} from "./useAuth.helpers";
 import {useAuthStore} from "./Auth.store";
 import { debugLog } from "../debug/useDebugLog"
 import {useKeywordHelper} from "../keyword/useKeyword.helper";
+import { authEvents } from "./auth.events";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, $user, set$User } = useAuthStore();
@@ -56,11 +57,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             debugLog.log("auth", "authguard-refresh-success-event", { device });
             // _console.specialSuccess("Token refreshed successfully.");
         };
-        window.addEventListener("auth:unauthorized", handleUnauthorized);
-        window.addEventListener("auth:special-success", handleRefreshSuccess);
+        window.addEventListener(authEvents.unauthorized, handleUnauthorized);
+        window.addEventListener(authEvents.specialSuccess, handleRefreshSuccess);
         return () => {
-            window.removeEventListener("auth:unauthorized", handleUnauthorized);
-            window.removeEventListener("auth:special-success", handleRefreshSuccess);
+            window.removeEventListener(authEvents.unauthorized, handleUnauthorized);
+            window.removeEventListener(authEvents.specialSuccess, handleRefreshSuccess);
         };
     }, []);
 

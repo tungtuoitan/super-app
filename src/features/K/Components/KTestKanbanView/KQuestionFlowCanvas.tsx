@@ -12,6 +12,8 @@ import { useGlobalShortcut } from "@/shared";
 import type { KTestQuestion } from "@/features/K/types/kTest.type";
 import type { QuestionFlowNodeData } from "@/features/K/types/kTestFlow.type";
 import type { Node } from "@xyflow/react";
+import { kEvents } from "@/features/K/utils/kEvents.utils";
+import type { KFlowQuestionsChangedDetail } from "@/features/K/utils/kEvents.utils";
 
 const PAN_SPEED = 0.8;
 
@@ -124,31 +126,13 @@ function KQuestionFlowCanvasContent({ selectedTestId, questions, knowledgeId, sh
         return () => document.removeEventListener("wheel", onWheel, { capture: true } as EventListenerOptions);
     }, [rfInstance]);
 
-    // Toolbar "Add Question" button → place node at canvas center
     useEffect(() => {
-        const handler = () => {
-            if (!selectedTestId) return;
-            const { x, y, zoom } = rfInstance.getViewport();
-            const canvasX = (-x + window.innerWidth / 2) / zoom - 140;
-            const canvasY = (-y + window.innerHeight / 2) / zoom - 80 + (Math.random() * 60 - 30);
-            const tempId = `temp-node-${Date.now()}`;
-            const tempNode: Node<QuestionFlowNodeData> = {
-                id: tempId, type: "questionFlowNode",
-                position: { x: canvasX, y: canvasY },
-                data: { question: makeTempQuestion() },
-            };
-            setFlowNodes((prev) => [...prev, tempNode]);
-            setEditingNodeId(tempId);
+        const handler = (e: CustomEvent<KFlowQuestionsChangedDetail>) => {
+            if (e.detail.testId === selectedTestId) onQuestionsChanged();
         };
-        window.addEventListener("kflow:add-question", handler);
-        return () => window.removeEventListener("kflow:add-question", handler);
-    }, [selectedTestId, rfInstance]);
-
-    useEffect(() => {
-        const handler = () => onQuestionsChanged();
-        window.addEventListener("kflow:questions-changed", handler);
-        return () => window.removeEventListener("kflow:questions-changed", handler);
-    }, [onQuestionsChanged]);
+        window.addEventListener(kEvents.flowQuestionsChanged, handler);
+        return () => window.removeEventListener(kEvents.flowQuestionsChanged, handler);
+    }, [onQuestionsChanged, selectedTestId]);
 
     const handlePaneContextMenu = (event: MouseEvent | React.MouseEvent) => {
             event.preventDefault();

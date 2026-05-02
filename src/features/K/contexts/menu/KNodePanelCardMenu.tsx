@@ -3,6 +3,7 @@ import { Plus, Trash2, RotateCcw } from "lucide-react";
 import { useKMenuHelper } from "../helpers/useKMenu.helper";
 import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
 import {useMenuContext, useMenuContextHelper} from "@/shared";
+import { dispatchKNodeInlineCreate } from "../../utils/kEvents.utils";
 
 export function KNodePanelCardMenu() {
     const { contextData } = useMenuContext();
@@ -14,9 +15,7 @@ export function KNodePanelCardMenu() {
 
     const handleNewCard = () => {
         setIsMenuContextOpen(false);
-        window.dispatchEvent(new CustomEvent("k-node-inline-create", {
-            detail: { knowledgeId: contextData?.knowledgeId, parentId: contextData?.id ?? null },
-        }));
+        dispatchKNodeInlineCreate({ knowledgeId: contextData?.knowledgeId, parentId: contextData?.id ?? null });
     };
 
     return (

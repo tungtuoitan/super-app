@@ -6,6 +6,8 @@ import { useKTestLoader } from "../hooks/test/useKTest.loader";
 import { KTestService } from "../service/kTest.service";
 import { ScoreSparkline } from "./small/ScoreSparkline";
 import type { KTestSummary } from "../types/kTest.type";
+import { kEvents } from "../utils/kEvents.utils";
+import type { KTestMovedDetail } from "../utils/kEvents.utils";
 
 interface KTestListProps {
     knowledgeId: number;
@@ -35,12 +37,12 @@ export function KTestList({ knowledgeId, onSelectTest }: KTestListProps) {
     }, [knowledgeId, activeNodeId]);
 
     useEffect(() => {
-        const handler = (e: Event) => {
-            const { sourceNodeId, knowledgeId: kId } = (e as CustomEvent).detail;
-            if (kId === knowledgeId && sourceNodeId === activeNodeId) loadTests(knowledgeId, activeNodeId ?? undefined);
+        const handler = (e: CustomEvent<KTestMovedDetail>) => {
+            if (e.detail.knowledgeId === knowledgeId && e.detail.sourceNodeId === activeNodeId)
+                loadTests(knowledgeId, activeNodeId ?? undefined);
         };
-        window.addEventListener("k-test-moved", handler);
-        return () => window.removeEventListener("k-test-moved", handler);
+        window.addEventListener(kEvents.testMoved, handler);
+        return () => window.removeEventListener(kEvents.testMoved, handler);
     }, [knowledgeId, activeNodeId]);
 
     useEffect(() => {

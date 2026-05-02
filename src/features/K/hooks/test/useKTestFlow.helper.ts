@@ -6,6 +6,7 @@ import { KTestService } from "@/features/K/service/kTest.service";
 import { useKTestFlowStore } from "@/features/K/store/useKTestFlow.store";
 import type { KFlowEdgeData, QuestionFlowNodeData, ArrowDirection } from "@/features/K/types/kTestFlow.type";
 import type { KTestQuestion } from "@/features/K/types/kTest.type";
+import { dispatchKFlowQuestionsChanged } from "@/features/K/utils/kEvents.utils";
 
 const ARROW_CYCLE: ArrowDirection[] = ["forward", "backward", "both"];
 
@@ -243,7 +244,7 @@ export function useKTestFlowHelper() {
 
                 // Remove temp node — headless will add the real node when questions reload
                 setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));
-                window.dispatchEvent(new CustomEvent("kflow:questions-changed", { detail: { testId } }));
+                dispatchKFlowQuestionsChanged({ testId });
             } catch {
                 setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));
             }
@@ -268,7 +269,7 @@ export function useKTestFlowHelper() {
                 updateQuestions: [{ id: questionId, name: trimmedQ, description: trimmedA || null }],
                 deleteQuestionIds: [], restoreQuestionIds: [],
             });
-            window.dispatchEvent(new CustomEvent("kflow:questions-changed", { detail: { testId } }));
+            dispatchKFlowQuestionsChanged({ testId });
         } catch { /* silent — optimistic already applied */ }
     }
     // ── Delete / restore question ──────────────────────────────────────────
@@ -287,7 +288,7 @@ export function useKTestFlowHelper() {
                 addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
                 deleteQuestionIds: [questionId], restoreQuestionIds: [],
             });
-            window.dispatchEvent(new CustomEvent("kflow:questions-changed", { detail: { testId } }));
+            dispatchKFlowQuestionsChanged({ testId });
         } catch { /* silent — optimistic applied */ }
     }
     const handleRestoreQuestion = async (questionId: number) => {
@@ -304,7 +305,7 @@ export function useKTestFlowHelper() {
                 addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
                 deleteQuestionIds: [], restoreQuestionIds: [questionId],
             });
-            window.dispatchEvent(new CustomEvent("kflow:questions-changed", { detail: { testId } }));
+            dispatchKFlowQuestionsChanged({ testId });
         } catch { /* silent — optimistic applied */ }
     }
     // ── Connection tracking ────────────────────────────────────────────────

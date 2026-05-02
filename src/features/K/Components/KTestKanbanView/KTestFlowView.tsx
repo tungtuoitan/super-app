@@ -7,6 +7,8 @@ import { KTestFlowProvider } from "../../store/useKTestFlow.store";
 import { KQuestionFlowCanvas } from "./KQuestionFlowCanvas";
 import { sortQuestionsByFlowOrder } from "../../utils/kTestFlow.utils";
 import type { KTestDetail, KTestQuestion, KTestSummary } from "../../types/kTest.type";
+import { kEvents } from "../../utils/kEvents.utils";
+import type { KTestMovedDetail } from "../../utils/kEvents.utils";
 
 interface KTestFlowViewProps {
     knowledgeId: number;
@@ -51,12 +53,12 @@ function KTestFlowContent({ knowledgeId, onQuickTest, initialSelectedTestId }: K
     }, [knowledgeId, activeNodeId]);
 
     useEffect(() => {
-        const handler = (e: Event) => {
-            const { sourceNodeId, knowledgeId: kId } = (e as CustomEvent).detail;
-            if (kId === knowledgeId && sourceNodeId === activeNodeId) loadTests(knowledgeId, activeNodeId ?? undefined);
+        const handler = (e: CustomEvent<KTestMovedDetail>) => {
+            if (e.detail.knowledgeId === knowledgeId && e.detail.sourceNodeId === activeNodeId)
+                loadTests(knowledgeId, activeNodeId ?? undefined);
         };
-        window.addEventListener("k-test-moved", handler);
-        return () => window.removeEventListener("k-test-moved", handler);
+        window.addEventListener(kEvents.testMoved, handler);
+        return () => window.removeEventListener(kEvents.testMoved, handler);
     }, [knowledgeId, activeNodeId]);
 
     useEffect(() => {

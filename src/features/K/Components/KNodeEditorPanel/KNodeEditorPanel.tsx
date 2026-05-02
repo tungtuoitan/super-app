@@ -18,6 +18,8 @@ import { useSideBarHelper } from "@/shell";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { useEditorTabBarHelper } from "@/shell";
 import {KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
+import { kEvents } from "../../utils/kEvents.utils";
+import type { KNodeInlineCreateDetail } from "../../utils/kEvents.utils";
 
 function KNodeEditorContent() {
     const { rootNode, breadcrumb, setBreadcrumb, setEditingNodeId, setParentPickerNodeId, inlineNewParentId, setInlineNewParentId, showDeleted, setShowDeleted, showAllChild, setShowAllChild, editingNodeId, unsavedPromptNodeId, setPromptFlashTick } = useKNodeEditorStore();
@@ -99,18 +101,17 @@ function KNodeEditorContent() {
     }, [lastBreadcrumbName]);
 
     useEffect(() => {
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent).detail as { knowledgeId: number; parentId: number | null };
-            if (detail.knowledgeId !== rootNode.knowledgeId) return;
+        const handler = (e: CustomEvent<KNodeInlineCreateDetail>) => {
+            if (e.detail.knowledgeId !== rootNode.knowledgeId) return;
             // Block if editing or unsaved-prompt is active — flash the prompt instead
             if (editingNodeId != null || unsavedPromptNodeId != null) {
                 setPromptFlashTick(t => t + 1);
                 return;
             }
-            setInlineNewParentId(detail.parentId);
+            setInlineNewParentId(e.detail.parentId);
         };
-        window.addEventListener("k-node-inline-create", handler);
-        return () => window.removeEventListener("k-node-inline-create", handler);
+        window.addEventListener(kEvents.nodeInlineCreate, handler);
+        return () => window.removeEventListener(kEvents.nodeInlineCreate, handler);
     }, [rootNode.knowledgeId]);
 
     const handleGridContextMenu = (e: React.MouseEvent) => {
