@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon } from "lucide-react";
-import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
+import { treeMiniHelper, TreeFolder } from "../../utils/workspace.tree.utils";
 
 /**
  * Custom Drag Preview Component (VS Code style)

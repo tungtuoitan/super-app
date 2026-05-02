@@ -8,8 +8,8 @@
 
 
 import type { NodeApi } from "react-arborist";
-import type { TreeFolder } from "./tree.miniHelper";
-import { useWorkspaceStore } from "../store/Workspace.store";
+import type { TreeFolder } from "../utils/workspace.tree.utils";
+import { useWorkspaceStore } from "../store/workspace.store";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
 export const useTreeHelper2 = () => {

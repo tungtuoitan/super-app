@@ -6,7 +6,7 @@
 import { useEffect } from "react";
 import { useMovingTreeStore } from "../store/MovingTree.store";
 
-export function CalculateMovingTreeContainerHeight() {
+export function useCalculateMovingTreeContainerHeight() {
     const { treeContainerRef, setContainerHeight,containerHeight } = useMovingTreeStore();
     
     // Track container height to make Tree component responsive

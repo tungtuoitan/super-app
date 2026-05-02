@@ -3,8 +3,8 @@
  * Handles tree status operations: selected items status, deleted status checks
  */
 
-import { useWorkspaceStore } from "../store/Workspace.store";
-import { treeMiniHelper } from "./tree.miniHelper";
+import { useWorkspaceStore } from "../store/workspace.store";
+import { treeMiniHelper } from "../utils/workspace.tree.utils";
 import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { useCallback, useMemo } from "react";
 

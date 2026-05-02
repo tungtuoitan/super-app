@@ -2,10 +2,10 @@
 import type { Note } from "@/features/note";
 import { useEditorTabBarHelper } from "@/shell";
 import { useAuthStore } from "@/shared";
-import { useWorkspaceStore } from "../store/Workspace.store";
+import { useWorkspaceStore } from "../store/workspace.store";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";
-import { useWorkspaceLoader } from "./useWorkspace.loader";
+import { useWorkspaceLoader } from "./useWorkspace.helper";
 import { isNumber } from "lodash";
 import {useConsoleHelper} from "@/shared";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";

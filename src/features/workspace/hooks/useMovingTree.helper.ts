@@ -2,7 +2,7 @@
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { useSnackbar } from "notistack";
 import { useMovingTreeStore } from "../store/MovingTree.store";
-import { useWorkspaceStore } from "../store/Workspace.store";
+import { useWorkspaceStore } from "../store/workspace.store";
 import { useAuthStore } from "@/shared";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import { workspaceService } from "../service/workspace.service";
@@ -10,9 +10,9 @@ import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/worksp
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
-import { treeMiniHelper, TreeFolder } from "./tree.miniHelper";
+import { treeMiniHelper, TreeFolder } from "../utils/workspace.tree.utils";
 import {useConsoleHelper} from "@/shared";
-import { useWorkspaceLoader } from "./useWorkspace.loader";
+import { useWorkspaceLoader } from "./useWorkspace.helper";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
 export const useMovingTreeHelper = () => {

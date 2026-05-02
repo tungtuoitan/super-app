@@ -1,11 +1,11 @@
 import React from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, Layers, Plus, RefreshCw, ChevronsUp } from "lucide-react";
-import { useWorkspaceStore } from "../../store/Workspace.store";
+import { useWorkspaceStore } from "../../store/workspace.store";
 import { useSideBarHelper } from "@/shell";
 import { useTreeHelper } from "../../hooks/useTreeHelper";
-import { useWorkspaceLoader } from "../../hooks/useWorkspace.loader"; 
-import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
+import { useWorkspaceLoader } from "../../hooks/useWorkspace.helper";
+import { treeMiniHelper, TreeFolder } from "../../utils/workspace.tree.utils";
 import { FolderItem } from "../../types/workspace.types";
 import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";

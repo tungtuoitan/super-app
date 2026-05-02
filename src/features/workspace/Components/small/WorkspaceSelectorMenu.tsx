@@ -3,16 +3,6 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useMenuContext } from "@/shared";
 import { useMenuContextHelper } from "@/shared";
 
-/**
- * WorkspaceSelectorMenu
- * Right-click context menu on the workspace selector in WorkspaceView
- *
- * contextData shape:
- *   onAdd:    () => void  — creates a new workspace tab
- *   onEdit:   () => void  — opens the current workspace tab for editing
- *   onDelete: () => void  — soft-deletes the current workspace
- *   hasSelected: boolean  — whether a workspace is currently selected
- */
 export function WorkspaceSelectorMenu() {
     const { contextData } = useMenuContext();
     const { executeDirectly, openConfirmDialog } = useMenuContextHelper();

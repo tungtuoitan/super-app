@@ -9,7 +9,7 @@ import type { BaseTab } from "@/shell";
 
 export function useTaskDetailHeadless() {
     const { selectedTask, currentProject } = useTaskDetailSelector();
-    const { loadProjectOptions, loadParentTaskOptions } = useTaskDetailFormHelper();
+    const { loadAllProjects, loadProjectOptions, loadParentTaskOptions } = useTaskDetailFormHelper();
     const { loadLinkedKeywords } = useTaskLinkedKeywordsHelper();
     const { loadFolderItems } = useTaskWorkspaceItemHelper();
     const { setParentTaskOptions, taskDetailContentRef } = useTaskDetailStore();
@@ -18,6 +18,7 @@ export function useTaskDetailHeadless() {
     const tab = getActiveTab();
 
     useEffect(() => {
+        loadAllProjects();
         loadProjectOptions();
     }, []);
 

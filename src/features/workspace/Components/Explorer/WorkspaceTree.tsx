@@ -3,7 +3,7 @@ import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
-import { useWorkspaceStore } from "../../store/Workspace.store";
+import { useWorkspaceStore } from "../../store/workspace.store";
 import { useSideBarHelper } from "@/shell";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
 import { useTreeHelper } from "../../hooks/useTreeHelper";
@@ -13,12 +13,12 @@ import { FolderNode } from "./FolderNode";
 import { RootFolderNode } from "./RootFolderNode";
 import { NoteNode } from "./NoteNode";
 import { FileNode } from "./FileNode";
-import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
+import { treeMiniHelper, TreeFolder } from "../../utils/workspace.tree.utils";
 import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2 } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/shared";
-import { CalculateWorkspaceTreeContainerHeight } from "../../hooks/useCalculateWorkspaceTreeContainerHeight";
-import { CalculateWorkspaceTreeDropZoneHeight } from "../../hooks/useCalculateWorkspaceTreeDropZoneHeight";
-import { ScrollToHighlightItem } from "../../hooks/useScrollToHighlightItem";
+import { useCalculateWorkspaceTreeContainerHeight } from "../../hooks/useCalculateWorkspaceTreeContainerHeight";
+import { useCalculateWorkspaceTreeDropZoneHeight } from "../../hooks/useCalculateWorkspaceTreeDropZoneHeight";
+import { useScrollToHighlightItem } from "../../hooks/useScrollToHighlightItem";
 
 export function WorkspaceTree() {
     const { isDragging, currentWorkspace, _treeRef, containerHeight, setContainerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, scrollToItem, setScrollToItem } =
@@ -118,6 +118,10 @@ export function WorkspaceTree() {
     //     return () => clearTimeout(timer);
     // }, [currentWorkspace?.id, treeData.length]); // Re-run when workspace changes or tree loads
 
+    useCalculateWorkspaceTreeContainerHeight();
+    useCalculateWorkspaceTreeDropZoneHeight();
+    useScrollToHighlightItem();
+
     // Handle context menu on empty space (treat as root workspace)
     const handleContainerContextMenu = (e: React.MouseEvent) => {
         // Check if click is on an actual tree node
@@ -152,9 +156,6 @@ export function WorkspaceTree() {
                 onContextMenu={handleContainerContextMenu}
                 className="h-full flex flex-col py-4 pl-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
             >
-                <CalculateWorkspaceTreeContainerHeight />
-                <CalculateWorkspaceTreeDropZoneHeight treeData={treeData} containerHeight={containerHeight} treeRef={_treeRef} setDropZoneHeight={setDropZoneHeight} />
-                <ScrollToHighlightItem />
                 {/* Loading overlay when dragging */}
                 {isDragging && (
                     <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">

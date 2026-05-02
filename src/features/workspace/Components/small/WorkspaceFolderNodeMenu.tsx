@@ -1,44 +1,28 @@
-﻿import React from "react";
+import React from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import {
     Plus as AddIcon,
     Edit as EditIcon,
     Trash2 as DeleteIcon,
-    File as FileIcon,
-    FileText as NoteIcon,
-    AlertTriangle as HardDeleteIcon,
     RotateCcw as RestoreIcon,
-    BarChart3 as TrackingIcon,
 } from "lucide-react";
 import { constants } from "@/shared";
-import { useWorkspaceFolderMenuHelper } from "../helpers/useWorkspaceFolderMenu.helper";
-import { useWorkspaceStore } from "../../store/Workspace.store";
+import { useWorkspaceFolderMenuHelper } from "../../hooks/useWorkspaceFolderMenu.helper";
+import { useWorkspaceStore } from "../../store/workspace.store";
 import { useMenuContext } from "@/shared";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 
-/**
- * WorkspaceFolderNodeMenu
- * Context menu for folder nodes in workspace workspace tree
- *
- * Menu Items:
- * - Add Folder/File/Note (submenu)
- * - Edit (rename folder)
- * - Delete / Hard Delete
- */
 export function WorkspaceFolderNodeMenu() {
     const { contextData } = useMenuContext();
-    const { selectedItemIds, currentWorkspace } = useWorkspaceStore();
+    const { selectedItemIds } = useWorkspaceStore();
     const { createFolder, editFolder, dhr_items, createNewNote } = useWorkspaceFolderMenuHelper();
     const _TREESTATUS = useTreeStatusHelper();
 
-    // Calculate derived values
-    const entityId = contextData?.entityId
+    const entityId = contextData?.entityId;
     const isWorkspaceRoot = contextData && entityId < 0;
+    const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData);
 
-    // Check deleted status (including inherited from parent)
-    const _ITEMSTATUS = _TREESTATUS.getItemStatus(contextData)
-    
     const addMenuItems = [
         { type: workspaceConstants.itemTypes.folder, icon: AddIcon, label: "New Folder", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
         { type: workspaceConstants.itemTypes.note, icon: AddIcon, label: "New Note", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
@@ -47,7 +31,6 @@ export function WorkspaceFolderNodeMenu() {
 
     return (
         <>
-            {/* Add submenu - Create new items */}
             {addMenuItems.map((item) => {
                 const Icon = item.icon;
                 const handleClick = () => {
@@ -56,7 +39,6 @@ export function WorkspaceFolderNodeMenu() {
                     } else if (item.type === workspaceConstants.itemTypes.folder) {
                         createFolder(item.type, contextData);
                     }
-                    // Other types not implemented yet
                 };
                 return (
                     <MenuItem key={item.type} onClick={handleClick} disabled={item.disabled}>
@@ -66,50 +48,24 @@ export function WorkspaceFolderNodeMenu() {
                 );
             })}
 
-            {/* Only show Edit and Delete options for non-root folders */}
             {!isWorkspaceRoot && (
                 <>
                     <MenuDivider />
-
-                    {/* Edit - disabled if multiple items selected or deleted */}
                     <MenuItem onClick={() => editFolder(contextData)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple || _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted}>
                         <EditIcon className="w-4 h-4 mr-2" />
                         Edit
                     </MenuItem>
 
-                    {/* Delete/Restore options */}
                     {(() => {
-                        // If item is directly deleted (not inherited), show both Hard Delete and Restore
                         if (_ITEMSTATUS.isDirectlyDeleted) {
                             return (
-                                <>
-                                    {/* //*Táº M THá»œI DISABLE VÃŒ CHÆ¯A TRIá»‚N KHAI  */}
-                                    {/* <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
-                                    <HardDeleteIcon className="w-4 h-4 mr-2" />
-                                    Hard Delete
-                                </MenuItem> */}
-                                    <MenuItem onClick={(e) => dhr_items(e, false)}>
-                                        <RestoreIcon className="w-4 h-4 mr-2" />
-                                        Restore
-                                    </MenuItem>
-                                </>
+                                <MenuItem onClick={(e) => dhr_items(e, false)}>
+                                    <RestoreIcon className="w-4 h-4 mr-2" />
+                                    Restore
+                                </MenuItem>
                             );
                         }
-                        // If item is deleted but not directly (inherited from parent), only show Hard Delete
-                        // Don't show if multiple selected and any item is still active
-                        //* Táº M THá»œI áº¨N VÃŒ CHÆ¯A TRIá»‚N KHAI
-                        // else if (isDeleted && !isDirectlyDeleted && !(isMultipleSelected && hasAnyNormalItem)) {
-                        //     return (
-                        //         <MenuItem onClick={(e) => dhr_items(e, true)} className="text-red-600 hover:bg-red-50">
-                        //             <HardDeleteIcon className="w-4 h-4 mr-2" />
-                        //             Hard Delete
-                        //         </MenuItem>
-                        //     );
-                        // }
-                        // If item is not deleted, show normal Delete option
-                        // Disable if multiple selected and any item is still active (deletedAt = null)
-                        
-                        else if (!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted) {
+                        if (!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted) {
                             return (
                                 <MenuItem onClick={(e) => dhr_items(e, false)} disabled={_TREESTATUS.selectedItemStatuses.isMultiple && _TREESTATUS.selectedItemStatuses.hasAnyDeletedItem}>
                                     <DeleteIcon className="w-4 h-4 mr-2" />
@@ -117,7 +73,6 @@ export function WorkspaceFolderNodeMenu() {
                                 </MenuItem>
                             );
                         }
-                        // Don't show anything if conditions don't match
                         return null;
                     })()}
                 </>
@@ -125,4 +80,3 @@ export function WorkspaceFolderNodeMenu() {
         </>
     );
 }
-

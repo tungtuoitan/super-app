@@ -12,17 +12,18 @@ import React, { useEffect, useMemo } from "react";
 import { Loader2, ArrowRightLeft, CheckCircle2 } from "lucide-react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
-import { useWorkspaceStore } from "../../store/Workspace.store";
+import { useWorkspaceStore } from "../../store/workspace.store";
 import { useDragDropManager, useDrop } from "react-dnd";
 import { useMovingTreeHelper } from "../../hooks/useMovingTree.helper";
 import { MovingTree } from "./MovingTree";
-import {CalculateMovingTreeContainerHeight} from "../../hooks/useCalculateMovingTreeContainerHeight";
+import { useCalculateMovingTreeContainerHeight } from "../../hooks/useCalculateMovingTreeContainerHeight";
 
 export function MovingTab() {
     const { targetWorkspaceId, setTargetWorkspaceId, isLoadingTargetTree, setHighlightedDuplicateIds, targetWorkspace, treeContainerRef, containerHeight } = useMovingTreeStore();
     const { allWorkspaces, currentWorkspace, selectedWorkspaceId, selectedItemIds } = useWorkspaceStore();
     const manager = useDragDropManager();
     const { handleWorkspaceChange, loadTargetWorkspaceTree, checkDraggingItemsAreDuplicate, checkAndHighlightDuplicates } = useMovingTreeHelper();
+    useCalculateMovingTreeContainerHeight();
 
     // Ensure targetWorkspaceId is not the same as selectedWorkspaceId
     useEffect(() => {
@@ -63,7 +64,6 @@ export function MovingTab() {
 
     return (
         <div className="h-full flex overflow-hidden" ref={treeContainerRef} data-workspace-tree="true">
-            <CalculateMovingTreeContainerHeight />
             {/* Left Panel - Workspace Selector & Status */}
             <div className="w-1/2 flex flex-col border-r border-editor-border">
                 <div className="px-4 py-3">

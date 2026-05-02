@@ -7,7 +7,7 @@ import React, { useEffect, useMemo } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { Tree } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
-import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
+import { treeMiniHelper, TreeFolder } from "../../utils/workspace.tree.utils";
 import { FolderNode } from "../Explorer/FolderNode";
 import { RootFolderNode } from "../Explorer/RootFolderNode";
 import { NoteNode } from "../Explorer/NoteNode";
@@ -16,12 +16,13 @@ import { isFolder as isFolderV2, isNote as isNoteV2, isFile as isFileV2, Workspa
 import { constants } from "@/shared";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useMovingTreeHelper } from "../../hooks/useMovingTree.helper";
-import { CalculateMovingTreeDropZoneHeight } from "../../hooks/useCalculateMovingTreeDropZoneHeight";
+import { useCalculateMovingTreeDropZoneHeight } from "../../hooks/useCalculateMovingTreeDropZoneHeight";
 
 export function MovingTree() {
     const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey, dropZoneHeight, setDropZoneHeight, _treeRef } = useMovingTreeStore();
     const { dropToMovingTree } = useMovingTreeHelper();
     const manager = useDragDropManager();
+    useCalculateMovingTreeDropZoneHeight();
 
     // Transform target workspace data to tree format
     const targetTreeData = useMemo(() => {
@@ -73,12 +74,6 @@ export function MovingTree() {
 
     return (
         <div ref={treeContainerRef} className="h-full pl-4 py-2">
-            <CalculateMovingTreeDropZoneHeight
-                treeData={targetTreeData}
-                containerHeight={containerHeight}
-                treeRef={_treeRef}
-                setDropZoneHeight={setDropZoneHeight}
-            />
             <Tree
                 ref={_treeRef}
                 key={treeRenderKey}

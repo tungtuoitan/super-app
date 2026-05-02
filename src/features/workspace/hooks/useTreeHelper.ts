@@ -1,13 +1,8 @@
-/**
- * Tree Operation Helper Hook
- * Handles tree operations: drag & drop, refresh, new folder
- */
-
-import type { TreeFolder } from "./tree.miniHelper";
-import { treeMiniHelper } from "./tree.miniHelper";
-import { useWorkspaceStore } from "../store/Workspace.store";
+import type { TreeFolder } from "../utils/workspace.tree.utils";
+import { treeMiniHelper } from "../utils/workspace.tree.utils";
+import { useWorkspaceStore } from "../store/workspace.store";
 import { useFolderDialogHelper } from "./useFolderDialog.helper";
-import { useWorkspaceLoader } from "./useWorkspace.loader";
+import { useWorkspaceLoader } from "./useWorkspace.helper";
 import { constants, useKeywordHelper } from "@/shared";
 import { workspaceService } from "../service/workspace.service";
 import { WorkspaceItemAction } from "../types/workspace.types";
@@ -27,22 +22,6 @@ export const useTreeHelper = () => {
     const { $user } = useAuthStore();
     const { loadKeywords } = useKeywordHelper();
 
-    /**
-     * Handle drag and drop - SUPPORTS MULTI-ITEM DRAG (folders, notes, files)
-     *
-     * KEY CONCEPTS:
-     * - TreeFolder.id = string version of workspace_items.id (for react-arborist)
-     * - TreeFolder.data.id = workspace_items.id (workspace item ID)
-     * - TreeFolder.data.entityId = entity ID (folders.id | notes.id | files.id)
-     * - TreeFolder.data.parentId = parent workspace_items.id (SELF-REFERENCING, NOT entity ID!)
-     *
-     * ALGORITHM:
-     * 1. Extract entity IDs from dragged items (for selection tracking)
-     * 2. Determine drop target (parent workspace_items.id or root)
-     * 3. Validate move (prevent invalid moves)
-     * 4. Build MOVE batch request with workspace_items.id + new parent workspace_items.id
-     * 5. Call API and refresh tree
-     */
     const handleMove = async (args: { dragIds: string[]; parentId: string | null; index: number }, treeData: TreeFolder[]) => {
         try {
             setIsDragging(true);

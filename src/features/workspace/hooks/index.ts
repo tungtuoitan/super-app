@@ -4,11 +4,10 @@
  */
 
 // Sub-hooks (use directly for specific operations)
-export { useWorkspaceLoader } from "./useWorkspace.loader";
+export { useWorkspaceLoader } from "./useWorkspace.helper";
 // export { useFolderDialogHelper } from "./useFolderDialog.helper";
 // export { useTreeHelper2 } from "./useTreeHelper2";
 // export { useTreeHelper } from "./useTreeHelper";
 
 // Tree helper utilities (pure functions)
-// export type { TreeNode, TreeFolder } from "./tree.miniHelper";
-export { treeMiniHelper } from "./tree.miniHelper";
+export { treeMiniHelper } from "../utils/workspace.tree.utils";

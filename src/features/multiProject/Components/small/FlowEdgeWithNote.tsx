@@ -9,7 +9,7 @@ import type { EdgeProps, Edge } from "@xyflow/react";
 import { MessageSquarePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
-import { useMultiProjectTaskFlowHelper } from "@/features/multiProject/hooks/mpTaskFlow/useMultiProjectTaskFlow.helper";
+import { useMultiProjectTaskFlowEdgeHelper } from "@/features/multiProject/hooks/mpTaskFlow/useMultiProjectTaskFlowEdge.helper";
 import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
 
 const ARROW_CYCLE: ArrowDirection[] = ["forward", "backward", "both"];
@@ -32,7 +32,7 @@ export function FlowEdgeWithNote({
     selected,
 }: EdgeProps<Edge<FlowEdgeData>>) {
     const { editingEdgeId, setEditingEdgeId, flowNodes, flowEdges } = useMultiTaskFlowStore();
-    const { handleEdgeNoteConfirm, handleEdgeDelete, isEdgeLocked } = useMultiProjectTaskFlowHelper();
+    const { handleEdgeNoteConfirm, handleEdgeDelete, isEdgeLocked } = useMultiProjectTaskFlowEdgeHelper();
     const edgeLocked = isEdgeLocked(id);
 
     const isDimmed = (() => {

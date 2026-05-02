@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { WorkspaceLink } from "@/features/note";
-import {useWorkspaceStore} from "../../store/Workspace.store";
+import {useWorkspaceStore} from "../../store/workspace.store";
 
 interface StatusDotProps {
     isUnsaved: boolean;

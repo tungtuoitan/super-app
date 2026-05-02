@@ -14,6 +14,7 @@ import { taskService, transformTaskData } from "@/features/taskDetail";
 import type { TaskDTO } from "@/features/taskDetail";
 import { flowService } from "@/shared";
 import { toLocalISOString } from "@/shared";
+import { useMultiProjectTaskFlowProcessHelper } from "./useMultiProjectTaskFlowProcess.helper";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/taskDetail";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
@@ -23,6 +24,7 @@ import { useDebugLog } from "@/shared";
 
 export const useMultiProjectTaskFlowNodeHelper = () => {
     const { setFlowNodes, setEditingNodeId } = useMultiTaskFlowStore();
+    const { handleToggleProcess } = useMultiProjectTaskFlowProcessHelper();
     const { filteredTasks, flowNodes: currentFlowNodes, projectNameMap } = useMultiProjectTaskFlowSelector();
     const { tasks, setTasks } = useMpTaskStore();
     const { $user } = useAuthStore();
@@ -335,6 +337,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
         handleAddTaskAtPosition,
         handleChangeProject,
         handleChangeStatus,
+        handleToggleProcess,
         isNodeLocked,
     };
 };

@@ -6,8 +6,8 @@
 import { useEffect, useCallback } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { WorkspaceTree } from "./Explorer/WorkspaceTree";
-import { useWorkspaceLoader } from "../hooks/useWorkspace.loader";
-import { useWorkspaceStore } from "../store/Workspace.store";
+import { useWorkspaceLoader } from "../hooks/useWorkspace.helper";
+import { useWorkspaceStore } from "../store/workspace.store";
 import { Loader2 } from "lucide-react";
 import { FolderDialog } from "./Explorer/FolderDialog/FolderDialog";
 import { useAuthStore } from "@/shared";

@@ -99,7 +99,7 @@ export { ConsoleTab } from "./console/ConsoleTab";
 // export { debugLogStore } from "./debug/debugLog.store";
 // export type { DebugLogEntry } from "./debug/debugLog.store";
 export { DebugLoggerProvider } from "./debug/DebugLogger.store";
-export { useDebugLog } from "./debug/useDebugLog";
+export { useDebugLog, debugLog } from "./debug/useDebugLog";
 
 // ── fetch ─────────────────────────────────────────────────────────────────
 export { apiFetch } from "./fetch/apiClient";

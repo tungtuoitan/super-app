@@ -2,11 +2,11 @@
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { NodeApi } from "react-arborist";
 import { File, FileImage, FileVideo, FileArchive, FileCode } from "lucide-react";
-import { useWorkspaceStore } from "../../store/Workspace.store";
+import { useWorkspaceStore } from "../../store/workspace.store";
 import { useSideBarHelper } from "@/shell";
 import { useMovingTreeStore } from "../../store/MovingTree.store";
 import { useTreeHelper2 } from "../../hooks/useTreeHelper2";
-import { treeMiniHelper, TreeFolder } from "../../hooks/tree.miniHelper";
+import { treeMiniHelper, TreeFolder } from "../../utils/workspace.tree.utils";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceFileItem } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/shared";

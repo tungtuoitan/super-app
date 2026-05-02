@@ -17,7 +17,7 @@ import {getChecklistTemplate, isChecklistAllDone, parseChecklistJson, parseTextT
 export const useTaskDetailFormHelper = () => {
     const { $user } = useAuthStore();
     const { patchTab } = useEditorTabBarHelper();
-    const { setProjectOptions, setIsLoadingProjects, setParentTaskOptions, setIsLoadingParentTasks } = useTaskDetailStore();
+    const { setProjectOptions, setIsLoadingProjects, setParentTaskOptions, setIsLoadingParentTasks, allProjects, setAllProjects } = useTaskDetailStore();
 
     const { taskTab, selectedTask } = useTaskDetailSelector();
 
@@ -42,6 +42,18 @@ export const useTaskDetailFormHelper = () => {
             console.error("Failed to load project options:", error);
         } finally {
             setIsLoadingProjects(false);
+        }
+    };
+
+    const loadAllProjects = async () => {
+        if (allProjects.length > 0 || !$user.userToken) return;
+        try {
+            const result = await taskService._getProjects($user.userToken);
+            if (result.success && result.data) {
+                setAllProjects(result.data);
+            }
+        } catch (error) {
+            console.error("Failed to load all projects:", error);
         }
     };
 
@@ -134,6 +146,7 @@ export const useTaskDetailFormHelper = () => {
 
     return {
         // load functions
+        loadAllProjects,
         loadProjectOptions,
         loadParentTaskOptions,
         // handlers

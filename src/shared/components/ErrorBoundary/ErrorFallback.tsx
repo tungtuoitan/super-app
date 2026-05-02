@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { AlertTriangle, RefreshCw, RotateCcw } from "lucide-react";
 import type { FallbackProps } from "react-error-boundary";
+import { debugLog } from "@/shared";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -13,11 +15,23 @@ function getErrorStack(error: unknown): string | undefined {
     return undefined;
 }
 
+function reportError(boundary: string, error: unknown): void {
+    debugLog.log("error-boundary", boundary, {
+        message: getErrorMessage(error),
+        stack: getErrorStack(error),
+    });
+    debugLog.flush();
+}
+
 /**
  * Full-page fallback — used at the root boundary (index.tsx).
  * The entire app is down; only option is a hard reload.
  */
 export function RootErrorFallback({ error }: FallbackProps) {
+    useEffect(() => {
+        reportError("root-crash", error);
+    }, [error]);
+
     return (
         <div className="flex h-screen w-full flex-col items-center justify-center gap-6 bg-background text-foreground p-8">
             <AlertTriangle className="h-12 w-12 text-destructive" />
@@ -52,6 +66,10 @@ export function RootErrorFallback({ error }: FallbackProps) {
  * Sidebar / activity bar still work; only the editor crashed.
  */
 export function EditorAreaErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+    useEffect(() => {
+        reportError("editor-crash", error);
+    }, [error]);
+
     return (
         <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-editor-bg text-foreground p-8">
             <AlertTriangle className="h-10 w-10 text-destructive" />
@@ -84,6 +102,10 @@ export function EditorAreaErrorFallback({ error, resetErrorBoundary }: FallbackP
  * Other open tabs are completely unaffected.
  */
 export function TabPanelErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+    useEffect(() => {
+        reportError("tab-crash", error);
+    }, [error]);
+
     return (
         <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-editor-bg text-foreground p-8">
             <AlertTriangle className="h-8 w-8 text-destructive/80" />

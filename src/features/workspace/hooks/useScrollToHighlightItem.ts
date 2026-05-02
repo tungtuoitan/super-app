@@ -4,9 +4,9 @@
  */
 
 import { useEffect, useRef } from "react";
-import {useWorkspaceStore} from "@/features/workspace/store/Workspace.store";
+import { useWorkspaceStore } from "../store/workspace.store";
 
-export function ScrollToHighlightItem() {
+export function useScrollToHighlightItem() {
     const { selectedItemIds, _treeRef, scrollToItem, setScrollToItem, currentWorkspace, setIsLoadingTree, isLoadingTree } = useWorkspaceStore();
     const isScrollingRef = useRef(false);
     const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);

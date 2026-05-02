@@ -9,7 +9,7 @@ import { useWsSaveActions } from "../hooks/ws/useWsSaveActions";
 import { wsService } from "../service/ws.service";
 import type { WsDTO } from "../service/ws.service";
 import type { Ws } from "../types/workspace.types";
-import { useWorkspaceStore, getWorkspaceState } from "../store/Workspace.store";
+import { useWorkspaceStore, getWorkspaceState } from "../store/workspace.store";
 import { useWsStore } from "../store/ws/useWs.store";
 import { useMovingTreeStore } from "../store/MovingTree.store";
 import { useWorkspaceHelper } from "../hooks/useWorkspaceHelper";

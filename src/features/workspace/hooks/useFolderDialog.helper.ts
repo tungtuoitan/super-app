@@ -1,7 +1,7 @@
 ﻿import { useFolderDialogStore } from "../store/FolderDialog.store";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import type { ItemType } from "../store/FolderDialog.store";
-import { useWorkspaceStore } from "../store/Workspace.store";
+import { useWorkspaceStore } from "../store/workspace.store";
 import { useAuthStore } from "@/shared";
 import { workspaceService } from "../service/workspace.service"; 
 import type { FolderDialogFormErrors } from "../store/FolderDialog.store";
@@ -9,9 +9,9 @@ import type { Folder } from "@/features/workspace/types/folder.types";
 import { constants, useKeywordHelper } from "@/shared";
 import { WorkspaceItemAction } from "../types/workspace.types";
 import { useConsoleHelper } from "@/shared";
-import { treeMiniHelper } from "./tree.miniHelper";
+import { treeMiniHelper } from "../utils/workspace.tree.utils";
 import { isFolder } from "@/features/workspace/types/workspace-v2.types";
-import { useWorkspaceLoader } from "./useWorkspace.loader";
+import { useWorkspaceLoader } from "./useWorkspace.helper";
 
 export const useFolderDialogHelper = () => {
     const _console = useConsoleHelper();

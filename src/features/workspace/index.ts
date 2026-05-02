@@ -32,7 +32,7 @@
  */
 
 // Stores
-export { useWorkspaceStore } from "./store/Workspace.store";
+export { useWorkspaceStore } from "./store/workspace.store";
 export { useMovingTreeStore } from "./store/MovingTree.store";
 export { useTreeStatusHelper } from "./hooks/useTreeStatusHelper";
 // Types
@@ -64,14 +64,14 @@ export { useWsSaveActions } from "./hooks/ws/useWsSaveActions";
 
 export type { WorkspaceNoteItem, WorkspaceFolderItem } from './types/workspace-v2.types'
 export type { WorkspaceDTO } from './types/workspace-dto.types'
-export { treeMiniHelper } from './hooks/tree.miniHelper'
-export { useWorkspaceLoader } from './hooks/useWorkspace.loader'
+export { treeMiniHelper } from './utils/workspace.tree.utils'
+export { useWorkspaceLoader } from './hooks/useWorkspace.helper'
 
 // Context menus
-export { WorkspaceFolderNodeMenu } from "./contexts/menus/WorkspaceFolderNodeMenu";
-export { WorkspaceChildNodeMenu } from "./contexts/menus/WorkspaceChildNodeMenu";
-export { WorkspaceSelectorMenu } from "./contexts/menus/WorkspaceSelectorMenu";
-export { WsGridMenu } from "./contexts/menus/WsGridMenu";
+export { WorkspaceFolderNodeMenu } from "./Components/small/WorkspaceFolderNodeMenu";
+export { WorkspaceChildNodeMenu } from "./Components/small/WorkspaceChildNodeMenu";
+export { WorkspaceSelectorMenu } from "./Components/small/WorkspaceSelectorMenu";
+export { WsGridMenu } from "./Components/small/WsGridMenu";
 
 // Utils
 export { generateTempId, collectIdsFromTabs, generateUnsavedName, collectIdsFromTree, SPECIAL_IDS } from "./utils/temp-id.utils";

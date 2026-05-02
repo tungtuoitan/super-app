@@ -4,9 +4,9 @@
  */
 
 import React, { useEffect } from "react";
-import { useWorkspaceStore } from "../store/Workspace.store";
+import { useWorkspaceStore } from "../store/workspace.store";
 
-export function CalculateWorkspaceTreeContainerHeight() {
+export function useCalculateWorkspaceTreeContainerHeight() {
     const { treeContainerRef, setContainerHeight } = useWorkspaceStore();
 
     // Track container height to make Tree component responsive

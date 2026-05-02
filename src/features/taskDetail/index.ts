@@ -35,19 +35,21 @@ export {
     isStatusNonDraggable,
     getTaskStatusColorsWithBorder,
     getTaskPriorityDotColor,
-    TIMELINE_TASK_BAR_HEIGHT,
-    TIMELINE_SUBTASK_BAR_HEIGHT,
-    TIMELINE_MIN_BAR_WIDTH,
-    TIMELINE_EXTEND_DAYS,
-    TIMELINE_ZOOM_STEP,
-    TIMELINE_ROW_HEIGHT,
-    TIMELINE_HEADER_HEIGHT,
-    WEEKEND_STRIPE_BG,
     formatDateHeader,
     isWeekend,
     isToday,
     isFirstDayOfMonth,
 } from "./utils/TaskGrid.utils";
+export {
+    TIMELINE_ROW_HEIGHT,
+    TIMELINE_HEADER_HEIGHT,
+    TIMELINE_TASK_BAR_HEIGHT,
+    TIMELINE_SUBTASK_BAR_HEIGHT,
+    TIMELINE_MIN_BAR_WIDTH,
+    TIMELINE_EXTEND_DAYS,
+    TIMELINE_ZOOM_STEP,
+    WEEKEND_STRIPE_BG,
+} from "./utils/taskGrid.constants";
 
 // Stores / Providers (only expose what other features/shell need)
 export { TaskDetailProvider } from "./store/useTaskDetail.store";

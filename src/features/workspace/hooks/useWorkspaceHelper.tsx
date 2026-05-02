@@ -3,7 +3,7 @@
  * Extracted from VSSideBar for better separation of concerns
  */
 
-import { useWorkspaceStore } from "../store/Workspace.store";
+import { useWorkspaceStore } from "../store/workspace.store";
 import { constants } from "@/shared";
 import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { useSnackbar } from "notistack";

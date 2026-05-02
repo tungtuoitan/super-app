@@ -1,12 +1,12 @@
-import { useWorkspaceStore } from "../store/Workspace.store";
-import { useWorkspaceLoader } from "./useWorkspace.loader";
+import { useWorkspaceStore } from "../store/workspace.store";
+import { useWorkspaceLoader } from "./useWorkspace.helper";
 import { useWorkspaceHelper } from "./useWorkspaceHelper";
 import { useAuthStore, useConsoleHelper, parseKeywordLink } from "@/shared";
 import { shellConstants, useSideBarHelper } from "@/shell";
 import { noteService } from "@/features/note";
 import type { Note } from "@/features/note";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
-import { treeMiniHelper } from "./tree.miniHelper";
+import { treeMiniHelper } from "../utils/workspace.tree.utils";
 import { findFolderInWorkspace, findNoteInWorkspace } from "../utils/workspace.find.utils";
 import { _setWorkspaceNavigateImpl } from "../shell/workspace.keywordPlugin";
 import type { Keyword } from "@/shared";
