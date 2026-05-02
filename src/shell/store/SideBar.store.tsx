@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Grid Control Store
  * Centralized state management for grid controls (search, filter)
  * Shared between sidebar header and grid components
@@ -6,7 +6,7 @@
  */
 
 import { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import {STORAGE_KEYS, storageService} from "@/shared";
 import {UserFilters, ViewFilter} from "../genericFilter/filter.types";
 

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * FolderDialog - Dialog for creating new folders in workspace
  * Migrated from MUI to shadcn/ui
  *
@@ -7,7 +7,7 @@
 
 import React, { useEffect } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared";
 import { Button } from "@/shared";
@@ -74,7 +74,7 @@ export function FolderDialog() {
         // For creating at root, parentId would be null or the workspace root id
         return currentWorkspace.flatData.filter(
             (item: WorkspaceItemV2) =>
-                // âœ… Use type guard and entityId field
+                // ✅ Use type guard and entityId field
                 isFolder(item) &&
                 // Same parent (siblings)
                 item.parentId === parentFolderId &&

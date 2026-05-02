@@ -1,10 +1,10 @@
-﻿/**
+/**
  * Task Tab Helper
  * Helper functions for managing task editor tabs
  */
 
 import { Task } from "../types/task.types";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { BaseTab } from "@/shell";
 import { constants } from "@/shared";
 import { useEditorTabBarHelper } from "@/shell";

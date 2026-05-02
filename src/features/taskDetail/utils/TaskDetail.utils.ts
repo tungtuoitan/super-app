@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Task Detail Utilities
- * Pure functions â€” no hooks, no React.
- * Colors, date formatting, DTO â†’ domain transform.
+ * Pure functions — no hooks, no React.
+ * Colors, date formatting, DTO → domain transform.
  */
 
 import { constants } from "@/shared";

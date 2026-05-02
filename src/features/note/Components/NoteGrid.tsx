@@ -1,5 +1,5 @@
-﻿import React, { useEffect } from "react";
-import { shellConstants } from "@/shell/shell.constants";
+import React, { useEffect } from "react";
+import { shellConstants } from "@/shell";
 import { flexRender } from "@tanstack/react-table";
 import { Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/shared";

@@ -1,4 +1,4 @@
-﻿
+
 // ============================================
 // TREE NODE TYPE (for react-arborist)
 // ============================================
@@ -133,7 +133,7 @@ function $sortChildrenRecursively(nodes: KTreeNode[]) {
 /**
  * Build hierarchical KTreeNode structure from flat V2 list.
  *
- * k_items.id   = primary key (used as parentId reference â€” self-referencing)
+ * k_items.id   = primary key (used as parentId reference — self-referencing)
  * entityId     = entity ID (k_nodes.id)
  * parentId     = parent's k_items.id (null = root)
  */
@@ -165,7 +165,7 @@ export function buildTreeFromV2Items(items: KItemV2[]): KTreeNode[] {
             if (parent) {
                 parent.children!.push(node);
             } else {
-                console.warn(`âš ï¸ Parent k_items.id ${item.parentId} not found for item ${item.id}, treating as root`);
+                console.warn(`⚠️ Parent k_items.id ${item.parentId} not found for item ${item.id}, treating as root`);
                 rootNodes.push(node);
             }
         }
@@ -178,7 +178,7 @@ export function buildTreeFromV2Items(items: KItemV2[]): KTreeNode[] {
 }
 
 // ============================================
-// TRANSFORM DTO â†’ TREE DATA
+// TRANSFORM DTO → TREE DATA
 // ============================================
 
 /**

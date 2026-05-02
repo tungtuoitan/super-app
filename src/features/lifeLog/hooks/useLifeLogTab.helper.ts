@@ -1,11 +1,11 @@
-﻿/**
+/**
  * LifeLog Tab Helper Hook
  * Manages opening/closing log editor tabs
  */
 
 
 import { constants } from "@/shared";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import { useLifeLogStore } from "../store/useLifeLog.store";
@@ -36,7 +36,7 @@ export function useLifeLogTabHelper() {
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
     }
 
-    /** Create temp log (negative ID), push to store, open tab â€” no API call */
+    /** Create temp log (negative ID), push to store, open tab — no API call */
     const openNewLogTab = () => {
         const tempId = -Date.now();
         const now = new Date();
@@ -88,7 +88,7 @@ export function useLifeLogTabHelper() {
         window.dispatchEvent(new CustomEvent("lifelog-tab-opened"));
     }
 
-    /** Create temp track (negative ID), push to store, open tab â€” no API call */
+    /** Create temp track (negative ID), push to store, open tab — no API call */
     const openNewTrackTab = () => {
         const tempId = -Date.now();
         const now = new Date();

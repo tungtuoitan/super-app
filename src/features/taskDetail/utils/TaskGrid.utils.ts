@@ -1,12 +1,12 @@
-﻿/**
+/**
  * Task Grid Utilities
- * Pure functions â€” no hooks, no React.
+ * Pure functions — no hooks, no React.
  * Shared validation, sorting, color helpers, and timeline utilities for task grid views.
  */
 
 import {DropValidation} from "../types/taskGrid.types";
 import {Task} from "../types/task.types";
-// eslint-disable-next-line no-restricted-imports -- direct import to break project ↔ taskDetail circular dep
+// eslint-disable-next-line no-restricted-imports -- direct import to break project ? taskDetail circular dep
 import {projectConstants} from "@/features/project/project.constants";
 
 // Timeline Constants
@@ -27,11 +27,11 @@ export const WEEKEND_STRIPE_BG = `repeating-linear-gradient(
     hsl(var(--muted-foreground) / 0.15) 6px
 )`;
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────────────────
 // Timeline Utility Functions
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────────────────
 
-/** Format month for timeline header â€” "Oct 2025" */
+/** Format month for timeline header — "Oct 2025" */
 export function formatMonthHeader(date: Date): string {
     return new Intl.DateTimeFormat("en-US", {
         month: "short",
@@ -50,7 +50,7 @@ export function generateDateRange(startDate: Date, endDate: Date): Date[] {
     return dates;
 }
 
-/** Format date for day header â€” "Mo 20", "Tu 21" */
+/** Format date for day header — "Mo 20", "Tu 21" */
 export function formatDateHeader(date: Date): string {
     const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
     const dayOfWeek = dayNames[date.getDay()];
@@ -79,9 +79,9 @@ export function isFirstDayOfMonth(date: Date): boolean {
     return date.getDate() === 1;
 }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────────────────
 // TaskBar Color/Status Utilities
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────────────────
 
 /** Get task bar colors from constants.timelineTask based on status */
 export function getTaskBarColors(status: string) {

@@ -1,5 +1,5 @@
-﻿import { Shell, BarChart3, FileText } from "lucide-react";
-import { shellConstants } from "@/shell/shell.constants";
+import { Shell, BarChart3, FileText } from "lucide-react";
+import { shellConstants } from "@/shell";
 import { LifeLogView } from "../Components/LifeLogView";
 import { LogEditorPanel } from "../Components/LogEditorPanel";
 import { LifeLogGraphPanel } from "../Components/LifeLogGraphPanel";
@@ -90,7 +90,7 @@ export const lifeLogModule: ModuleDefinition = {
     filterViewKey: null,
 };
 
-// â”€â”€â”€ Keyword Navigator Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Keyword Navigator Plugin ─────────────────────────────────────────────────
 
 export const lifeLogKeywordPlugin: KeywordPlugin = {
     handles: ["log", "track"],

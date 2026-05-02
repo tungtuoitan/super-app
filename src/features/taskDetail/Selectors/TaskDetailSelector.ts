@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Task Detail Selector
  * Derived / computed values from global store state.
- * No functions, no side effects â€” only useMemo & direct derivations.
+ * No functions, no side effects — only useMemo & direct derivations.
  *
  * Provides: tab resolution, project context, disabled flags, dropdown options,
  *           current selected values, date limit bounds.
@@ -21,18 +21,18 @@ export const useTaskDetailSelector = () => {
     const { tasks } = usePTaskStore();
     const { registriesByType } = useStandardRegistrySelector();
 
-    // â”€â”€ Tab & task â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Tab & task ────────────────────────────────────────────────────────────
 
     const taskTab = openTabs.find((tab) => tab.id === activeTabId);
 
     const selectedTask = taskTab ? (taskTab.data as Task) : undefined;
 
-    // â”€â”€ Project â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Project ───────────────────────────────────────────────────────────────
 
     const currentProject = selectedTask?.projectId
             ? (allProjects.find((p) => p.id === selectedTask.projectId) ?? null)
             : null
-    // â”€â”€ Disabled flags â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Disabled flags ────────────────────────────────────────────────────────
 
     const isDeleted = selectedTask?.deletedAt != null;
 
@@ -47,11 +47,11 @@ export const useTaskDetailSelector = () => {
 
     const isDisabled = isDeleted || isCompleted || isProjectInactive;
 
-    // â”€â”€ Subtask check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Subtask check ─────────────────────────────────────────────────────────
 
     const hasSubtasks = selectedTask ? tasks.some((t) => t.parentTaskId === selectedTask.id) : false
 
-    // â”€â”€ Dropdown options â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Dropdown options ──────────────────────────────────────────────────────
 
     const taskTypeOptions: IStatusOption[] = (registriesByType["taskType"] ?? []).map((reg:any) => ({
                 id: reg.code,
@@ -94,7 +94,7 @@ export const useTaskDetailSelector = () => {
             );
     })()
 
-    // â”€â”€ Current selected option values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Current selected option values ────────────────────────────────────────
 
     const currentStatusValue: IStatusOption | null =
         statusOptions.find((o:any) => o.code === selectedTask?.status) ?? null;
@@ -105,7 +105,7 @@ export const useTaskDetailSelector = () => {
     const currentTaskTypeValue: IStatusOption | null =
         taskTypeOptions.find((o:any) => o.code === selectedTask?.taskType) ?? null;
 
-    // â”€â”€ Date limit bounds (for DateRangePicker warnings) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Date limit bounds (for DateRangePicker warnings) ──────────────────────
 
     const limitDates = (() => {
         if (selectedTask?.parentTaskId) {
@@ -120,7 +120,7 @@ export const useTaskDetailSelector = () => {
         };
     })()
 
-    // â”€â”€ Return â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Return ────────────────────────────────────────────────────────────────
 
     return {
         // tab resolution

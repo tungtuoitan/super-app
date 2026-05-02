@@ -1,12 +1,12 @@
-﻿/**
+/**
  * ProjectDetail Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
- * Reads from stores directly â€” NO params.
+ * Reads from stores directly — NO params.
  */
 
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { projectConstants } from "@/features/project/project.constants";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { constants, useGetStandardRegistry } from "@/shared";
 import { getProjectStatusColors } from "../Components/ProjectStatusBadge";
 import type { IStatusOption } from "@/shared";

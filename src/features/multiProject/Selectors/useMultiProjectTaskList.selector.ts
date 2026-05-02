@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Multi-Project Task List Selector
  * Derived values only (useMemo). No side-effects, no callbacks.
- * Gets projectIds from useMultiTimelineStore â€” NO params.
+ * Gets projectIds from useMultiTimelineStore — NO params.
  */
 
 import { useMemo } from "react";

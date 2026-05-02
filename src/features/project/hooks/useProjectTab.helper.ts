@@ -1,10 +1,10 @@
-﻿/**
+/**
  * Project Tab Helper
  * Helper functions for managing project editor tabs
  */
 
 import { BaseTab, MultiProjectTabData } from "@/shell";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { constants } from "@/shared";
 import { useEditorTabBarHelper } from "@/shell";
 import {useEditorTabBarStore} from "@/shell";
@@ -112,7 +112,7 @@ export const useProjectTabHelper = () => {
             );
             updateActiveTab(existingTab.id);
         } else {
-            // Create new multi-project tab â€” pinned at first position
+            // Create new multi-project tab — pinned at first position
             const newTab: BaseTab = {
                 id: `multi-project-tab-${Date.now()}`,
                 type: shellConstants.vscode.tab.tabTypes.multiProject,

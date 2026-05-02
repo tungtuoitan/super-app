@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Navigation Context
  * Global navigation state management for sidebar navigation, body wrapper,
  * routing, and selected menu items across the application
@@ -8,7 +8,7 @@ import { createContext, useContext, useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { PropsWithChildren } from "react";
 import { ActivityBarView } from "@/shell";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 
 /**
  * Helper function to get view from route path

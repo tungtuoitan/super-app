@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Multi-Project Task Grid Helper Hook
  * Business logic for task grid operations across multiple projects
  */

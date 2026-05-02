@@ -1,6 +1,6 @@
-﻿import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { ChevronRight, Trash2, Layers, Trash, LibraryBig, Bookmark } from "lucide-react";
 import { useKStore } from "../../store/K.store";
 import type { BaseTab } from "@/shell";
@@ -36,7 +36,7 @@ function KNodeEditorContent() {
         return allNodes.find(n => n.id === last.id) ?? rootNode;
     })()
 
-    // â”€â”€ Warning: > 12 direct children â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Warning: > 12 direct children ────────────────────────────────────────
     const directChildrenCount = (() => {
         const scopeId = currentScopeNode.id < 0 ? null : currentScopeNode.id;
         return allNodes.filter(n => n.parentId === scopeId && !n.deletedAt).length;
@@ -106,7 +106,7 @@ function KNodeEditorContent() {
         const handler = (e: Event) => {
             const detail = (e as CustomEvent).detail as { knowledgeId: number; parentId: number | null };
             if (detail.knowledgeId !== rootNode.knowledgeId) return;
-            // Block if editing or unsaved-prompt is active â€” flash the prompt instead
+            // Block if editing or unsaved-prompt is active — flash the prompt instead
             if (editingNodeId != null || unsavedPromptNodeId != null) {
                 setPromptFlashTick(t => t + 1);
                 return;
@@ -125,7 +125,7 @@ function KNodeEditorContent() {
 
     const sortedNodes = [...scopedNodes].sort((a, b) => (a.pathDepth ?? 0) - (b.pathDepth ?? 0))
 
-    // Filter by search query â€” diacritic-insensitive match on name or description
+    // Filter by search query — diacritic-insensitive match on name or description
     const filteredNodes = (() => {
         if (!searchQuery.trim()) return sortedNodes;
         return sortedNodes.filter(n =>
@@ -147,7 +147,7 @@ function KNodeEditorContent() {
             {/* breadcrumb + stats */}
             <div className="flex items-center gap-2 px-6 py-2.5 border-b border-zinc-800 shrink-0 min-w-0">
                 <div className="flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
-                    {/* Knowledge prefix â€” always first */}
+                    {/* Knowledge prefix — always first */}
                     {kName && (
                         <span className="flex items-center gap-1 shrink-0">
                             <button
@@ -165,7 +165,7 @@ function KNodeEditorContent() {
                             <ChevronRight className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
                         </span>
                     )}
-                    {/* Breadcrumb items â€” skip null-id entry (knowledge root sentinel, already shown via kName prefix) */}
+                    {/* Breadcrumb items — skip null-id entry (knowledge root sentinel, already shown via kName prefix) */}
                     {(() => {
                         const visible = breadcrumb.filter(entry => entry.id !== null);
                         return visible.map((entry, i) => {

@@ -1,6 +1,6 @@
-﻿
+
 import { constants } from "@/shared";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { useNoteDetailHelper } from "./useNoteDetail.helper";
 import { useWorkspaceItemHelper } from "@/features/workspace";
 import { useWorkspaceStore } from "@/features/workspace";

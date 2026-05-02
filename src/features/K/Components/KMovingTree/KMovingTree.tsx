@@ -1,4 +1,4 @@
-﻿/**
+/**
  * MovingTree - Tree component for MovingTab
  * Displays target workspace tree structure for drag & drop operations
  */
@@ -87,7 +87,7 @@ export function KMovingTree() {
                         );
                     }
 
-                    // All K items are nodes â€” render root differently from children
+                    // All K items are nodes — render root differently from children
                     // if (node.level === 0) {
                     //     return <KRootNode node={node} treeData={targetTreeData} style={style} dragHandle={dragHandle} treeType="targetTree" />;
                     // }

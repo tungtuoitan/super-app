@@ -1,6 +1,6 @@
-﻿
+
 import { constants } from "@/shared";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { WikiTabData } from "../types/wiki.type";
 import {useEditorTabBarStore} from "@/shell";

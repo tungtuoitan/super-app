@@ -1,11 +1,11 @@
-﻿/**
+/**
  * KTab Helper Hook
  * Opens knowledge editor tabs (create new / edit existing)
  */
 
 
 import { constants } from "@/shared";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { KWsResponse } from "../types/K.types";
 import { useKStore } from "../store/K.store";
@@ -21,7 +21,7 @@ export function useKTabHelper() {
             (t) => t.type === shellConstants.vscode.tab.tabTypes.kKnowledge
         );
         if (existing) {
-            // Reuse â€” swap data to the new knowledge
+            // Reuse — swap data to the new knowledge
             const isSame = (existing.data as KWsResponse).id === knowledge.id;
             if (!isSame) {
                 setOpenTabs((prev) =>
@@ -90,7 +90,7 @@ export function useKTabHelper() {
         }
     }
 
-    /** Open global daily review tab (singleton â€” reuse if already open) */
+    /** Open global daily review tab (singleton — reuse if already open) */
     const openGlobalDailyReviewTab = () => {
         const existing = openTabs.find(
             (t) => t.type === shellConstants.vscode.tab.tabTypes.kDailyReview

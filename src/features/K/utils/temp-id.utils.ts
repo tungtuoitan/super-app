@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Temporary ID Generator for Unsaved Items
  *
  * Generates sequential negative IDs for new unsaved items (workspaces, notes, folders, etc.)
@@ -106,7 +106,7 @@ export const collectIdsFromTree = (flatData: KItemV2[]): {
         // Collect workspace_items.id (always present)
         workspaceItemIds.push(item.id);
 
-        // All K items are nodes â€” push id to folderEntityIds for backward compat
+        // All K items are nodes — push id to folderEntityIds for backward compat
         folderEntityIds.push(item.id);
     });
 

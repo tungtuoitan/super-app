@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Markdown Editor ViewState Sync
  * Syncs Monaco editor scroll + cursor position with tab ViewState
  * - Saves editor position when switching away from tab
@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { useNoteDetailStore } from "@/features/note/store/useNoteDetail.store";
 import { useEditorTabBarStore } from "@/shell";
 import { useEditorTabBarHelper } from "@/shell";
@@ -133,8 +133,8 @@ export function useMarkdownEditorViewStateSync() {
     }, [activeTabId]);
 
     // Restore when editor is freshly mounted from a non-note tab (editorMountCount changes).
-    // For noteâ†’note switches, MarkdownEditorSync restores scroll directly after setValue.
-    // At this point editorRef.current is the new instance but layout hasn't run yet â†’ need one rAF
+    // For note→note switches, MarkdownEditorSync restores scroll directly after setValue.
+    // At this point editorRef.current is the new instance but layout hasn't run yet → need one rAF
     useEffect(() => {
         if (editorMountCount === 0) return; // skip initial render
 

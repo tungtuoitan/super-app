@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CalculateMovingTreeDropZoneHeight - Headless component for drop zone height calculation
  * Uses treeRef to get accurate visible node count and calculate remaining space
  */

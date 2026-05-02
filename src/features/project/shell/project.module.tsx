@@ -1,5 +1,5 @@
-﻿import { Cuboid, Layers, CheckSquare } from "lucide-react";
-import { shellConstants } from "@/shell/shell.constants";
+import { Cuboid, Layers, CheckSquare } from "lucide-react";
+import { shellConstants } from "@/shell";
 import { ProjectView } from "../Components/ProjectView";
 import { ProjectEditorPanel } from "../Components/ProjectEditorPanel";
 import type { ModuleDefinition, BaseTab } from "@/shell";
@@ -165,7 +165,7 @@ export const projectModule: ModuleDefinition = {
     filterViewKey: "projectGrid",
 };
 
-// â”€â”€â”€ Keyword Navigator Plugin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Keyword Navigator Plugin ─────────────────────────────────────────────────
 
 export const projectKeywordPlugin: KeywordPlugin = {
     handles: ["project", "task"],

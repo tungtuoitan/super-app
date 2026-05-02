@@ -1,11 +1,11 @@
-﻿/**
+/**
  * Task Timeline Helper
  * Callbacks only (useCallback). Handles date changes, scroll, zoom, and API calls.
- * Gets projectId from useProjectDetailStore â€” NO params.
+ * Gets projectId from useProjectDetailStore — NO params.
  */
 
 import type { Task } from "@/features/taskDetail";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
 import { toLocalISOString } from "@/shared";

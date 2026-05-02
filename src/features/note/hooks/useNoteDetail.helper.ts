@@ -1,6 +1,6 @@
-﻿
+
 import { noteService } from "../service/note.service";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { transformANote } from "../utils/note.utils";
 import { Note, UpsertNoteDTO } from "../types/note.types";
 import { useNoteGridHelper } from "./useNoteGrid.helper";
@@ -65,7 +65,7 @@ export const useNoteDetailHelper = () => {
         async (tabId?: string): Promise<Note | null> => {
             const activeTab = getActiveTab();
             if (!activeTab || activeTab.type !== shellConstants.vscode.tab.tabTypes.note) {
-                _console.warning("âš ï¸ No note tab active to upsert");
+                _console.warning("⚠️ No note tab active to upsert");
                 return null;
             }
 
@@ -135,7 +135,7 @@ export const useNoteDetailHelper = () => {
 
                 return transformedNote;
             } catch (error) {
-                console.error("âŒ Failed to save note:", error);
+                console.error("❌ Failed to save note:", error);
                 const errorMessage = await parseApiError(error);
 
                 if (isUnauthorizedError(error)) {

@@ -1,10 +1,10 @@
-﻿/**
+/**
  * Project Detail Helper
  * Business logic for project detail operations
  */
 
 import { projectService, ProjectDTO } from "../service/project.service";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { BaseTab } from "@/shell";

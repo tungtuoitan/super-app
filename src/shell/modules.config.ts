@@ -10,7 +10,7 @@ import { moduleRegistry } from "./moduleRegistry";
 import { FileText } from "lucide-react";
 import React from "react";
 import { NoteBodyInPanel } from "@/features/note";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 // Module files are imported directly (not via barrel) to avoid circular deps.
 // Each *.module file may import from other feature barrels; keeping them out
 // of their own barrel breaks the init cycle during HMR and initial load.

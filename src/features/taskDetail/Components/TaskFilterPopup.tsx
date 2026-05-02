@@ -1,4 +1,4 @@
-﻿/**
+/**
  * TaskFilterPopup - Filter popup for task views (taskList, kanban, timeline)
  * Self-contained, always operates on "taskGrid" filters in userProfile
  */
@@ -16,7 +16,7 @@ import {parseApiError} from "@/shared";
 import {UserFilters, ViewFilter} from "@/shell";
 import {useAuthStore} from "@/shared";
 import {TaskFilterGroup} from "./TaskFilterGroup";
-// eslint-disable-next-line no-restricted-imports -- direct import to break project ↔ taskDetail circular dep
+// eslint-disable-next-line no-restricted-imports -- direct import to break project ? taskDetail circular dep
 import {projectConstants} from "@/features/project/project.constants";
 
 const DEFAULT_FILTERS = projectConstants.filters.defaults.taskGrid as ViewFilter;

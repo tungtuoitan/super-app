@@ -1,10 +1,10 @@
-﻿/**
+/**
  * WorkspaceLinksCell - Displays workspace links count with tooltip
  * Used in NoteGrid to show which workspaces reference a note
  */
 
 import React, { useState } from "react";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import type { WorkspaceLink } from "../types/note.types";
 import { constants } from "@/shared";
 import { useWorkspaceStore } from "@/features/workspace";
@@ -52,7 +52,7 @@ export function WorkspaceLinksCell({ source, count, links, onWorkspaceClick, too
                                     }}
                                     className={`${source === "Note" ? "text-blue-400 hover:underline cursor-pointer" : "text-gray-400"}`}
                                 >
-                                    â€¢ {link.workspaceName} {selectedWorkspaceId === link.workspaceId ? "(current)" : ""}
+                                    • {link.workspaceName} {selectedWorkspaceId === link.workspaceId ? "(current)" : ""}
                                 </div>
                             ))}
                         </div>

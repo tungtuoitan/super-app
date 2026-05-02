@@ -1,5 +1,5 @@
-﻿import { BookOpen } from "lucide-react";
-import { shellConstants } from "@/shell/shell.constants";
+import { BookOpen } from "lucide-react";
+import { shellConstants } from "@/shell";
 import { constants } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
 import type { BaseTab } from "@/shell";

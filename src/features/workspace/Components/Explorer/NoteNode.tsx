@@ -1,6 +1,6 @@
-﻿import React, { useCallback } from "react";
+import React, { useCallback } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { NodeApi } from "react-arborist";
 import { FileText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -204,7 +204,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
             setLastSelectedItemId(workspaceItemId);
             node.select();
 
-            // âœ… Open note in editor tab (convert WorkspaceNoteItem to Note)
+            // ✅ Open note in editor tab (convert WorkspaceNoteItem to Note)
             const note: Note = {
                 id: noteItem.data.id,
                 name: noteItem.data.name,
@@ -301,7 +301,7 @@ export function NoteNode({ node, style, dragHandle, treeData, treeType = "worksp
                             _ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""
                         }`}
                     />
-                    {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">ðŸ“Œ</span>} */}
+                    {/* {noteItem.data.isPinned && <span className="text-xs text-yellow-500">📌</span>} */}
                     <StatusDot
                         isUnsaved={isUnsaved}
                         isDuplicate={isDuplicate}

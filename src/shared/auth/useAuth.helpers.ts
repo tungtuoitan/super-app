@@ -20,7 +20,6 @@ import { debugLog } from "../debug/useDebugLog";
 import { getDeviceFingerprint } from "../device/deviceFingerprint";
 import { acquireRefreshToken } from "../fetch/apiClient";
 import {STORAGE_KEYS} from "../localStorage/storage.config";
-import {projectConstants} from "@/features/project";
 
 const DEFAULT_USER: User = {
     userId: null,
@@ -188,7 +187,14 @@ export function useAuthHelper() {
                 throw new Error("Email hoanhtungle2@gmail.com is not allowed in the production environment");
             }
 
-            const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : projectConstants.filters.defaults;
+            const parsedFilters = response.user.filters ? JSON.parse(response.user.filters) : {
+                noteGrid: { statusCode: "active", deletedAt: "null" },
+                wsGrid: { statusCode: "active", deletedAt: "null" },
+                workspace: { statusCode: "active", deletedAt: "null" },
+                k: { statusCode: "active", deletedAt: "null" },
+                projectGrid: { statusCode: "active" },
+                taskGrid: { status: "open,in_progress,background_progress,paused", priority: "low,medium,high" },
+            };
             const userProfile: User = {
                 userId: response.user.id,
                 userName: response.user.email || "",

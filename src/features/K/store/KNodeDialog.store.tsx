@@ -1,4 +1,4 @@
-﻿import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { kconstants } from "../utils/K.Constants";
 import {ICON_COLORS, IconKey} from "@/shared";
@@ -50,7 +50,7 @@ export interface NodeDialogContextData {
     setIsLoadingTree: Dispatch<SetStateAction<boolean>>;
 }
 
-// @deprecated aliases â€” remove after all consumers updated
+// @deprecated aliases — remove after all consumers updated
 export interface FolderDialogFormErrors extends NodeDialogFormErrors {}
 export interface FolderDialogContextData extends NodeDialogContextData {}
 

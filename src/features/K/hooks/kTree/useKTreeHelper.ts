@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Tree Operation Helper Hook
  * Handles tree operations: drag & drop, refresh, new folder
  */
@@ -104,7 +104,7 @@ export const KuseTreeHelper = () => {
                             return !item?.data.parentId || item.data.parentId === null;
                         });
                         if (allAlreadyRoot) {
-                            console.warn("âš ï¸ All items are already at root level");
+                            console.warn("⚠️ All items are already at root level");
                             setIsDragging(false);
                             return;
                         }
@@ -130,7 +130,7 @@ export const KuseTreeHelper = () => {
                         });
 
                         if (allSameParent) {
-                            console.warn("âš ï¸ All items already have this parent - no change needed");
+                            console.warn("⚠️ All items already have this parent - no change needed");
                             setIsDragging(false);
                             return;
                         }
@@ -156,13 +156,13 @@ export const KuseTreeHelper = () => {
             // -------------------------------------------------------
             const hasWorkspaceRoot = selectedItemIds.some((id) => id === workspaceConstants.root.workspaceItemId);
             if (hasWorkspaceRoot) {
-                console.warn("âš ï¸ Cannot move workspace root node");
+                console.warn("⚠️ Cannot move workspace root node");
                 setIsDragging(false);
                 return;
             }
 
             if (newParentId !== undefined && selectedItemIds.includes(newParentId)) {
-                console.warn("âš ï¸ Cannot move items into one of the selected items");
+                console.warn("⚠️ Cannot move items into one of the selected items");
                 setIsDragging(false);
                 return;
             }
@@ -173,7 +173,7 @@ export const KuseTreeHelper = () => {
                 });
 
                 if (isTargetDescendantOfSelected) {
-                    console.warn("âš ï¸ Cannot move items into a descendant of selected items");
+                    console.warn("⚠️ Cannot move items into a descendant of selected items");
                     setIsDragging(false);
                     return;
                 }
@@ -204,7 +204,7 @@ export const KuseTreeHelper = () => {
                     const normalizedTargetParent = newParentId ?? null;
 
                     if (normalizedCurrentParent === normalizedTargetParent) {
-                        console.warn("âš ï¸ Item already has this parent - no move needed");
+                        console.warn("⚠️ Item already has this parent - no move needed");
                         setIsDragging(false);
                         return;
                     }
@@ -225,7 +225,7 @@ export const KuseTreeHelper = () => {
 
                 // If all items already have target parent, no move needed
                 if (itemsToMove.length === 0) {
-                    console.warn("âš ï¸ All items already have target parent - no move needed");
+                    console.warn("⚠️ All items already have target parent - no move needed");
                     setIsDragging(false);
                     return;
                 }
@@ -252,7 +252,7 @@ export const KuseTreeHelper = () => {
                     bothInSelection ||
                     (hasSiblingsInSelection && ((itemBeforeId && selectedItemIds.includes(itemBeforeId)) || (itemAfterId && selectedItemIds.includes(itemAfterId))))
                 ) {
-                    console.warn("âš ï¸ Cannot drop between items in the same selection");
+                    console.warn("⚠️ Cannot drop between items in the same selection");
                     setIsDragging(false);
                     return;
                 }
@@ -278,8 +278,8 @@ export const KuseTreeHelper = () => {
             // STEP 6: SPLIT INTO 2 FLOWS: REAL IDS (API) & VIRTUAL IDS (STATE ONLY)
             // -------------------------------------------------------
             // Split itemsNeedUpdate into:
-            // - realItemsNeedUpdate (>0): Real items in database â†’ Call API
-            // - virtualItemsNeedUpdate (<0): Virtual items (workspace root, drop zone) â†’ Update state only
+            // - realItemsNeedUpdate (>0): Real items in database → Call API
+            // - virtualItemsNeedUpdate (<0): Virtual items (workspace root, drop zone) → Update state only
             const realItemsNeedUpdate = itemsNeedUpdate.filter((id) => id > 0);
             const virtualItemsNeedUpdate = itemsNeedUpdate.filter((id) => id < 0);
 
@@ -288,7 +288,7 @@ export const KuseTreeHelper = () => {
             // -------------------------------------------------------
             if (realItemsNeedUpdate.length > 0) {
                 if (!currentK?.id) {
-                    console.error("âŒ No workspace ID found");
+                    console.error("❌ No workspace ID found");
                     setIsDragging(false);
                     return;
                 }
@@ -304,8 +304,8 @@ export const KuseTreeHelper = () => {
                 const batchRequests = realItemsNeedUpdate.map((workspaceItemId) => {
                     return {
                         action: KItemAction.Move,
-                        id: workspaceItemId, // âœ… workspace_items.id (primary key)
-                        parentId: newParentId ?? null, // âœ… Parent's workspace_items.id
+                        id: workspaceItemId, // ✅ workspace_items.id (primary key)
+                        parentId: newParentId ?? null, // ✅ Parent's workspace_items.id
                     };
                 });
 
@@ -316,7 +316,7 @@ export const KuseTreeHelper = () => {
                     }
 
                 } catch (error) {
-                    console.error(`âŒ Failed to move real items:`, error);
+                    console.error(`❌ Failed to move real items:`, error);
 
                     // Show error toast with user-friendly message
                     _console.error("Failed to move items. Please try again.");
@@ -377,7 +377,7 @@ export const KuseTreeHelper = () => {
                 setLastSelectedItemId(itemsNeedUpdate[itemsNeedUpdate.length - 1]);
             }
         } catch (error) {
-            console.error("âŒ Failed to move item(s):", error);
+            console.error("❌ Failed to move item(s):", error);
 
             // Show error toast to user
             _console.error("An error occurred while moving items");

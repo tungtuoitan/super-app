@@ -1,6 +1,6 @@
 import type { Note } from "@/features/note";
 import { BaseTab, TabType } from "@/shell";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog";
 import type { Task } from "@/features/taskDetail";
 import type { Ws } from "@/features/workspace";

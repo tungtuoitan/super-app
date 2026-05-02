@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Workspace Mapper - Transform backend response to frontend types
  *
  *
@@ -50,8 +50,8 @@ export interface BackendWorkspaceItem {
  */
 function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
     return {
-        id: item.id || item.childId!, // âœ… folder ID (prefer 'id', fallback 'childId')
-        type: workspaceConstants.itemTypes.folder, // âœ… type = 'folder'
+        id: item.id || item.childId!, // ✅ folder ID (prefer 'id', fallback 'childId')
+        type: workspaceConstants.itemTypes.folder, // ✅ type = 'folder'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -78,8 +78,8 @@ function transformToFolderItem(item: BackendWorkspaceItem): FolderItem {
  */
 function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
     return {
-        id: item.id || item.childId!, // âœ… note ID (prefer 'id', fallback 'childId')
-        type: workspaceConstants.itemTypes.note, // âœ… type = 'note'
+        id: item.id || item.childId!, // ✅ note ID (prefer 'id', fallback 'childId')
+        type: workspaceConstants.itemTypes.note, // ✅ type = 'note'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,
@@ -106,8 +106,8 @@ function transformToNoteItem(item: BackendWorkspaceItem): NoteItem {
  */
 function transformToFileItem(item: BackendWorkspaceItem): FileItem {
     return {
-        id: item.id || item.childId!, // âœ… file ID (prefer 'id', fallback 'childId')
-        type: workspaceConstants.itemTypes.file, // âœ… type = 'file'
+        id: item.id || item.childId!, // ✅ file ID (prefer 'id', fallback 'childId')
+        type: workspaceConstants.itemTypes.file, // ✅ type = 'file'
         userId: item.userId,
         name: item.name,
         parentId: item.parentId,

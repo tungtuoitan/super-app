@@ -1,6 +1,6 @@
-﻿
+
 import { constants } from "@/shared";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogStore } from "../store/useLifeLog.store";

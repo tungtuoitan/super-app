@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { useKMovingTreeStore } from "../../store/KMovingTree.store";
 import { useKStore } from "../../store/K.store";
@@ -151,7 +151,7 @@ export const useKMovingTreeHelper = () => {
             const dragItem = monitor.getItem();
 
             if (!dragItem) {
-                console.warn("âš ï¸ No drag item found in monitor");
+                console.warn("⚠️ No drag item found in monitor");
                 return;
             }
 
@@ -161,20 +161,20 @@ export const useKMovingTreeHelper = () => {
             if (args.parentNode) {
                 const parentNodeData = args.parentNode.data.data as any;
 
-                // Check if dropped on drop zone â†’ treat as root
+                // Check if dropped on drop zone → treat as root
                 if (SPECIAL_IDS.includes(parentNodeData.entityId)) {
                     targetId = null;
                 }
                 // Check if parent node is a folder
                 else if (isFolderV2(parentNodeData as unknown as KItemV2)) {
-                    // Drop into folder â†’ use folder's entityId
+                    // Drop into folder → use folder's entityId
                     targetId = parentNodeData.id;
                 } else {
-                    // Drop into note/file â†’ use their parent folder entityId
+                    // Drop into note/file → use their parent folder entityId
                     targetId = parentNodeData.parentId ?? null;
                 }
             } else {
-                // No parent node â†’ drop to root
+                // No parent node → drop to root
                 targetId = null;
             }
 
@@ -233,7 +233,7 @@ export const useKMovingTreeHelper = () => {
                     // Fallback: Try to get from dragItem (for backward compatibility)
                     const draggedNodeIds = dragItem.dragIds || [dragItem.id];
                     itemIds = draggedNodeIds.map((strId: string) => parseInt(strId, 10)).filter((id: number) => !isNaN(id));
-                    console.warn("âš ï¸ Fallback to dragItem.dragIds:", itemIds);
+                    console.warn("⚠️ Fallback to dragItem.dragIds:", itemIds);
                 }
 
                 if (itemIds.length === 0) {

@@ -1,11 +1,11 @@
-﻿/**
- * TaskFlowNode â€” custom React Flow node.
+/**
+ * TaskFlowNode — custom React Flow node.
  * - Project label above node (subtle, outside node bounds)
  * - Muted status-colored background
- * - 4 handles (top, bottom, left, right) â€” hidden until hover or selected
+ * - 4 handles (top, bottom, left, right) — hidden until hover or selected
  * - Double-click to rename inline
  * - FigJam-style minibar below node when selected (status pills + project picker)
- * - Delete key â†’ set status to cancelled
+ * - Delete key → set status to cancelled
  */
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
@@ -122,7 +122,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
             const task = data.task;
             const oldProcessJson = task.processJson;
 
-            // Check if all items are now done â†’ auto-complete
+            // Check if all items are now done → auto-complete
             const { done, total } = checklistProgress(newJson);
             const allDone = total > 0 && done === total;
 
@@ -178,7 +178,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
         setTimeout(tryFocus, 50);
     }, [isEditing, data.task.title]);
 
-    // Delete key â†’ set status to cancelled (only when selected, not editing, not temp, not locked)
+    // Delete key → set status to cancelled (only when selected, not editing, not temp, not locked)
     useEffect(() => {
         if (!selected || isEditing || isTempNode || nodeLocked) return;
         const onKeyDown = (e: KeyboardEvent) => {
@@ -243,7 +243,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
 
     return (
         <div ref={nodeRef} className="relative" style={{ opacity: nodeOpacity, width: nodeWidth }}>
-            {/* Project label â€” absolute above node, no layout impact */}
+            {/* Project label — absolute above node, no layout impact */}
             <span className="absolute -top-4 left-0 right-0 text-center text-[9px] text-muted-foreground/50 truncate select-none pointer-events-none">
                 {data.projectName}
             </span>
@@ -429,7 +429,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                 </div>
             </div>
 
-            {/* FigJam-style minibar â€” absolute below node, counter-scaled to ignore zoom */}
+            {/* FigJam-style minibar — absolute below node, counter-scaled to ignore zoom */}
             {selected && !isTempNode && !isDragging && !multiSelected && !showProgressPopup && (
                 <div
                     className="absolute left-1/2 origin-top flex items-center gap-1 px-1 py-0.5 bg-card/90 border border-border rounded-lg shadow-sm nodrag nopan whitespace-nowrap"

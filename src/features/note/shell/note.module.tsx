@@ -1,5 +1,5 @@
 import { FileText } from "lucide-react";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { NoteGrid } from "../Components/NoteGrid";
 import { NoteEditorPanel } from "../Components/NoteEditorPanel";
 import type { ModuleDefinition } from "@/shell";

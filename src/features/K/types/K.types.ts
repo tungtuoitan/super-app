@@ -1,5 +1,5 @@
-﻿/**
- * K.types.ts â€” K item action types and request/response interfaces
+/**
+ * K.types.ts — K item action types and request/response interfaces
  */
 
 import { kconstants } from "../utils/K.Constants";
@@ -10,7 +10,7 @@ import { workspaceConstants } from "@/features/workspace/workspace.constants";
 // ============================================
 
 /**
- * K node action â€” maps to backend KNodeAction enum (case-insensitive)
+ * K node action — maps to backend KNodeAction enum (case-insensitive)
  */
 export enum KItemAction {
     Create    = "create",
@@ -32,9 +32,9 @@ export interface KUpsertNodeData {
     color?: string | null;
     /** Only applicable when nodeType = "entity" */
     icon?: string | null;
-    /** Node type â€” "entity" | "question" | null */
+    /** Node type — "entity" | "question" | null */
     nodeType?: "entity" | "question" | null;
-    /** Workflow status â€” "draft" | null (active). Pass null to activate a draft node. */
+    /** Workflow status — "draft" | null (active). Pass null to activate a draft node. */
     statusCode?: string | null;
 }
 
@@ -56,16 +56,16 @@ export interface KUpsertWorkspaceItemRequest {
     /** Explicit action */
     action: KItemAction;
 
-    /** k.node.id â€” required for Update/Move/MoveCross/Delete/Restore */
+    /** k.node.id — required for Update/Move/MoveCross/Delete/Restore */
     id?: number | null;
 
-    /** Target knowledge ID â€” set from route for most actions; override for MoveCross */
+    /** Target knowledge ID — set from route for most actions; override for MoveCross */
     knowledgeId?: number | null;
 
-    /** Parent k.node.id â€” null = root level */
+    /** Parent k.node.id — null = root level */
     parentId?: number | null;
 
-    /** Node data â€” required for Create and Update */
+    /** Node data — required for Create and Update */
     nodeData?: KUpsertNodeData;
 }
 
@@ -80,7 +80,7 @@ export interface KDeleteItemsRequest {
 }
 
 // ============================================
-// MOVE REQUEST (currently unused â€” handled via batch)
+// MOVE REQUEST (currently unused — handled via batch)
 // ============================================
 
 /** @deprecated Use batch upsert with MoveCross action instead */
@@ -105,7 +105,7 @@ export interface KOperationResult {
 // K LIST ITEM (for knowledge selector)
 // ============================================
 
-/** Knowledge summary â€” maps to backend KKnowledgeSummary */
+/** Knowledge summary — maps to backend KKnowledgeSummary */
 export interface KWsResponse {
     id: number;
     userId: number;
@@ -131,10 +131,10 @@ export interface KWs {
 }
 
 // ============================================
-// LEGACY â€” @deprecated, remove after refactor
+// LEGACY — @deprecated, remove after refactor
 // ============================================
 
-/** @deprecated Legacy V1 type â€” use KItemV2 from K-v2.types */
+/** @deprecated Legacy V1 type — use KItemV2 from K-v2.types */
 export type ChildType = typeof workspaceConstants.itemTypes.node | typeof workspaceConstants.itemTypes.k;
 
 /** @deprecated V1 metadata stub */
@@ -144,7 +144,7 @@ export interface KNoteMetadata { [key: string]: unknown; }
 /** @deprecated V1 metadata stub */
 export interface KFileMetadata { [key: string]: unknown; }
 
-/** @deprecated V1 node item â€” kept for K-mapper.ts backward compat */
+/** @deprecated V1 node item — kept for K-mapper.ts backward compat */
 export interface FolderItem {
     id: number;
     type: string;
@@ -168,7 +168,7 @@ export interface FolderItem {
     children: FolderItem[];
 }
 
-/** @deprecated V1 stub â€” K has no notes */
+/** @deprecated V1 stub — K has no notes */
 export interface NoteItem {
     id: number;
     type: string;
@@ -192,7 +192,7 @@ export interface NoteItem {
     children: never[];
 }
 
-/** @deprecated V1 stub â€” K has no files */
+/** @deprecated V1 stub — K has no files */
 export interface FileItem {
     id: number;
     type: string;
@@ -216,7 +216,7 @@ export interface FileItem {
     children: never[];
 }
 
-/** @deprecated V1 union â€” kept for K-mapper.ts backward compat */
+/** @deprecated V1 union — kept for K-mapper.ts backward compat */
 export type KWorkspaceItem = FolderItem | NoteItem | FileItem;
 
 

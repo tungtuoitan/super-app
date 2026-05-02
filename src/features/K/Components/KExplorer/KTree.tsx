@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
@@ -28,7 +28,7 @@ export function KTree() {
     useCalculateKTreeContainerHeight()
     useScrollToHighlightItem()
 
-    // Always hide question nodes and their descendants â€” only entity nodes in the tree
+    // Always hide question nodes and their descendants — only entity nodes in the tree
     const filteredK = useMemo(() => {
         if (!currentK) return currentK;
         const questionIds = new Set([]);
@@ -104,7 +104,7 @@ export function KTree() {
 
     // Get all visible folder IDs for keyboard navigation
     const allVisibleFolderIds = KtreeMiniHelper.getAllVisibleNodeIds(treeData)
-    // â”€â”€ Mark helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Mark helpers ────────────────────────────────────────────────────────────
 
     /** Collect the numeric IDs of a node and all its descendants */
     function collectSubtreeIds(node: KTreeNode, out: Set<number>) {
@@ -137,10 +137,10 @@ export function KTree() {
         setMarkedNodeId(saved ?? null);
     }, [currentK?.id]);
 
-    // When mark is set: close all â†’ open path to node â†’ expand full subtree â†’ scroll
+    // When mark is set: close all → open path to node → expand full subtree → scroll
     useEffect(() => {
         if (!markedNodeId || !_treeRef.current) return;
-        const nodeId = markedNodeId; // narrow to number â€” TypeScript loses narrowing inside async
+        const nodeId = markedNodeId; // narrow to number — TypeScript loses narrowing inside async
 
         const waitForRender = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -218,7 +218,7 @@ export function KTree() {
         };
     }, [allVisibleFolderIds]);
 
-    // Auto-expand workspace root on init â€” show direct children of root
+    // Auto-expand workspace root on init — show direct children of root
     useEffect(() => {
         if (!_treeRef.current || !currentK?.id || treeData.length === 0) return;
         const timer = setTimeout(async () => {

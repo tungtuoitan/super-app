@@ -1,5 +1,5 @@
-﻿import { constants } from "@/shared";
-import { shellConstants } from "@/shell/shell.constants";
+import { constants } from "@/shared";
+import { shellConstants } from "@/shell";
 import { useProjectDetailHelper } from "./useProjectDetail.helper";
 import { useTaskDetailHelper } from "@/features/taskDetail";
 import { useProjectTaskFolderHelper } from "./useProjectTaskFolderHelper";

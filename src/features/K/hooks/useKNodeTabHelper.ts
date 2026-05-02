@@ -1,11 +1,11 @@
-﻿/**
+/**
  * KTab Helper Hook
  * Opens knowledge editor tabs (create new / edit existing)
  */
 
 
 import { constants } from "@/shared";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import type { BaseTab } from "@/shell";
 import type { KItemV2 } from "../types/K-v2.types";
 import {useEditorTabBarStore} from "@/shell";

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Generic Tab Types for Editor Area
  * Supports multiple tab types: Note, Folder, etc.
  */
@@ -9,7 +9,7 @@ import { Task } from "@/features/taskDetail";
 import { LifeLogLog, LifeLogTrack } from "@/features/lifeLog";
 import { KWsResponse } from "@/features/K";
 import { KItemV2 } from "@/features/K";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import { WikiTabData } from "@/features/Wiki";
 import {Ws} from "@/features/workspace";

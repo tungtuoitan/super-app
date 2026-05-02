@@ -1,9 +1,9 @@
-﻿/**
+/**
  * Note Detail Dialog Content Component
  */
 
 import React, { useEffect } from "react";
-import { shellConstants } from "@/shell/shell.constants";
+import { shellConstants } from "@/shell";
 import { CardContent } from "@/shared";
 import { Note } from "../types/note.types";
 import { useNoteDetailStore } from "../store/useNoteDetail.store";
