@@ -13,7 +13,9 @@ import { useProjectStore } from "../store/useProject.store";
 export const useProjectGridHeadless = () => {
     const { containerRef, setContainerWidth } = useProjectStore();
 
-    // Update container width on resize
+    // Update container width on resize.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- containerRef and setContainerWidth are both stable
+    // (useRef object + Zustand setter). The observer must be set up only once.
     useEffect(() => {
         if (!containerRef.current) return;
 

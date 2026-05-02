@@ -67,7 +67,7 @@ export const useProjectDetailHelper = () => {
                 status: projectGridFilters?.statusCode ?? "active",
             };
 
-            const result = await projectService._getProjects(token, filterParams);
+            const result = await projectService.getProjects(token, filterParams);
 
             if (!result.success) {
                 throw new Error(result.message || "Failed to load projects");
@@ -89,7 +89,7 @@ export const useProjectDetailHelper = () => {
         }
     };
 
-    const handleProjectFieldChange = (field: keyof Project, value: any) => {
+    const handleProjectFieldChange = <K extends keyof Project>(field: K, value: Project[K]) => {
         const activeTabId = getActiveTab()?.id;
         if (!activeTabId) return;
         patchTab(activeTabId, (cur) => {
@@ -154,7 +154,7 @@ export const useProjectDetailHelper = () => {
             // ============================================================
             // Step 4: Call batch API to upsert project
             // ============================================================
-            const result = await projectService._upsertProjectBatch(token, [upsertData]);
+            const result = await projectService.upsertProjectBatch(token, [upsertData]);
             if (!result.success) {
                 throw new Error(result.message || "Failed to save project");
             }

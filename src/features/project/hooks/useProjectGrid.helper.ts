@@ -52,7 +52,7 @@ export const useProjectGridHelper = () => {
     const { setShouldFocusProjectName } = useProjectDetailStore();
 
     // Create new project (temporary with negative ID) and open tab
-    const __createNewProject = () => {
+    const createNewProject = () => {
         // Generate sequential temporary negative ID
         const existingIds = projects.map((p) => p.id);
         const tempId = generateTempId(existingIds);
@@ -86,7 +86,7 @@ export const useProjectGridHelper = () => {
     /**
      * Toggle delete/restore for selected projects (soft delete)
      */
-    const __deleteRestore_Projects = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
+    const deleteRestoreProjects = async (ids?: number[], type: "soft-delete" | "restore" = "soft-delete") => {
         const selectedIds = ids ?? Object.keys(projectGridRowSelection).map((id) => parseInt(id));
         if (selectedIds.length === 0) return;
 
@@ -121,7 +121,7 @@ export const useProjectGridHelper = () => {
                     };
                 });
 
-                const result = await projectService._upsertProjectBatch(token, batchRequests);
+                const result = await projectService.upsertProjectBatch(token, batchRequests);
 
                 if (!result.success) {
                     throw new Error(result.message || `Failed to ${type === "soft-delete" ? "delete" : "restore"} projects`);
@@ -166,9 +166,9 @@ export const useProjectGridHelper = () => {
         showContextMenu(event, "project-grid", {
             selectedProjects,
             selectedIds,
-            onSoftDelete: () => __deleteRestore_Projects(selectedIds, "soft-delete"),
-            onRestore: () => __deleteRestore_Projects(selectedIds, "restore"),
-            onAddProject: __createNewProject,
+            onSoftDelete: () => deleteRestoreProjects(selectedIds, "soft-delete"),
+            onRestore: () => deleteRestoreProjects(selectedIds, "restore"),
+            onAddProject: createNewProject,
             onOpenMultiProjectView: () => {
                 // Open multi-project tab - it will use its own chip selector to choose projects
                 // Default will be all active projects (handled in MultiProjectDetailContent)
@@ -198,7 +198,7 @@ export const useProjectGridHelper = () => {
                 status: projectGridFilters?.statusCode ?? "active",
             };
 
-            const result = await projectService._getProjects(token, filterParams);
+            const result = await projectService.getProjects(token, filterParams);
 
             if (!result.success) {
                 throw new Error(result.message || "Failed to load projects");
@@ -223,6 +223,6 @@ export const useProjectGridHelper = () => {
     return {
         openProjectContextMenu,
         loadProjects,
-        createNewProject: __createNewProject,
+        createNewProject,
     };
 };

@@ -29,7 +29,7 @@ export function useProjectWorkspaceResolver() {
         if (found) return found.workspaceId;
 
         const token = $user.userToken ?? "";
-        const result = await projectService._getProjects(token, { ids: projectId.toString() });
+        const result = await projectService.getProjects(token, { ids: projectId.toString() });
         if (result.success && result.data && result.data.length > 0) {
             const dto = (result.data as ProjectDTO[])[0];
             const fetched: Project = {

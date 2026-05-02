@@ -20,7 +20,7 @@ export interface ProjectDTO {
     image?: string | null;
 }
 
-const _getProjects = async (
+const getProjects = async (
     _token: string,
     params?: {
         searchText?: string;
@@ -46,7 +46,7 @@ const _getProjects = async (
     return Promise.reject(res);
 };
 
-const _upsertProjectBatch = async (
+const upsertProjectBatch = async (
     _token: string,
     requests: Array<{
         id?: number;
@@ -70,7 +70,7 @@ const _upsertProjectBatch = async (
     return Promise.reject(res);
 };
 
-const _getProjectById = async (_token: string, id: number): Promise<ResultOptions<ProjectDTO>> => {
+const getProjectById = async (_token: string, id: number): Promise<ResultOptions<ProjectDTO>> => {
     const res = await apiFetch(`${config.api.baseURL}/api/project/${id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -80,7 +80,7 @@ const _getProjectById = async (_token: string, id: number): Promise<ResultOption
 };
 
 export const projectService = {
-    _getProjects,
-    _getProjectById,
-    _upsertProjectBatch,
+    getProjects,
+    getProjectById,
+    upsertProjectBatch,
 };

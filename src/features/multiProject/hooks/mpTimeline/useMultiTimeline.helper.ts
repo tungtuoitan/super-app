@@ -138,7 +138,7 @@ export const useMultiTimelineHelper = () => {
                 startDate: toLocalISOString(startDate),
                 endDate: toLocalISOString(endDate),
             };
-            const result = await projectService._upsertProjectBatch($user.userToken, [upsertData]);
+            const result = await projectService.upsertProjectBatch($user.userToken, [upsertData]);
             if (result.success) {
                 setProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, startDate, endDate } : p)));
                 _console.success("Project dates updated");

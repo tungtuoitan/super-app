@@ -14,7 +14,7 @@ import { TaskKanbanView } from "@/features/project/task/Components/TaskKanbanVie
 import { TaskTimelineView } from "@/features/project/task/Components/TaskTimelineView";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import { useProjectDetailHelper } from "../hooks/useProjectDetail.helper";
-import type { TabConfig } from "../types/projectDetail.type";
+import type { TabConfig, TabType } from "../types/projectDetail.type";
 import {useProjectDetailHeadless} from "../hooks/useProjectDetail.headless";
 import {TaskFilterPopup} from "../task/Components/TaskFilterPopup";
 import {TaskSearchInput} from "../task/Components/TaskSearchInput";
@@ -25,6 +25,13 @@ const TABS: TabConfig[] = [
     { id: "kanban", label: "KANBAN", icon: <Columns className="h-4 w-4" /> },
     { id: "timeline", label: "TIMELINE", icon: <GanttChartSquare className="h-4 w-4" /> },
 ];
+
+const TAB_CONTENT: Record<TabType, React.ComponentType> = {
+    general: ProjectGeneral,
+    taskList: TaskGrid,
+    kanban: TaskKanbanView,
+    timeline: TaskTimelineView,
+};
 
 /**
  * ProjectDetailContent
@@ -39,20 +46,7 @@ export function ProjectDetailContent() {
     const { setActiveTab, handleOpenWorkspace } = useProjectDetailHelper();
     useProjectDetailHeadless()
 
-    const renderTabContent = () => {
-        switch (activeTab) {
-            case "general":
-                return <ProjectGeneral />;
-            case "taskList":
-                return <TaskGrid />;
-            case "kanban":
-                return <TaskKanbanView />;
-            case "timeline":
-                return <TaskTimelineView />;
-            default:
-                return null;
-        }
-    };
+    const TabContent = TAB_CONTENT[activeTab] ?? null;
 
     return (
         <div className="flex flex-col h-full w-full bg-background">
@@ -99,7 +93,7 @@ export function ProjectDetailContent() {
 
                 {/* Tab Content */}
                 <div className="flex-1 overflow-hidden">
-                    {renderTabContent()}
+                    {TabContent && <TabContent />}
                 </div>
         </div>
     );

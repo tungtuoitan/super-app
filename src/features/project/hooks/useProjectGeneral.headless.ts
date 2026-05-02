@@ -15,7 +15,8 @@ export const useProjectGeneralHeadless = () => {
     // Track form key to force remount of RichTextEditor when project changes
     const [projectKey, setProjectKey] = useState(0);
 
-    // Reset form key and clear name error when switching project
+    // Reset form key and clear name error when switching project.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setNameError and setProjectKey are stable (Zustand setter + useState setter)
     useEffect(() => {
         if (selectedProject) {
             setProjectKey((prev) => prev + 1);
@@ -23,7 +24,8 @@ export const useProjectGeneralHeadless = () => {
         }
     }, [selectedProject?.id]);
 
-    // Focus on Project Name field when creating new project
+    // Focus on Project Name field when creating new project.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setShouldFocusProjectName is a stable Zustand setter; projectNameRef is a stable ref
     useEffect(() => {
         if (shouldFocusProjectName && projectNameRef.current) {
             setTimeout(() => {
@@ -31,7 +33,7 @@ export const useProjectGeneralHeadless = () => {
                 setShouldFocusProjectName(false);
             }, 100);
         }
-    }, [shouldFocusProjectName, projectNameRef]);
+    }, [shouldFocusProjectName]);
 
     return { projectKey };
 };

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 export function useTaskListHeadless() {
     const { taskContainerRef, setTaskContainerWidth } = usePTaskStore();
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setTaskContainerWidth is a stable Zustand setter
     useEffect(() => {
         if (!taskContainerRef.current) return;
 

@@ -15,22 +15,20 @@ export const useProjectGridSelector = () => {
     const projectStatuses = useGetStandardRegistry("project_status");
 
     // Get status label from registry
-    const getStatusLabel = (() => {
-        return (statusCode: string) => {
-            const status = projectStatuses.find((s:any) => s.code === statusCode);
-            return status?.description || statusCode;
-        };
-    })()
+    const getStatusLabel = (statusCode: string) => {
+        const status = projectStatuses.find((s) => s.code === statusCode);
+        return status?.description || statusCode;
+    };
 
     // Filter data by search query
     const filteredData = useMemo(() => {
         const sorted = [...projects].sort(
-            (a:any, b:any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
         if (!searchQuery) return sorted;
         const query = searchQuery.toLowerCase();
         return sorted.filter(
-            (p:any) =>
+            (p) =>
                 p.name?.toLowerCase().includes(query) ||
                 p.description?.toLowerCase().includes(query) ||
                 String(p.id).includes(query),

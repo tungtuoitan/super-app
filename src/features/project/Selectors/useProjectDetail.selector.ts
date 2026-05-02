@@ -25,50 +25,40 @@ export const useProjectDetailSelector = () => {
     const activeTab: TabType = (currentTab?.metadata?.innerTab as TabType) || "general";
 
     // Get project data from the open tab
-    const selectedProject = (() => {
-        const projectTab = openTabs.find(
-            (tab) => tab.type === shellConstants.vscode.tab.tabTypes.project && (tab.data as Project).id === projectId,
-        );
-        return projectTab ? (projectTab.data as Project) : undefined;
-    })()
+    const projectTab = openTabs.find(
+        (tab) => tab.type === shellConstants.vscode.tab.tabTypes.project && (tab.data as Project).id === projectId,
+    );
+    const selectedProject = projectTab ? (projectTab.data as Project) : undefined;
 
     // Whether to show task filter button
     const showTaskFilter = activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline";
-    
 
     // Project status options for autocomplete
     const projectStatuses = useGetStandardRegistry("project_status");
-    const statusOptions: IStatusOption[] = (() => {
-        return projectStatuses
-            .map((reg:any) => {
-                const colors = getProjectStatusColors(reg.code);
-                return {
-                    id: reg.code,
-                    code: reg.code,
-                    label: reg.description || reg.code,
-                    bgColor: colors.bg,
-                    textColor: colors.text,
-                };
-            })
-            .sort((a:any, b:any) =>
-                (projectConstants.optionOrder.projectStatuses[a.label] ?? 999) - (projectConstants.optionOrder.projectStatuses[b.label] ?? 999),
-            );
-    })()
+    const statusOptions: IStatusOption[] = projectStatuses
+        .map((reg) => {
+            const colors = getProjectStatusColors(reg.code);
+            return {
+                id: reg.code,
+                code: reg.code,
+                label: reg.description || reg.code,
+                bgColor: colors.bg,
+                textColor: colors.text,
+            };
+        })
+        .sort(
+            (a, b) =>
+                (projectConstants.optionOrder.projectStatuses[a.label] ?? 999) -
+                (projectConstants.optionOrder.projectStatuses[b.label] ?? 999),
+        );
 
     // Current status value for autocomplete
     const currentStatusValue: IStatusOption | null = statusOptions.find((option) => option.code === selectedProject?.status) || null;
 
     // Check if project is inactive (soft deleted, completed, or dropped)
-    const isDisabled = (() => {
-        const isDeleted = selectedProject?.deletedAt !== null && selectedProject?.deletedAt !== undefined;
-        const isCompleted = selectedProject?.status === "completed" || selectedProject?.status === "dropped";
-        return isDeleted || isCompleted;
-    })()
-
-    // Whether the project is soft-deleted (for disabling status only)
-    const isDeleted = (() => {
-        return selectedProject?.deletedAt !== null && selectedProject?.deletedAt !== undefined;
-    })()
+    const isDeleted = selectedProject?.deletedAt != null;
+    const isCompleted = selectedProject?.status === "completed" || selectedProject?.status === "dropped";
+    const isDisabled = isDeleted || isCompleted;
 
     return {
         currentTab,
@@ -81,7 +71,3 @@ export const useProjectDetailSelector = () => {
         isDeleted,
     };
 };
-
-
-
-

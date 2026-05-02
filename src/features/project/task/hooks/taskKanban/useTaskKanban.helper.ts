@@ -85,7 +85,8 @@ export const useTaskKanbanHelper = () => {
             );
 
             try {
-                const batchRequests: any[] = [];
+                type TaskBatchRequest = Parameters<typeof taskService['_upsertTaskBatch']>[1][number];
+                const batchRequests: TaskBatchRequest[] = [];
 
                 batchRequests.push({
                     id: task.id,

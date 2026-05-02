@@ -72,7 +72,7 @@ export const projectModule: ModuleDefinition = {
         },
         restoreTab: async (persisted: TabStorage, userToken: string) => {
             if (persisted.type === shellConstants.vscode.tab.tabTypes.project) {
-                const res = await projectService._getProjectById(userToken, persisted.dataId as number);
+                const res = await projectService.getProjectById(userToken, persisted.dataId as number);
                 if (!res.success || !res.data?.[0]) return null;
                 const project = _transformProject(res.data[0]);
                 return {
@@ -96,7 +96,7 @@ export const projectModule: ModuleDefinition = {
                 };
             }
             if (persisted.type === shellConstants.vscode.tab.tabTypes.multiProject) {
-                const res = await projectService._getProjects(userToken, { ids: persisted.dataId as string });
+                const res = await projectService.getProjects(userToken, { ids: persisted.dataId as string });
                 if (!res.success || !res.data?.length) return null;
                 const projectIds = (persisted.dataId as string).split(",").map(Number).filter(n => n > 0);
                 const projects = (res.data as ProjectDTO[]).map(_transformProject);
@@ -157,7 +157,7 @@ export const projectModule: ModuleDefinition = {
     getBackButtonAsync: async (tab, userToken) => {
         if (tab.type !== shellConstants.vscode.tab.tabTypes.task || tab.openedBy) return null;
         const task = tab.data as Task;
-        const res = await projectService._getProjectById(userToken, task.projectId);
+        const res = await projectService.getProjectById(userToken, task.projectId);
         if (res.success && res.data?.[0]) {
             return { link: `sa/p${task.projectId}`, label: res.data[0].name };
         }
@@ -209,7 +209,7 @@ export const projectKeywordPlugin: KeywordPlugin = {
                     return true;
                 }
 
-                const res = await projectService._getProjectById(ctx.userToken, parsed.projectId);
+                const res = await projectService.getProjectById(ctx.userToken, parsed.projectId);
                 if (res.success && res.data?.[0]) {
                     const dto = res.data[0];
                     const project: Project = {
@@ -284,7 +284,7 @@ export const projectKeywordPlugin: KeywordPlugin = {
 
     resolveTarget: async (targetType, targetId, userToken) => {
         if (targetType === "PROJECT") {
-            const res = await projectService._getProjectById(userToken, targetId);
+            const res = await projectService.getProjectById(userToken, targetId);
             if (res.success && res.data?.[0]) return { link: `sa/p${targetId}`, label: res.data[0].name };
         }
         if (targetType === "TASK") {
