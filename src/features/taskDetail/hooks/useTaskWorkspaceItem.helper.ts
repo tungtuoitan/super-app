@@ -88,7 +88,7 @@ export const useTaskWorkspaceItemHelper = () => {
      * Opens a bare note tab. On save, upsertOrchestraitor will place the note
      * inside the task's workspace folder via parentId.
      */
-    const createTaskNote = (task: Task) => {
+    const createTaskNote = (task: Task, workspaceId?: number | null) => {
         const existingIds = openTabs
             .filter((t) => t.type === shellConstants.vscode.tab.tabTypes.note)
             .map((t) => (t.data as Note).id);
@@ -117,6 +117,8 @@ export const useTaskWorkspaceItemHelper = () => {
                 taskSnapshot: task,
                 // folderWorkspaceItemId tells upsertOrchestraitor where to place the note
                 folderWorkspaceItemId: task.folderWorkspaceItemId ?? null,
+                // workspaceId lets addNoteToTaskFolder place the note without re-fetching project
+                workspaceId: workspaceId ?? null,
             },
         });
         setShouldFocusNoteName(true);

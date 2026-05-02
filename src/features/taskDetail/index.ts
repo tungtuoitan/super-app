@@ -6,6 +6,8 @@
 
 // Components
 export { TaskEditorPanel } from "./Components/TaskEditorPanel";
+export { MakeIndependentDropZone } from "./Components/small/MakeIndependentDropZone";
+export { TASK_ROW } from "./task.constants";
 
 // Types
 export type { Task, TaskPaginationState } from "./types/task.types";
@@ -55,6 +57,7 @@ export { TaskDetailSectionProvider } from "./store/useTaskDetailSection.store";
 // Helpers (only expose hooks needed by other features)
 export { useTaskTabHelper } from "./hooks/useTaskTab.helper";
 export { useTaskDetailHelper } from "./hooks/useTaskDetail.helper";
+export { useTaskFolderHelper } from "./hooks/useTaskFolderHelper";
 
 // Services (only expose what other features need)
 export { taskService } from "./service/task.service";

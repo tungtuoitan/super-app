@@ -22,7 +22,7 @@ import { useMultiProjectTaskListHeadless } from "../hooks/mpTaskList/useMultiPro
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { StatusCell, PriorityCell } from "./small/MultiProjectTaskListCells";
 import { DateRangeCell, DraggableRow } from "./small/MultiProjectTaskListRow";
-import { MakeIndependentDropZone } from "./small/MakeIndependentDropZone";
+import { MakeIndependentDropZone } from "@/features/taskDetail";
 import {useMultiProjectTaskListHelper} from "../hooks/mpTaskList/useMultiProjectTaskList.helper";
 
 /**

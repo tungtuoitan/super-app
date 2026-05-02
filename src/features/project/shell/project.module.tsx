@@ -5,12 +5,10 @@ import { ProjectEditorPanel } from "../Components/ProjectEditorPanel";
 import type { ModuleDefinition, BaseTab } from "@/shell";
 import type { TabStorage } from "@/shell";
 import type { MultiProjectTabData } from "@/shell";
-import { constants } from "@/shared";
 import { TaskEditorPanel } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";
 import { taskService, transformTaskData } from "@/features/taskDetail";
 import type { TaskDTO } from "@/features/taskDetail";
-// eslint-disable-next-line no-restricted-imports
 import { MultiProjectEditorPanel } from "@/features/multiProject";
 import type { KeywordPlugin } from "@/shell";
 import { parseKeywordLink } from "@/shared";

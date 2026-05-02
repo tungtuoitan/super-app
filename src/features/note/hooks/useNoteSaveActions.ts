@@ -1,11 +1,10 @@
 
-import { constants } from "@/shared";
 import { shellConstants } from "@/shell";
 import { useNoteDetailHelper } from "./useNoteDetail.helper";
 import { useWorkspaceItemHelper } from "@/features/workspace";
 import { useWorkspaceStore } from "@/features/workspace";
 import { WorkspaceItemAction } from "@/features/workspace";
-import { useProjectTaskFolderHelper } from "@/features/project";
+import { useTaskFolderHelper } from "@/features/taskDetail";
 import type { BaseTab } from "@/shell";
 import type { Note } from "../types/note.types";
 import {SaveActions} from "@/shell";
@@ -14,7 +13,7 @@ export function useNoteSaveActions(): SaveActions {
     const { upsertNote } = useNoteDetailHelper();
     const _treeEditor = useWorkspaceItemHelper();
     const { currentWorkspace } = useWorkspaceStore();
-    const { addNoteToTaskFolder } = useProjectTaskFolderHelper();
+    const { addNoteToTaskFolder } = useTaskFolderHelper();
 
     const handles = (tabType: string) => tabType === shellConstants.vscode.tab.tabTypes.note;
 

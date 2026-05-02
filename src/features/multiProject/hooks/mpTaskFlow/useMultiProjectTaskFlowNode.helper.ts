@@ -17,7 +17,8 @@ import { toLocalISOString } from "@/shared";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/taskDetail";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
-import { useProjectTaskFolderHelper } from "@/features/project";
+import { useTaskFolderHelper } from "@/features/taskDetail";
+import { useProjectWorkspaceResolver } from "@/features/project";
 import { useDebugLog } from "@/shared";
 
 export const useMultiProjectTaskFlowNodeHelper = () => {
@@ -27,7 +28,8 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const { isNodeLocked } = useMultiProjectTaskFlowHelper();
-    const { createTaskFolder } = useProjectTaskFolderHelper();
+    const { createTaskFolder } = useTaskFolderHelper();
+    const { resolveWorkspaceId } = useProjectWorkspaceResolver();
     const debugLog = useDebugLog();
     // ── Rename ──────────────────────────────────────────────────────────────
 
@@ -101,7 +103,21 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                         { nodeId: newTask.id, nodeType: "task", x: tempNode.position.x, y: tempNode.position.y },
                     ]).catch(() => {});
 
-                    await createTaskFolder(newTask);
+                    const workspaceId = await resolveWorkspaceId(newTask.projectId);
+                    await createTaskFolder(newTask, workspaceId, (taskId, folderId) => {
+                        // Update task store
+                        setTasks((prev) => prev.map((t) =>
+                            t.id === taskId ? { ...t, folderWorkspaceItemId: folderId } : t
+                        ));
+                        // Update flow node so openTaskTab(data.task) picks up folderWorkspaceItemId
+                        setFlowNodes((prev) => prev.map((n) => {
+                            const nodeData = n.data as TaskFlowNodeData;
+                            if (nodeData?.task?.id === taskId) {
+                                return { ...n, data: { ...nodeData, task: { ...nodeData.task, folderWorkspaceItemId: folderId } } };
+                            }
+                            return n;
+                        }));
+                    });
 
                     _console.success("Task created");
                     debugLog.flush();

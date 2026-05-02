@@ -9,7 +9,7 @@ import { useDrag, useDrop, DragSourceMonitor, DropTargetMonitor } from "react-dn
 import type { Task, TaskDragItem } from "@/features/taskDetail";
 import { validateDropTaskOntoTask } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
-import { TASK_ROW } from "../task/taskRow.constants";
+import { TASK_ROW } from "@/features/taskDetail";
 
 interface DraggableRowProps {
     row: Row<Task>;

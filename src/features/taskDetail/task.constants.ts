@@ -56,3 +56,7 @@ export const SECTION_META: Record<string, { label: string; icon: React.ElementTy
 export const FALLBACK_CUSTOM_ICON = FilePlus;
 
 export const COLLAPSE_HEIGHT = 120;
+
+// ── Drag-and-drop type identifier ─────────────────────────────────────────────
+/** DnD accept type for task row dragging (used by TaskGrid and MultiProjectTaskList). */
+export const TASK_ROW = "TASK_ROW";

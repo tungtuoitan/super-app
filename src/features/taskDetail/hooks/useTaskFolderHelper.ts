@@ -1,80 +1,38 @@
 /**
- * Cross-feature helper: Task folder creation & note-to-folder assignment.
- * Owned by project feature because project/task controls the workspace folder lifecycle.
- * Consumed by useProjectSaveActions (task save) and useNoteSaveActions (note-from-task save).
+ * Task Folder Helper
+ * Creates workspace folders for tasks and assigns notes to task folders.
+ *
+ * Lives in taskDetail — zero dependency on project / multiProject.
+ * Callers supply:
+ *   - workspaceId   (from their project store / resolver)
+ *   - onFolderCreated  (to update their local task store)
+ *   - findTask      (to look up a task from their store; falls back to tab metadata)
  */
 
-import { useRef, useEffect } from "react";
-import { shellConstants } from "@/shell";
-import { useAuthStore } from "@/shared";
-import { useProjectStore } from "../store/useProject.store";
-import type { Task } from "@/features/taskDetail";
-import { useConsoleHelper } from "@/shared";
-import { workspaceService } from "@/features/workspace";
-import { taskService } from "@/features/taskDetail";
-import { projectService, type ProjectDTO } from "../service/project.service";
-import { WorkspaceItemAction } from "@/features/workspace";
-import { parseApiError, isUnauthorizedError } from "@/shared";
-import { parseAsLocalDate } from "@/shared";
-import { useDebugLog } from "@/shared";
-import { constants } from "@/shared";
+import { useAuthStore, useConsoleHelper, useDebugLog, parseApiError, isUnauthorizedError } from "@/shared";
 import type { BaseTab } from "@/shell";
-import type { Note } from "@/features/note";
-import { useEditorTabBarHelper } from "@/shell";
-import { Project } from "../types/project.types";
-import { usePTaskStore } from "@/features/project/store/usePTask.store";
+import type { Task } from "../types/task.types";
+import { taskService } from "../service/task.service";
+import { workspaceService, WorkspaceItemAction } from "@/features/workspace";
 
-export function useProjectTaskFolderHelper() {
+export function useTaskFolderHelper() {
     const _console = useConsoleHelper();
     const { $user } = useAuthStore();
-    const { openTabs, patchTab } = useEditorTabBarHelper();
-    const { projects, setProjects } = useProjectStore();
-    const { setTasks } = usePTaskStore();
     const debugLog = useDebugLog();
-
-    const projectsRef = useRef(projects);
-    useEffect(() => { projectsRef.current = projects; }, [projects]);
-
-    const { tasks } = usePTaskStore();
-    const tasksRef = useRef(tasks);
-    useEffect(() => { tasksRef.current = tasks; }, [tasks]);
-
-    /** Resolve a project by ID, fetching from API if not in store */
-    const resolveProject = async (projectId: number): Promise<Project | null> => {
-        const token = $user.userToken ?? "";
-        let project = projectsRef.current.find((p) => p.id === projectId);
-        if (project) return project;
-
-        const result = await projectService._getProjects(token, { ids: projectId.toString() });
-        if (result.success && result.data && result.data.length > 0) {
-            const fetched: Project[] = (result.data as ProjectDTO[]).map((dto) => ({
-                id: dto.id,
-                name: dto.name,
-                description: dto.description,
-                status: dto.status,
-                startDate: parseAsLocalDate(dto.startDate),
-                endDate: parseAsLocalDate(dto.endDate),
-                createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
-                updatedAt: parseAsLocalDate(dto.updatedAt),
-                deletedAt: parseAsLocalDate(dto.deletedAt),
-                workspaceId: dto.workspaceId,
-            }));
-            setProjects((prev) => {
-                const ids = new Set(prev.map((p) => p.id));
-                return [...prev, ...fetched.filter((p) => !ids.has(p.id))];
-            });
-            project = fetched.find((p) => p.id === projectId);
-        }
-        return project ?? null;
-    };
 
     /**
      * After a new task is saved:
-     * 1. Ensure project has a workspace
-     * 2. Create a folder named after the task in that workspace
-     * 3. Update task.folderWorkspaceItemId in DB and local store
+     * 1. Create a folder named after the task in the project's workspace
+     * 2. Persist folderWorkspaceItemId on the task (API + open tabs)
+     *
+     * @param workspaceId    - project's workspace ID (resolved by caller)
+     * @param onFolderCreated - caller's callback to update its local task store
      */
-    const createTaskFolder = async (savedTask: Task) => {
+    const createTaskFolder = async (
+        savedTask: Task,
+        workspaceId: number | null | undefined,
+        onFolderCreated?: (taskId: number, folderWorkspaceItemId: number) => void
+    ): Promise<void> => {
         debugLog.log("task-folder", "createTaskFolder-start", {
             taskId: savedTask.id,
             title: savedTask.title,
@@ -84,13 +42,6 @@ export function useProjectTaskFolderHelper() {
         try {
             const token = $user.userToken ?? "";
 
-            const project = await resolveProject(savedTask.projectId);
-            if (!project) {
-                _console.error("Project not found — cannot create task folder");
-                return;
-            }
-
-            const workspaceId = project.workspaceId;
             if (!workspaceId) {
                 debugLog.log("task-folder", "createTaskFolder-skip-no-workspace", {
                     taskId: savedTask.id, projectId: savedTask.projectId,
@@ -162,17 +113,14 @@ export function useProjectTaskFolderHelper() {
                     folderWorkspaceItemId,
                     returnedFolderWorkspaceItemId: updatedTaskResult.data[0].folderWorkspaceItemId,
                 });
-                setTasks((prev) => prev.map((t) =>
-                    t.id === savedTask.id ? { ...t, folderWorkspaceItemId } : t
-                ));
-                for (const tab of openTabs) {
-                    if (tab.type === shellConstants.vscode.tab.tabTypes.task && (tab.data as Task).id === savedTask.id) {
-                        patchTab(tab.id, (cur) => ({
-                            data: { ...(cur.data as Task), folderWorkspaceItemId },
-                            data0: cur.data0 ? { ...(cur.data0 as Task), folderWorkspaceItemId } : cur.data0,
-                        }));
-                    }
-                }
+
+                // Delegate all state updates to the caller.
+                // openTabs is a stale closure here (patchTab inside upsertTask hasn't
+                // re-rendered this hook yet), so looping openTabs to find the right tab
+                // would fail for newly-created tasks whose id just changed from -1 → real id.
+                // The caller holds the stable shell tab.id and uses patchTab's functional
+                // updater to read fresh state — which is always correct.
+                onFolderCreated?.(savedTask.id, folderWorkspaceItemId);
             }
         } catch (error) {
             console.error("Failed to create task folder:", error);
@@ -187,9 +135,16 @@ export function useProjectTaskFolderHelper() {
 
     /**
      * After a task-created note is saved:
-     * Add note to the task's workspace folder (folderWorkspaceItemId from tab metadata).
+     * Adds the note to the task's workspace folder.
+     *
+     * workspaceId is read from activeTab.metadata (set by createTaskNote).
+     * findTask is optional — falls back to activeTab.metadata.taskSnapshot.
      */
-    const addNoteToTaskFolder = async (savedNote: Note, activeTab: BaseTab) => {
+    const addNoteToTaskFolder = async (
+        savedNote: { id: number },
+        activeTab: BaseTab,
+        findTask?: (id: number) => Task | undefined
+    ): Promise<void> => {
         try {
             const token = $user.userToken ?? "";
 
@@ -199,21 +154,22 @@ export function useProjectTaskFolderHelper() {
                 return;
             }
 
+            const workspaceId = activeTab.metadata?.workspaceId as number | null | undefined;
+            if (!workspaceId) {
+                _console.error("Workspace ID missing from tab metadata");
+                return;
+            }
+
             const taskId = activeTab.metadata?.taskId as number;
-            const task = tasksRef.current.find((t) => t.id === taskId)
-                ?? (activeTab.metadata?.taskSnapshot as Task | undefined) ?? null;
+            const task = findTask?.(taskId)
+                ?? (activeTab.metadata?.taskSnapshot as Task | undefined)
+                ?? null;
             if (!task) {
                 _console.error("Task not found");
                 return;
             }
 
-            const project = await resolveProject(task.projectId);
-            if (!project?.workspaceId) {
-                _console.error("Project workspace not found");
-                return;
-            }
-
-            await workspaceService._upsertWorkspaceItems(token, project.workspaceId as number, [
+            await workspaceService._upsertWorkspaceItems(token, workspaceId, [
                 {
                     action: WorkspaceItemAction.Add,
                     entityType: 3,
@@ -236,5 +192,3 @@ export function useProjectTaskFolderHelper() {
 
     return { createTaskFolder, addNoteToTaskFolder };
 }
-
-

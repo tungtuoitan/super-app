@@ -91,5 +91,5 @@ export interface Project {
     startDate?: Date | string | null;
     endDate?: Date | string | null;
     deletedAt?: Date | string | null;
-    workspaceId?: number
+    workspaceId?: number | null
 }

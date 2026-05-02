@@ -243,7 +243,7 @@ export function TaskDetailContent() {
                                     {isLoadingFolderItems && <Loader2 className="h-3 w-3 animate-spin" />}
                                     {!isDisabled && (
                                         <button
-                                            onClick={() => createTaskNote(selectedTask)}
+                                            onClick={() => createTaskNote(selectedTask, currentProject?.workspaceId)}
                                             className="ml-auto p-0.5 rounded hover:bg-muted transition-colors"
                                             title="Create note"
                                         >
@@ -286,7 +286,7 @@ export function TaskDetailContent() {
                                         <div className="ml-auto flex items-center gap-1">
                                             {!selectedTask.folderWorkspaceItemId && (
                                                 <button
-                                                    onClick={() => createTaskNote(selectedTask)}
+                                                    onClick={() => createTaskNote(selectedTask, currentProject?.workspaceId)}
                                                     className="p-0.5 rounded hover:bg-muted transition-colors"
                                                     title="Create note"
                                                 >

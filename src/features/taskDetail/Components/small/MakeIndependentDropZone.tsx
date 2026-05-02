@@ -1,14 +1,16 @@
 /**
- * MakeIndependentDropZone - Drop zone for making subtasks independent.
+ * MakeIndependentDropZone - Drop zone for detaching a subtask from its parent.
+ * Shared by TaskGrid (project) and MultiProjectTaskList (multiProject).
  */
 
 import React, { useRef } from "react";
 import { useDrop, DropTargetMonitor } from "react-dnd";
 import { ArrowUpFromLine } from "lucide-react";
-import type { Task, TaskDragItem } from "@/features/taskDetail";
-import { validateMakeIndependent } from "@/features/taskDetail";
+import type { Task } from "../../types/task.types";
+import { validateMakeIndependent } from "../../utils/TaskGrid.utils";
 import { cn } from "@/lib/utils";
-import { TASK_ROW } from "../task/taskRow.constants";
+import { TASK_ROW } from "../../task.constants";
+import {TaskDragItem} from "../../types/taskGrid.types";
 
 interface MakeIndependentDropZoneProps {
     onDrop: (task: Task) => void;

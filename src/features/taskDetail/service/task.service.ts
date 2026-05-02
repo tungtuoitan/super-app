@@ -13,6 +13,7 @@ export interface ProjectOptionDTO {
     name: string;
     status: string;
     deletedAt?: string | null;
+    workspaceId?: number | null;
 }
 
 // Re-export for backward compatibility

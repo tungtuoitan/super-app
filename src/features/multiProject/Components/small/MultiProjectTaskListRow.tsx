@@ -10,7 +10,7 @@ import type { Task, TaskDragItem } from "@/features/taskDetail";
 import { validateDropTaskOntoTask } from "@/features/taskDetail";
 import { DateRangePicker } from "@/shared";
 import { cn } from "@/lib/utils";
-import { TASK_ROW } from "@/features/multiProject/utils/multiProjectDetail.constants";
+import { TASK_ROW } from "@/features/taskDetail";
 import type { DraggableRowProps } from "@/features/multiProject/types/multiProjectTaskList.type";
 
 /**

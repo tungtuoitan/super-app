@@ -19,7 +19,7 @@ import { useTaskListSelector } from "../Selectors/TaskListSelector";
 import { useTaskGridUpdateHelper } from "../hooks/taskList/useTaskGridUpdate.helper";
 import { useTaskListHeadless } from "../hooks/taskList/useTaskList.headless";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
-import {MakeIndependentDropZone} from "../../Components/MakeIndependentDropZone";
+import { MakeIndependentDropZone } from "@/features/taskDetail";
 import {DraggableRow} from "../../Components/DraggableRow";
 import {StatusCell} from "../../Components/StatusCell";
 import {PriorityCell} from "../../Components/PriorityCell";

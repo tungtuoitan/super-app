@@ -19,7 +19,6 @@ import { useMultiProjectTaskFlowSelector } from "@/features/multiProject/Selecto
 import { useTaskTabHelper } from "@/features/taskDetail";
 import { getStatusBorderColor, getStatusNodeBackground } from "@/features/multiProject/utils/multiProjectTaskFlow.utils";
 import { parseChecklistJson, checklistProgress, toggleChecklistItem, getItemCheckState, flatItemIndex, getFlatItems } from "@/features/taskDetail";
-import { constants } from "@/shared";
 import { ExternalLink, ChevronDown, ChevronRight, Circle, CheckSquare2, Square } from "lucide-react";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { taskService } from "@/features/taskDetail";
