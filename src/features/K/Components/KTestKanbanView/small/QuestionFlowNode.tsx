@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps, Node } from "@xyflow/react";
-import { ChevronRight, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { ChevronRight, PenLine, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { QuestionScoreBar } from "../../small/QuestionScoreBar";
 import { useKTestFlowStore } from "@/features/K/store/useKTestFlow.store";
 import { useKTestFlowHelper } from "@/features/K/hooks/test/useKTestFlow.helper";
@@ -31,7 +31,7 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
         if (!ids.includes(nodeId)) ids.push(nodeId);
         return ids;
     };
-    const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleDeleteQuestion, handleRestoreQuestion, handleMoveQuestion } = useKTestFlowHelper();
+    const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleDeleteQuestion, handleRestoreQuestion, handleToggleDraft, handleMoveQuestion } = useKTestFlowHelper();
     const { currentK, kFlowClipboard } = useKStore();
     
     const { question } = data as QuestionFlowNodeData;
@@ -151,7 +151,7 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
         handleRenameConfirm(idRef.current, draftQRef.current, draftARef.current);
     });
 
-    const isDraft = !isDeleted && (!question.answer?.trim() || question.answer.trim().includes("DRAFT"));
+    const isDraft = !isDeleted && !!question.isDraft;
 
     return (
         <div
@@ -161,6 +161,10 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
                     ? "border-zinc-800/40 bg-zinc-900/20 opacity-50"
                     : isCut
                     ? "border-blue-500 bg-zinc-900/80 ring-1 ring-blue-500/60 shadow-lg shadow-blue-500/10 opacity-60"
+                    : isDraft && selected
+                    ? "border-blue-500/50 bg-amber-950/20 ring-1 ring-blue-500/40 shadow-lg shadow-blue-500/10"
+                    : isDraft
+                    ? "border-amber-700/50 bg-amber-950/20"
                     : selected
                     ? "border-blue-500/50 bg-zinc-900/80 ring-1 ring-blue-500/40 shadow-lg shadow-blue-500/10"
                     : "border-zinc-700/60 bg-zinc-900/80"
@@ -281,7 +285,19 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
 
             <div className="flex items-center px-3 pb-2 pt-0.5">
                 <QuestionScoreBar scores={question.scoreHistory} srsNextReviewAt={question.srsNextReviewAt} retention={question.retention} />
-                {isDraft && <span className="text-[9px] text-amber-500/70 font-mono ml-auto">draft</span>}
+                {!isDeleted && !isEditing && (
+                    <button
+                        onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleDraft(question.id); }}
+                        title={isDraft ? "Unmark draft" : "Mark as draft"}
+                        className={`nodrag nopan ml-auto shrink-0 rounded p-0.5 transition-colors ${
+                            isDraft
+                                ? "text-amber-500 hover:text-amber-300"
+                                : "text-zinc-700 hover:text-zinc-400 opacity-0 group-hover:opacity-100"
+                        }`}
+                    >
+                        <PenLine className="w-3 h-3" />
+                    </button>
+                )}
             </div>
 
             {ctxMenu && createPortal(
@@ -304,6 +320,12 @@ export function QuestionFlowNode({ id, data, selected }: NodeProps<Node<Question
                                 className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-zinc-200"
                             >
                                 <Pencil className="w-3.5 h-3.5 text-zinc-400" /> Edit
+                            </button>
+                            <button
+                                onMouseDown={() => { setCtxMenu(null); setShowMoveMenu(false); handleToggleDraft(question.id); }}
+                                className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-amber-400"
+                            >
+                                <PenLine className="w-3.5 h-3.5" /> {isDraft ? "Unmark draft" : "Mark as draft"}
                             </button>
                             {/* Move to node/orphan */}
                             <div className="relative">

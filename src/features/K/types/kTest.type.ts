@@ -15,6 +15,8 @@ export interface KQuestion {
     answer: string | null;
     /** Whether this question is active */
     isActive: boolean;
+    /** True when the question is in draft state and excluded from review sessions */
+    isDraft: boolean;
     /** Display/sort order within the knowledge */
     sortOrder: number;
     /** Last ≤10 individual points (0–5) oldest→newest */
@@ -45,6 +47,8 @@ export interface KUpdateQuestionsRequest {
     restoreQuestionIds: number[];
     /** k.question IDs to reset SRS state */
     resetSrsQuestionIds?: number[];
+    /** k.question IDs to toggle isDraft flag */
+    toggleDraftQuestionIds?: number[];
 }
 
 // ── Submit answers + grading result ──────────────────────────────────────────

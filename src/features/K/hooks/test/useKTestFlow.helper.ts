@@ -29,7 +29,7 @@ function _hasOverlap(moved: { x: number; y: number }[], target: { x: number; y: 
 // ──────────────────────────────────────────────────────────────────────────
 
 function makeTempQuestion(): KTestQuestion {
-    return { id: 0, question: "", answer: null, isActive: true, sortOrder: 0, scoreHistory: [], retention: 0 };
+    return { id: 0, question: "", answer: null, isActive: true, isDraft: false, sortOrder: 0, scoreHistory: [], retention: 0 };
 }
 
 export function useKTestFlowHelper() {
@@ -251,10 +251,20 @@ export function useKTestFlowHelper() {
 
     // ── Rename confirm — create or update question ─────────────────────────
 
+    // Strip "DRAFT" keyword from an answer and determine if the question should be drafted.
+    // Rules: empty answer → draft; answer contains "DRAFT" → draft + remove "DRAFT".
+    const resolveDraft = (raw: string): { cleanedAnswer: string; shouldBeDraft: boolean } => {
+        const hasDraftKeyword = raw.includes("DRAFT");
+        const cleanedAnswer   = hasDraftKeyword ? raw.replace(/DRAFT/g, "").trim() : raw;
+        return { cleanedAnswer, shouldBeDraft: !cleanedAnswer || hasDraftKeyword };
+    };
+
     const handleRenameConfirm = async (nodeId: string, questionText: string, answerText: string) => {
         const kId = knowledgeIdRef.current;
         const trimmedQ = questionText.trim();
         const trimmedA = answerText.trim();
+
+        const { cleanedAnswer, shouldBeDraft } = resolveDraft(trimmedA);
 
         setEditingNodeId(null);
 
@@ -268,10 +278,10 @@ export function useKTestFlowHelper() {
             const tempNode = flowNodesRef.current.find((n) => n.id === nodeId);
             if (!tempNode) return;
 
-            // Optimistic label
+            // Optimistic label (use cleaned answer, pre-apply draft flag)
             setFlowNodes((prev) => prev.map((n) =>
                 n.id === nodeId
-                    ? { ...n, data: { question: { ...(n.data as QuestionFlowNodeData).question, question: trimmedQ, answer: trimmedA || null } } as QuestionFlowNodeData }
+                    ? { ...n, data: { question: { ...(n.data as QuestionFlowNodeData).question, question: trimmedQ, answer: cleanedAnswer || null, isDraft: shouldBeDraft } } as QuestionFlowNodeData }
                     : n,
             ));
 
@@ -284,7 +294,7 @@ export function useKTestFlowHelper() {
 
             try {
                 await updateQForNode(kId, {
-                    addQuestions: [{ name: trimmedQ, description: trimmedA || null }],
+                    addQuestions: [{ name: trimmedQ, description: cleanedAnswer || null }],
                     updateQuestions: [], toggleQuestionIds: [],
                     deleteQuestionIds: [], restoreQuestionIds: [],
                 });
@@ -294,6 +304,15 @@ export function useKTestFlowHelper() {
 
                 const newQ = res.object.questions.find((q) => !existingIds.has(q.id) && q.question === trimmedQ);
                 if (!newQ) throw new Error();
+
+                // Mark as draft if needed (new questions start as non-draft)
+                if (shouldBeDraft) {
+                    await updateQForNode(kId, {
+                        addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
+                        deleteQuestionIds: [], restoreQuestionIds: [],
+                        toggleDraftQuestionIds: [newQ.id],
+                    });
+                }
 
                 const realId = String(newQ.id);
                 const pos = tempNode.position;
@@ -317,17 +336,23 @@ export function useKTestFlowHelper() {
         const questionId = parseInt(nodeId, 10);
         if (!questionId) return;
 
+        const currentNode   = flowNodesRef.current.find((n) => n.id === nodeId);
+        const currentIsDraft = (currentNode?.data as QuestionFlowNodeData)?.question?.isDraft ?? false;
+        // Only toggle to draft — never auto-unset (user can unset manually)
+        const needsDraftToggle = shouldBeDraft && !currentIsDraft;
+
         setFlowNodes((prev) => prev.map((n) =>
             n.id === nodeId
-                ? { ...n, data: { question: { ...(n.data as QuestionFlowNodeData).question, question: trimmedQ, answer: trimmedA || null } } as QuestionFlowNodeData }
+                ? { ...n, data: { question: { ...(n.data as QuestionFlowNodeData).question, question: trimmedQ, answer: cleanedAnswer || null, isDraft: currentIsDraft || shouldBeDraft } } as QuestionFlowNodeData }
                 : n,
         ));
 
         try {
             await updateQForNode(kId, {
                 addQuestions: [], toggleQuestionIds: [],
-                updateQuestions: [{ id: questionId, name: trimmedQ, description: trimmedA || null }],
+                updateQuestions: [{ id: questionId, name: trimmedQ, description: cleanedAnswer || null }],
                 deleteQuestionIds: [], restoreQuestionIds: [],
+                ...(needsDraftToggle ? { toggleDraftQuestionIds: [questionId] } : {}),
             });
             dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
         } catch { /* silent — optimistic already applied */ }
@@ -360,6 +385,24 @@ export function useKTestFlowHelper() {
             await updateQForNode(kId, {
                 addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
                 deleteQuestionIds: [], restoreQuestionIds: [questionId],
+            });
+            dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
+        } catch { /* silent — optimistic applied */ }
+    }
+
+    const handleToggleDraft = async (questionId: number) => {
+        const kId = knowledgeIdRef.current;
+        // Optimistic toggle
+        setFlowNodes((prev) => prev.map((n) =>
+            n.id === String(questionId)
+                ? { ...n, data: { ...(n.data as QuestionFlowNodeData), question: { ...(n.data as QuestionFlowNodeData).question, isDraft: !(n.data as QuestionFlowNodeData).question.isDraft } } }
+                : n,
+        ));
+        try {
+            await updateQForNode(kId, {
+                addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
+                deleteQuestionIds: [], restoreQuestionIds: [],
+                toggleDraftQuestionIds: [questionId],
             });
             dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
         } catch { /* silent — optimistic applied */ }
@@ -593,6 +636,6 @@ export function useKTestFlowHelper() {
         handleConnectStart, handleConnectEnd,
         handleReconnect, handleReconnectStart, handleReconnectEnd,
         handleRenameStart, handleRenameConfirm, handleRenameCancel,
-        handleDeleteQuestion, handleRestoreQuestion, handleMoveQuestion, handlePasteQuestions,
+        handleDeleteQuestion, handleRestoreQuestion, handleToggleDraft, handleMoveQuestion, handlePasteQuestions,
     };
 }

@@ -1,3 +1,5 @@
+import { parseAsLocalDate } from "@/shared";
+
 interface QuestionScoreBarProps {
     /** Last ≤10 scores, each 0–5, oldest→newest */
     scores: number[];
@@ -17,7 +19,7 @@ const dotColor = (point: number) =>
     point >= 4 ? "#22c55e" : point >= 2 ? "#eab308" : "#ef4444";
 
 function formatNextReview(iso: string): string {
-    const diff = new Date(iso).getTime() - Date.now();
+    const diff = (parseAsLocalDate(iso)?.getTime() ?? Date.now()) - Date.now();
     if (diff <= 0) return "due";
 
     if (diff < 3_600_000) {
@@ -44,7 +46,9 @@ export function QuestionScoreBar({ scores, srsNextReviewAt, retention }: Questio
         ...scores.slice(-SLOTS),
     ];
 
-    const isDue = srsNextReviewAt ? new Date(srsNextReviewAt).getTime() <= Date.now() : false;
+    const isDue = srsNextReviewAt
+        ? (parseAsLocalDate(srsNextReviewAt)?.getTime() ?? Infinity) <= Date.now()
+        : false;
 
     return (
         <div className="flex items-center gap-1.5">

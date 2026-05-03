@@ -1,16 +1,24 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Eye, EyeOff, Loader2, Play } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BookDashed, BookOpen, Eye, EyeOff, Loader2, Play, RotateCcw, Trophy } from "lucide-react";
 import { KTestService } from "../../service/kTest.service";
+import { KService } from "../../service/K.service";
 import { KTestFlowProvider } from "../../store/useKTestFlow.store";
 import { KQuestionFlowCanvas } from "./KQuestionFlowCanvas";
 import { KDailyReviewSession } from "../KDailyReview/KDailyReviewSession";
-import { ScoreSparkline } from "../small/ScoreSparkline";
 import { sortQuestionsByFlowOrder } from "../../utils/kTestFlow.utils";
-import { useKStore } from "../../store/K.store";
-import type { KQuestion } from "../../types/kTest.type";
 import type { KDailySessionQuestion } from "../../types/kTest.type";
+import { ScoreSparkline } from "../small/ScoreSparkline";
+import { useKStore } from "../../store/K.store";
+import { useKLoader } from "../../hooks/kTree/useK.loader";
+import { useAuthStore, parseAsLocalDate } from "@/shared";
+import { KItemAction } from "../../types/K.types";
+import type { KQuestion } from "../../types/kTest.type";
 import { kEvents } from "../../utils/kEvents.utils";
 import type { KFlowQuestionsChangedDetail } from "../../utils/kEvents.utils";
+
+// A question is "mastered" when its last N consecutive reviews are all scored >= this threshold
+const MASTER_STREAK  = 5;
+const GOOD_SCORE_MIN = 4; // 0–5 scale; 4–5 = good recall
 
 interface KQFlowViewProps {
     nodeId: number | null; // null = show orphan questions (node_id IS NULL)
@@ -25,36 +33,38 @@ export function KQFlowView({ nodeId }: KQFlowViewProps) {
 }
 
 function KQFlowContent({ nodeId }: KQFlowViewProps) {
-    const [questions, setQuestions] = useState<KQuestion[]>([]);
-    // Start as true — initial mount will fetch questions, so we want canvas hidden until done
-    const [loading, setLoading] = useState(true);
-    const [showDeleted, setShowDeleted] = useState(false);
+    const [questions, setQuestions]       = useState<KQuestion[]>([]);
+    const [loading, setLoading]           = useState(true);
+    const [showDeleted, setShowDeleted]   = useState(false);
     const [reviewSession, setReviewSession] = useState<KDailySessionQuestion[] | null>(null);
     const [sessionLoading, setSessionLoading] = useState(false);
+    const [statusUpdating, setStatusUpdating] = useState(false);
+    const [resetConfirm, setResetConfirm] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
+    const resetConfirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const { currentK } = useKStore();
-    const node = nodeId !== null ? currentK?.flatData.find(n => n.id === nodeId) : null;
+    const { currentK, selectedKId } = useKStore();
+    const { loadTree }              = useKLoader();
+    const { $user }                 = useAuthStore();
+
+    const node       = nodeId !== null ? currentK?.flatData.find(n => n.id === nodeId) : null;
     const nodeStatus = node?.statusCode ?? null;
-    const isLearning = nodeStatus === "learning";
+    const isDraft    = nodeStatus === "draft";
 
     useEffect(() => {
-        console.log(`[kflow-view] nodeId→${nodeId} → clear questions, loading=true`);
         setQuestions([]);
         setShowDeleted(false);
         setReviewSession(null);
-        setLoading(true); // mark transition start so canvas overlay covers it
+        setLoading(true);
     }, [nodeId]);
 
     const loadQuestions = useCallback(async () => {
-        const t0 = performance.now();
-        console.log(`[kflow-view] loadQuestions start (nodeId=${nodeId})`);
         setLoading(true);
         try {
             const res = nodeId === null
                 ? await KTestService._getOrphanQuestions()
                 : await KTestService._getQuestions(nodeId);
             if (res.success && res.object) {
-                console.log(`[kflow-view] loadQuestions done in ${(performance.now() - t0).toFixed(0)}ms — got ${res.object.questions.length} questions`);
                 setQuestions(res.object.questions);
             }
         } finally {
@@ -62,11 +72,9 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
         }
     }, [nodeId]);
 
-    useEffect(() => {
-        loadQuestions();
-    }, [loadQuestions]);
+    useEffect(() => { loadQuestions(); }, [loadQuestions]);
 
-    // Reload when a question operation fires for this node (or for orphans when nodeId=null)
+    // Reload when a question operation fires for this node (or orphans when nodeId=null)
     useEffect(() => {
         const handler = (e: CustomEvent<KFlowQuestionsChangedDetail>) => {
             if (e.detail.knowledgeId === nodeId) loadQuestions();
@@ -77,16 +85,31 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
 
     // ── Stats ─────────────────────────────────────────────────────────────────
 
-    const now = new Date();
+    const now             = new Date();
     const activeQuestions = questions.filter(q => q.isActive && !q.deletedAt);
-    const dueCount = activeQuestions.filter(
-        q => q.srsNextReviewAt && new Date(q.srsNextReviewAt) <= now
-    ).length;
-    const newCount = activeQuestions.filter(q => !q.srsNextReviewAt).length;
-    const totalDue = dueCount + newCount;
+    // Draft questions are excluded from review sessions
+    const reviewableQuestions = activeQuestions.filter(q => !q.isDraft);
+    const dueCount        = reviewableQuestions.filter(q => {
+        if (!q.srsNextReviewAt) return false;
+        const d = parseAsLocalDate(q.srsNextReviewAt);
+        return d !== null && d <= now;
+    }).length;
+    const newCount        = reviewableQuestions.filter(q => !q.srsNextReviewAt).length;
+    const draftCount      = activeQuestions.filter(q => q.isDraft).length;
+    const totalReviewable = dueCount + newCount;
+    const canReview       = totalReviewable > 0;
 
-    // Aggregate sparkline: for each of the last 7 slots, average score across all questions
-    // scoreHistory values are 0–5; multiply ×20 to get 0–100 for ScoreSparkline
+    // "Master" is UI-only: statusCode stays "learning" but we surface a badge
+    // when every reviewable (non-draft) question has MASTER_STREAK consecutive good scores.
+    const isMaster = useMemo(() => {
+        if (reviewableQuestions.length === 0) return false;
+        return reviewableQuestions.every(q =>
+            q.scoreHistory.length >= MASTER_STREAK &&
+            q.scoreHistory.slice(-MASTER_STREAK).every(s => s >= GOOD_SCORE_MIN)
+        );
+    }, [reviewableQuestions]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Aggregate sparkline: average score across all questions per slot (0–5 → ×20 → 0–100)
     const sparkScores = useMemo(() => {
         const qs = activeQuestions.filter(q => q.scoreHistory.length > 0);
         if (qs.length === 0) return [];
@@ -98,80 +121,180 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                 const idx = q.scoreHistory.length - SLOTS + slot;
                 if (idx >= 0) values.push(q.scoreHistory[idx]);
             }
-            if (values.length > 0) {
-                const avg = values.reduce((a, b) => a + b, 0) / values.length;
-                result.push(Math.round(avg * 20));
-            }
+            if (values.length > 0)
+                result.push(Math.round(values.reduce((a, b) => a + b, 0) / values.length * 20));
         }
         return result;
     }, [questions]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // ── Play handler ──────────────────────────────────────────────────────────
+    // ── Status toggle ─────────────────────────────────────────────────────────
 
-    const handleStartReview = async () => {
-        if (nodeId === null) return;
-        setSessionLoading(true);
+    const handleToggleStatus = async () => {
+        if (!node || !selectedKId) return;
+        setStatusUpdating(true);
         try {
-            const res = await KTestService._getDailySession(nodeId);
-            if (res.success && res.object && res.object.length > 0) {
-                const sorted = await sortQuestionsByFlowOrder(res.object);
-                setReviewSession(sorted);
-            }
+            const newStatus = isDraft ? "learning" : "draft";
+            await KService._upsertWorkspaceItems($user.userToken, selectedKId, [{
+                action: KItemAction.Update,
+                id: node.id,
+                nodeData: {
+                    name:        node.name,
+                    description: node.description ?? null,
+                    color:       node.color       ?? null,
+                    icon:        node.icon        ?? null,
+                    statusCode:  newStatus,
+                },
+            }]);
+            await loadTree();
         } catch { /* silent */ }
-        finally { setSessionLoading(false); }
+        finally { setStatusUpdating(false); }
     };
 
-    const deletedCount = questions.filter((q) => !!q.deletedAt).length;
+    // ── SRS reset ─────────────────────────────────────────────────────────────
 
-    // Use 0 as canvas key for orphans — just needs a stable numeric ID for position storage
+    const handleResetClick = () => {
+        if (resetLoading) return;
+        if (!resetConfirm) {
+            setResetConfirm(true);
+            resetConfirmTimerRef.current = setTimeout(() => setResetConfirm(false), 3000);
+        } else {
+            if (resetConfirmTimerRef.current) clearTimeout(resetConfirmTimerRef.current);
+            setResetConfirm(false);
+            void (async () => {
+                if (!nodeId) return;
+                const ids = activeQuestions.map(q => q.id);
+                if (ids.length === 0) return;
+                setResetLoading(true);
+                try {
+                    await KTestService._updateQuestions(nodeId, {
+                        addQuestions: [],
+                        updateQuestions: [],
+                        toggleQuestionIds: [],
+                        deleteQuestionIds: [],
+                        restoreQuestionIds: [],
+                        resetSrsQuestionIds: ids,
+                    });
+                    await loadQuestions();
+                } catch { /* silent */ }
+                finally { setResetLoading(false); }
+            })();
+        }
+    };
+
+    // Clean up auto-cancel timer on unmount
+    useEffect(() => () => {
+        if (resetConfirmTimerRef.current) clearTimeout(resetConfirmTimerRef.current);
+    }, []);
+
+    const deletedCount = questions.filter(q => !!q.deletedAt).length;
     const canvasNodeId = nodeId ?? 0;
+    // Show reset button only when at least one active question has been reviewed
+    const hasReviewHistory = reviewableQuestions.some(q => q.srsNextReviewAt !== null || q.scoreHistory.length > 0);
 
     return (
         <div className="flex flex-col h-full relative">
             {/* Toolbar */}
-            <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800/60 shrink-0">
+            <div className="flex items-center gap-1.5 px-3 h-11 border-b border-zinc-800/60 shrink-0">
+
                 {nodeId === null && (
                     <span className="text-xs text-zinc-500 italic">Orphaned questions</span>
                 )}
+
+                {/* Status badge + toggle */}
+                {nodeId !== null && node && (
+                    <button
+                        onClick={handleToggleStatus}
+                        disabled={statusUpdating}
+                        title={isDraft ? "Set to Learning" : "Set to Draft"}
+                        className={[
+                            "h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50",
+                            isDraft
+                                ? "text-zinc-500 border-zinc-700/60 hover:text-zinc-300 hover:border-zinc-500"
+                                : isMaster
+                                    ? "text-amber-400 border-amber-800/50 bg-amber-900/10 hover:bg-amber-900/25"
+                                    : "text-indigo-400 border-indigo-800/50 bg-indigo-900/10 hover:bg-indigo-900/25",
+                        ].join(" ")}
+                    >
+                        {statusUpdating
+                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                            : isDraft
+                                ? <BookDashed className="w-3 h-3" />
+                                : isMaster
+                                    ? <Trophy className="w-3 h-3" />
+                                    : <BookOpen className="w-3 h-3" />
+                        }
+                        {isDraft ? "Draft" : isMaster ? "Master" : "Learning"}
+                    </button>
+                )}
+
                 <div className="ml-auto flex items-center gap-2">
-                    {/* Sparkline + stats — shown when there are active questions */}
+                    {/* Sparkline + stats */}
                     {activeQuestions.length > 0 && (
                         <div className="flex items-center gap-2">
                             {sparkScores.length > 0 && (
                                 <ScoreSparkline scores={sparkScores} slots={7} />
                             )}
                             <div className="flex items-center gap-1.5 text-[11px]">
-                                {dueCount > 0 && (
-                                    <span className="text-orange-400/80 font-medium">{dueCount} due</span>
-                                )}
-                                {newCount > 0 && (
-                                    <span className="text-blue-400/80 font-medium">{newCount} new</span>
-                                )}
+                                {dueCount > 0 && <span className="text-orange-400/80 font-medium">{dueCount} due</span>}
+                                {newCount  > 0 && <span className="text-blue-400/80 font-medium">{newCount} new</span>}
+                                {draftCount > 0 && <span className="text-amber-600/70 font-medium">{draftCount} draft</span>}
                                 <span className="text-zinc-500">{activeQuestions.length} Q</span>
                             </div>
                         </div>
                     )}
 
-                    {/* Play button — only for "learning" nodes with due questions */}
-                    {nodeId !== null && isLearning && totalDue > 0 && (
+                    {/* Play button — show when any due or new (unreviewed) questions exist */}
+                    {nodeId !== null && !isDraft && canReview && (
                         <button
-                            onClick={handleStartReview}
+                            onClick={async () => {
+                                if (sessionLoading) return;
+                                setSessionLoading(true);
+                                try {
+                                    const res = await KTestService._getDailySession(nodeId);
+                                    if (res.success && res.object && res.object.length > 0) {
+                                        const sorted = await sortQuestionsByFlowOrder(res.object);
+                                        setReviewSession(sorted);
+                                    }
+                                } catch { /* silent */ }
+                                finally { setSessionLoading(false); }
+                            }}
                             disabled={sessionLoading}
-                            title={`Review ${totalDue} question${totalDue !== 1 ? "s" : ""}`}
+                            title={`Review ${totalReviewable} question${totalReviewable !== 1 ? "s" : ""}${dueCount > 0 ? ` (${dueCount} due)` : ""}`}
                             className="h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border border-blue-700/60 bg-blue-900/20 text-blue-300 hover:bg-blue-900/40 hover:border-blue-600 transition-colors disabled:opacity-50"
                         >
                             {sessionLoading
                                 ? <Loader2 className="w-3 h-3 animate-spin" />
                                 : <Play className="w-3 h-3 fill-current" />
                             }
-                            {totalDue}
+                            {totalReviewable}
+                        </button>
+                    )}
+
+                    {/* Reset SRS — first click arms confirm, second click executes */}
+                    {nodeId !== null && !isDraft && hasReviewHistory && (
+                        <button
+                            onClick={handleResetClick}
+                            disabled={resetLoading}
+                            title={resetConfirm ? "Click again to confirm reset" : "Reset all SRS history for this node"}
+                            className={[
+                                "h-7 px-2 flex items-center gap-1 text-xs rounded border transition-colors disabled:opacity-50",
+                                resetConfirm
+                                    ? "text-red-400 border-red-700/60 bg-red-950/30 hover:bg-red-950/50"
+                                    : "text-zinc-600 border-zinc-800 hover:text-zinc-400 hover:border-zinc-600",
+                            ].join(" ")}
+                        >
+                            {resetLoading
+                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                : <RotateCcw className="w-3 h-3" />
+                            }
+                            {resetConfirm && <span>Confirm?</span>}
                         </button>
                     )}
 
                     {/* Show-deleted toggle */}
                     {deletedCount > 0 && (
                         <button
-                            onClick={() => setShowDeleted((v) => !v)}
+                            onClick={() => setShowDeleted(v => !v)}
                             title={showDeleted ? "Hide deleted questions" : `Show ${deletedCount} deleted question${deletedCount !== 1 ? "s" : ""}`}
                             className={`h-7 px-2 flex items-center gap-1 text-xs rounded border transition-colors ${
                                 showDeleted
@@ -202,10 +325,10 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
             </div>
 
             {/* Review session overlay */}
-            {reviewSession && (
+            {reviewSession && nodeId !== null && (
                 <div className="absolute inset-0 z-50 bg-zinc-950 flex flex-col">
                     <KDailyReviewSession
-                        knowledgeId={nodeId!}
+                        knowledgeId={nodeId}
                         testTitle={node?.name ?? ""}
                         questions={reviewSession}
                         onComplete={() => { setReviewSession(null); loadQuestions(); }}

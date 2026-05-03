@@ -139,6 +139,7 @@ export const useKNodeDialogHelper = () => {
                         color,
                         icon: nodeType === "entity" ? (icon || undefined) : null,
                         nodeType: nodeType ?? undefined,
+                        statusCode: "draft",
                     }
                 }]);
             }

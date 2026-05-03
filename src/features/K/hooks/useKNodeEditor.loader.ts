@@ -215,6 +215,7 @@ export const useKNodeEditorLoader = () => {
             description: draft.description || null,
             color: draft.color,
             icon: draft.icon,
+            statusCode: "draft",
             pathDepth: parentId != null
                 ? (currentK.flatData.find(n => n.id === parentId)?.pathDepth ?? 0) + 1
                 : 1,
@@ -234,6 +235,7 @@ export const useKNodeEditorLoader = () => {
                     description: draft.description || null,
                     color: draft.color,
                     icon: draft.icon,
+                    statusCode: "draft",
                 },
             }]);
 

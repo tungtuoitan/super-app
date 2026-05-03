@@ -403,7 +403,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                             />
                         )}
                         {/* Draft badge â€" hover to see "Keep it", click to activate */}
-                        {nodeItem.statusCode === "draft" && treeType === "workspaceTree" && (
+                        {/* {nodeItem.statusCode === "draft" && treeType === "workspaceTree" && (
                             <button
                                 onMouseEnter={() => setIsDraftHovered(true)}
                                 onMouseLeave={() => setIsDraftHovered(false)}
@@ -423,7 +423,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                             >
                                 {isDraftHovered ? "Keep it" : "DRAFT"}
                             </button>
-                        )}
+                        )} */}
                     </div>
                 </div>
 

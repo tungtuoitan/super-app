@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ArrowLeft, PenLine } from "lucide-react";
 import { Button } from "@/shared";
 import { KTestService } from "../../service/kTest.service";
 import { cn } from "@/lib/utils";
@@ -69,7 +69,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
             selfScore: scoresSnap[q.id] ?? null,
         }));
         KTestService._submitDailyAnswers(knowledgeId, { answers: dailyAnswers })
-            .catch(err => console.error("[KDailyReview] submit failed:", err));
+            .catch(() => { /* silent */ });
     }
 
     const advanceWithScore = (score: number) => {
@@ -88,6 +88,27 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
         setCurrentIndex(i => i + 1);
     }
     advanceWithScoreRef.current = advanceWithScore;
+
+    // Mark current question as draft and skip it (no score recorded)
+    const handleMarkDraft = () => {
+        if (isSubmitted) return;
+        const qId = currentQuestion?.id;
+        if (qId === undefined) return;
+        // Fire-and-forget toggle
+        KTestService._updateQuestions(knowledgeId, {
+            addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
+            deleteQuestionIds: [], restoreQuestionIds: [],
+            toggleDraftQuestionIds: [qId],
+        }).catch(() => {});
+        // Advance without recording a score for this question
+        if (currentIndex >= totalQuestions - 1) {
+            setIsSubmitted(true);
+            if (!isQuickTest) submitInBackground(selfScores, timings);
+            return;
+        }
+        setShowResult(false);
+        setCurrentIndex(i => i + 1);
+    };
 
     // Drag-to-score — only active after answer is revealed
     const handleDragStart = (e: React.PointerEvent) => {
@@ -268,7 +289,17 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
                         <ArrowLeft className="w-4 h-4 inline mr-1" />
                         Cancel
                     </button>
-                    <span className="text-xs text-muted-foreground">{currentIndex + 1} / {totalQuestions}</span>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleMarkDraft}
+                            title="Mark as draft and skip"
+                            className="flex items-center gap-1 text-xs text-amber-600/70 hover:text-amber-400 transition-colors"
+                        >
+                            <PenLine className="w-3.5 h-3.5" />
+                            Draft
+                        </button>
+                        <span className="text-xs text-muted-foreground">{currentIndex + 1} / {totalQuestions}</span>
+                    </div>
                 </div>
                 <div className="h-1 rounded-full bg-muted overflow-hidden">
                     <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />

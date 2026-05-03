@@ -31,10 +31,20 @@ export function KKnowledgeEditorPanel() {
         return saved ?? (isNew ? "general" : "qflow");
     });
     const [selectedNodeId, setSelectedNodeId] = useState<number | null>(() => {
-        return (tab?.metadata?.selectedNodeId as number | undefined) ?? null;
+        // 1. Tab already had a saved node (e.g. page refresh / tab swap back)
+        const fromMetadata = tab?.metadata?.selectedNodeId as number | undefined;
+        if (fromMetadata !== undefined) return fromMetadata;
+        // 2. Tab just opened via a node click — pendingQuizTabSwitch is already in scope
+        //    (useKStore() is called above, so this closure captures the initial render value)
+        return typeof pendingQuizTabSwitch === "number" ? pendingQuizTabSwitch : null;
     });
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [importParentNode, setImportParentNode] = useState<KItemV2 | null>(null);
+
+    // Track previous knowledge.id — initialized to the CURRENT value so the effect
+    // is a no-op on first mount (and on StrictMode double-mount since the ref persists).
+    // The reset only fires when the singleton tab is genuinely swapped to a different knowledge.
+    const prevKnowledgeIdRef = useRef<number>(knowledge.id);
 
     // Persist activeTab to tab metadata
     const setActiveTab = (t: KTab) => {
@@ -42,8 +52,12 @@ export function KKnowledgeEditorPanel() {
         if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, activeKTab: t } }));
     };
 
-    // When knowledge changes (singleton tab swap), reset state
+    // When knowledge changes (singleton tab swap), reset state.
+    // No-op on initial mount or StrictMode double-mount (prev === current).
     useEffect(() => {
+        const prev = prevKnowledgeIdRef.current;
+        prevKnowledgeIdRef.current = knowledge.id;
+        if (prev === knowledge.id) return; // same knowledge — skip
         const defaultTab = isNew ? "general" : "qflow";
         setActiveTabLocal(defaultTab);
         setSelectedNodeId(null);
