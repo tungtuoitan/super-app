@@ -20,11 +20,12 @@ export interface KTestFlowContextData {
     setEditingEdgeId: Dispatch<SetStateAction<string | null>>;
     connectingSourceId: string | null;
     setConnectingSourceId: Dispatch<SetStateAction<string | null>>;
-    /** Passed down from parent so helper can call API without prop drilling */
+    /** The knowledge whose questions are shown in this canvas */
     knowledgeId: number;
     setKnowledgeId: Dispatch<SetStateAction<number>>;
-    activeTestId: number | null;
-    setActiveTestId: Dispatch<SetStateAction<number | null>>;
+    /** Node IDs to auto-select after the next rebuild (cleared once applied) */
+    pendingSelectIds: number[];
+    setPendingSelectIds: Dispatch<SetStateAction<number[]>>;
 }
 
 const defaultValue: KTestFlowContextData = {
@@ -37,7 +38,7 @@ const defaultValue: KTestFlowContextData = {
     editingEdgeId: null, setEditingEdgeId: () => {},
     connectingSourceId: null, setConnectingSourceId: () => {},
     knowledgeId: 0, setKnowledgeId: () => {},
-    activeTestId: null, setActiveTestId: () => {},
+    pendingSelectIds: [], setPendingSelectIds: () => {},
 };
 
 const KTestFlowStore = createContext<KTestFlowContextData>(defaultValue);
@@ -54,7 +55,7 @@ export const KTestFlowProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
     const [editingEdgeId, setEditingEdgeId] = useState<string | null>(null);
     const [connectingSourceId, setConnectingSourceId] = useState<string | null>(null);
     const [knowledgeId, setKnowledgeId] = useState(0);
-    const [activeTestId, setActiveTestId] = useState<number | null>(null);
+    const [pendingSelectIds, setPendingSelectIds] = useState<number[]>([]);
 
     return (
         <KTestFlowStore.Provider value={{
@@ -67,7 +68,7 @@ export const KTestFlowProvider: React.FC<React.PropsWithChildren<unknown>> = ({ 
             editingEdgeId, setEditingEdgeId,
             connectingSourceId, setConnectingSourceId,
             knowledgeId, setKnowledgeId,
-            activeTestId, setActiveTestId,
+            pendingSelectIds, setPendingSelectIds,
         }}>
             {children}
         </KTestFlowStore.Provider>

@@ -1,56 +1,21 @@
-// ── Test summary (list view) ──────────────────────────────────────────────────
+// ── Questions list for a knowledge ───────────────────────────────────────────
 
-export interface KTestSummary {
-    id: number;
+export interface KQuestionsListResponse {
     knowledgeId: number;
-    userId: number;
-    /** Entity node (k.node.id) this test is linked to */
-    nodeId: number | null;
-    title: string;
-    level: number;
-    mode: string;
-    /** inactive | learning | mastered */
-    status: string | null;
-    /** Total question count */
-    questionCount: number;
-    /** Number of questions with isActive = true */
-    activeCount: number;
-    /** Latest submission score (null if never submitted) */
-    lastTotalPoints: number | null;
-    lastMaxPoints: number | null;
-    lastPct: number | null;
-    lastSubmittedAt: string | null;
-    createdAt: string | null;
-    sortOrder: number;
-    deletedAt?: string | null;
-    /** Last ≤10 submission percentages oldest→newest — for sparkline */
-    scoreHistory: number[];
+    questions: KQuestion[];
 }
 
-// ── Test detail (session view) ────────────────────────────────────────────────
-
-export interface KTestDetail {
-    id: number;
-    knowledgeId: number;
-    title: string;
-    level: number;
-    mode: string;
-    /** Questions belonging to this test (from k.question table) */
-    questions: KTestQuestion[];
-    createdAt: string | null;
-}
-
-/** A single question in the test — stored in k.question table */
-export interface KTestQuestion {
+/** A single question stored in k.question table */
+export interface KQuestion {
     /** k.question.id */
     id: number;
     /** k.question.name — the question text */
     question: string;
     /** k.question.description — expected answer */
     answer: string | null;
-    /** Whether this question is active in the test */
+    /** Whether this question is active */
     isActive: boolean;
-    /** Display/sort order within the test */
+    /** Display/sort order within the knowledge */
     sortOrder: number;
     /** Last ≤10 individual points (0–5) oldest→newest */
     scoreHistory: number[];
@@ -62,18 +27,13 @@ export interface KTestQuestion {
     deletedAt?: string | null;
 }
 
-// ── Update test request ───────────────────────────────────────────────────────
-
-export interface KUpdateTestRequest {
-    title?: string;
-    /** Optionally re-link test to a different entity node */
-    nodeId?: number | null;
-}
+// Backward-compat alias used by flow canvas / helpers
+export type KTestQuestion = KQuestion;
 
 // ── Question management ──────────────────────────────────────────────────────
 
 export interface KUpdateQuestionsRequest {
-    /** New questions to add to the test */
+    /** New questions to add to the knowledge */
     addQuestions: Array<{ name: string; description?: string | null }>;
     /** Existing questions to update name/description */
     updateQuestions: Array<{ id: number; name: string; description?: string | null }>;
@@ -85,8 +45,6 @@ export interface KUpdateQuestionsRequest {
     restoreQuestionIds: number[];
     /** k.question IDs to reset SRS state */
     resetSrsQuestionIds?: number[];
-    /** Move questions to a different test (preserves SRS/history) */
-    moveQuestions?: Array<{ id: number; targetTestId: number }>;
 }
 
 // ── Submit answers + grading result ──────────────────────────────────────────
@@ -122,15 +80,22 @@ export interface KQuestionGrade {
 
 export type KQuestionScoreMap = Record<number, number>;
 
+// ── Per-node SRS due summary ──────────────────────────────────────────────
+
+/** Per-node due/new count — from GET /api/k/{knowledgeId}/node-due-summary */
+export interface KNodeDueCount {
+    nodeId: number;
+    /** Questions with srsNextReviewAt <= now */
+    dueCount: number;
+    /** Questions with srsNextReviewAt = null (never reviewed) */
+    newCount: number;
+}
+
 // ── Daily Review (SRS) ────────────────────────────────────────────────────
 
 export interface KDailyQueueItem {
-    testId: number;
     knowledgeId: number;
     knowledgeName: string;
-    title: string;
-    level: number;
-    status: string | null;
     /** Questions due for review */
     dueCount: number;
     /** New questions (never reviewed) */
@@ -143,9 +108,6 @@ export interface KDailySessionQuestion {
     id: number;
     question: string;
     answer: string | null;
-    srsInterval?: number;
-    srsRepetitions?: number;
-    srsEaseFactor?: number;
 }
 
 export interface KDailyAnswerItem {
@@ -164,14 +126,6 @@ export interface KDailySubmitRequest {
 export interface KRetentionSummary {
     average: number;
     totalQuestions: number;
-    tests: KRetentionTestItem[];
-}
-
-export interface KRetentionTestItem {
-    testId: number;
-    title: string;
-    retention: number;
-    questionCount: number;
 }
 
 // ── Retention Graph ──────────────────────────────────────────────────────
@@ -184,7 +138,6 @@ export interface KRetentionGraph {
 export interface KRetentionGraphQuestion {
     id: number;
     name: string;
-    testTitle: string;
 }
 
 export interface KRetentionGraphDay {

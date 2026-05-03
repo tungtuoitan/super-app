@@ -1,80 +1,42 @@
-import { useCallback, useEffect, useState } from "react";
-import { Settings, GitBranch, CalendarClock, LayoutGrid, List } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Settings, GitBranch } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useDeviceStore } from "@/shared";
 import { CardContent } from "@/shared";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared";
 import { KKnowledgeGeneral } from "./KKnowledgeGeneral";
-import { KTestList } from "./KTestList";
-import { KDailyReviewSession } from "./KDailyReview/KDailyReviewSession";
 import { KMarkdownImportPanel } from "./KMarkdownImportPanel/KMarkdownImportPanel";
-import { KDailyReviewPanel } from "./KDailyReview/KDailyReviewPanel";
-import { KRetentionBadge } from "./small/KRetentionBadge";
-import { KTestStore, useKTestStoreValues } from "../store/useKTest.store";
-import { KTestService } from "../service/kTest.service";
+import { KQFlowView } from "./KTestKanbanView/KQFlowView";
 import { useKStore } from "../store/K.store";
 import type { KWsResponse } from "../types/K.types";
-import type { KTestDetail as KTestDetailType, KDailySessionQuestion } from "../types/kTest.type";
 import type { KItemV2 } from "../types/K-v2.types";
-import {KTestFlowView} from "./KTestKanbanView/KTestFlowView";
-import {KTestKanbanView} from "./KTestKanbanView/KTestKanbanView";
-import {useEditorTabBarHelper} from "@/shell";
+import { useEditorTabBarHelper } from "@/shell";
+import { dispatchKFlowQuestionsChanged } from "../utils/kEvents.utils";
 
-
-type SessionState = {
-    knowledgeId: number;
-    testId: number;
-    testTitle: string;
-    questions: KDailySessionQuestion[];
-} | null;
-
-type PanelView =
-    | { kind: "none" }
-    | { kind: "testDetail"; testId: number };
-
-type KTab = "questionFlow" | "general" | "testList" | "dailyReview" | "testKanban";
+type KTab = "general" | "qflow";
 
 const TABS: { id: KTab; label: string; icon: React.ReactNode }[] = [
     { id: "general", label: "GENERAL", icon: <Settings className="h-4 w-4" /> },
-    { id: "testList", label: "TEST LIST", icon: <List className="h-4 w-4" /> },
-    { id: "testKanban", label: "TEST KANBAN", icon: <LayoutGrid className="h-4 w-4" /> },
-    { id: "questionFlow", label: "Q FLOW", icon: <GitBranch className="h-4 w-4" /> },
-    { id: "dailyReview", label: "DAILY", icon: <CalendarClock className="h-4 w-4" /> },
+    { id: "qflow", label: "Q FLOW", icon: <GitBranch className="h-4 w-4" /> },
 ];
 
 export function KKnowledgeEditorPanel() {
-    const { getActiveTab, patchTab } = useEditorTabBarHelper()
-    const tab = getActiveTab()
+    const { getActiveTab, patchTab } = useEditorTabBarHelper();
+    const tab = getActiveTab();
     const knowledge = tab?.data as unknown as KWsResponse;
-    const isNew     = knowledge.id < 0;
-    const { isMobile } = useDeviceStore();
-    const kTestStoreValues = useKTestStoreValues();
-    const { currentK, pendingImportNodeId, setPendingImportNodeId, pendingQuizTabSwitch, setPendingQuizTabSwitch, allK } = useKStore();
+    const isNew = knowledge.id < 0;
+    const { pendingImportNodeId, setPendingImportNodeId, pendingQuizTabSwitch, setPendingQuizTabSwitch, currentK, selectedItemIds } = useKStore();
 
-    const [activeTab, setActiveTabLocal]           = useState<KTab>(() => {
+    const [activeTab, setActiveTabLocal] = useState<KTab>(() => {
         const saved = tab?.metadata?.activeKTab as KTab | undefined;
-        return saved ?? (isNew ? "general" : "questionFlow");
+        return saved ?? (isNew ? "general" : "qflow");
     });
-    const [session, setSession]                   = useState<SessionState>(null);
-    const [view, setView]                         = useState<PanelView>({ kind: "none" });
-    const [isImportOpen, setIsImportOpen]         = useState(false);
+    const [selectedNodeId, setSelectedNodeId] = useState<number | null>(() => {
+        return (tab?.metadata?.selectedNodeId as number | undefined) ?? null;
+    });
+    const [isImportOpen, setIsImportOpen] = useState(false);
     const [importParentNode, setImportParentNode] = useState<KItemV2 | null>(null);
-    const [dailyDueCount, setDailyDueCount]       = useState(0);
-    const [initialFlowTestId, setInitialFlowTestId] = useState<number | null>(null);
 
-    // Load daily due count for badge (global — all knowledges)
-    useEffect(() => {
-        if (isNew) return;
-        KTestService._getGlobalDailyQueue()
-            .then(res => {
-                if (res.success && res.object) {
-                    setDailyDueCount(res.object.filter(q => q.dueCount + q.newCount > 0).length);
-                }
-            })
-            .catch(() => {});
-    }, [knowledge.id, isNew]);
-
-    // Persist activeTab to tab?.metadata so it survives unmount/remount
+    // Persist activeTab to tab metadata
     const setActiveTab = (t: KTab) => {
         setActiveTabLocal(t);
         if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, activeKTab: t } }));
@@ -82,11 +44,10 @@ export function KKnowledgeEditorPanel() {
 
     // When knowledge changes (singleton tab swap), reset state
     useEffect(() => {
-        setSession(null);
-        setView({ kind: "none" });
-        const defaultTab = isNew ? "general" : "questionFlow";
+        const defaultTab = isNew ? "general" : "qflow";
         setActiveTabLocal(defaultTab);
-        if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, activeKTab: defaultTab } }));
+        setSelectedNodeId(null);
+        if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, activeKTab: defaultTab, selectedNodeId: null } }));
     }, [knowledge.id]);
 
     // Track unsaved changes on tab
@@ -96,162 +57,81 @@ export function KKnowledgeEditorPanel() {
         }
     }, [tab?.data, tab?.id]);
 
-    // pendingQuizTabSwitch set by tree node click → reload tests filtered by that node
+    // Tree deselect (click empty space) → reset to orphan view
+    const prevSelectedLenRef = useRef(selectedItemIds.length);
+    useEffect(() => {
+        const prev = prevSelectedLenRef.current;
+        prevSelectedLenRef.current = selectedItemIds.length;
+        if (prev > 0 && selectedItemIds.length === 0) {
+            setSelectedNodeId(null);
+            if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, selectedNodeId: null } }));
+        }
+    }, [selectedItemIds]);
+
+    // pendingQuizTabSwitch carries the clicked nodeId → switch to qflow and show that node's questions
     useEffect(() => {
         if (pendingQuizTabSwitch === undefined || isNew) return;
         const nodeId = pendingQuizTabSwitch;
         setPendingQuizTabSwitch(undefined);
-        // Cancel any ongoing test session / detail view
-        setSession(null);
-        setView({ kind: "none" });
-        setActiveTab("questionFlow");
-        // Only set the activeNodeId — KTestKanbanView's own effect will call loadTests
-        kTestStoreValues.setActiveNodeId(nodeId ?? null);
+        setActiveTab("qflow");
+        setSelectedNodeId(nodeId);
+        if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, selectedNodeId: nodeId } }));
     }, [pendingQuizTabSwitch]);
 
     // pendingImportNodeId set by tree right-click → open Import dialog
     useEffect(() => {
         if (pendingImportNodeId === undefined) return;
         const node = pendingImportNodeId !== null
-            ? (currentK?.flatData.find(n => n.id === pendingImportNodeId) ?? null)
+            ? (currentK?.flatData.find((n) => n.id === pendingImportNodeId) ?? null)
             : null;
         setImportParentNode(node);
         setIsImportOpen(true);
         setPendingImportNodeId(undefined);
     }, [pendingImportNodeId]);
 
-    const handleStartQuickTest = useCallback((testDetail: KTestDetailType) => {
-        const questions: KDailySessionQuestion[] = testDetail.questions.map(q => ({
-            id: q.id,
-            question: q.question,
-            answer: q.answer,
-        }));
-        setSession({ knowledgeId: knowledge.id, testId: testDetail.id, testTitle: testDetail.title, questions });
-    }, [knowledge.id]);
-    const handleSessionEnd = () => setSession(null);
-
-    // ── Tab content ───────────────────────────────────────────────────────────
-
-    const effectiveTab: KTab = isMobile ? "dailyReview" : activeTab;
-
     const renderTabContent = () => {
-        // Active test session overlays everything
-        if (!isNew && session) {
-            return (
-                <KDailyReviewSession
-                    knowledgeId={session.knowledgeId}
-                    testId={session.testId}
-                    testTitle={session.testTitle}
-                    questions={session.questions}
-                    isQuickTest
-                    onComplete={handleSessionEnd}
-                    onBack={handleSessionEnd}
-                />
-            );
-        }
-
-        switch (effectiveTab) {
+        switch (activeTab) {
             case "general":
-                return <KKnowledgeGeneral knowledgeId={knowledge.id} tabId={tab?.id ?? ''} />;
-            case "testList":
+                return <KKnowledgeGeneral knowledgeId={knowledge.id} tabId={tab?.id ?? ""} />;
+            case "qflow":
                 if (isNew) return null;
-                return (
-                    <KTestList
-                        knowledgeId={knowledge.id}
-                        onSelectTest={(testId) => {
-                            setInitialFlowTestId(testId);
-                            setActiveTab("questionFlow");
-                        }}
-                    />
-                );
-            case "questionFlow":
-                if (isNew) return null;
-                return (
-                    <KTestFlowView
-                        knowledgeId={knowledge.id}
-                        onQuickTest={handleStartQuickTest}
-                        initialSelectedTestId={initialFlowTestId}
-                    />
-                );
-            case "testKanban":
-                if (isNew) return null;
-                return (
-                    <KTestKanbanView
-                        knowledgeId={knowledge.id}
-                        onQuickTest={handleStartQuickTest}
-                    />
-                );
-            case "dailyReview":
-                if (isNew) return null;
-                return (
-                    <KDailyReviewPanel
-                        onComplete={() => {
-                            setActiveTab("questionFlow");
-                            KTestService._getGlobalDailyQueue()
-                                .then(res => {
-                                    if (res.success && res.object) setDailyDueCount(res.object.filter(q => q.dueCount + q.newCount > 0).length);
-                                })
-                                .catch(() => {});
-                        }}
-                        onNavigateToTest={(targetKnowledgeId) => {
-                            if (targetKnowledgeId === knowledge.id) {
-                                // Same knowledge — switch sub-tab + reset node filter
-                                kTestStoreValues.setActiveNodeId(null);
-                                setActiveTab("questionFlow");
-                            } else {
-                                // Different knowledge — swap tab data, then pendingQuizTabSwitch triggers testKanban
-                                const targetK = allK.find(k => k.id === targetKnowledgeId);
-                                if (targetK && tab?.id) {
-                                    patchTab(tab.id, { data: targetK, data0: targetK, title: targetK.name || "Knowledge", hasUnsavedChanges: false });
-                                    setPendingQuizTabSwitch(null);
-                                }
-                            }
-                        }}
-                    />
-                );
+                // key changes on every node switch (null = "orphans" view)
+                return <KQFlowView nodeId={selectedNodeId} />;
             default:
                 return null;
         }
     };
 
     return (
-        <KTestStore.Provider value={kTestStoreValues}>
-            <CardContent className="flex flex-col flex-1 min-h-0 w-full p-0 h-full">
-                {/* Tab bar */}
-                <div className="flex items-center border-b-2 border-primary/20 bg-muted/20 shrink-0">
-                    <div className="flex flex-1">
-                        {(isMobile ? TABS.filter(t => t.id === "dailyReview") : TABS).map((t) => (
-                            <button
-                                key={t.id}
-                                onClick={() => setActiveTab(t.id)}
-                                disabled={t.id !== "general" && isNew}
-                                className={cn(
-                                    "relative flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
-                                    "border-b-3 -mb-[2px]",
-                                    effectiveTab === t.id
-                                        ? "border-primary text-primary bg-primary/5"
-                                        : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                                    t.id !== "general" && isNew && "opacity-50 cursor-not-allowed"
-                                )}
-                            >
-                                {t.icon}
-                                {t.label}
-                                {t.id === "dailyReview" && dailyDueCount > 0 && (
-                                    <span className="min-w-[16px] h-4 flex items-center justify-center rounded-full bg-blue-600 text-white text-[9px] font-bold px-1 leading-none">
-                                        {dailyDueCount > 99 ? "99+" : dailyDueCount}
-                                    </span>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                    {!isNew && <KRetentionBadge knowledgeId={knowledge.id} />}
+        <CardContent className="flex flex-col flex-1 min-h-0 w-full p-0 h-full">
+            {/* Tab bar */}
+            <div className="flex items-center border-b-2 border-primary/20 bg-muted/20 shrink-0">
+                <div className="flex flex-1">
+                    {TABS.map((t) => (
+                        <button
+                            key={t.id}
+                            onClick={() => setActiveTab(t.id)}
+                            disabled={t.id !== "general" && isNew}
+                            className={cn(
+                                "relative flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
+                                "border-b-3 -mb-[2px]",
+                                activeTab === t.id
+                                    ? "border-primary text-primary bg-primary/5"
+                                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                                t.id !== "general" && isNew && "opacity-50 cursor-not-allowed"
+                            )}
+                        >
+                            {t.icon}
+                            {t.label}
+                        </button>
+                    ))}
                 </div>
+            </div>
 
-                {/* Content */}
-                <div className="flex-1 min-h-0 w-full overflow-hidden h-full">
-                    {renderTabContent()}
-                </div>
-            </CardContent>
+            {/* Content */}
+            <div className="flex-1 min-h-0 w-full overflow-hidden h-full">
+                {renderTabContent()}
+            </div>
 
             {/* ── Import popup — triggered by right-click in tree ── */}
             <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
@@ -266,18 +146,16 @@ export function KKnowledgeEditorPanel() {
                                 initialParentNode={importParentNode}
                                 onSuccess={() => {
                                     setIsImportOpen(false);
-                                    const nodeId = kTestStoreValues.activeNodeId ?? undefined;
-                                    kTestStoreValues.setIsLoadingTests(true);
-                                    KTestService._getTests(knowledge.id, nodeId)
-                                        .then(tests => kTestStoreValues.setTests(tests))
-                                        .catch(e => console.error("reload tests after import failed", e))
-                                        .finally(() => kTestStoreValues.setIsLoadingTests(false));
+                                    // Reload the flow canvas if it's currently viewing the imported node
+                                    if (importParentNode) {
+                                        dispatchKFlowQuestionsChanged({ knowledgeId: importParentNode.id });
+                                    }
                                 }}
                             />
                         )}
                     </div>
                 </DialogContent>
             </Dialog>
-        </KTestStore.Provider>
+        </CardContent>
     );
 }

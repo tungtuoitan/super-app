@@ -7,7 +7,6 @@ import type { KDailySessionQuestion, KDailyAnswerItem } from "../../types/kTest.
 
 interface KDailyReviewSessionProps {
     knowledgeId: number;
-    testId: number;
     testTitle: string;
     questions: KDailySessionQuestion[];
     onComplete: () => void;
@@ -25,21 +24,6 @@ function getScoreFromDelta(dx: number, dy: number): number | null {
     return null; // dragging down = cancel
 }
 
-function formatInterval(days: number | undefined | null): string {
-    if (days === undefined || days === null || days === 0) return "Mới";
-    return days < 1 ? `${Math.round(days * 24)}h` : `${days} ngày`;
-}
-
-function computeNewInterval(interval: number, repetitions: number, easeFactor: number, score: number): string {
-    if (score === 0) return "30 phút";
-    if (score === 3) return "2 giờ";
-    // score === 5
-    let n: number;
-    if (repetitions === 0) n = 1;
-    else if (repetitions === 1) n = 6;
-    else n = Math.round(interval * Math.max(1.3, easeFactor));
-    return `${n} ngày`;
-}
 
 const SCORE_BUTTONS = [
     { score: 0, label: "Quên", btnClass: "border-red-500/40 text-red-400 hover:bg-red-600/20" },
@@ -53,7 +37,7 @@ const SCORE_CONFIG: Record<number, { label: string; color: string; bg: string }>
     5: { label: "Nhớ",  color: "text-green-400",  bg: "bg-green-500/10 border-green-500/30" },
 };
 
-export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions, onComplete, onBack, isQuickTest }: KDailyReviewSessionProps) {
+export function KDailyReviewSession({ knowledgeId, testTitle, questions, onComplete, onBack, isQuickTest }: KDailyReviewSessionProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [timings, setTimings]           = useState<Record<number, number>>({});
     const [isSubmitted, setIsSubmitted]   = useState(false);
@@ -84,7 +68,7 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
             responseTimeMs: timingsSnap[q.id] ?? null,
             selfScore: scoresSnap[q.id] ?? null,
         }));
-        KTestService._submitDailyAnswers(knowledgeId, testId, { answers: dailyAnswers })
+        KTestService._submitDailyAnswers(knowledgeId, { answers: dailyAnswers })
             .catch(err => console.error("[KDailyReview] submit failed:", err));
     }
 
@@ -191,26 +175,15 @@ export function KDailyReviewSession({ knowledgeId, testId, testTitle, questions,
                         {questions.map((q, i) => {
                             const score = selfScores[q.id] ?? 3;
                             const cfg = SCORE_CONFIG[score] ?? SCORE_CONFIG[3];
-                            const hasIntervalData = q.srsInterval !== undefined;
-                            const newIntervalStr = hasIntervalData
-                                ? computeNewInterval(q.srsInterval ?? 0, q.srsRepetitions ?? 0, q.srsEaseFactor ?? 2.5, score)
-                                : null;
                             return (
-                                <div key={q.id} className={cn(" text-left rounded-lg border p-2.5 flex flex-col gap-1.5", cfg.bg)}>
+                                <div key={q.id} className={cn("text-left rounded-lg border p-2.5 flex flex-col gap-1.5", cfg.bg)}>
                                     <div className="flex items-start justify-between gap-2">
                                         <p className="text-sm font-medium flex-1 whitespace-pre-wrap">{i + 1}. {q.question}</p>
-                                        <div className="flex flex-col items-end shrink-0 gap-0.5">
-                                            <span className={cn("text-xs font-bold", cfg.color)}>{cfg.label}</span>
-                                            {newIntervalStr && (
-                                                <span className="text-[10px] text-muted-foreground/40 whitespace-nowrap">
-                                                    {formatInterval(q.srsInterval)} → {newIntervalStr}
-                                                </span>
-                                            )}
-                                        </div>
+                                        <span className={cn("text-xs font-bold shrink-0", cfg.color)}>{cfg.label}</span>
                                     </div>
                                     {q.answer && (
                                         <p className="text-xs text-muted-foreground/50 border-t border-border/20 pt-1.5 whitespace-pre-wrap">
-                                            <span className="font-medium text-foreground/30"></span>{q.answer}
+                                            {q.answer}
                                         </p>
                                     )}
                                 </div>

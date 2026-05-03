@@ -8,6 +8,12 @@ import type { KWsResponse } from "../types/K.types";
 import type { KDTO } from "../types/K-dto.types";
 import {KTreeNode} from "../hooks/kTree/Ktree.miniHelper";
 
+/** Question cut/paste clipboard — persists across node navigation */
+export interface KFlowClipboard {
+    questionIds: number[];
+    sourceNodeId: number | null; // null = orphan
+}
+
 export interface KContextData {
     // K list state
     allK: KWsResponse[];
@@ -95,6 +101,18 @@ export interface KContextData {
     /** Global daily review: number of tests with due questions (for ActivityBar badge) */
     dailyReviewDueCount: number;
     setDailyReviewDueCount: Dispatch<SetStateAction<number>>;
+
+    /** Per-node SRS due count: nodeId → (dueCount + newCount). Populated after tree loads. */
+    nodeReviewDueMap: Record<number, number>;
+    setNodeReviewDueMap: Dispatch<SetStateAction<Record<number, number>>>;
+
+    /** Cut/paste clipboard for question nodes — persists across node navigation */
+    kFlowClipboard: KFlowClipboard | null;
+    setKFlowClipboard: Dispatch<SetStateAction<KFlowClipboard | null>>;
+
+    /** Last viewport (x, y, zoom) per knowledgeId (0 = orphan) — persists across canvas remounts */
+    kFlowViewportMap: Record<number, { x: number; y: number; zoom: number }>;
+    setKFlowViewportMap: Dispatch<SetStateAction<Record<number, { x: number; y: number; zoom: number }>>>;
 }
 
 // @deprecated aliases — remove after all consumers updated
@@ -159,6 +177,13 @@ const kContextDefaultValue: KContextData = {
     setTestDropNodeIds: () => {},
     dailyReviewDueCount: 0,
     setDailyReviewDueCount: () => {},
+    nodeReviewDueMap: {},
+    setNodeReviewDueMap: () => {},
+
+    kFlowClipboard: null,
+    setKFlowClipboard: () => {},
+    kFlowViewportMap: {},
+    setKFlowViewportMap: () => {},
 };
 
 // @deprecated alias
@@ -202,6 +227,9 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
     const [showQuestionNodes, setShowQuestionNodes] = useState<boolean>(false);
     const [testDropNodeIds, setTestDropNodeIds]     = useState<number[]>([]);
     const [dailyReviewDueCount, setDailyReviewDueCount] = useState<number>(0);
+    const [nodeReviewDueMap, setNodeReviewDueMap] = useState<Record<number, number>>({});
+    const [kFlowClipboard, setKFlowClipboard] = useState<KFlowClipboard | null>(null);
+    const [kFlowViewportMap, setKFlowViewportMap] = useState<Record<number, { x: number; y: number; zoom: number }>>({});
 
     return (
         <KStore.Provider
@@ -264,6 +292,13 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
                 setTestDropNodeIds,
                 dailyReviewDueCount,
                 setDailyReviewDueCount,
+                nodeReviewDueMap,
+                setNodeReviewDueMap,
+
+                kFlowClipboard,
+                setKFlowClipboard,
+                kFlowViewportMap,
+                setKFlowViewportMap,
             }}
         >
             {children}
