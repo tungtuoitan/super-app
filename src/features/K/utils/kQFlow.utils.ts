@@ -28,9 +28,10 @@ export function buildGridPosition(index: number): { x: number; y: number } {
 }
 
 /**
- * Topological sort (Kahn's BFS) of questions by their canvas flow edges.
- * Questions with no incoming edges come first; unconnected questions
- * keep their original order appended at the end.
+ * Topological sort (DFS) of questions by their canvas flow edges.
+ * Respects arrowDirection: forward = source→target, backward = target→source,
+ * both = source→target (one direction chosen to avoid artificial cycles).
+ * Unconnected questions and cycle members keep their original order at the end.
  */
 export function topoSortByFlow<T extends { id: number }>(questions: T[], edges: FlowEdgeDTO[]): T[] {
     const idSet = new Set(questions.map((q) => q.id));
@@ -45,32 +46,43 @@ export function topoSortByFlow<T extends { id: number }>(questions: T[], edges: 
 
     if (relevant.length === 0) return questions;
 
-    // adjacency list: sourceId → [targetId, ...]
+    // Build adjacency list respecting arrowDirection
     const adj = new Map<number, number[]>();
-    const inDegree = new Map<number, number>();
-    for (const q of questions) { adj.set(q.id, []); inDegree.set(q.id, 0); }
+    for (const q of questions) adj.set(q.id, []);
     for (const e of relevant) {
-        adj.get(e.sourceId)!.push(e.targetId);
-        inDegree.set(e.targetId, (inDegree.get(e.targetId) ?? 0) + 1);
-    }
-
-    const queue = questions.filter((q) => inDegree.get(q.id) === 0).map((q) => q.id);
-    const sorted: T[] = [];
-    const byId = new Map(questions.map((q) => [q.id, q]));
-
-    while (queue.length > 0) {
-        const id = queue.shift()!;
-        const q = byId.get(id);
-        if (q) sorted.push(q);
-        for (const nextId of (adj.get(id) ?? [])) {
-            const deg = (inDegree.get(nextId) ?? 1) - 1;
-            inDegree.set(nextId, deg);
-            if (deg === 0) queue.push(nextId);
+        if (e.arrowDirection === "backward") {
+            adj.get(e.targetId)?.push(e.sourceId);
+        } else {
+            // forward or both → source→target
+            adj.get(e.sourceId)?.push(e.targetId);
         }
     }
 
-    // append any remaining questions (cycles or disconnected) in original order
-    const sortedIds = new Set(sorted.map((q) => q.id));
+    const visited = new Set<number>();
+    const inStack = new Set<number>();
+    const stack: number[] = [];
+
+    const dfs = (id: number) => {
+        if (visited.has(id) || inStack.has(id)) return;
+        inStack.add(id);
+        for (const nextId of (adj.get(id) ?? [])) dfs(nextId);
+        inStack.delete(id);
+        visited.add(id);
+        stack.push(id);
+    };
+
+    for (const q of questions) dfs(q.id);
+
+    // stack is reverse topo order
+    const byId = new Map(questions.map((q) => [q.id, q]));
+    const sorted: T[] = [];
+    const sortedIds = new Set<number>();
+    for (let i = stack.length - 1; i >= 0; i--) {
+        const q = byId.get(stack[i]);
+        if (q) { sorted.push(q); sortedIds.add(stack[i]); }
+    }
+
+    // append disconnected / cycle members in original order
     for (const q of questions) { if (!sortedIds.has(q.id)) sorted.push(q); }
 
     return sorted;
