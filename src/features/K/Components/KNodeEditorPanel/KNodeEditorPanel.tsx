@@ -17,7 +17,7 @@ import { kconstants } from "../../utils/k.constants";
 import { useSideBarHelper } from "@/shell";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { useEditorTabBarHelper } from "@/shell";
-import {KtreeMiniHelper} from "../../hooks/kTree/kTree.miniHelper";
+import {KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
 import { kEvents } from "../../utils/kEvents.utils";
 import type { KNodeInlineCreateDetail } from "../../utils/kEvents.utils";
 

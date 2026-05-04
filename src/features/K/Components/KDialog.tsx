@@ -14,10 +14,10 @@ import { Button } from "@/shared";
 import { GenericTextField, IconPicker } from "@/shared";
 import { useKNodeDialogHelper as useKFolderDialogHelper } from "../hooks/useKNodeDialog.helper";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
-import {useKStore} from "../store/useK.store";
-import {isFolder, KItemV2} from "../types/kV2.type";
-import {kconstants} from "../utils/k.constants";
-import {useNodeDialogStore} from "../store/useKNodeDialog.store";
+import {useKStore} from "../store/K.store";
+import {isFolder, KItemV2} from "../types/K-v2.types";
+import {kconstants} from "../utils/K.Constants";
+import {useNodeDialogStore} from "../store/KNodeDialog.store";
 import { getIconDefaultColor } from "@/shared";
 import { useGlobalShortcut } from "@/shared";
 
