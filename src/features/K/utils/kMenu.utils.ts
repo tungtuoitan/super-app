@@ -1,4 +1,4 @@
-import type { Folder } from "../types/folder.types";
+﻿import type { Folder } from "../types/folder.type";
 
 /**
  * Traverse tree and collect all visible node IDs in order (for VS Code-like navigation)

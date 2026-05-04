@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import {useKStore} from "../../store/K.store";
-import {WorkspaceLink} from "../../types/note.types";
+﻿import React, { useState } from "react";
+import {useKStore} from "../../store/useK.store";
+import {WorkspaceLink} from "../../types/note.type";
 
 interface StatusDotProps {
     isUnsaved: boolean;

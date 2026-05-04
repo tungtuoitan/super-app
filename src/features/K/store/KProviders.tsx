@@ -1,7 +1,7 @@
-import React from "react";
-import { KProvider } from "./K.store";
-import { KFolderDialogProvider } from "./KNodeDialog.store";
-import { KMovingTreeProvider } from "./KMovingTree.store";
+﻿import React from "react";
+import { KProvider } from "./useK.store";
+import { KFolderDialogProvider } from "./useKNodeDialog.store";
+import { KMovingTreeProvider } from "./useKMovingTree.store";
 
 export const KProviders: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
     <KProvider>

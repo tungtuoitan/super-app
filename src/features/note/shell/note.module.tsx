@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react";
+﻿import { FileText } from "lucide-react";
 import { shellConstants } from "@/shell";
 import { NoteGrid } from "../Components/NoteGrid";
 import { NoteEditorPanel } from "../Components/NoteEditorPanel";

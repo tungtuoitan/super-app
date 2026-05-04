@@ -1,5 +1,5 @@
-import { X, Check } from "lucide-react";
-import { useKNodeEditorStore } from "../../store/KNodeEditor.store";
+﻿import { X, Check } from "lucide-react";
+import { useKNodeEditorStore } from "../../store/useKNodeEditor.store";
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { isAncestorNode } from "../../hooks/kNodeEditor.miniHelper";
 

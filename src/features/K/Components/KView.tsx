@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Workspace View - Workspace tree navigation
  * Extracted from VSSideBar for better separation of concerns
  */
@@ -7,10 +7,10 @@ import { useEffect, useMemo, useCallback } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { CalendarClock, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/shared";
-import { useKStore } from "../store/K.store";
+import { useKStore } from "../store/useK.store";
 import { useKTabHelper } from "../hooks/useKTab.helper";
 import { KTree } from "./KExplorer/KTree";
-import { KDialog } from "./KExplorer/KDialog/KDialog";
+import { KDialog } from "./KDialog";
 import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import {useKLoader} from "../hooks/kTree/useK.loader";

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Note Utilities
  * Helper functions for note data transformation and manipulation
  */

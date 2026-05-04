@@ -1,16 +1,16 @@
-import { useKStore } from "../store/K.store";
+﻿import { useKStore } from "../store/useK.store";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import { KService } from "../service/K.service";
-import { KItemAction } from "../types/K.types";
-import { isFolder } from "../types/K-v2.types";
-import {kconstants} from "../utils/K.Constants";
-import {NodeDialogFormErrors, NodeItemType, useNodeDialogStore} from "../store/KNodeDialog.store";
-import type { KItemV2 } from "../types/K-v2.types";
-import {KtreeMiniHelper} from "./kTree/Ktree.miniHelper";
+import { KService } from "../service/k.service";
+import { KItemAction } from "../types/k.type";
+import { isFolder } from "../types/kV2.type";
+import {kconstants} from "../utils/k.constants";
+import {NodeDialogFormErrors, NodeItemType, useNodeDialogStore} from "../store/useKNodeDialog.store";
+import type { KItemV2 } from "../types/kV2.type";
+import {KtreeMiniHelper} from "./kTree/kTree.miniHelper";
 import {useKLoader} from "./kTree/useK.loader";
 import {useAuthStore, useConsoleHelper} from "@/shared";
 import {useKeywordHelper} from "@/shared";
-import {Folder} from "../types/folder.types";
+import {Folder} from "../types/folder.type";
 
 export const useKNodeDialogHelper = () => {
     const _console = useConsoleHelper();

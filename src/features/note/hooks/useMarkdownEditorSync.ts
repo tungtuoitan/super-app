@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MarkdownEditor Component
  * Monaco-based editor with keyword highlighting and autocomplete
  */

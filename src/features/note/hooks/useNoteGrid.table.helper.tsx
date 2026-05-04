@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from "react";
+﻿import React, { useEffect, useMemo, useCallback } from "react";
 import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef } from "@tanstack/react-table";
 import { useNoteGridStore } from "../store/useNoteGrid.store";
 import { Note } from "../types/note.types";

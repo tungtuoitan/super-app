@@ -1,4 +1,4 @@
-import type { TreeFolder } from "../utils/workspace.tree.utils";
+﻿import type { TreeFolder } from "../utils/workspace.tree.utils";
 import { treeMiniHelper } from "../utils/workspace.tree.utils";
 import { useWorkspaceStore } from "../store/workspace.store";
 import { useFolderDialogHelper } from "./useFolderDialog.helper";

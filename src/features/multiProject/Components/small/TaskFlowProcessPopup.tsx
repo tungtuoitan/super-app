@@ -10,6 +10,7 @@ import { useMultiProjectTaskFlowProcessHelper } from "@/features/multiProject/ho
 import { useMultiProjectTaskFlowHelper } from "@/features/multiProject/hooks/mpTaskFlow/useMultiProjectTaskFlow.helper";
 import { parseChecklistJson, checklistProgress, getItemCheckState, flatItemIndex, getFlatItems } from "@/features/taskDetail";
 import type { TaskFlowNodeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
+import { projectConstants } from "@/features/project/project.constants";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, CheckSquare2, Square } from "lucide-react";
 
@@ -38,6 +39,11 @@ export function TaskFlowProcessPopup({ nodeId }: { nodeId: string }) {
     const isBgProgress = task.status === "background_progress";
     const nodeLocked = isNodeLocked(nodeId);
     const canToggleProcess = (isInProgress || isBgProgress) && !nodeLocked;
+
+    const getProgressBarColor = () => {
+        const colors = projectConstants.optionColor.taskStatus.colors[task.status];
+        return colors?.bg || projectConstants.optionColor.taskStatus.default.bg;
+    };
 
     const handleProgressEnter = () => {
         if (popupTimeoutRef.current) clearTimeout(popupTimeoutRef.current);
@@ -70,7 +76,7 @@ export function TaskFlowProcessPopup({ nodeId }: { nodeId: string }) {
                 <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
                     <div
                         className="h-full rounded-full transition-all duration-300"
-                        style={{ width: `${percent}%` }}
+                        style={{ width: `${percent}%`, backgroundColor: getProgressBarColor() }}
                     />
                 </div>
                 <span

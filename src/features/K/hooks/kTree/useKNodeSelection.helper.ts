@@ -1,10 +1,10 @@
-import React from "react";
+﻿import React from "react";
 import type { NodeApi } from "react-arborist";
-import { useKStore } from "@/features/K/store/K.store";
+import { useKStore } from "@/features/K/store/useK.store";
 import { useEditorTabBarHelper, shellConstants } from "@/shell";
-import { useKTreeSelectionHelper } from "./useKTreeHelper2";
-import type { KTreeNode } from "./Ktree.miniHelper";
-import type { KWsResponse } from "@/features/K/types/K.types";
+import { useKTreeSelectionHelper } from "./useKTreeSelection.helper";
+import type { KTreeNode } from "./kTree.miniHelper";
+import type { KWsResponse } from "@/features/K/types/k.type";
 
 interface UseKNodeSelectionArgs {
     node: NodeApi<KTreeNode>;
@@ -78,8 +78,8 @@ export function useKNodeSelection({
                 const rangeSelection = allVisibleNodeIds.slice(startIndex, endIndex + 1);
 
                 tree.deselectAll();
-                tree.visibleNodes.forEach((visibleNode: any) => {
-                    const nodeItemId = (visibleNode.data.data as any).id;
+                tree.visibleNodes.forEach((visibleNode: { data: KTreeNode; selectMulti: () => void }) => {
+                    const nodeItemId = visibleNode.data.data.id;
                     if (rangeSelection.includes(nodeItemId)) visibleNode.selectMulti();
                 });
 
@@ -119,7 +119,7 @@ export function useKNodeSelection({
                 }
             }
 
-            // Signal KKnowledgeEditorPanel to switch to Quiz tab
+            // Signal KEditorPanel to switch to Quiz tab
             setPendingQuizTabSwitch(nodeId);
         }
     };

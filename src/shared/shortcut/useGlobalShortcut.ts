@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useGlobalShortcut — priority-based keyboard shortcut registry.
  *
  * ONE capture-phase listener on `window`. When a shortcut fires, only the single
@@ -33,7 +33,7 @@
  *        Active only when the user is inside a narrow editing context
  *        (inline editor, modal dialog, etc.). Condition is tight and explicit.
  *        Overrides both default and feature-level handlers.
- *        Example: NodeCard ctrl+s while isEditing=true.
+ *        Example: KNodeCard ctrl+s while isEditing=true.
  *
  *        Rule: handlers at the same priority level must have
  *        mutually-exclusive `enabled` conditions — only one should ever

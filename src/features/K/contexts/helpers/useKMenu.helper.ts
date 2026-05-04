@@ -1,6 +1,6 @@
-import { workspaceConstants } from "@/features/workspace/workspace.constants";
+﻿import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { useMenuContextHelper } from "@/shared";
-import { NodeItemType } from "../../store/KNodeDialog.store";
+import { NodeItemType } from "../../store/useKNodeDialog.store";
 import { useKNodeDialogHelper } from "../../hooks/useKNodeDialog.helper";
 import { useKMenuDeleteHelper } from "./useKMenuDelete.helper";
 

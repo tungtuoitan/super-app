@@ -1,23 +1,23 @@
-import { useEffect, useMemo, useRef } from "react";
+﻿import { useEffect, useMemo, useRef } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { shellConstants } from "@/shell";
 import { ChevronRight, Trash2, Layers, Trash, LibraryBig, Bookmark } from "lucide-react";
-import { useKStore } from "../../store/K.store";
+import { useKStore } from "../../store/useK.store";
 import type { BaseTab } from "@/shell";
-import type { KItemV2 } from "../../types/K-v2.types";
+import type { KItemV2 } from "../../types/kV2.type";
 import type { BreadcrumbEntry } from "../../hooks/kNodeEditor.miniHelper";
-import { KNodeEditorProvider, useKNodeEditorStore } from "../../store/KNodeEditor.store";
+import { KNodeEditorProvider, useKNodeEditorStore } from "../../store/useKNodeEditor.store";
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
-import { NodeCard } from "./NodeCard";
-import { InlineNewNodeCard } from "./InlineNewNodeCard";
+import { KNodeCard } from "./KNodeCard";
+import { KInlineNodeCard } from "./KInlineNodeCard";
 import { containsNormalized, useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { useConsoleHelper } from "@/shared";
-import { kconstants } from "../../utils/K.Constants";
+import { kconstants } from "../../utils/k.constants";
 import { useSideBarHelper } from "@/shell";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { useEditorTabBarHelper } from "@/shell";
-import {KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
+import {KtreeMiniHelper} from "../../hooks/kTree/kTree.miniHelper";
 import { kEvents } from "../../utils/kEvents.utils";
 import type { KNodeInlineCreateDetail } from "../../utils/kEvents.utils";
 
@@ -215,11 +215,11 @@ function KNodeEditorContent() {
             <div className="h-full overflow-y-auto px-6 py-6" onContextMenu={handleGridContextMenu}>
                 <div className="grid grid-cols-4 gap-3">
                     {/* card 0 = current scope node (breadcrumb last item) */}
-                    <NodeCard node={currentScopeNode} isRoot />
+                    <KNodeCard node={currentScopeNode} isRoot />
                     {filteredNodes.map((node) => (
-                        <NodeCard key={node.id} node={node} />
+                        <KNodeCard key={node.id} node={node} />
                     ))}
-                    {inlineNewParentId !== undefined && <InlineNewNodeCard />}
+                    {inlineNewParentId !== undefined && <KInlineNodeCard />}
                 </div>
             </div>
         </div>

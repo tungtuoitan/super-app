@@ -1,0 +1,165 @@
+﻿import React, { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+import type { TreeApi } from "react-arborist";
+import {KDTO} from "../types/kDto.type";
+import {KTreeNode} from "../hooks/kTree/kTree.miniHelper";
+
+/**
+ * MoveToWorkspacePopup Store - Manages state for "Moving" tab in VSPanel
+ * Used for cross-workspace drag & drop operations
+ */
+
+// ========================================
+// 1. Context Data Interface
+// ======================================== 
+
+export interface MovingTreeContextData {
+    // Target workspace info
+    targetWorkspaceId: number | null;
+    setTargetWorkspaceId: Dispatch<SetStateAction<number | null>>;
+
+    // Temporarily highlighted duplicate items (will be cleared after 5s)
+    highlightedDuplicateIds: Set<string>;
+    setHighlightedDuplicateIds: Dispatch<SetStateAction<Set<string>>>;
+
+    // Loading state
+    isLoadingTargetTree: boolean;
+    setIsLoadingTargetTree: Dispatch<SetStateAction<boolean>>;
+
+    // Target workspace tree data
+    targetWorkspace: KDTO | null;
+    setTargetWorkspace: Dispatch<SetStateAction<KDTO | null>>;
+
+    // Tree container ref and height for responsive layout
+    treeContainerRef: React.RefObject<HTMLDivElement>;
+    containerHeight: number;
+    setContainerHeight: Dispatch<SetStateAction<number>>;
+
+    // Tree instance ref (react-arborist TreeApi)
+    _treeRef: React.RefObject<TreeApi<KTreeNode>>;
+
+    // Force tree re-render after drop operations
+    treeRenderKey: number;
+    setTreeRenderKey: Dispatch<SetStateAction<number>>;
+
+    dropZoneHeight: number;
+    setDropZoneHeight: Dispatch<SetStateAction<number>>;
+}
+
+// ========================================
+// 2. Context & Default Value
+// ========================================
+
+const movingTreeContextDefaultValue: MovingTreeContextData = {
+    // Target workspace info
+    targetWorkspaceId: null,
+    setTargetWorkspaceId: () => {},
+
+    // Temporarily highlighted duplicates
+    highlightedDuplicateIds: new Set(),
+    setHighlightedDuplicateIds: () => {},
+
+    // Loading state
+    isLoadingTargetTree: false,
+    setIsLoadingTargetTree: () => {},
+
+    // Target workspace tree data
+    targetWorkspace: null,
+    setTargetWorkspace: () => {},
+
+    // Tree container ref and height
+    treeContainerRef: { current: null },
+    containerHeight: 500,
+    setContainerHeight: () => {},
+
+    // Tree instance ref
+    _treeRef: { current: null },
+
+    // Force tree re-render
+    treeRenderKey: 0,
+    setTreeRenderKey: () => {},
+    dropZoneHeight: 0,
+    setDropZoneHeight: () => {},
+};
+
+const KMovingTreeStore = createContext<MovingTreeContextData>(movingTreeContextDefaultValue);
+
+// ========================================
+// 3. Custom Hook
+// ========================================
+
+export const useKMovingTreeStore = (): MovingTreeContextData => {
+    const context = useContext(KMovingTreeStore);
+    if (!context) {
+        throw new Error("useKMovingTreeStore must be used within KMovingTreeProvider");
+    }
+    return context;
+};
+
+// ========================================
+// 4. Provider Component
+// ========================================
+
+export const KMovingTreeProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
+    // Target workspace info
+    const [targetWorkspaceId, setTargetWorkspaceId] = useState<number | null>(null);
+
+    // Temporarily highlighted duplicates (cleared after 5s)
+    const [highlightedDuplicateIds, setHighlightedDuplicateIds] = useState<Set<string>>(new Set());
+
+    // Loading state
+    const [isLoadingTargetTree, setIsLoadingTargetTree] = useState<boolean>(false);
+
+    // Target workspace tree data
+    const [targetWorkspace, setTargetWorkspace] = useState<KDTO | null>(null);
+
+    // Tree container ref and height
+    const treeContainerRef = React.useRef<HTMLDivElement>(null);
+    const [containerHeight, setContainerHeight] = useState<number>(500);
+
+    // Tree instance ref
+    const _treeRef = React.useRef<TreeApi<KTreeNode>>(null);
+
+    // Force tree re-render
+    const [treeRenderKey, setTreeRenderKey] = useState<number>(0);
+    const [dropZoneHeight, setDropZoneHeight] = React.useState(0);
+
+    return (
+        <KMovingTreeStore.Provider
+            value={{
+                // Target workspace info
+                targetWorkspaceId,
+                setTargetWorkspaceId,
+
+                // Temporarily highlighted duplicates
+                highlightedDuplicateIds,
+                setHighlightedDuplicateIds,
+
+                // Loading state
+                isLoadingTargetTree,
+                setIsLoadingTargetTree,
+
+                // Target workspace tree data
+                targetWorkspace,
+                setTargetWorkspace,
+
+                // Tree container ref and height
+                treeContainerRef,
+                containerHeight,
+                setContainerHeight,
+
+                // Tree instance ref
+                _treeRef,
+
+                // Force tree re-render
+                treeRenderKey,
+                setTreeRenderKey,
+
+                dropZoneHeight,
+                setDropZoneHeight,
+            }}
+        >
+            {children}
+        </KMovingTreeStore.Provider>
+    );
+};
+

@@ -1,21 +1,21 @@
-import React, { useEffect, useMemo } from "react";
+﻿import React, { useEffect, useMemo } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
-import { useKStore } from "../../store/K.store";
+import { useKStore } from "../../store/useK.store";
 import { useSideBarHelper } from "@/shell";
-import { useKTreeHelper } from "../../hooks/kTree/useKTreeHelper";
+import { useKTreeHelper } from "../../hooks/kTree/useKTree.helper";
 import { useMenuContextHelper } from "@/shared";
 
 import { KCustomDragPreview } from "./KCustomDragPreview";
 import { KNode } from "./KNode";
-import { kconstants } from "../../utils/K.Constants";
-import { useCalculateKTreeContainerHeight } from "../../hooks/kTree/useCalculateKTreeContainerHeight";
-import { useCalculateKTreeDropZoneHeight } from "../../hooks/kTree/useCalculateKTreeDropZoneHeight";
-import { useScrollToHighlightItem } from "../../hooks/kTree/useScrollToHighlightItem";
-import { KtreeMiniHelper, KTreeNode } from "../../hooks/kTree/Ktree.miniHelper";
-import { useKTreeSelectionHelper } from "../../hooks/kTree/useKTreeHelper2";
+import { kconstants } from "../../utils/k.constants";
+import { useCalculateKTreeContainerHeight } from "../../hooks/kTree/useKTreeContainerHeight.headless";
+import { useCalculateKTreeDropZoneHeight } from "../../hooks/kTree/useKTreeDropZoneHeight.headless";
+import { useScrollToHighlightItem } from "../../hooks/kTree/useKScrollToHighlight.headless";
+import { KtreeMiniHelper, KTreeNode } from "../../hooks/kTree/kTree.miniHelper";
+import { useKTreeSelectionHelper } from "../../hooks/kTree/useKTreeSelection.helper";
 import { useKTreeMark } from "../../hooks/kTree/useKTreeMark.helper";
 import { useKTreeOpenState } from "../../hooks/kTree/useKTreeOpenState.helper";
 
@@ -60,30 +60,13 @@ export function KTree() {
                     id: workspaceConstants.dropZone.workspaceItemId,
                     knowledgeId: currentK.id,
                     parentId: null,
-                    entityType: 2 as const,
-                    entityId: workspaceConstants.dropZone.entityId,
+                    name: "",
+                    pathIds: "",
+                    pathDepth: 0,
                     createdAt: new Date().toISOString(),
-                    updatedAt: undefined,
-                    deletedAt: null,
-                    level: 0,
-                    position: 0,
-                    accessType: "owner" as const,
-                    isOriginal: true,
-                    data: {
-                        id: workspaceConstants.dropZone.entityId,
-                        userId: currentK.userId,
-                        name: "",
-                        description: undefined,
-                        color: undefined,
-                        icon: undefined,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: undefined,
-                        deletedAt: null,
-                        slug: undefined,
-                    },
                     isExpanded: false,
                     isSelected: false,
-                } as any,
+                },
                 children: [],
             };
             return [...baseTree, dropZoneNode];
@@ -106,15 +89,15 @@ export function KTree() {
     const allVisibleFolderIds = KtreeMiniHelper.getAllVisibleNodeIds(treeData);
 
     // ── Mark feature ─────────────────────────────────────────────────────────
-    const { markedNodeId, setMarkedNodeId, markedVisibleIds } = useKTreeMark(treeData);
+    const { markedVisibleIds } = useKTreeMark(treeData);
 
     // ── Open/close persistence ───────────────────────────────────────────────
-    const { handleToggle, hasSavedState } = useKTreeOpenState();
+    // const { handleToggle, hasSavedState } = useKTreeOpenState();
 
     // Auto-expand workspace root on init — skip when saved state exists
     useEffect(() => {
         if (!_treeRef.current || !currentK?.id || treeData.length === 0) return;
-        if (hasSavedState) return;
+        // if (hasSavedState) return;
         const timer = setTimeout(async () => {
             const rootId = workspaceConstants.root.workspaceItemId;
             await KtreeMiniHelper.expandPathToItem(_treeRef, treeData, rootId);
@@ -182,7 +165,7 @@ export function KTree() {
                     onMove={async (args) => {
                         await handleMove(args, treeData);
                     }}
-                    onToggle={handleToggle}
+                    // onToggle={handleToggle}
                     onSelect={(nodes: NodeApi<KTreeNode>[]) => handleSelectionChange(nodes)}
                     disableMultiSelection={false}
                     disableEdit={true}
@@ -190,7 +173,7 @@ export function KTree() {
                 >
                     {({ node, style, dragHandle }) => {
                         const item = node.data.data;
-                        const isDropZone = (item as any).entityId === workspaceConstants.dropZone.entityId;
+                        const isDropZone = item.id === workspaceConstants.dropZone.workspaceItemId;
 
                         return (
                             <div
@@ -240,9 +223,6 @@ export function KTree() {
                                         dragHandle={dragHandle}
                                         treeData={treeData}
                                         markedVisibleIds={markedVisibleIds}
-                                        markedNodeId={markedNodeId}
-                                        setMarkedNodeId={setMarkedNodeId}
-                                        currentKId={currentK?.id ?? null}
                                     />
                                 )}
                             </div>

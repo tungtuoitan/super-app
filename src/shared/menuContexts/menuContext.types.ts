@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Context Menu Data Types
  * Typed contextData payloads for each menu.
  *
@@ -63,7 +63,7 @@ export interface KKnowledgeSelectorMenuData {
     onDelete?: () => Promise<void>;
 }
 
-export interface KTestFlowMenuData {
+export interface KQFlowMenuData {
     selectedIds: number[];
     onAddQuestion?: () => void;
     onDeleteSelected?: () => void;

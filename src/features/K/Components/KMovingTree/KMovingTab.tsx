@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MovingTab - Tab for moving workspace items to another workspace via drag & drop
  *
  * Features:
@@ -12,11 +12,11 @@ import React, { useEffect, useMemo } from "react";
 import { Loader2, ArrowRightLeft, CheckCircle2 } from "lucide-react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useDragDropManager, useDrop } from "react-dnd";
-import {useKStore} from "../../store/K.store";
-import {useKMovingTreeStore} from "../../store/KMovingTree.store";
+import {useKStore} from "../../store/useK.store";
+import {useKMovingTreeStore} from "../../store/useKMovingTree.store";
 import {useKMovingTreeHelper} from "../../hooks/kTree/useKMovingTree.helper";
 import {KMovingTree} from "./KMovingTree";
-import {useCalculateKMovingTreeContainerHeight} from "../../hooks/kTree/useCalculateMovingKTreeContainerHeight";
+import {useCalculateKMovingTreeContainerHeight} from "../../hooks/kTree/useKMovingTreeContainerHeight.headless";
 
 export function KMovingTab() {
     const { targetWorkspaceId, setTargetWorkspaceId, isLoadingTargetTree, setHighlightedDuplicateIds, targetWorkspace, treeContainerRef, containerHeight } = useKMovingTreeStore();

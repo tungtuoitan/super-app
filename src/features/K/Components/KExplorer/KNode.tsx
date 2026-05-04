@@ -1,28 +1,24 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
-import { useKTreeSelectionHelper } from "../../hooks/kTree/useKTreeHelper2";
+import { useKTreeSelectionHelper } from "../../hooks/kTree/useKTreeSelection.helper";
 import { ICON_MAP, IconKey, useMenuContextHelper } from "@/shared";
 import { KHighlightText } from "./KHighlightText";
-import { useKStore } from "../../store/K.store";
-import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
-import { kconstants } from "../../utils/K.Constants";
-import { useKNodeDialogHelper } from "../../hooks/useKNodeDialog.helper";
+import { useKStore } from "../../store/useK.store";
+import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatus.helper";
+import { kconstants } from "../../utils/k.constants";
 import { storageService, STORAGE_KEYS } from "@/shared";
 import { useSideBarHelper } from "@/shell";
-import { KTreeNode } from "../../hooks/kTree/Ktree.miniHelper";
+import { KTreeNode } from "../../hooks/kTree/kTree.miniHelper";
 import { useKNodeSelection } from "../../hooks/kTree/useKNodeSelection.helper";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;
     style: React.CSSProperties;
-    dragHandle?: any;
+    dragHandle?: ((el: HTMLDivElement | null) => void);
     treeData: KTreeNode[];
     treeType?: "workspaceTree" | "targetTree";
     markedVisibleIds?: Set<number> | null;
-    markedNodeId?: number | null;
-    setMarkedNodeId?: React.Dispatch<React.SetStateAction<number | null>>;
-    currentKId?: number | null;
 }
 
 type IconProps = {
@@ -36,17 +32,57 @@ const Folder2: React.FC<IconProps> = ({ className, color }) => (
 
 export default Folder2;
 
-export function KNode({ node, style, dragHandle, treeData, treeType = "workspaceTree", markedVisibleIds, markedNodeId, setMarkedNodeId, currentKId }: NodeProps) {
+interface NodeFolderIconProps {
+    nodeIcon: IconKey;
+    hasDeletedAncestor: boolean;
+    isDirectlyDeleted: boolean;
+    nodeColor?: string | null;
+}
+
+function NodeFolderIcon({ nodeIcon, hasDeletedAncestor, isDirectlyDeleted, nodeColor }: NodeFolderIconProps) {
+    const CustomIcon = ICON_MAP[nodeIcon];
+    if (!CustomIcon) return null;
+    const isDeleted = hasDeletedAncestor || isDirectlyDeleted;
+    return (
+        <CustomIcon
+            className="w-4 h-4"
+            style={{ color: isDeleted ? "#6b7280" : (nodeColor || "#90A4AE") }}
+            strokeWidth={2}
+        />
+    );
+}
+
+interface ExpandCollapseButtonProps {
+    phase: 0 | 1 | 2;
+    onClick: (e: React.MouseEvent) => void;
+}
+
+function ExpandCollapseButton({ phase, onClick }: ExpandCollapseButtonProps) {
+    const titles = ["Expand children", "Expand all descendants", "Collapse all"] as const;
+    return (
+        <button
+            onClick={onClick}
+            title={titles[phase]}
+            className="ml-0.5 shrink-0 p-0.5 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
+        >
+            {phase === 2
+                ? <ChevronsDownUp className="w-3 h-3" />
+                : <ChevronsUpDown className="w-3 h-3" />}
+        </button>
+    );
+}
+
+export function KNode({ node, style, dragHandle, treeData, treeType = "workspaceTree", markedVisibleIds }: NodeProps) {
     const {
         currentK, allK,
         _treeRef,
         hoveredNodeId, setHoveredNodeId,
+        markedNodeId, setMarkedNodeId,
     } = useKStore();
     const { searchQuery } = useSideBarHelper();
     const { showContextMenu } = useMenuContextHelper();
     const { isNodeSelected } = useKTreeSelectionHelper();
-    const _TREESTATUS = useKTreeStatusHelper();
-    const { activateDraftNode } = useKNodeDialogHelper();
+    const treeStatus = useKTreeStatusHelper();
 
     // Safe cast: KTree already filters to only render FolderNode for folders
     const nodeItem = node.data.data;
@@ -67,7 +103,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     const isDropTarget = node.state.willReceiveDrop;
 
     // Check if deleted (including inherited from parent)
-    const _ITEMSTATUS = _TREESTATUS.getItemStatus(nodeItem);
+    const itemStatus = treeStatus.getItemStatus(nodeItem);
 
     // Knowledge imageBase64 — used for workspace root node icon
     const knowledgeImage = isWorkspaceRoot
@@ -82,20 +118,19 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     const handleToggleMark = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        if (!setMarkedNodeId || !currentKId) return;
+        if (!currentK?.id) return;
         const newVal = isMarked ? null : nodeId;
         setMarkedNodeId(newVal);
         if (newVal === null) {
-            storageService.remove(`${STORAGE_KEYS.K_TREE_MARK}_${currentKId}`);
+            storageService.remove(`${STORAGE_KEYS.K_TREE_MARK}_${currentK.id}`);
         } else {
-            storageService.set(`${STORAGE_KEYS.K_TREE_MARK}_${currentKId}`, newVal);
+            storageService.set(`${STORAGE_KEYS.K_TREE_MARK}_${currentK.id}`, newVal);
         }
     };
 
     // Expand/collapse subtree — 3-state cycle: expand(1 lvl) → expand all → collapse
     // 0 = collapsed, 1 = expanded 1 level, 2 = expanded all
     const [expandPhase, setExpandPhase] = useState<0 | 1 | 2>(0);
-    const [isDraftHovered, setIsDraftHovered] = useState(false);
 
     function findSubtree(nodes: KTreeNode[], targetId: number): KTreeNode | null {
         for (const n of nodes) {
@@ -160,7 +195,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
         if (treeType === "targetTree") return;
         if (isWorkspaceRoot) return;
 
-        const _currentNode = currentK?.flatData.find((f: any) => f.id === nodeId);
+        const _currentNode = currentK?.flatData.find((f) => f.id === nodeId);
         const contextData = { ...nodeItem, parentId: _currentNode?.parentId ?? null };
         showContextMenu(e, kconstants.contextMenu.contextMenuTypes.kNode, contextData);
     };
@@ -192,7 +227,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 onMouseLeave={() => setHoveredNodeId(null)}
                 className={`
                     flex items-center h-full w-full py-1 pr-2 cursor-pointer
-                    ${isDimmed ? "opacity-20" : isDragging ? "opacity-40" : _ITEMSTATUS.hasDeletedAncestor ? "opacity-60" : "opacity-100"}
+                    ${isDimmed ? "opacity-20" : isDragging ? "opacity-40" : itemStatus.hasDeletedAncestor ? "opacity-60" : "opacity-100"}
                     ${isWorkspaceRoot ? "font-semibold" : ""}
                     ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1 rounded" : ""}
                     ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
@@ -230,21 +265,16 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                             <LibraryBig className="w-4 h-4" style={{ color: nodeColor || "#A1887F" }} />
                         )
                     ) : nodeIcon && ICON_MAP[nodeIcon] ? (
-                        (() => {
-                            const CustomIcon = ICON_MAP[nodeIcon];
-                            const isDeleted = _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted;
-                            return (
-                                <CustomIcon
-                                    className="w-4 h-4"
-                                    style={{ color: isDeleted ? "#6b7280" : (nodeColor || "#90A4AE") }}
-                                    strokeWidth={2}
-                                />
-                            );
-                        })()
+                        <NodeFolderIcon
+                            nodeIcon={nodeIcon}
+                            hasDeletedAncestor={itemStatus.hasDeletedAncestor}
+                            isDirectlyDeleted={itemStatus.isDirectlyDeleted}
+                            nodeColor={nodeColor}
+                        />
                     ) : (
                         <Library
-                            className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : ""}`}
-                            color={!_ITEMSTATUS.hasDeletedAncestor && !_ITEMSTATUS.isDirectlyDeleted ? nodeColor || "#90A4AE" : ""}
+                            className={`w-4 h-4 ${itemStatus.hasDeletedAncestor || itemStatus.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                            color={!itemStatus.hasDeletedAncestor && !itemStatus.isDirectlyDeleted ? nodeColor || "#90A4AE" : ""}
                         />
                     )}
                 </div>
@@ -259,8 +289,8 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                             text-sm truncate
                             ${hasChildren ? "font-semibold" : "font-normal"}
                             ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
-                            ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}
-                            ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"}
+                            ${itemStatus.isDirectlyDeleted ? "line-through" : ""}
+                            ${itemStatus.hasDeletedAncestor || itemStatus.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"}
                         `}
                         />
                         {/* SRS review dot — learning node has questions with srsNextReviewAt <= now */}
@@ -307,21 +337,12 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 )}
 
                 {/* Expand/collapse subtree — 3-state, shown on hover for any node with children */}
-                {hasChildren && isHovered && (() => {
-                    const phase = !node.isOpen ? 0 : expandPhase === 0 ? 1 : expandPhase;
-                    const titles = ["Expand children", "Expand all descendants", "Collapse all"];
-                    return (
-                        <button
-                            onClick={handleExpandCollapse}
-                            title={titles[phase]}
-                            className="ml-0.5 shrink-0 p-0.5 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
-                        >
-                            {phase === 2
-                                ? <ChevronsDownUp className="w-3 h-3" />
-                                : <ChevronsUpDown className="w-3 h-3" />}
-                        </button>
-                    );
-                })()}
+                {hasChildren && isHovered && (
+                    <ExpandCollapseButton
+                        phase={!node.isOpen ? 0 : expandPhase === 0 ? 1 : expandPhase}
+                        onClick={handleExpandCollapse}
+                    />
+                )}
             </div>
         </div>
     );

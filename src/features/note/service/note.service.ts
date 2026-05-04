@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Note Service - API communication for note operations
  */
 

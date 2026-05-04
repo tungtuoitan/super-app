@@ -1,4 +1,4 @@
-
+﻿
 import { noteService } from "../service/note.service";
 import { shellConstants } from "@/shell";
 import { transformANote } from "../utils/note.utils";

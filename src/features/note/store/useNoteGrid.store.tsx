@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Note Grid Store (Zustand)
  *
  * Migrated from React Context → Zustand. Public hook API unchanged.

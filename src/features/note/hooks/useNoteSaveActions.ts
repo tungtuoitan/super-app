@@ -1,4 +1,4 @@
-
+﻿
 import { shellConstants } from "@/shell";
 import { useNoteDetailHelper } from "./useNoteDetail.helper";
 import { useWorkspaceItemHelper } from "@/features/workspace";

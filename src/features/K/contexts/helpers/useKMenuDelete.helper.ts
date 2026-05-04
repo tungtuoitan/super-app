@@ -1,12 +1,12 @@
-import { useKStore } from "../../store/K.store";
-import { KService } from "../../service/K.service";
-import { KItemV2 } from "../../types/K-v2.types";
-import { KUpsertWorkspaceItemRequest, KItemAction } from "../../types/K.types";
-import { KDTO } from "../../types/K-dto.types";
-import { KtreeMiniHelper } from "../../hooks/kTree/Ktree.miniHelper";
+﻿import { useKStore } from "../../store/useK.store";
+import { KService } from "../../service/k.service";
+import { KItemV2 } from "../../types/kV2.type";
+import { KUpsertWorkspaceItemRequest, KItemAction } from "../../types/k.type";
+import { KDTO } from "../../types/kDto.type";
+import { KtreeMiniHelper } from "../../hooks/kTree/kTree.miniHelper";
 import { useEditorTabBarHelper } from "@/shell";
 import { isUnauthorizedError, parseApiError, useAuthStore, useConfirmationPopoverHelper, useConsoleHelper, useMenuContext, useMenuContextHelper } from "@/shared";
-import { getKConfirmMessage } from "../../utils/confirmMessage";
+import { getKConfirmMessage } from "../../utils/kConfirmMessage.constants";
 import {
     $getAllVisibleNodeIds,
     $collectAllDescendants,
@@ -14,7 +14,7 @@ import {
     $countChildren,
     $removeItemsFromTree,
 } from "../../utils/kMenu.utils";
-import type { Folder } from "../../types/folder.types";
+import type { Folder } from "../../types/folder.type";
 
 export const useKMenuDeleteHelper = () => {
     const { $user } = useAuthStore();

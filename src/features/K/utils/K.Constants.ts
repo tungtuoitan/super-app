@@ -111,7 +111,7 @@ export const kconstants = {
             kNodePanelBlank: "k-node-panel-blank",
             kNodePanelCard: "k-node-panel-card",
             kKnowledgeSelector: "k-knowledge-selector",
-            kTestFlow: "k-test-flow",
+            kQFlow: "k-test-flow",
         } as const,
     },
 

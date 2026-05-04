@@ -1,15 +1,15 @@
-import React from "react";
+﻿import React from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import { useKMovingTreeStore } from "../../store/KMovingTree.store";
-import { useKStore } from "../../store/K.store";
-import { KService } from "../../service/K.service";
-import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/K.types";
+import { useKMovingTreeStore } from "../../store/useKMovingTree.store";
+import { useKStore } from "../../store/useK.store";
+import { KService } from "../../service/k.service";
+import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/k.type";
 import { useDragDropManager } from "react-dnd";
-import { isFolder as isFolderV2, KItemV2 } from "../../types/K-v2.types";
-import {KDTO} from "../../types/K-dto.types";
-import {KtreeMiniHelper} from "./Ktree.miniHelper";
-import {kconstants} from "../../utils/K.Constants";
-import {SPECIAL_IDS} from "../../utils/temp-id.utils";
+import { isFolder as isFolderV2, KItemV2 } from "../../types/kV2.type";
+import {KDTO} from "../../types/kDto.type";
+import {KtreeMiniHelper} from "./kTree.miniHelper";
+import {kconstants} from "../../utils/k.constants";
+import {SPECIAL_IDS} from "../../utils/kTempId.utils";
 import {useKLoader} from "./useK.loader";
 import {useAuthStore, useConsoleHelper} from "@/shared";
 import {IAutoCompleteOptions} from "@/shared";
@@ -159,18 +159,18 @@ export const useKMovingTreeHelper = () => {
             let targetId: number | null = null;
 
             if (args.parentNode) {
-                const parentNodeData = args.parentNode.data.data as any;
+                const parentNodeData = args.parentNode.data.data;
 
                 // Check if dropped on drop zone → treat as root
-                if (SPECIAL_IDS.includes(parentNodeData.entityId)) {
+                if (SPECIAL_IDS.includes(parentNodeData.id)) {
                     targetId = null;
                 }
                 // Check if parent node is a folder
-                else if (isFolderV2(parentNodeData as unknown as KItemV2)) {
-                    // Drop into folder → use folder's entityId
+                else if (isFolderV2(parentNodeData)) {
+                    // Drop into folder → use folder's id
                     targetId = parentNodeData.id;
                 } else {
-                    // Drop into note/file → use their parent folder entityId
+                    // Drop into note/file → use their parent folder id
                     targetId = parentNodeData.parentId ?? null;
                 }
             } else {

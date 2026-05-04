@@ -1,5 +1,5 @@
-import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon } from "lucide-react";
-import {KtreeMiniHelper, KTreeNode} from "../../hooks/kTree/Ktree.miniHelper";
+﻿import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon } from "lucide-react";
+import {KtreeMiniHelper, KTreeNode} from "../../hooks/kTree/kTree.miniHelper";
 
 /**
  * Custom Drag Preview Component (VS Code style)
@@ -21,7 +21,7 @@ export function KCustomDragPreview({
     treeData: KTreeNode[];
 }) {
     if (!isDragging || !offset) return null;
-    // Only show for tree-node drags — NodeCard drags have no dragIds
+    // Only show for tree-node drags — KNodeCard drags have no dragIds
     if (!dragIds || dragIds.length === 0) return null;
 
     // Count of items being dragged

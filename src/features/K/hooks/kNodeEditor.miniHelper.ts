@@ -1,4 +1,4 @@
-import type { KItemV2 } from "../types/K-v2.types";
+﻿import type { KItemV2 } from "../types/kV2.type";
 
 export interface BreadcrumbEntry {
     id: number | null;

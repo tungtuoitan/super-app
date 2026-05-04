@@ -1,4 +1,4 @@
-import { MenuItem, MenuDivider } from "@szhsin/react-menu";
+﻿import { MenuItem, MenuDivider } from "@szhsin/react-menu";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import {
     Plus as AddIcon,
@@ -8,11 +8,11 @@ import {
     RotateCcw as RestoreIcon,
     FileCode as ImportMarkdownIcon,
 } from "lucide-react";
-import { useKStore } from "../../store/K.store";
+import { useKStore } from "../../store/useK.store";
 import { useKMenuHelper } from "../helpers/useKMenu.helper";
-import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatusHelper";
+import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatus.helper";
 import { useKTabHelper } from "../../hooks/useKTab.helper";
-import { kconstants } from "../../utils/K.Constants";
+import { kconstants } from "../../utils/k.constants";
 import {useMenuContext} from "@/shared";
 
 /**
@@ -43,7 +43,7 @@ export function KNodeMenu() {
     ];
 
     const handleImportMarkdown = () => {
-        // Store the target parent node in KStore so KKnowledgeEditorPanel can read it even if not yet mounted
+        // Store the target parent node in KStore so KEditorPanel can read it even if not yet mounted
         setPendingImportNodeId(contextData?.id ?? null);
         // Ensure the knowledge tab is open
         const ks = allK.find(k => k.id === currentK?.id);

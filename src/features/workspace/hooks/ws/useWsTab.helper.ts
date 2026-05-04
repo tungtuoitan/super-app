@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Workspace Tab Helper
  * Helper functions for managing workspace editor tabs.
  * Delegates all tab lifecycle to shell — never builds BaseTab directly.

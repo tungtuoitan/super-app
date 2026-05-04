@@ -1,10 +1,10 @@
 ﻿import { LibraryBig, CalendarClock, ArrowRightLeft } from "lucide-react";
 import { shellConstants } from "@/shell";
 import { KView } from "../Components/KView";
-import { KKnowledgeEditorPanel } from "../Components/KKnowledgeEditorPanel";
+import { KEditorPanel } from "../Components/KEditorPanel";
 import { KNodeEditorPanel } from "../Components/KNodeEditorPanel/KNodeEditorPanel";
 import { KMovingTab } from "../Components/KMovingTree/KMovingTab";
-import { useKStore } from "../store/K.store";
+import { useKStore } from "../store/useK.store";
 import { constants } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
 
@@ -23,7 +23,7 @@ export const kModule: ModuleDefinition = {
     SidebarView: KView,
 
     editorPanels: {
-        [shellConstants.vscode.tab.tabTypes.kKnowledge]: KKnowledgeEditorPanel,
+        [shellConstants.vscode.tab.tabTypes.kKnowledge]: KEditorPanel,
         [shellConstants.vscode.tab.tabTypes.kNode]: KNodeEditorPanel,
         [shellConstants.vscode.tab.tabTypes.kDailyReview]: () => null, // handled separately if needed
     },

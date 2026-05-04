@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Tree Selection Helper Hook
  * Handles folder selection operations (VS Code-like multi-selection)
  *

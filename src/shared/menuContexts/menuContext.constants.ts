@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Context Menu Type Constants
  * Single source of truth for all menu IDs.
  */
@@ -30,7 +30,7 @@ export const MENU_CONTEXT_TYPES = {
     kNode:              "k-node",
     kNodePanelCard:     "k-node-panel-card",
     kKnowledgeSelector: "k-knowledge-selector",
-    kTestFlow:          "k-test-flow",
+    kQFlow:          "k-test-flow",
     kNodePanelBlank:    "k-node-panel-blank",
 
     // Wiki

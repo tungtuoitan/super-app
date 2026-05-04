@@ -1,4 +1,4 @@
-/**
+﻿/**
  * KTab Helper Hook
  * Opens knowledge editor tabs (create new / edit existing).
  * Delegates all tab lifecycle to shell — never builds BaseTab directly.
@@ -6,8 +6,8 @@
 
 import { shellConstants } from "@/shell";
 import { useEditorTabBarHelper } from "@/shell";
-import type { KWsResponse } from "../types/K.types";
-import { useKStore } from "../store/K.store";
+import type { KWsResponse } from "../types/k.type";
+import { useKStore } from "../store/useK.store";
 
 const K_TAB_TYPE           = shellConstants.vscode.tab.tabTypes.kKnowledge;
 const DAILY_REVIEW_TAB_TYPE = shellConstants.vscode.tab.tabTypes.kDailyReview;

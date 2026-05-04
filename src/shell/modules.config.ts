@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Module Registration
  *
  * Register all feature modules into the VSCode shell.
@@ -25,7 +25,7 @@ import { WorkspaceFolderNodeMenu, WorkspaceChildNodeMenu, WorkspaceSelectorMenu,
 import { NoteGridMenu, RichTextEditorMenu } from "@/features/note";
 import { ProjectGridMenu, TaskGridMenu, TaskFlowMenu } from "@/features/project";
 import { LogListMenu, TrackPanelMenu } from "@/features/lifeLog";
-import { KNodeMenu, KNodePanelCardMenu, KKnowledgeMenu, KTestFlowMenu, KNodePanelBlankMenu } from "@/features/K";
+import { KNodeMenu, KNodePanelCardMenu, KMenu, KQFlowMenu, KNodePanelBlankMenu } from "@/features/K";
 import { WikiGraphNodeMenu } from "@/features/Wiki";
 import { TabBarMenu } from "./components/TabBarMenu";
 
@@ -75,8 +75,8 @@ menuContextRegistry.register({ handles: ["lifelog-log"],           component: Lo
 menuContextRegistry.register({ handles: ["lifelog-track"],         component: TrackPanelMenu });
 menuContextRegistry.register({ handles: ["k-node"],                component: KNodeMenu });
 menuContextRegistry.register({ handles: ["k-node-panel-card"],     component: KNodePanelCardMenu });
-menuContextRegistry.register({ handles: ["k-knowledge-selector"],  component: KKnowledgeMenu });
-menuContextRegistry.register({ handles: ["k-test-flow"],           component: KTestFlowMenu });
+menuContextRegistry.register({ handles: ["k-knowledge-selector"],  component: KMenu });
+menuContextRegistry.register({ handles: ["k-test-flow"],           component: KQFlowMenu });
 menuContextRegistry.register({ handles: ["k-node-panel-blank"],    component: KNodePanelBlankMenu });
 menuContextRegistry.register({ handles: ["wiki-graph-node"],       component: WikiGraphNodeMenu });
 menuContextRegistry.register({ handles: ["tab"],                   component: TabBarMenu });

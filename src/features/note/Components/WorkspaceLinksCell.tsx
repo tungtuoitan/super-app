@@ -1,4 +1,4 @@
-/**
+﻿/**
  * WorkspaceLinksCell - Displays workspace links count with tooltip
  * Used in NoteGrid to show which workspaces reference a note
  */

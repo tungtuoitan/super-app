@@ -1,4 +1,4 @@
-import { WorkspaceItem, isFolder } from "../types/workspace.types";
+﻿import { WorkspaceItem, isFolder } from "../types/workspace.types";
 import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/shared";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";

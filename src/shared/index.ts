@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shared Public API
  * Only import from this file when crossing module boundaries.
  * Internal imports within shared should use relative paths.
@@ -172,7 +172,7 @@ export type {
     LogListMenuData,
     TrackPanelMenuData,
     KKnowledgeSelectorMenuData,
-    KTestFlowMenuData,
+    KQFlowMenuData,
     RichTextEditorMenuData,
 } from "./menuContexts/menuContext.types";
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * K Service — API communication for k knowledge/node operations
  *
  * Endpoints (KController):
@@ -9,8 +9,8 @@
  */
 
 import { config } from "config/app.config";
-import type { KDeleteItemsRequest, KOperationResult, KWsResponse, KUpsertWorkspaceItemRequest } from "../types/K.types";
-import type { KDTO } from "../types/K-dto.types";
+import type { KDeleteItemsRequest, KOperationResult, KWsResponse, KUpsertWorkspaceItemRequest } from "../types/k.type";
+import type { KDTO } from "../types/kDto.type";
 import type { KImportTestMarkdownRequest } from "../types/kMarkdownImport.type";
 import {ResultOptions} from "@/shared";
 import {apiFetch} from "@/shared";

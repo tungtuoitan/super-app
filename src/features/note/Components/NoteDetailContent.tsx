@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Note Detail Dialog Content Component
  */
 
