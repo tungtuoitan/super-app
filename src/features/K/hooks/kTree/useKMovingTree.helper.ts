@@ -2,13 +2,12 @@
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { useKMovingTreeStore } from "../../store/useKMovingTree.store";
 import { useKStore } from "../../store/useK.store";
-import { KService } from "../../service/K.service";
+import { KService } from "../../service/k.service";
 import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/k.type";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, KItemV2 } from "../../types/kV2.type";
 import {KDTO} from "../../types/kDto.type";
-import {KtreeMiniHelper} from "./Ktree.miniHelper";
-import {kconstants} from "../../utils/K.Constants";
+import {KtreeMiniHelper} from "./kTree.miniHelper";
 import {SPECIAL_IDS} from "../../utils/kTempId.utils";
 import {useKLoader} from "./useK.loader";
 import {useAuthStore, useConsoleHelper} from "@/shared";

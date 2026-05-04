@@ -11,13 +11,11 @@ import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { KNodeCard } from "./KNodeCard";
 import { KInlineNodeCard } from "./KInlineNodeCard";
 import { containsNormalized, useMenuContextHelper } from "@/shared";
-import { constants } from "@/shared";
 import { useConsoleHelper } from "@/shared";
-import { kconstants } from "../../utils/K.Constants";
 import { useSideBarHelper } from "@/shell";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { useEditorTabBarHelper } from "@/shell";
-import {KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
+import {KtreeMiniHelper} from "../../hooks/kTree/kTree.miniHelper";
 import { kEvents } from "../../utils/kEvents.utils";
 import type { KNodeInlineCreateDetail } from "../../utils/kEvents.utils";
 

@@ -7,7 +7,6 @@
 
 import React, { useEffect } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import { shellConstants } from "@/shell";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, getAllIconLabel, IconKey } from "@/shared";
 import { Button } from "@/shared";
@@ -15,7 +14,6 @@ import { GenericTextField, IconPicker } from "@/shared";
 import { useKNodeDialogHelper as useKFolderDialogHelper } from "../hooks/useKNodeDialog.helper";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import {useKStore} from "../store/useK.store";
-import {kconstants} from "../utils/K.Constants";
 import {useNodeDialogStore} from "../store/useKNodeDialog.store";
 import { getIconDefaultColor } from "@/shared";
 import { useGlobalShortcut } from "@/shared";

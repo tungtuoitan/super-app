@@ -9,13 +9,13 @@ import { DND_TYPE, CARD_HEIGHT } from "../../utils/kNodeEditor.constants";
 import { isAncestorNode } from "../../hooks/kNodeEditor.miniHelper";
 import { KAutoResizeTextarea } from "./KAutoResizeTextarea";
 import { ICON_MAP, IconKey, useMenuContextHelper } from "@/shared";
-import { kconstants } from "../../utils/K.Constants";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTab.helper";
 import { storageService, STORAGE_KEYS } from "@/shared";
 import { KHighlightText } from "../KExplorer/KHighlightText";
 import { useSideBarHelper } from "@/shell";
 import {useGlobalShortcut} from "@/shared";
 import type { FC } from "react";
+import {kconstants} from "../../utils/k.constants";
 
 interface NodeIconDisplayProps {
     opacity?: number;

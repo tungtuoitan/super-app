@@ -8,14 +8,14 @@ import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { Tree } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { KNode } from "../KExplorer/KNode";
-import { kconstants } from "../../utils/K.Constants";
 import { useKMovingTreeStore } from "../../store/useKMovingTree.store";
 import { useKMovingTreeHelper } from "../../hooks/kTree/useKMovingTree.helper";
-import {KTreeFolder, KtreeMiniHelper} from "../../hooks/kTree/Ktree.miniHelper";
+import {KtreeMiniHelper} from "../../hooks/kTree/kTree.miniHelper";
+import {KTreeFolder} from "../../types/kV2.type";
 
 export function KMovingTree() {
     const { targetWorkspace, containerHeight, treeContainerRef, highlightedDuplicateIds, treeRenderKey, dropZoneHeight, _treeRef } = useKMovingTreeStore();
-    const { dropToMovingTree } = useKMovingTreeHelper();
+    const { dropToMovingTree } = useKMovingTreeHelper(); 
     const manager = useDragDropManager();
 
     // Transform target workspace data to tree format

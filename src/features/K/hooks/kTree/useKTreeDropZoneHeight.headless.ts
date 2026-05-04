@@ -6,8 +6,7 @@
 import { useEffect } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import type { TreeApi } from "react-arborist";
-import {kconstants} from "../../utils/K.Constants";
-import {KTreeNode} from "./Ktree.miniHelper";
+import {KTreeNode} from "../../types/kV2.type";
  
 interface CalculateWorkspaceTreeDropZoneHeightProps { 
     treeData: KTreeNode[];

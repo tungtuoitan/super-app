@@ -1,6 +1,6 @@
 ﻿import { useState } from "react";
 import { useAuthStore } from "@/shared";
-import { KService } from "../service/K.service";
+import { KService } from "../service/k.service";
 import { useConsoleHelper } from "@/shared";
 import { useKStore } from "../store/useK.store";
 import type { KMdParsed } from "../types/kMarkdownImport.type";

@@ -1,7 +1,7 @@
 ﻿import { useCallback, useEffect, useState } from "react";
 import { BookDashed, BookOpen, Eye, EyeOff, Loader2, Play, RotateCcw, Trophy } from "lucide-react";
 import { KTestService } from "../../service/kTest.service";
-import { KService } from "../../service/K.service";
+import { KService } from "../../service/k.service";
 import { KQFlowProvider } from "../../store/useKQFlow.store";
 import { KQFlowCanvas } from "./KQFlowCanvas";
 import { KDailyReviewSession } from "../KDailyReviewSession";

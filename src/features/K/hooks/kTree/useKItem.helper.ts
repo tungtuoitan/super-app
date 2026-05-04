@@ -2,7 +2,7 @@
 import { useEditorTabBarHelper } from "@/shell";
 import { useAuthStore } from "@/shared";
 import { useKStore } from "../../store/useK.store";
-import { KService } from "../../service/K.service";
+import { KService } from "../../service/k.service";
 import { KItemAction, KUpsertWorkspaceItemRequest } from "../../types/k.type";
 import { isNumber } from "lodash";
 import { useConsoleHelper } from "@/shared";

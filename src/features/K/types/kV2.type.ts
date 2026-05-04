@@ -73,3 +73,16 @@ export function canHaveChildren(_item: KItemV2): boolean {
 export function isFolder(_item: KItemV2): _item is KItemV2 {
   return true;
 }
+
+
+
+/** Tree node wrapper for react-arborist */
+export interface KTreeNode {
+    id: string;
+    name: string;
+    children?: KTreeNode[];
+    data: KItemV2;
+}
+
+// @deprecated alias
+export type KTreeFolder = KTreeNode;

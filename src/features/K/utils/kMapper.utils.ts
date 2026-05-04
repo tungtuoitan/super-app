@@ -7,7 +7,6 @@
 
 import { KWorkspaceItem, FolderItem, NoteItem, FileItem, KFolderMetadata, KNoteMetadata, KFileMetadata } from "../types/k.type";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import {kconstants} from "./K.Constants";
 
 /**
  * Type aliases for backend API types

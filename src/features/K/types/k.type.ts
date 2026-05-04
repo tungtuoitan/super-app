@@ -2,7 +2,6 @@
  * K.types.ts — K item action types and request/response interfaces
  */
 
-import { kconstants } from "../utils/K.Constants";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 
 // ============================================

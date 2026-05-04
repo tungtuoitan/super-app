@@ -6,12 +6,11 @@
 import { useKStore } from "../../store/useK.store";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import { useKNodeDialogHelper } from "../useKNodeDialog.helper";
-import { KService } from "../../service/K.service";
+import { KService } from "../../service/k.service";
 import { KItemAction } from "../../types/k.type";
-import { KItemV2 } from "../../types/kV2.type";
-import {kconstants} from "../../utils/K.Constants";
+import { KItemV2, KTreeNode } from "../../types/kV2.type";
 import {SPECIAL_IDS} from "../../utils/kTempId.utils";
-import {KtreeMiniHelper, KTreeNode} from "./Ktree.miniHelper";
+import {KtreeMiniHelper} from "./kTree.miniHelper";
 import {useKLoader} from "./useK.loader";
 import {useAuthStore, useConsoleHelper} from "@/shared";
 import {Folder} from "../../types/folder.type";

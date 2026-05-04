@@ -3,8 +3,8 @@ import type { NodeApi } from "react-arborist";
 import { useKStore } from "@/features/K/store/useK.store";
 import { useEditorTabBarHelper, shellConstants } from "@/shell";
 import { useKTreeSelectionHelper } from "./useKTreeSelection.helper";
-import type { KTreeNode } from "./Ktree.miniHelper";
 import type { KWsResponse } from "@/features/K/types/k.type";
+import {KTreeNode} from "../../types/kV2.type";
 
 interface UseKNodeSelectionArgs {
     node: NodeApi<KTreeNode>;

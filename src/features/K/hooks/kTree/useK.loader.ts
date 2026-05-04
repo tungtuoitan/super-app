@@ -14,13 +14,13 @@
 import {useConsoleHelper} from "@/shared";
 import {useAuthStore} from "@/shared";
 import {useKMovingTreeStore} from "../../store/useKMovingTree.store";
-import {KService} from "../../service/K.service";
 import {useKStore} from "../../store/useK.store";
 import {KTestService} from "../../service/kTest.service";
 import {KItemV2} from "../../types/kV2.type";
 import {KDTO} from "../../types/kDto.type";
 import {KWsResponse} from "../../types/k.type";
 import {ResultOptions} from "@/shared";
+import {KService} from "../../service/k.service";
 
 
 export const useKLoader = () => {

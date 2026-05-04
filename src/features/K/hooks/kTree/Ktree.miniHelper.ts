@@ -5,19 +5,9 @@
 
 import {KDTO} from "../../types/kDto.type";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import {KItemV2} from "../../types/kV2.type";
-import {kconstants} from "../../utils/K.Constants";
+import {KItemV2, KTreeNode} from "../../types/kV2.type";
 
-/** Tree node wrapper for react-arborist */
-export interface KTreeNode {
-    id: string;
-    name: string;
-    children?: KTreeNode[];
-    data: KItemV2;
-}
 
-// @deprecated alias
-export type KTreeFolder = KTreeNode;
 
 // ============================================
 // RECURSIVE HELPERS (prefix $)
