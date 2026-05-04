@@ -109,12 +109,12 @@ export function KTree() {
     const { markedNodeId, setMarkedNodeId, markedVisibleIds } = useKTreeMark(treeData);
 
     // ── Open/close persistence ───────────────────────────────────────────────
-    const { handleToggle, hasSavedState } = useKTreeOpenState();
+    // const { handleToggle, hasSavedState } = useKTreeOpenState();
 
     // Auto-expand workspace root on init — skip when saved state exists
     useEffect(() => {
         if (!_treeRef.current || !currentK?.id || treeData.length === 0) return;
-        if (hasSavedState) return;
+        // if (hasSavedState) return;
         const timer = setTimeout(async () => {
             const rootId = workspaceConstants.root.workspaceItemId;
             await KtreeMiniHelper.expandPathToItem(_treeRef, treeData, rootId);
@@ -182,7 +182,7 @@ export function KTree() {
                     onMove={async (args) => {
                         await handleMove(args, treeData);
                     }}
-                    onToggle={handleToggle}
+                    // onToggle={handleToggle}
                     onSelect={(nodes: NodeApi<KTreeNode>[]) => handleSelectionChange(nodes)}
                     disableMultiSelection={false}
                     disableEdit={true}
