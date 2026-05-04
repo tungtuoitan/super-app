@@ -13,7 +13,7 @@ import { KInlineNodeCard } from "./KInlineNodeCard";
 import { containsNormalized, useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { useConsoleHelper } from "@/shared";
-import { kconstants } from "../../utils/k.constants";
+import { kconstants } from "../../utils/K.Constants";
 import { useSideBarHelper } from "@/shell";
 import { stripHtmlToText } from "./KNodeDescEditor";
 import { useEditorTabBarHelper } from "@/shell";

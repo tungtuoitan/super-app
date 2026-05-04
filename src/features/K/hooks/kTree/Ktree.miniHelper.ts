@@ -6,7 +6,7 @@
 import {KDTO} from "../../types/kDto.type";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import {KItemV2} from "../../types/kV2.type";
-import {kconstants} from "../../utils/k.constants";
+import {kconstants} from "../../utils/K.Constants";
 
 /** Tree node wrapper for react-arborist */
 export interface KTreeNode {

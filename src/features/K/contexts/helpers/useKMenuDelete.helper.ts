@@ -1,9 +1,9 @@
 ﻿import { useKStore } from "../../store/useK.store";
-import { KService } from "../../service/k.service";
+import { KService } from "../../service/K.service";
 import { KItemV2 } from "../../types/kV2.type";
 import { KUpsertWorkspaceItemRequest, KItemAction } from "../../types/k.type";
 import { KDTO } from "../../types/kDto.type";
-import { KtreeMiniHelper } from "../../hooks/kTree/kTree.miniHelper";
+import { KtreeMiniHelper } from "../../hooks/kTree/Ktree.miniHelper";
 import { useEditorTabBarHelper } from "@/shell";
 import { isUnauthorizedError, parseApiError, useAuthStore, useConfirmationPopoverHelper, useConsoleHelper, useMenuContext, useMenuContextHelper } from "@/shared";
 import { getKConfirmMessage } from "../../utils/kConfirmMessage.constants";

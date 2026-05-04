@@ -1,13 +1,13 @@
 ﻿import { useMemo } from "react";
 import { useKStore } from "../store/useK.store";
 import { useAuthStore } from "@/shared";
-import { KService } from "../service/k.service";
+import { KService } from "../service/K.service";
 import { KItemAction } from "../types/k.type";
 import { useKNodeEditorStore } from "../store/useKNodeEditor.store";
 import { getDescendantIds, isAncestorNode } from "./kNodeEditor.miniHelper";
 import { generateTempId, collectIdsFromTree } from "../utils/kTempId.utils";
 import type { KItemV2 } from "../types/kV2.type";
-import {KtreeMiniHelper} from "./kTree/kTree.miniHelper";
+import {KtreeMiniHelper} from "./kTree/Ktree.miniHelper";
 import {useKLoader} from "./kTree/useK.loader";
 
 export const useKNodeEditorLoader = () => {

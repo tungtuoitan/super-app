@@ -1,5 +1,5 @@
 ﻿import { ChevronDown, ChevronRight, Tag as TagIcon, FolderOpen, Folder as FolderIcon } from "lucide-react";
-import {KtreeMiniHelper, KTreeNode} from "../../hooks/kTree/kTree.miniHelper";
+import {KtreeMiniHelper, KTreeNode} from "../../hooks/kTree/Ktree.miniHelper";
 
 /**
  * Custom Drag Preview Component (VS Code style)

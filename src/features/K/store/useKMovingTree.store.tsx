@@ -1,7 +1,7 @@
 ﻿import React, { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 import type { TreeApi } from "react-arborist";
 import {KDTO} from "../types/kDto.type";
-import {KTreeNode} from "../hooks/kTree/kTree.miniHelper";
+import {KTreeNode} from "../hooks/kTree/Ktree.miniHelper";
 
 /**
  * MoveToWorkspacePopup Store - Manages state for "Moving" tab in VSPanel

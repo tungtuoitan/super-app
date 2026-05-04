@@ -1,6 +1,6 @@
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import { kconstants } from "../utils/k.constants";
+import { kconstants } from "../utils/K.Constants";
 import {ICON_COLORS, IconKey} from "@/shared";
 
 export interface NodeDialogFormErrors {

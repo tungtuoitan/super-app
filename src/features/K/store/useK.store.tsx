@@ -7,7 +7,7 @@ import { useContext, createContext, useState, useRef } from "react";
 import type { KFlowClipboard, KContextData } from "../types/kContext.type";
 import type { KWsResponse } from "../types/k.type";
 import type { KDTO } from "../types/kDto.type";
-import type { KTreeNode } from "../hooks/kTree/kTree.miniHelper";
+import type { KTreeNode } from "../hooks/kTree/Ktree.miniHelper";
 
 const kContextDefaultValue: KContextData = {
     allK: [],

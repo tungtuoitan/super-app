@@ -10,11 +10,11 @@ import { useMenuContextHelper } from "@/shared";
 
 import { KCustomDragPreview } from "./KCustomDragPreview";
 import { KNode } from "./KNode";
-import { kconstants } from "../../utils/k.constants";
+import { kconstants } from "../../utils/K.Constants";
 import { useCalculateKTreeContainerHeight } from "../../hooks/kTree/useKTreeContainerHeight.headless";
 import { useCalculateKTreeDropZoneHeight } from "../../hooks/kTree/useKTreeDropZoneHeight.headless";
 import { useScrollToHighlightItem } from "../../hooks/kTree/useKScrollToHighlight.headless";
-import { KtreeMiniHelper, KTreeNode } from "../../hooks/kTree/kTree.miniHelper";
+import { KtreeMiniHelper, KTreeNode } from "../../hooks/kTree/Ktree.miniHelper";
 import { useKTreeSelectionHelper } from "../../hooks/kTree/useKTreeSelection.helper";
 import { useKTreeMark } from "../../hooks/kTree/useKTreeMark.helper";
 import { useKTreeOpenState } from "../../hooks/kTree/useKTreeOpenState.helper";

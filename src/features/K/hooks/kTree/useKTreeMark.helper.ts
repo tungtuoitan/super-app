@@ -1,8 +1,8 @@
 ﻿import { useEffect, useMemo } from "react";
 import { useKStore } from "@/features/K/store/useK.store";
 import { storageService, STORAGE_KEYS } from "@/shared";
-import { KtreeMiniHelper } from "./kTree.miniHelper";
-import type { KTreeNode } from "./kTree.miniHelper";
+import { KtreeMiniHelper } from "./Ktree.miniHelper";
+import type { KTreeNode } from "./Ktree.miniHelper";
 
 function collectSubtreeIds(node: KTreeNode, out: Set<number>) {
     out.add(node.data.id);

@@ -8,7 +8,7 @@
 
 import {KItemV2} from "../types/kV2.type";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import {kconstants} from "./k.constants";
+import {kconstants} from "./K.Constants";
 
 
 /**

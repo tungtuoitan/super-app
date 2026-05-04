@@ -6,10 +6,10 @@ import { ICON_MAP, IconKey, useMenuContextHelper } from "@/shared";
 import { KHighlightText } from "./KHighlightText";
 import { useKStore } from "../../store/useK.store";
 import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatus.helper";
-import { kconstants } from "../../utils/k.constants";
+import { kconstants } from "../../utils/K.Constants";
 import { storageService, STORAGE_KEYS } from "@/shared";
 import { useSideBarHelper } from "@/shell";
-import { KTreeNode } from "../../hooks/kTree/kTree.miniHelper";
+import { KTreeNode } from "../../hooks/kTree/Ktree.miniHelper";
 import { useKNodeSelection } from "../../hooks/kTree/useKNodeSelection.helper";
 
 interface NodeProps {

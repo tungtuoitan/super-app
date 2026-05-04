@@ -10,7 +10,7 @@ import {useKStore} from "../../store/useK.store";
 
 import type { NodeApi } from "react-arborist";
 import {SPECIAL_IDS} from "../../utils/kTempId.utils";
-import {KTreeNode} from "./kTree.miniHelper";
+import {KTreeNode} from "./Ktree.miniHelper";
 
 export const useKTreeSelectionHelper = () => {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, _treeRef, currentK } = useKStore();

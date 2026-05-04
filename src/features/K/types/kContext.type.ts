@@ -1,7 +1,7 @@
 ﻿import type { Dispatch, SetStateAction } from "react";
 import type { KWsResponse } from "./k.type";
 import type { KDTO } from "./kDto.type";
-import type { KTreeNode } from "../hooks/kTree/kTree.miniHelper";
+import type { KTreeNode } from "../hooks/kTree/Ktree.miniHelper";
 
 /** Question cut/paste clipboard — persists across node navigation */
 export interface KFlowClipboard {
