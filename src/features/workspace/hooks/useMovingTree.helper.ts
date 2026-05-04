@@ -6,7 +6,6 @@ import { useWorkspaceStore } from "../store/workspace.store";
 import { useAuthStore } from "@/shared";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import { workspaceService } from "../service/workspace.service";
-import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
@@ -298,15 +297,12 @@ export const useMovingTreeHelper = () => {
                     return;
                 }
 
-                const requests: UpsertWorkspaceItemRequest[] = itemsToMove.map((itemId: number) => ({
-                    action: WorkspaceItemAction.MoveCross,
-                    id: itemId,
-                    workspaceId: targetWorkspaceId,
-                    parentId: targetId, // null = root, number = specific folder
-                }));
-
-                // STEP 7: Call batch API
-                const result = await workspaceService._upsertWorkspaceItems($user.userToken, currentWorkspace.id, requests);
+                // STEP 7: Call move-cross API
+                const result = await workspaceService._moveCrossItems(
+                    $user.userToken,
+                    currentWorkspace.id,
+                    { itemIds: itemsToMove, targetWorkspaceId, parentId: targetId }
+                );
 
                 if (result.success) {
                     _console.success(`Moved ${itemsToMove.length} item(s) to target workspace`);

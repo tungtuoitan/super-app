@@ -67,9 +67,25 @@ const _upsertWorkspaceItems = async (
     return Promise.reject(res);
 };
 
+const _moveCrossItems = async (
+    _token: string,
+    sourceWorkspaceId: number,
+    data: { itemIds: number[]; targetWorkspaceId: number; parentId?: number | null }
+): Promise<ResultOptions> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/workspace/${sourceWorkspaceId}/items/move-cross`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+
+    if (res.ok) return await res.json();
+    return Promise.reject(res);
+};
+
 export const workspaceService = {
     _getAllUserWorkspaces,
     _getWorkspaceTreeV2,
     _deleteWorkspaceItems,
     _upsertWorkspaceItems,
+    _moveCrossItems,
 };

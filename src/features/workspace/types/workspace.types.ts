@@ -541,8 +541,6 @@ export enum WorkspaceItemAction {
     Add = "ADD",
     /** MOVE workspace_item to new location (within same workspace) */
     Move = "MOVE",
-    /** MOVE CROSS workspace_item to another workspace (updates workspaceId + parentId + all descendants) */
-    MoveCross = "MOVECROSS",
     /** UPDATE FOLDER data (FOLDER ONLY - name, description, color, icon, etc.) */
     UpdateFolder = "UPDATEFOLDER", // Note: Only for folders. Notes/Files use their own entity-specific APIs.
     /** SOFT DELETE workspace_item */
@@ -574,14 +572,7 @@ export enum WorkspaceItemAction {
  *    ParentId = workspace_items.id of new parent (NOT entity ID!)
  *    Example: { action: "MOVE", id: 789, parentId: null } ← move to root
  *
- * 4. MOVE_CROSS (move to another workspace):
- *    Required: action=MoveCross, id, workspaceId (target workspace)
- *    Optional: parentId (target parent in new workspace, null = root)
- *    Updates workspace_id for item and ALL descendants recursively
- *    Example: { action: "MOVE_CROSS", id: 789, workspaceId: 5, parentId: 123 }
- *    Example: { action: "MOVE_CROSS", id: 789, workspaceId: 5, parentId: null } ← to root of workspace 5
- *
- * 5. UPDATE_FOLDER (update folder properties - FOLDER ONLY):
+ * 4. UPDATE_FOLDER (update folder properties - FOLDER ONLY):
  *    Required: action=UpdateFolder, id, folderData
  *    Optional: None
  *    Note: Only for folders. Notes/Files use their own entity-specific APIs.
@@ -601,16 +592,16 @@ export interface UpsertWorkspaceItemRequest {
     /** Explicit action to perform on workspace item */
     action: WorkspaceItemAction;
 
-    /** Workspace item ID - Required for: Move, MoveCross, Update, Delete, Restore */
+    /** Workspace item ID - Required for: Move, UpdateFolder, Delete, Restore */
     id?: number | null;
 
-    /** Workspace ID (target workspace for MoveCross, set by controller from route for other actions) */
+    /** Workspace ID — set by controller from route, override for Add/Create */
     workspaceId?: number | null;
 
     /** User ID (set by controller from JWT) */
     userId?: number;
 
-    /** Parent workspace_item ID (SELF-REFERENCING) - Required for: Move, Optional for: MoveCross, Create, Add */
+    /** Parent workspace_item ID (SELF-REFERENCING) - Required for: Move, Optional for: Create, Add */
     parentId?: number | null;
 
     /** Entity type: 2=folder, 3=note, 4=file - Required for: Create, Add */
