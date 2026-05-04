@@ -12,7 +12,7 @@ import type { NodeApi } from "react-arborist";
 import {SPECIAL_IDS} from "../../utils/temp-id.utils";
 import {KTreeNode} from "./Ktree.miniHelper";
 
-export const KuseTreeHelper2 = () => {
+export const useKTreeSelectionHelper = () => {
     const { selectedItemIds, setSelectedItemIds, lastSelectedItemId, setLastSelectedItemId, _treeRef, currentK } = useKStore();
     /**
      * Clear all selections

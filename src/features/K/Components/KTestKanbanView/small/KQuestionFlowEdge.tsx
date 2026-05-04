@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import { getSmoothStepPath, EdgeLabelRenderer, BaseEdge } from "@xyflow/react";
 import type { EdgeProps, Edge } from "@xyflow/react";
 import { useKTestFlowStore } from "@/features/K/store/useKTestFlow.store";
-import { useKTestFlowHelper } from "@/features/K/hooks/test/useKTestFlow.helper";
+import { useKTestFlowCanvasHelper } from "@/features/K/hooks/test/useKTestFlowCanvas.helper";
 import type { KFlowEdgeData, ArrowDirection } from "@/features/K/types/kTestFlow.type";
 
 const FLOW_DASH = "10 6";
@@ -17,7 +17,7 @@ export function KQuestionFlowEdge({
     data, selected,
 }: EdgeProps<Edge<KFlowEdgeData>>) {
     const { flowEdges } = useKTestFlowStore();
-    const { handleEdgeDelete, handleEdgeToggleDirection } = useKTestFlowHelper();
+    const { handleEdgeDelete, handleEdgeToggleDirection } = useKTestFlowCanvasHelper();
 
     const edgeData = data as KFlowEdgeData | undefined;
     const currentArrow = edgeData?.arrowDirection ?? "forward";

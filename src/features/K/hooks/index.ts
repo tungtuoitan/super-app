@@ -5,8 +5,8 @@
 
 // Sub-hooks (use directly for specific operations)
 // export { useKNodeDialogHelper } from "./useKNodeDialog.helper";
-// export { KuseTreeHelper2 } from "./kTree/useKTreeHelper2";
-// export { KuseTreeHelper } from "./kTree/useKTreeHelper";
+// export { useKTreeSelectionHelper } from "./kTree/useKTreeHelper2";
+// export { useKTreeHelper } from "./kTree/useKTreeHelper";
 
 // Tree helper utilities (pure functions)
 // export type { KTreeNode, KTreeFolder } from "./kTree/Ktree.miniHelper";

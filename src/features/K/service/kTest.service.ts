@@ -52,6 +52,14 @@ const _moveQuestion = async (questionId: number, targetNodeId: number | null): P
     return Promise.reject(res);
 };
 
+const _markQuestionDraft = async (knowledgeId: number, questionId: number): Promise<ResultOptions> => {
+    const res = await apiFetch(`${base(knowledgeId)}/questions/${questionId}/mark-draft`, {
+        method: "PATCH",
+    });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
 const _updateQuestions = async (
     knowledgeId: number,
     request: KUpdateQuestionsRequest,
@@ -164,6 +172,7 @@ export const KTestService = {
     _updateQuestions,
     _updateOrphanQuestions,
     _moveQuestion,
+    _markQuestionDraft,
     _submitAnswers,
     _getQuestionScores,
     _getDailyQueue,

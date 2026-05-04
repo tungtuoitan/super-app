@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { X, HelpCircle } from "lucide-react";
 import { useKNodeEditorLoader } from "../../hooks/useKNodeEditor.loader";
 import { useKNodeEditorStore } from "../../store/KNodeEditor.store";
-import { CARD_HEIGHT } from "../../hooks/kNodeEditor.miniHelper";
+import { CARD_HEIGHT } from "../../utils/kNodeEditor.constants";
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
 import { ICON_MAP, IconKey, IconPicker } from "@/shared";
 

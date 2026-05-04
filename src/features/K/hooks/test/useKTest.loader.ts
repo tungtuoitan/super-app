@@ -37,5 +37,9 @@ export const useKTestLoader = () => {
         throw new Error("Failed to update questions");
     };
 
-    return { loadQuestions, submitAnswers, loadQuestionScores, updateQuestions };
+    const markQuestionDraft = async (knowledgeId: number, questionId: number) => {
+        await KTestService._markQuestionDraft(knowledgeId, questionId);
+    };
+
+    return { loadQuestions, submitAnswers, loadQuestionScores, updateQuestions, markQuestionDraft };
 };

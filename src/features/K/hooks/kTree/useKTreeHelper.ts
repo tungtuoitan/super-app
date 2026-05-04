@@ -17,7 +17,7 @@ import {useAuthStore, useConsoleHelper} from "@/shared";
 import {Folder} from "../../types/folder.types";
 import {useKeywordHelper} from "@/shared";
 
-export const KuseTreeHelper = () => {
+export const useKTreeHelper = () => {
     const { selectedItemIds, setSelectedItemIds, setLastSelectedItemId, setIsDragging, currentK } = useKStore();
 
     const { openNodeDialog } = useKNodeDialogHelper();

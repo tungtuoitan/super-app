@@ -26,7 +26,7 @@ import {ResultOptions} from "@/shared";
 export const useKLoader = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree, setNodeScoreMap, setDailyReviewDueCount, setNodeReviewDueMap } = useKStore();
+    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree, setNodeScoreMap, setDailyReviewDueCount } = useKStore();
     const { setTargetWorkspaceId } = useKMovingTreeStore();
 
     /**
@@ -128,17 +128,6 @@ export const useKLoader = () => {
                 // Return a snapshot for callers that need it (mergedVirtualItems resolved above,
                 // so just return freshData; callers should prefer reading store state instead).
                 const snapshot = { ...result.object, flatData: freshData } as KDTO;
-
-                // Load per-node SRS due counts (non-blocking, best-effort)
-                KTestService._getNodeDueSummary(workspaceIdToLoad).then(res => {
-                    if (res.success && res.object) {
-                        const map: Record<number, number> = {};
-                        for (const item of res.object) {
-                            map[item.nodeId] = item.dueCount + item.newCount;
-                        }
-                        setNodeReviewDueMap(map);
-                    }
-                }).catch(() => { /* non-critical */ });
 
                 return snapshot;
             }

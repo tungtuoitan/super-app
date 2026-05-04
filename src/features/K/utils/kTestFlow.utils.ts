@@ -1,5 +1,31 @@
 import { flowService } from "@/shared";
 import type { FlowEdgeDTO } from "@/shared";
+import { QUESTION_NODE_WIDTH, NODE_HEIGHT, COL_COUNT, H_GAP, V_GAP } from "./kTestFlow.constants";
+
+// Constants used by the overlap check (node visual bounds with margin)
+const OVERLAP_NODE_W = 280, OVERLAP_NODE_H = 160, OVERLAP_GAP = 40;
+
+/** Check whether any "moved" node position overlaps with any "target" node position. */
+export function hasPositionOverlap(
+    moved: { x: number; y: number }[],
+    target: { x: number; y: number }[],
+): boolean {
+    for (const m of moved)
+        for (const t of target)
+            if (Math.abs(m.x - t.x) < OVERLAP_NODE_W + OVERLAP_GAP && Math.abs(m.y - t.y) < OVERLAP_NODE_H + OVERLAP_GAP)
+                return true;
+    return false;
+}
+
+/** Fallback grid layout for nodes that have no saved position yet. */
+export function buildGridPosition(index: number): { x: number; y: number } {
+    const col = index % COL_COUNT;
+    const row = Math.floor(index / COL_COUNT);
+    return {
+        x: col * (QUESTION_NODE_WIDTH + H_GAP),
+        y: row * (NODE_HEIGHT + V_GAP),
+    };
+}
 
 /**
  * Topological sort (Kahn's BFS) of questions by their canvas flow edges.

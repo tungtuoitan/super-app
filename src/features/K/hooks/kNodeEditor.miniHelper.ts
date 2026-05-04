@@ -1,19 +1,9 @@
 import type { KItemV2 } from "../types/K-v2.types";
 
-export const DND_TYPE = "K_NODE_CARD";
-export const CARD_HEIGHT = "h-52";
-
 export interface BreadcrumbEntry {
     id: number | null;
     name: string;
     color?: string | null;
-}
-
-export function getLevelStyle(level: number): { className: string; style?: React.CSSProperties } {
-    if (level === 1) return { className: "", style: { backgroundColor: "#111318" } };
-    if (level === 2) return { className: "", style: { backgroundColor: "#14171C" } };
-    if (level === 3) return { className: "", style: { backgroundColor: "#181A20" } };
-    return { className: "", style: { backgroundColor: "#1B1D23" } };
 }
 
 export function getDescendantIds(rootId: number, allNodes: KItemV2[]): Set<number> {

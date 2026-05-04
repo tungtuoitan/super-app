@@ -47,6 +47,9 @@ export interface KItemV2 {
   updatedAt?: string | null;
   deletedAt?: string | null;
 
+  /** Questions with srsNextReviewAt <= now for this node (from tree API) */
+  dueSrsCount?: number;
+
   // ── UI state ──────────────────────────────
   isExpanded?: boolean;
   isSelected?: boolean;

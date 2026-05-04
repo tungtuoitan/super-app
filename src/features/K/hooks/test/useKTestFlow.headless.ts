@@ -5,22 +5,7 @@ import type { QuestionFlowNodeData, KFlowEdgeData } from "@/features/K/types/kTe
 import type { Edge, Node } from "@xyflow/react";
 import { flowService } from "@/shared";
 import { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared";
-
-const QUESTION_NODE_WIDTH = 260;
-const NODE_HEIGHT = 160;
-const COL_COUNT = 4;
-const H_GAP = 40;
-const V_GAP = 60;
-
-// Fallback grid layout used for nodes that have no saved position yet
-function buildGridPosition(index: number): { x: number; y: number } {
-    const col = index % COL_COUNT;
-    const row = Math.floor(index / COL_COUNT);
-    return {
-        x: col * (QUESTION_NODE_WIDTH + H_GAP),
-        y: row * (NODE_HEIGHT + V_GAP),
-    };
-}
+import { buildGridPosition } from "@/features/K/utils/kTestFlow.utils";
 
 export function useKTestFlowHeadless(knowledgeId: number, questions: KTestQuestion[], showDeleted: boolean) {
     const {

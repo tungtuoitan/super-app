@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BookDashed, BookOpen, Eye, EyeOff, Loader2, Play, RotateCcw, Trophy } from "lucide-react";
 import { KTestService } from "../../service/kTest.service";
 import { KService } from "../../service/K.service";
@@ -10,15 +10,13 @@ import type { KDailySessionQuestion } from "../../types/kTest.type";
 import { ScoreSparkline } from "../small/ScoreSparkline";
 import { useKStore } from "../../store/K.store";
 import { useKLoader } from "../../hooks/kTree/useK.loader";
-import { useAuthStore, parseAsLocalDate } from "@/shared";
+import { useAuthStore } from "@/shared";
 import { KItemAction } from "../../types/K.types";
 import type { KQuestion } from "../../types/kTest.type";
 import { kEvents } from "../../utils/kEvents.utils";
 import type { KFlowQuestionsChangedDetail } from "../../utils/kEvents.utils";
-
-// A question is "mastered" when its last N consecutive reviews are all scored >= this threshold
-const MASTER_STREAK  = 5;
-const GOOD_SCORE_MIN = 4; // 0–5 scale; 4–5 = good recall
+import { useKQFlowStats } from "../../hooks/test/useKQFlowStats.helper";
+import { useKFlowSrsReset } from "../../hooks/test/useKFlowSrsReset.helper";
 
 interface KQFlowViewProps {
     nodeId: number | null; // null = show orphan questions (node_id IS NULL)
@@ -39,9 +37,6 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
     const [reviewSession, setReviewSession] = useState<KDailySessionQuestion[] | null>(null);
     const [sessionLoading, setSessionLoading] = useState(false);
     const [statusUpdating, setStatusUpdating] = useState(false);
-    const [resetConfirm, setResetConfirm] = useState(false);
-    const [resetLoading, setResetLoading] = useState(false);
-    const resetConfirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const { currentK, selectedKId } = useKStore();
     const { loadTree }              = useKLoader();
@@ -84,48 +79,17 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
     }, [nodeId, loadQuestions]);
 
     // ── Stats ─────────────────────────────────────────────────────────────────
+    const {
+        activeQuestions, reviewableQuestions,
+        dueCount, newCount, draftCount,
+        totalReviewable, canReview,
+        isMaster, sparkScores,
+    } = useKQFlowStats(questions);
 
-    const now             = new Date();
-    const activeQuestions = questions.filter(q => q.isActive && !q.deletedAt);
-    // Draft questions are excluded from review sessions
-    const reviewableQuestions = activeQuestions.filter(q => !q.isDraft);
-    const dueCount        = reviewableQuestions.filter(q => {
-        if (!q.srsNextReviewAt) return false;
-        const d = parseAsLocalDate(q.srsNextReviewAt);
-        return d !== null && d <= now;
-    }).length;
-    const newCount        = reviewableQuestions.filter(q => !q.srsNextReviewAt).length;
-    const draftCount      = activeQuestions.filter(q => q.isDraft).length;
-    const totalReviewable = dueCount + newCount;
-    const canReview       = totalReviewable > 0;
-
-    // "Master" is UI-only: statusCode stays "learning" but we surface a badge
-    // when every reviewable (non-draft) question has MASTER_STREAK consecutive good scores.
-    const isMaster = useMemo(() => {
-        if (reviewableQuestions.length === 0) return false;
-        return reviewableQuestions.every(q =>
-            q.scoreHistory.length >= MASTER_STREAK &&
-            q.scoreHistory.slice(-MASTER_STREAK).every(s => s >= GOOD_SCORE_MIN)
-        );
-    }, [reviewableQuestions]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    // Aggregate sparkline: average score across all questions per slot (0–5 → ×20 → 0–100)
-    const sparkScores = useMemo(() => {
-        const qs = activeQuestions.filter(q => q.scoreHistory.length > 0);
-        if (qs.length === 0) return [];
-        const SLOTS = 7;
-        const result: number[] = [];
-        for (let slot = 0; slot < SLOTS; slot++) {
-            const values: number[] = [];
-            for (const q of qs) {
-                const idx = q.scoreHistory.length - SLOTS + slot;
-                if (idx >= 0) values.push(q.scoreHistory[idx]);
-            }
-            if (values.length > 0)
-                result.push(Math.round(values.reduce((a, b) => a + b, 0) / values.length * 20));
-        }
-        return result;
-    }, [questions]); // eslint-disable-line react-hooks/exhaustive-deps
+    // ── SRS reset ─────────────────────────────────────────────────────────────
+    const { resetConfirm, resetLoading, handleResetClick } = useKFlowSrsReset(
+        nodeId, activeQuestions, loadQuestions,
+    );
 
     // ── Status toggle ─────────────────────────────────────────────────────────
 
@@ -149,42 +113,6 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
         } catch { /* silent */ }
         finally { setStatusUpdating(false); }
     };
-
-    // ── SRS reset ─────────────────────────────────────────────────────────────
-
-    const handleResetClick = () => {
-        if (resetLoading) return;
-        if (!resetConfirm) {
-            setResetConfirm(true);
-            resetConfirmTimerRef.current = setTimeout(() => setResetConfirm(false), 3000);
-        } else {
-            if (resetConfirmTimerRef.current) clearTimeout(resetConfirmTimerRef.current);
-            setResetConfirm(false);
-            void (async () => {
-                if (!nodeId) return;
-                const ids = activeQuestions.map(q => q.id);
-                if (ids.length === 0) return;
-                setResetLoading(true);
-                try {
-                    await KTestService._updateQuestions(nodeId, {
-                        addQuestions: [],
-                        updateQuestions: [],
-                        toggleQuestionIds: [],
-                        deleteQuestionIds: [],
-                        restoreQuestionIds: [],
-                        resetSrsQuestionIds: ids,
-                    });
-                    await loadQuestions();
-                } catch { /* silent */ }
-                finally { setResetLoading(false); }
-            })();
-        }
-    };
-
-    // Clean up auto-cancel timer on unmount
-    useEffect(() => () => {
-        if (resetConfirmTimerRef.current) clearTimeout(resetConfirmTimerRef.current);
-    }, []);
 
     const deletedCount = questions.filter(q => !!q.deletedAt).length;
     const canvasNodeId = nodeId ?? 0;
@@ -271,7 +199,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                     )}
 
                     {/* Reset SRS — first click arms confirm, second click executes */}
-                    {nodeId !== null && !isDraft && hasReviewHistory && (
+                    {/* {nodeId !== null && !isDraft && hasReviewHistory && (
                         <button
                             onClick={handleResetClick}
                             disabled={resetLoading}
@@ -289,7 +217,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                             }
                             {resetConfirm && <span>Confirm?</span>}
                         </button>
-                    )}
+                    )} */}
 
                     {/* Show-deleted toggle */}
                     {deletedCount > 0 && (

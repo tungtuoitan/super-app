@@ -89,18 +89,12 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
     }
     advanceWithScoreRef.current = advanceWithScore;
 
-    // Mark current question as draft and skip it (no score recorded)
+    // Mark current question as draft, clear its review history, then skip it
     const handleMarkDraft = () => {
         if (isSubmitted) return;
         const qId = currentQuestion?.id;
         if (qId === undefined) return;
-        // Fire-and-forget toggle
-        KTestService._updateQuestions(knowledgeId, {
-            addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
-            deleteQuestionIds: [], restoreQuestionIds: [],
-            toggleDraftQuestionIds: [qId],
-        }).catch(() => {});
-        // Advance without recording a score for this question
+        KTestService._markQuestionDraft(knowledgeId, qId).catch(() => {});
         if (currentIndex >= totalQuestions - 1) {
             setIsSubmitted(true);
             if (!isQuickTest) submitInBackground(selfScores, timings);
