@@ -259,7 +259,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                         knowledgeId={nodeId}
                         testTitle={node?.name ?? ""}
                         questions={reviewSession}
-                        onComplete={() => { setReviewSession(null); loadQuestions(); }}
+                        onComplete={() => { setReviewSession(null); loadQuestions(); loadTree(); }}
                         onBack={() => setReviewSession(null)}
                     />
                 </div>

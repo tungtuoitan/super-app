@@ -1,5 +1,5 @@
 import { config } from "config/app.config";
-import type { WikiExtractResult, WikiInfo, WikiKeyword } from "../types/wiki.type";
+import type { WikiInfo, WikiKeyword } from "../types/wiki.type";
 import {apiFetch} from "@/shared";
 
 const BASE = () => `${config.api.baseURL}/api/wiki`;
@@ -131,21 +131,6 @@ const _interact = async (keywordId: number, type: "view" | "read" | "edit"): Pro
     if (!res.ok) throw new Error(`API error ${res.status}`);
 };
 
-const _extractKeywords = async (title: string, content: string): Promise<WikiExtractResult> => {
-    try {
-        const res = await apiFetch(`${BASE()}/extract`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title, content }),
-        });
-        if (!res.ok) throw new Error(`API error ${res.status}`);
-        const json = await res.json();
-        return json.object as WikiExtractResult;
-    } catch {
-        return { existingMatches: [], newSuggestions: [] };
-    }
-};
-
 export const wikiService = {
     getAll:             _getAll,
     createKeyword:      _createKeyword,
@@ -154,7 +139,6 @@ export const wikiService = {
     deleteInfo:         _deleteInfo,
     restoreInfo:        _restoreInfo,
     savePinnedPosition: _savePinnedPosition,
-    extractKeywords:    _extractKeywords,
     updateKeyword:      _updateKeyword,
     interact:           _interact,
     rescanAll:          _rescanAll,

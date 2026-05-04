@@ -11,7 +11,6 @@ import type {
     KDailySubmitRequest,
     KRetentionSummary,
     KRetentionGraph,
-    KNodeDueCount,
 } from "../types/kTest.type";
 import { apiFetch } from "@/shared";
 import { ResultOptions } from "@/shared";
@@ -100,12 +99,6 @@ const _getDailyQueue = async (knowledgeId: number): Promise<ResultOptions<KDaily
     return Promise.reject(res);
 };
 
-const _getNodeDueSummary = async (knowledgeId: number): Promise<ResultOptions<KNodeDueCount[]>> => {
-    const res = await apiFetch(`${base(knowledgeId)}/node-due-summary`, { method: "GET" });
-    if (res.ok) return res.json();
-    return Promise.reject(res);
-};
-
 const _getGlobalDailyQueue = async (): Promise<ResultOptions<KDailyQueueItem[]>> => {
     const res = await apiFetch(`${config.api.baseURL}/api/k/global-daily-queue`, { method: "GET" });
     if (res.ok) return res.json();
@@ -166,7 +159,6 @@ const _transcribeAudio = async (audioBlob: Blob): Promise<string> => {
 };
 
 export const KTestService = {
-    _getNodeDueSummary,
     _getQuestions,
     _getOrphanQuestions,
     _updateQuestions,
