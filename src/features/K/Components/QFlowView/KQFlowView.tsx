@@ -4,7 +4,7 @@ import { KTestService } from "../../service/kTest.service";
 import { KService } from "../../service/K.service";
 import { KTestFlowProvider } from "../../store/useKTestFlow.store";
 import { KQuestionFlowCanvas } from "./KQuestionFlowCanvas";
-import { KDailyReviewSession } from "../KDailyReview/KDailyReviewSession";
+import { KDailyReviewSession } from "../KDailyReviewSession";
 import { sortQuestionsByFlowOrder } from "../../utils/kTestFlow.utils";
 import type { KDailySessionQuestion } from "../../types/kTest.type";
 import { ScoreSparkline } from "../small/ScoreSparkline";

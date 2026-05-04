@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { ArrowLeft, PenLine } from "lucide-react";
 import { Button } from "@/shared";
-import { KTestService } from "../../service/kTest.service";
+import { KTestService } from "../service/kTest.service";
 import { cn } from "@/lib/utils";
-import type { KDailySessionQuestion, KDailyAnswerItem } from "../../types/kTest.type";
+import type { KDailySessionQuestion, KDailyAnswerItem } from "../types/kTest.type";
 
 interface KDailyReviewSessionProps {
     knowledgeId: number;

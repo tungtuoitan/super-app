@@ -2,10 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Loader2, CheckCircle2, AlertCircle, FileText, XCircle, TriangleAlert } from "lucide-react";
 import { Button } from "@/shared";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
-import { useKMarkdownImportHelper } from "../../hooks/useKMarkdownImport.helper";
-import { useKStore } from "../../store/K.store";
-import type { KItemV2 } from "../../types/K-v2.types";
-import type { KMdParsed, KMdQuestion } from "../../types/kMarkdownImport.type";
+import { useKMarkdownImportHelper } from "../hooks/useKMarkdownImport.helper";
+import { useKStore } from "../store/K.store";
+import type { KItemV2 } from "../types/K-v2.types";
+import type { KMdParsed, KMdQuestion } from "../types/kMarkdownImport.type";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
