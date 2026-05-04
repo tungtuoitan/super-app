@@ -219,7 +219,6 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
             className="relative flex flex-col h-full bg-background select-none w-full"
             style={{ touchAction: showResult ? "none" : undefined }}
             onPointerDown={handleDragStart}
-            onClick={!showResult ? () => setShowResult(true) : undefined}
         >
             {/* Drag-to-score overlay */}
             {isDragScoring && (
@@ -285,7 +284,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
                     </button>
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={handleMarkDraft}
+                            onClick={(e) => { e.stopPropagation(); handleMarkDraft(); }}
                             title="Mark as draft and skip"
                             className="flex items-center gap-1 text-xs text-amber-600/70 hover:text-amber-400 transition-colors"
                         >
@@ -302,6 +301,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
 
             {/* Content */}
             <div className="flex-1 flex flex-col px-4 pt-6 pb-4 gap-4 max-w-lg mx-auto w-full"
+            onClick={!showResult ? () => setShowResult(true) : undefined}
                 
             >
                 {/* Question */}
