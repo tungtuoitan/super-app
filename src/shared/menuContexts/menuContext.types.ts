@@ -67,6 +67,7 @@ export interface KQFlowMenuData {
     selectedIds: number[];
     onAddQuestion?: () => void;
     onDeleteSelected?: () => void;
+    onOrganize?: () => void;
 }
 
 export interface RichTextEditorMenuData {

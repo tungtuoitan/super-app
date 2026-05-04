@@ -2,10 +2,11 @@
 import { createPortal } from "react-dom";
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps, Node } from "@xyflow/react";
-import { ChevronRight, PenLine, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { ChevronRight, Grid2X2, PenLine, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { KScoreBar } from "../../small/KScoreBar";
 import { useKQFlowStore } from "@/features/K/store/useKQFlow.store";
 import { useKQFlowHelper } from "@/features/K/hooks/qFlow/useKQFlow.helper";
+import { useKQFlowCanvasHelper } from "@/features/K/hooks/qFlow/useKQFlowCanvas.helper";
 import { useKStore } from "@/features/K/store/useK.store";
 import { useGlobalShortcut } from "@/shared";
 import type { KQFlowNodeData } from "@/features/K/types/kQFlow.type";
@@ -32,6 +33,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
         return ids;
     };
     const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleDeleteQuestion, handleRestoreQuestion, handleToggleDraft, handleMoveQuestion } = useKQFlowHelper();
+    const { handleOrganize } = useKQFlowCanvasHelper();
     const { currentK, kFlowClipboard } = useKStore();
     
     const { question } = data as KQFlowNodeData;
@@ -42,6 +44,9 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
     const isDeleted = !!question.deletedAt;
     const anyEdgeSelected = flowEdges.some((e) => e.selected);
     const multiSelected = flowNodes.filter((n) => n.selected).length > 1;
+    const selectedStringIds = flowNodes
+        .filter((n) => n.selected && !n.id.startsWith("temp-node-") && !(n.data as KQFlowNodeData).question.deletedAt)
+        .map((n) => n.id);
     
     const [draftQ, setDraftQ] = useState(question.question);
     const [draftA, setDraftA] = useState(question.answer ?? "");
@@ -383,6 +388,15 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                                 )}
                             </div>
                             <div className="my-1 border-t border-zinc-800" />
+                            {selectedStringIds.length >= 2 && (
+                                <button
+                                    onMouseDown={() => { setCtxMenu(null); setShowMoveMenu(false); handleOrganize(selectedStringIds); }}
+                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-zinc-200"
+                                >
+                                    <Grid2X2 className="w-3.5 h-3.5 text-zinc-400" />
+                                    Organize ({selectedStringIds.length})
+                                </button>
+                            )}
                             <button
                                 onMouseDown={() => { setCtxMenu(null); setShowMoveMenu(false); handleDeleteQuestion(question.id); }}
                                 className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-red-400"

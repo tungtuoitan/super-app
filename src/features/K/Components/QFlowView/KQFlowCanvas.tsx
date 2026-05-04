@@ -4,6 +4,7 @@ import "@xyflow/react/dist/style.css";
 import { useKQFlowStore } from "@/features/K/store/useKQFlow.store";
 import { useKQFlowHelper } from "@/features/K/hooks/qFlow/useKQFlow.helper";
 import { useKQFlowCanvasHelper } from "@/features/K/hooks/qFlow/useKQFlowCanvas.helper";
+import { useKQFlowDragHelper } from "@/features/K/hooks/qFlow/useKQFlowDrag.helper";
 import { useKQFlowHeadless } from "@/features/K/hooks/qFlow/useKQFlow.headless";
 import { useKQFlowCanvasReveal } from "@/features/K/hooks/qFlow/useKQFlowCanvasReveal.helper";
 import { useKQFlowWheelZoom } from "@/features/K/hooks/qFlow/useKQFlowWheelZoom.helper";
@@ -13,7 +14,7 @@ import { KQFlowNode } from "./small/KQFlowNode";
 import { KQFlowEdge } from "./small/KQFlowEdge";
 import type { KTestQuestion } from "@/features/K/types/kTest.type";
 import type { KQFlowNodeData } from "@/features/K/types/kQFlow.type";
-import type { Node } from "@xyflow/react";
+import type { Edge, Node } from "@xyflow/react";
 
 const nodeTypes = { questionFlowNode: KQFlowNode };
 const edgeTypes = { kQuestionEdge: KQFlowEdge };
@@ -51,13 +52,17 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
     const { handleMoveEnd } = useKQFlowWheelZoom(containerRef, knowledgeId);
 
     const {
-        handleNodesChange, handleEdgesChange,
-        handleNodeDragStop, lockSelection,
+        selectionLockRef, lockSelection,
+        handleEdgesChange,
         handleConnect,
         handleConnectStart, handleConnectEnd,
         handleReconnect, handleReconnectStart, handleReconnectEnd,
-        handleEdgeDelete,
+        handleEdgeDelete, handleEdgeReoptimize,
+        handleOrganize,
     } = useKQFlowCanvasHelper();
+
+    const { handleNodesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop } =
+        useKQFlowDragHelper(selectionLockRef, lockSelection);
     const { handleDeleteQuestion, handlePasteQuestions } = useKQFlowHelper();
     const { showContextMenu } = useMenuContextHelper();
 
@@ -115,6 +120,10 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
             .filter((n) => n.selected && !(n.data as KQFlowNodeData).question.deletedAt)
             .map((n) => parseInt(n.id, 10));
 
+        const selectedStringIds = flowNodes
+            .filter((n) => n.selected && !n.id.startsWith("temp-node-") && !(n.data as KQFlowNodeData).question.deletedAt)
+            .map((n) => n.id);
+
         showContextMenu(
             event as React.MouseEvent,
             "k-test-flow",
@@ -131,6 +140,9 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
                 },
                 onDeleteSelected: selectedIds.length > 0
                     ? () => selectedIds.forEach((id) => handleDeleteQuestion(id))
+                    : undefined,
+                onOrganize: selectedStringIds.length >= 2
+                    ? () => handleOrganize(selectedStringIds)
                     : undefined,
                 selectedIds,
             },
@@ -163,6 +175,8 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
                 edgeTypes={edgeTypes}
                 onNodesChange={handleNodesChange}
                 onEdgesChange={handleEdgesChange}
+                onNodeDragStart={handleNodeDragStart}
+                onNodeDrag={handleNodeDrag}
                 onNodeDragStop={handleNodeDragStop}
                 onConnect={handleConnect}
                 onConnectStart={handleConnectStart}
@@ -170,6 +184,7 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
                 onReconnectStart={handleReconnectStart}
                 onReconnectEnd={handleReconnectEnd}
                 onReconnect={handleReconnect}
+                onEdgeDoubleClick={(_: React.MouseEvent, edge: Edge) => handleEdgeReoptimize(edge.id)}
                 onPaneContextMenu={handlePaneContextMenu}
                 onNodeClick={handleNodeClick}
                 onSelectionChange={handleSelectionChange}

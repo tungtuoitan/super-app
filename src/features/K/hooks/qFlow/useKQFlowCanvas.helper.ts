@@ -1,6 +1,6 @@
 ﻿import { useEffect, useRef } from "react";
-import { applyNodeChanges, applyEdgeChanges, addEdge } from "@xyflow/react";
-import type { NodeChange, EdgeChange, Connection, Edge, Node } from "@xyflow/react";
+import { applyEdgeChanges, addEdge } from "@xyflow/react";
+import type { EdgeChange, Connection, Edge, Node } from "@xyflow/react";
 import { flowService } from "@/shared";
 import { useKQFlowStore } from "@/features/K/store/useKQFlow.store";
 import type { KFlowEdgeData, KQFlowNodeData, ArrowDirection } from "@/features/K/types/kQFlow.type";
@@ -22,26 +22,17 @@ export function useKQFlowCanvasHelper() {
 
     const reconnectingRef = useRef(false);
 
-    // IDs whose deselect changes should be blocked (drag, Ctrl+X, etc.)
+    // IDs whose deselect changes should be blocked — shared with useKQFlowDragHelper
     const selectionLockRef = useRef<Set<string>>(new Set());
     const lockSelectionTimer = useRef<ReturnType<typeof setTimeout>>();
 
-    /** Block ReactFlow deselect changes for the given node IDs for `ms` milliseconds. */
     const lockSelection = (ids: string[], ms = 400) => {
         ids.forEach(id => selectionLockRef.current.add(id));
         clearTimeout(lockSelectionTimer.current);
         lockSelectionTimer.current = setTimeout(() => selectionLockRef.current.clear(), ms);
     };
 
-    // ── Node change / edge change ───────────────────────────────────────────
-
-    const handleNodesChange = (changes: NodeChange<Node<KQFlowNodeData>>[]) => {
-        const locked = selectionLockRef.current;
-        const filtered = locked.size > 0
-            ? changes.filter(c => !(c.type === 'select' && !(c as { type: 'select'; selected: boolean }).selected && locked.has((c as { type: 'select'; id: string }).id)))
-            : changes;
-        setFlowNodes((prev) => applyNodeChanges(filtered, prev) as Node<KQFlowNodeData>[]);
-    };
+    // ── Edge change ────────────────────────────────────────────────────────
 
     const handleEdgesChange = (changes: EdgeChange<Edge<KFlowEdgeData>>[]) => {
         setFlowEdges((prev) => {
@@ -52,31 +43,6 @@ export function useKQFlowCanvasHelper() {
             return updated.map((e) =>
                 e.type === 'kQuestionEdge' ? { ...e, reconnectable: !!e.selected } : e,
             );
-        });
-    };
-
-    // ── Node drag stop — persist positions ─────────────────────────────────
-
-    const handleNodeDragStop = (_event: React.MouseEvent, _node: Node, draggedNodes: Node[]) => {
-        if (!draggedNodes.length) return;
-        const draggedIds = new Set(draggedNodes.map((n) => n.id));
-        lockSelection([...draggedIds]);
-
-        requestAnimationFrame(() => {
-            setFlowNodes((prev) => {
-                const posUpdate: Record<string, { x: number; y: number }> = {};
-                const payload: { nodeId: number; nodeType: string; x: number; y: number }[] = [];
-                const updated = prev.map((n) => {
-                    if (!draggedIds.has(n.id) || n.id.startsWith("temp-node-")) return n;
-                    posUpdate[n.id] = n.position;
-                    const nodeId = parseInt(n.id, 10);
-                    if (nodeId) payload.push({ nodeId, nodeType: "kQuestion", x: n.position.x, y: n.position.y });
-                    return { ...n, selected: true };
-                });
-                setSavedPositions((p) => ({ ...p, ...posUpdate }));
-                if (payload.length > 0) flowService._upsertPositions("", payload).catch(() => {});
-                return updated;
-            });
         });
     };
 
@@ -158,6 +124,142 @@ export function useKQFlowCanvasHelper() {
         } catch { /* silent */ }
     };
 
+    // ── Organize selected nodes into a grid ───────────────────────────────
+
+    const handleOrganize = (nodeIds: string[]) => {
+        if (nodeIds.length < 2) return;
+        const nodes = flowNodesRef.current.filter((n) => nodeIds.includes(n.id));
+        if (nodes.length < 2) return;
+
+        const NODE_W = 280;
+        const GAP_X = 64;
+        const GAP_Y = 48;
+        const cols = Math.ceil(Math.sqrt(nodes.length));
+
+        // Sort by reading order: top → bottom, left → right (50px y-tolerance)
+        const sorted = [...nodes].sort((a, b) => {
+            const yDiff = a.position.y - b.position.y;
+            if (Math.abs(yDiff) > 50) return yDiff;
+            return a.position.x - b.position.x;
+        });
+
+        // Anchor at top-left of current bounding box
+        const minX = Math.min(...nodes.map((n) => n.position.x));
+        const minY = Math.min(...nodes.map((n) => n.position.y));
+
+        // Row heights = max measured height per row
+        const rows = Math.ceil(sorted.length / cols);
+        const rowHeights: number[] = Array.from({ length: rows }, (_, r) => {
+            let maxH = 0;
+            for (let c = 0; c < cols; c++) {
+                const h = sorted[r * cols + c]?.measured?.height ?? 120;
+                if (h > maxH) maxH = h;
+            }
+            return maxH;
+        });
+
+        // Cumulative row offsets
+        const rowOffsets: number[] = [0];
+        for (let r = 0; r < rows - 1; r++) {
+            rowOffsets.push(rowOffsets[r] + rowHeights[r] + GAP_Y);
+        }
+
+        // Compute new positions up-front (needed for edge handle resolution)
+        const newPositions = new Map<string, { x: number; y: number; h: number }>();
+        sorted.forEach((n, idx) => {
+            const row = Math.floor(idx / cols);
+            const col = idx % cols;
+            const h = n.measured?.height ?? 120;
+            newPositions.set(n.id, {
+                x: minX + col * (NODE_W + GAP_X),
+                y: minY + rowOffsets[row] + (rowHeights[row] - h) / 2,
+                h,
+            });
+        });
+
+        // ── Update node positions ──────────────────────────────────────────
+        const posUpdate: Record<string, { x: number; y: number }> = {};
+        const posPayload: { nodeId: number; nodeType: string; x: number; y: number }[] = [];
+
+        setFlowNodes((prev) =>
+            prev.map((n) => {
+                const p = newPositions.get(n.id);
+                if (!p) return n;
+                posUpdate[n.id] = { x: p.x, y: p.y };
+                const nodeId = parseInt(n.id, 10);
+                if (nodeId) posPayload.push({ nodeId, nodeType: "kQuestion", x: p.x, y: p.y });
+                return { ...n, position: { x: p.x, y: p.y } };
+            }),
+        );
+
+        setSavedPositions((prev) => ({ ...prev, ...posUpdate }));
+        if (posPayload.length > 0) flowService._upsertPositions("", posPayload).catch(() => {});
+
+        // ── Reoptimize edges between organized nodes ───────────────────────
+        const nodeIdSet = new Set(nodeIds);
+        const edgesToUpdate = savedEdgesRef.current.filter(
+            (e) => nodeIdSet.has(e.source) && nodeIdSet.has(e.target),
+        );
+        if (edgesToUpdate.length === 0) return;
+
+        const resolveFromNew = (srcId: string, tgtId: string) => {
+            const src = newPositions.get(srcId);
+            const tgt = newPositions.get(tgtId);
+            if (!src || !tgt) return null;
+            const dx = (tgt.x + NODE_W / 2) - (src.x + NODE_W / 2);
+            const dy = (tgt.y + tgt.h / 2) - (src.y + src.h / 2);
+            return Math.abs(dx) >= Math.abs(dy)
+                ? (dx >= 0 ? { sourceHandle: "right", targetHandle: "left" } : { sourceHandle: "left", targetHandle: "right" })
+                : (dy >= 0 ? { sourceHandle: "bottom", targetHandle: "top" } : { sourceHandle: "top", targetHandle: "bottom" });
+        };
+
+        const edgeUpdateMap = new Map<string, { sourceHandle: string; targetHandle: string }>();
+        const edgePayload: { id: number; sourceId: number; targetId: number; sourceHandle: string; targetHandle: string }[] = [];
+
+        edgesToUpdate.forEach((edge) => {
+            const handles = resolveFromNew(edge.source, edge.target);
+            if (!handles) return;
+            if (handles.sourceHandle === edge.sourceHandle && handles.targetHandle === edge.targetHandle) return;
+            edgeUpdateMap.set(edge.id, handles);
+            const backendId = edge.data?.edgeId;
+            if (backendId) edgePayload.push({
+                id: backendId,
+                sourceId: parseInt(edge.source, 10),
+                targetId: parseInt(edge.target, 10),
+                ...handles,
+            });
+        });
+
+        if (edgeUpdateMap.size > 0) {
+            const applyUpdates = (prev: Edge<KFlowEdgeData>[]) =>
+                prev.map((e) => { const upd = edgeUpdateMap.get(e.id); return upd ? { ...e, ...upd } : e; });
+            setFlowEdges(applyUpdates);
+            setSavedEdges(applyUpdates);
+            if (edgePayload.length > 0) flowService._upsertEdges("", edgePayload).catch(() => {});
+        }
+    };
+
+    // ── Edge reoptimize handles (double-click) ────────────────────────────
+
+    const handleEdgeReoptimize = async (edgeId: string) => {
+        const edge = savedEdgesRef.current.find((e) => e.id === edgeId);
+        if (!edge) return;
+        const { sourceHandle, targetHandle } = resolveHandles(edge.source, edge.target, null, null);
+        if (sourceHandle === edge.sourceHandle && targetHandle === edge.targetHandle) return;
+        const updatedEdge: Edge<KFlowEdgeData> = { ...edge, sourceHandle, targetHandle };
+        setFlowEdges((prev) => prev.map((e) => e.id === edgeId ? updatedEdge : e));
+        setSavedEdges((prev) => prev.map((e) => e.id === edgeId ? updatedEdge : e));
+        const backendId = edge.data?.edgeId;
+        if (!backendId) return;
+        try {
+            await flowService._upsertEdges('', [{
+                id: backendId,
+                sourceId: parseInt(edge.source, 10), targetId: parseInt(edge.target, 10),
+                sourceHandle, targetHandle,
+            }]);
+        } catch { /* silent */ }
+    };
+
     // ── Edge direction toggle ─────────────────────────────────────────────
 
     const handleEdgeToggleDirection = async (edgeId: string, nextDir: ArrowDirection) => {
@@ -222,10 +324,11 @@ export function useKQFlowCanvasHelper() {
     };
 
     return {
+        selectionLockRef,
         lockSelection,
-        handleNodesChange, handleEdgesChange,
-        handleNodeDragStop,
-        handleConnect, handleEdgeDelete, handleEdgeToggleDirection,
+        handleEdgesChange,
+        handleConnect, handleEdgeDelete, handleEdgeToggleDirection, handleEdgeReoptimize,
+        handleOrganize,
         handleConnectStart, handleConnectEnd,
         handleReconnect, handleReconnectStart, handleReconnectEnd,
     };
