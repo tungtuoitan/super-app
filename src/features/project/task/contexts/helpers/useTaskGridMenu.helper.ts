@@ -7,7 +7,6 @@
 import { useMenuContext, useMenuContextHelper } from "@/shared";
 import { useConfirmationPopoverHelper } from "@/shared";
 import { getGenericConfirmMessage } from "@/shared";
-import { useConsoleHelper } from "@/shared";
 import type { TaskGridMenuData } from "@/shared";
 import { useTaskGridHelper } from "../../hooks/taskList/useTaskGrid.helper";
 
@@ -16,7 +15,6 @@ export const useTaskGridMenuHelper = () => {
     const { setIsMenuContextOpen } = useMenuContextHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { createNewTask, createSubTask, deleteRestoreTasks } = useTaskGridHelper();
-    const _console = useConsoleHelper();
 
     const data = contextData as TaskGridMenuData | null;
     const selectedIds   = data?.selectedIds   ?? [];
@@ -36,12 +34,12 @@ export const useTaskGridMenuHelper = () => {
     const addTask = () => {
         setIsMenuContextOpen(false);
         if (onAddTask) {
-            _console.info("task-grid-menu: addTask via onAddTask callback (multi-project)");
+            console.log("[task-grid-menu] addTask via onAddTask callback (multi-project)");
             onAddTask();
             return;
         }
         if (!projectId) {
-            _console.error("task-grid-menu: addTask blocked — no projectId in context data");
+            console.log("[task-grid-menu] addTask blocked — no projectId in context data");
             return;
         }
         const newTask = createNewTask(projectId);

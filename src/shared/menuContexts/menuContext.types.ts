@@ -38,6 +38,8 @@ export interface WsGridMenuData {
 
 export interface TaskFlowMenuData {
     flowPosition: { x: number; y: number };
+    /** Pre-bound handler from TaskFlowCanvas (inside MultiTaskFlowProvider) */
+    onAddTask?: () => void;
 }
 
 // ── Pattern A menus (legacy — callbacks in data) ───────────────────────────
