@@ -66,18 +66,23 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
     const { handleDeleteQuestion, handlePasteQuestions } = useKQFlowHelper();
     const { showContextMenu } = useMenuContextHelper();
 
-    // ── Keyboard shortcuts (delete / cut / paste / escape) ────────────────────
+    // ── Keyboard shortcuts (delete / cut / paste / escape / ctrl+o) ──────────
     const selectedEdgeIds = flowEdges.filter((e) => e.selected).map((e) => e.id);
     const selectedNodeIds = flowNodes
         .filter((n) => n.selected && !n.id.startsWith("temp-node-") && !(n.data as KQFlowNodeData).question.deletedAt)
         .map((n) => parseInt(n.id, 10));
+    const selectedStringIds = flowNodes
+        .filter((n) => n.selected && !n.id.startsWith("temp-node-") && !(n.data as KQFlowNodeData).question.deletedAt)
+        .map((n) => n.id);
     const targetNodeId = knowledgeId === 0 ? null : knowledgeId;
 
     useKQFlowShortcuts({
         selectedEdgeIds,
         selectedNodeIds,
+        selectedStringIds,
         handleEdgeDelete,
         handleDeleteQuestion,
+        handleOrganize,
         lockSelection,
         targetNodeId,
         handlePasteQuestions,
@@ -120,10 +125,6 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
             .filter((n) => n.selected && !(n.data as KQFlowNodeData).question.deletedAt)
             .map((n) => parseInt(n.id, 10));
 
-        const selectedStringIds = flowNodes
-            .filter((n) => n.selected && !n.id.startsWith("temp-node-") && !(n.data as KQFlowNodeData).question.deletedAt)
-            .map((n) => n.id);
-
         showContextMenu(
             event as React.MouseEvent,
             "k-test-flow",
@@ -154,9 +155,15 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
             ref={containerRef}
             className="w-full h-full kflow-canvas relative"
         >
-            {/* Disable pointer events on ReactFlow's selection rect so clicks on
-                nodes behind the bounding box still register */}
-            <style>{`.kflow-canvas .react-flow__nodesselection-rect { pointer-events: none !important; }`}</style>
+            {/* Layer order: edges (0) → nodes (1) → edge labels (2).
+                Edges must render below nodes even when their path geometrically
+                crosses a node rectangle. */}
+            <style>{`
+                .kflow-canvas .react-flow__nodesselection-rect { pointer-events: none !important; }
+                .kflow-canvas .react-flow__edges      { z-index: 0; }
+                .kflow-canvas .react-flow__nodes      { z-index: 1; }
+                .kflow-canvas .react-flow__edgelabels { z-index: 2; }
+            `}</style>
 
             {/* Transition overlay — snaps to opaque instantly (no transition class
                 on opacity-100) so viewport teleports are never visible; fades out

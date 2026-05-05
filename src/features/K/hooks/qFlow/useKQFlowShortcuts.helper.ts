@@ -7,8 +7,10 @@ import type { KFlowClipboard } from "@/features/K/types/kContext.type";
 interface UseKFlowShortcutsArgs {
     selectedEdgeIds: string[];
     selectedNodeIds: number[];
+    selectedStringIds: string[];
     handleEdgeDelete: (id: string) => void;
     handleDeleteQuestion: (id: number) => void;
+    handleOrganize: (ids: string[]) => void;
     lockSelection: (ids: string[]) => void;
     targetNodeId: number | null;
     handlePasteQuestions: (
@@ -21,8 +23,10 @@ interface UseKFlowShortcutsArgs {
 export function useKQFlowShortcuts({
     selectedEdgeIds,
     selectedNodeIds,
+    selectedStringIds,
     handleEdgeDelete,
     handleDeleteQuestion,
+    handleOrganize,
     lockSelection,
     targetNodeId,
     handlePasteQuestions,
@@ -67,5 +71,10 @@ export function useKQFlowShortcuts({
     // Escape — cancel pending clipboard
     useGlobalShortcut("escape", { id: "kflow-cancel-cut", priority: 55, enabled: !!kFlowClipboard }, () => {
         setKFlowClipboard(null);
+    });
+
+    // Ctrl+O — organize selected nodes
+    useGlobalShortcut("ctrl+o", { id: "kflow-organize", priority: 60, enabled: selectedStringIds.length >= 2 }, () => {
+        handleOrganize(selectedStringIds);
     });
 }

@@ -1,5 +1,5 @@
 ﻿import { useCallback, useEffect } from "react";
-import { getSmoothStepPath, EdgeLabelRenderer, BaseEdge } from "@xyflow/react";
+import { getSmoothStepPath, EdgeLabelRenderer, BaseEdge, Position } from "@xyflow/react";
 import type { EdgeProps, Edge } from "@xyflow/react";
 import { useKQFlowStore } from "@/features/K/store/useKQFlow.store";
 import { useKQFlowCanvasHelper } from "@/features/K/hooks/qFlow/useKQFlowCanvas.helper";
@@ -16,7 +16,7 @@ export function KQFlowEdge({
     sourcePosition, targetPosition,
     data, selected,
 }: EdgeProps<Edge<KFlowEdgeData>>) {
-    const { flowEdges } = useKQFlowStore();
+    const { flowNodes, flowEdges } = useKQFlowStore();
     const { handleEdgeDelete, handleEdgeToggleDirection } = useKQFlowCanvasHelper();
 
     const edgeData = data as KFlowEdgeData | undefined;
@@ -25,9 +25,32 @@ export function KQFlowEdge({
     const anyEdgeSelected = flowEdges.some((e) => e.selected);
     const hitWidth = selected ? 20 : anyEdgeSelected ? 0 : 20;
 
+    // For horizontal edges (right/left handles): compute a centerY that routes
+    // the path below any intermediate node that would otherwise be crossed.
+    let centerY: number | undefined;
+    if (sourcePosition === Position.Right || sourcePosition === Position.Left) {
+        const NODE_W = 280;
+        const MARGIN = 16;   // tolerance when checking x/y overlap
+        const BYPASS = 24;   // gap below the lowest blocking node
+        const xL = Math.min(sourceX, targetX);
+        const xR = Math.max(sourceX, targetX);
+        const yLo = Math.min(sourceY, targetY) - MARGIN;
+        const yHi = Math.max(sourceY, targetY) + MARGIN;
+        let bottom = -Infinity;
+        for (const n of flowNodes) {
+            if (n.id === source || n.id === target) continue;
+            const nx = n.position.x; const nh = n.measured?.height ?? 120; const ny = n.position.y;
+            if (nx + NODE_W <= xL + MARGIN || nx >= xR - MARGIN) continue; // not in x-range
+            if (ny > yHi || ny + nh < yLo) continue;                       // not in y-range
+            if (ny + nh > bottom) bottom = ny + nh;
+        }
+        if (bottom > -Infinity) centerY = bottom + BYPASS;
+    }
+
     const [edgePath, labelX, labelY] = getSmoothStepPath({
         sourceX, sourceY, sourcePosition,
         targetX, targetY, targetPosition,
+        centerY,
     });
 
     const strokeColor = selected ? "hsl(var(--primary))" : "#6b7280cc";

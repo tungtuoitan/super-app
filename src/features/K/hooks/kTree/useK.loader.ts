@@ -70,7 +70,7 @@ export const useKLoader = () => {
         try {
             const res = await KTestService._getGlobalDailyQueue();
             if (res.success && res.object) {
-                const dueCount = res.object.filter(q => q.dueCount + q.newCount > 0).length;
+                const dueCount = res.object.reduce((sum, q) => sum + q.dueCount, 0);
                 setDailyReviewDueCount(dueCount);
             }
         } catch { /* silent */ }
