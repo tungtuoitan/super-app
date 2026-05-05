@@ -27,6 +27,8 @@ export interface TaskGridMenuData {
     /** Callback to notify task panel of new task (scroll-to) */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onTaskCreated?: (task: any) => void;
+    /** Pre-built add task handler — used by multi-project view to bypass single-project store */
+    onAddTask?: () => void;
 }
 
 export interface WsGridMenuData {
