@@ -20,7 +20,7 @@ const nodeTypes = { questionFlowNode: KQFlowNode };
 const edgeTypes = { kQuestionEdge: KQFlowEdge };
 
 function makeTempQuestion(): KTestQuestion {
-    return { id: 0, question: "", answer: null, isActive: true, isDraft: false, sortOrder: 0, scoreHistory: [], retention: 0 };
+    return { id: 0, question: "", answer: null, statusCode: "learning", sortOrder: 0, scoreHistory: [], retention: 0 };
 }
 
 interface CanvasContentProps {

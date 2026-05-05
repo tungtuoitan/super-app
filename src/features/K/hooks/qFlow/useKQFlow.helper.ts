@@ -90,7 +90,7 @@ export function useKQFlowHelper() {
 
             setFlowNodes((prev) => prev.map((n) =>
                 n.id === nodeId
-                    ? { ...n, data: { question: { ...(n.data as KQFlowNodeData).question, question: trimmedQ, answer: cleanedAnswer || null, isDraft: shouldBeDraft } } as KQFlowNodeData }
+                    ? { ...n, data: { question: { ...(n.data as KQFlowNodeData).question, question: trimmedQ, answer: cleanedAnswer || null, statusCode: shouldBeDraft ? "draft" : "learning" } } as KQFlowNodeData }
                     : n,
             ));
 
@@ -104,8 +104,7 @@ export function useKQFlowHelper() {
             try {
                 await updateQForNode(kId, {
                     addQuestions: [{ name: trimmedQ, description: cleanedAnswer || null }],
-                    updateQuestions: [], toggleQuestionIds: [],
-                    deleteQuestionIds: [], restoreQuestionIds: [],
+                    updateQuestions: [],                    deleteQuestionIds: [], restoreQuestionIds: [],
                 });
 
                 const res = await getQForNode(kId);
@@ -116,8 +115,7 @@ export function useKQFlowHelper() {
 
                 if (shouldBeDraft) {
                     await updateQForNode(kId, {
-                        addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
-                        deleteQuestionIds: [], restoreQuestionIds: [],
+                        addQuestions: [], updateQuestions: [],                        deleteQuestionIds: [], restoreQuestionIds: [],
                         toggleDraftQuestionIds: [newQ.id],
                     });
                 }
@@ -143,19 +141,18 @@ export function useKQFlowHelper() {
         if (!questionId) return;
 
         const currentNode    = flowNodesRef.current.find((n) => n.id === nodeId);
-        const currentIsDraft = (currentNode?.data as KQFlowNodeData)?.question?.isDraft ?? false;
+        const currentIsDraft = (currentNode?.data as KQFlowNodeData)?.question?.statusCode === "draft";
         const needsDraftToggle = shouldBeDraft && !currentIsDraft;
 
         setFlowNodes((prev) => prev.map((n) =>
             n.id === nodeId
-                ? { ...n, data: { question: { ...(n.data as KQFlowNodeData).question, question: trimmedQ, answer: cleanedAnswer || null, isDraft: currentIsDraft || shouldBeDraft } } as KQFlowNodeData }
+                ? { ...n, data: { question: { ...(n.data as KQFlowNodeData).question, question: trimmedQ, answer: cleanedAnswer || null, statusCode: currentIsDraft || shouldBeDraft ? "draft" : "learning" } } as KQFlowNodeData }
                 : n,
         ));
 
         try {
             await updateQForNode(kId, {
-                addQuestions: [], toggleQuestionIds: [],
-                updateQuestions: [{ id: questionId, name: trimmedQ, description: cleanedAnswer || null }],
+                addQuestions: [],                updateQuestions: [{ id: questionId, name: trimmedQ, description: cleanedAnswer || null }],
                 deleteQuestionIds: [], restoreQuestionIds: [],
                 ...(needsDraftToggle ? { toggleDraftQuestionIds: [questionId] } : {}),
             });
@@ -174,8 +171,7 @@ export function useKQFlowHelper() {
         ));
         try {
             await updateQForNode(kId, {
-                addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
-                deleteQuestionIds: [questionId], restoreQuestionIds: [],
+                addQuestions: [], updateQuestions: [],                deleteQuestionIds: [questionId], restoreQuestionIds: [],
             });
             dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
         } catch { /* silent — optimistic applied */ }
@@ -190,8 +186,7 @@ export function useKQFlowHelper() {
         ));
         try {
             await updateQForNode(kId, {
-                addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
-                deleteQuestionIds: [], restoreQuestionIds: [questionId],
+                addQuestions: [], updateQuestions: [],                deleteQuestionIds: [], restoreQuestionIds: [questionId],
             });
             dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
         } catch { /* silent — optimistic applied */ }
@@ -201,13 +196,12 @@ export function useKQFlowHelper() {
         const kId = knowledgeIdRef.current;
         setFlowNodes((prev) => prev.map((n) =>
             n.id === String(questionId)
-                ? { ...n, data: { ...(n.data as KQFlowNodeData), question: { ...(n.data as KQFlowNodeData).question, isDraft: !(n.data as KQFlowNodeData).question.isDraft } } }
+                ? { ...n, data: { ...(n.data as KQFlowNodeData), question: { ...(n.data as KQFlowNodeData).question, statusCode: (n.data as KQFlowNodeData).question.statusCode === "draft" ? "learning" : "draft" } } }
                 : n,
         ));
         try {
             await updateQForNode(kId, {
-                addQuestions: [], updateQuestions: [], toggleQuestionIds: [],
-                deleteQuestionIds: [], restoreQuestionIds: [],
+                addQuestions: [], updateQuestions: [],                deleteQuestionIds: [], restoreQuestionIds: [],
                 toggleDraftQuestionIds: [questionId],
             });
             dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });

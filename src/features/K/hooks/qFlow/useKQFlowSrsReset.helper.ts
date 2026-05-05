@@ -28,7 +28,6 @@ export function useKQFlowSrsReset(
                     await KTestService._updateQuestions(nodeId, {
                         addQuestions: [],
                         updateQuestions: [],
-                        toggleQuestionIds: [],
                         deleteQuestionIds: [],
                         restoreQuestionIds: [],
                         resetSrsQuestionIds: ids,

@@ -7,9 +7,9 @@ const GOOD_SCORE_MIN = 4; // 0–5 scale; 4–5 = good recall
 
 export function useKQFlowStats(questions: KQuestion[]) {
     const now             = new Date();
-    const activeQuestions = questions.filter(q => q.isActive && !q.deletedAt);
-    // Draft questions are excluded from review sessions
-    const reviewableQuestions = activeQuestions.filter(q => !q.isDraft);
+    const activeQuestions = questions.filter(q => !q.deletedAt);
+    // Only "learning" questions are included in review sessions
+    const reviewableQuestions = activeQuestions.filter(q => q.statusCode === "learning");
 
     const dueCount = reviewableQuestions.filter(q => {
         if (!q.srsNextReviewAt) return false;
@@ -17,7 +17,7 @@ export function useKQFlowStats(questions: KQuestion[]) {
         return d !== null && d <= now;
     }).length;
     const newCount        = reviewableQuestions.filter(q => !q.srsNextReviewAt).length;
-    const draftCount      = activeQuestions.filter(q => q.isDraft).length;
+    const draftCount      = activeQuestions.filter(q => q.statusCode === "draft").length;
     const totalReviewable = dueCount + newCount;
     const canReview       = totalReviewable > 0;
 

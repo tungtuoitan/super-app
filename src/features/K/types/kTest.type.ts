@@ -13,10 +13,8 @@ export interface KQuestion {
     question: string;
     /** k.question.description — expected answer */
     answer: string | null;
-    /** Whether this question is active */
-    isActive: boolean;
-    /** True when the question is in draft state and excluded from review sessions */
-    isDraft: boolean;
+    /** "learning" = active in review; "draft" = excluded from review sessions */
+    statusCode: string;
     /** Display/sort order within the knowledge */
     sortOrder: number;
     /** Last ≤10 individual points (0–5) oldest→newest */
@@ -39,8 +37,6 @@ export interface KUpdateQuestionsRequest {
     addQuestions: Array<{ name: string; description?: string | null }>;
     /** Existing questions to update name/description */
     updateQuestions: Array<{ id: number; name: string; description?: string | null }>;
-    /** k.question IDs to toggle isActive */
-    toggleQuestionIds: number[];
     /** k.question IDs to soft-delete */
     deleteQuestionIds: number[];
     /** k.question IDs to restore (clear deletedAt) */

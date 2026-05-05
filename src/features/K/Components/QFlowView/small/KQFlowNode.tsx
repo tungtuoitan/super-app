@@ -156,7 +156,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
         handleRenameConfirm(idRef.current, draftQRef.current, draftARef.current);
     });
 
-    const isDraft = !isDeleted && !!question.isDraft;
+    const isDraft = !isDeleted && question.statusCode === "draft";
 
     return (
         <div
