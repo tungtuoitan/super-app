@@ -5,8 +5,10 @@ CREATE TABLE [k].[node] (
     [created_at]              DATETIME2 (7)   CONSTRAINT [DF_kwi_created_at] DEFAULT (getutcdate()) NOT NULL,
     [updated_at]              DATETIME2 (7)   NULL,
     [deleted_at]              DATETIME2 (7)   NULL,
-    [PathIds]                 NVARCHAR (1000) CONSTRAINT [DF_kwi_PathIds] DEFAULT ('/') NOT NULL,
-    [PathDepth]               INT             CONSTRAINT [DF_kwi_PathDepth] DEFAULT ((0)) NOT NULL,
+    [PathIds]                 NVARCHAR (1000) ALTER TABLE [k].[node]
+    ADD CONSTRAINT [DF_kwi_PathIds] DEFAULT ('/') FOR [path_ids]; NOT NULL,
+    [PathDepth]               INT             ALTER TABLE [k].[node]
+    ADD CONSTRAINT [DF_kwi_PathDepth] DEFAULT ((0)) FOR [path_depth]; NOT NULL,
     [name]                    NVARCHAR (255)  DEFAULT ('') NOT NULL,
     [description]             NVARCHAR (MAX)  NULL,
     [type_code]               NVARCHAR (50)   CONSTRAINT [DF_kwi_type_code] DEFAULT ('draft') NOT NULL,
@@ -19,16 +21,11 @@ CREATE TABLE [k].[node] (
     [status]                  NVARCHAR (50)   CONSTRAINT [DF_knode_status] DEFAULT ('active') NULL,
     [status_code]             NVARCHAR (50)   NULL,
     CONSTRAINT [PK_kworkspace_items] PRIMARY KEY CLUSTERED ([id] ASC),
-    CONSTRAINT [CK_kwi_MaxDepth] CHECK ([PathDepth]<=(30)),
+    ALTER TABLE [k].[node]
+    ADD CONSTRAINT [CK_kwi_MaxDepth] CHECK ([path_depth]<=(30));,
     CONSTRAINT [FK_kwi_parent] FOREIGN KEY ([parent_id]) REFERENCES [k].[node] ([id]),
     CONSTRAINT [FK_kwi_workspace] FOREIGN KEY ([knowledge_id]) REFERENCES [k].[knowledge] ([id]) ON DELETE CASCADE
 );
-
-
-GO
-
-CREATE NONCLUSTERED INDEX [IX_kwi_path]
-    ON [k].[node]([PathIds] ASC, [PathDepth] ASC) WHERE ([deleted_at] IS NULL);
 
 
 GO
@@ -45,18 +42,4 @@ CREATE NONCLUSTERED INDEX [IX_kwi_parent]
 
 GO
 
-
-ALTER TABLE [k].[node]
-    ADD CONSTRAINT [DF_knode_point] DEFAULT ((10)) FOR [point];
-GO
-
-
-ALTER TABLE [k].[node]
-    ADD CONSTRAINT [DF_knode_status] DEFAULT ('active') FOR [status];
-GO
-
-
-ALTER TABLE [k].[node]
-    ADD CONSTRAINT [DF_kwi_type_code] DEFAULT ('draft') FOR [type_code];
-GO
 
