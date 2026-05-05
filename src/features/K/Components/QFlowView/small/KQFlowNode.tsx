@@ -167,9 +167,9 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                     : isCut
                     ? "border-blue-500 bg-zinc-900/80 ring-1 ring-blue-500/60 shadow-lg shadow-blue-500/10 opacity-60"
                     : isDraft && selected
-                    ? "border-blue-500/50 bg-amber-950/20 ring-1 ring-blue-500/40 shadow-lg shadow-blue-500/10"
+                    ? "border-blue-500/50 bg-[#261C1C]/80 ring-1 ring-blue-500/40 shadow-lg shadow-blue-500/10"
                     : isDraft
-                    ? "border-amber-700/50 bg-amber-950/20"
+                    ? "border-amber-700/50 bg-[#261C1C]/80"
                     : selected
                     ? "border-blue-500/50 bg-zinc-900/80 ring-1 ring-blue-500/40 shadow-lg shadow-blue-500/10"
                     : "border-zinc-700/60 bg-zinc-900/80"
@@ -217,7 +217,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
 
             {HANDLES.map((pos) => (
                 <Handle key={pos} type="source" position={pos} id={HANDLE_ID[pos]}
-                    className="!rounded-full !border-[1.5px] !border-primary !bg-primary/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150"
+                    className="!rounded-full !border-[1.5px] !border-primary !bg-primary/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150 before:content-[''] before:absolute before:inset-[-8px] before:rounded-full"
                     style={{ opacity: showHandles ? 1 : 0, pointerEvents: showHandles ? "auto" : "none", transition: "opacity 0.15s" }}
                 />
             ))}
@@ -245,7 +245,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
              * Textarea (edit) or display div (view) is absolute on top.
              * No DOM swap = no height recalc = no React Flow jitter.
              */}
-            <div className="px-3 pt-3 pb-1 relative">
+            <div className={`pl-3 pt-3 pb-1 ${isEditing ? "pr-20" : "pr-3"} relative`}>
                 <div aria-hidden className={`${Q_TEXT} whitespace-pre-wrap break-words invisible`}>
                     {(isEditing ? draftQ : question.question) || "\u00A0"}
                 </div>
@@ -256,7 +256,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                         onChange={(e) => setDraftQ(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Question…"
-                        className={`nodrag nopan absolute inset-0 px-3 pt-3 pb-1 ${Q_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-zinc-600`}
+                        className={`nodrag nopan absolute inset-0 pl-3 pt-3 pb-1 pr-20 ${Q_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-zinc-600`}
                     />
                 ) : (
                     <div className={`absolute inset-0 px-3 pt-3 pb-1 ${Q_TEXT} whitespace-pre-wrap break-words select-none`}>
@@ -294,7 +294,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                     <button
                         onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleDraft(question.id); }}
                         title={isDraft ? "Unmark draft" : "Mark as draft"}
-                        className={`nodrag nopan ml-auto shrink-0 rounded p-0.5 transition-colors ${
+                        className={`nodrag nopan ml-auto shrink-0 rounded -m-1.5 p-2 transition-colors ${
                             isDraft
                                 ? "text-amber-500 hover:text-amber-300"
                                 : "text-zinc-700 hover:text-zinc-400 opacity-0 group-hover:opacity-100"

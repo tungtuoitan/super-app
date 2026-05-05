@@ -126,7 +126,13 @@ export function useKQFlowHelper() {
                 setSavedPositions((p) => ({ ...p, [realId]: pos }));
                 flowService._upsertPositions("", [{ nodeId: newQ.id, nodeType: "kQuestion", x: pos.x, y: pos.y }]).catch(() => {});
 
-                setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));
+                // Replace temp node with real node atomically — prevents flash
+                // while the questions reload (rebuild skips until positionsLoaded=true).
+                setFlowNodes((prev) => prev.map((n) =>
+                    n.id === nodeId
+                        ? { id: realId, type: "questionFlowNode" as const, position: pos, data: { question: { ...newQ, statusCode: shouldBeDraft ? "draft" : newQ.statusCode } } as KQFlowNodeData }
+                        : n,
+                ));
                 dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
             } catch {
                 setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));

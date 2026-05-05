@@ -137,19 +137,10 @@ export function useKQFlowCanvasHelper() {
         const relevantEdges = savedEdgesRef.current.filter((e) => nodeIdSet.has(e.source) && nodeIdSet.has(e.target));
         const newPositions = new Map<string, { x: number; y: number; h: number }>();
 
-        if (relevantEdges.length === 0) {
-            // No edges → near-square grid (fallback)
-            const cols = Math.ceil(Math.sqrt(nodes.length));
-            const sorted = [...nodes].sort((a, b) => Math.abs(a.position.y - b.position.y) > 50 ? a.position.y - b.position.y : a.position.x - b.position.x);
-            const rows = Math.ceil(sorted.length / cols);
-            const rowH = Array.from({ length: rows }, (_, r) => { let m = 0; for (let c = 0; c < cols; c++) m = Math.max(m, sorted[r * cols + c]?.measured?.height ?? 120); return m; });
-            const rowOff = rowH.reduce<number[]>((a, _, i) => { a.push(i === 0 ? 0 : a[i - 1] + rowH[i - 1] + GAP_Y); return a; }, []);
-            sorted.forEach((n, idx) => {
-                const row = Math.floor(idx / cols); const col = idx % cols; const h = n.measured?.height ?? 120;
-                newPositions.set(n.id, { x: minX + col * (NODE_W + GAP_X), y: minY + rowOff[row] + (rowH[row] - h) / 2, h });
-            });
-        } else {
-            // ── Directed adjacency (respects arrowDirection) ──────────────
+        // ── Sort: topo rank (if edges exist) or reading order ────────────
+        let sorted: typeof nodes;
+
+        if (relevantEdges.length > 0) {
             const adj = new Map<string, string[]>();
             const revAdj = new Map<string, string[]>();
             for (const n of nodes) { adj.set(n.id, []); revAdj.set(n.id, []); }
@@ -160,8 +151,6 @@ export function useKQFlowCanvasHelper() {
                 adj.get(src)!.push(tgt);
                 revAdj.get(tgt)!.push(src);
             }
-
-            // ── DFS topo sort → longest-path rank (= column index) ───────
             const visited = new Set<string>();
             const inStack = new Set<string>();
             const topoOrder: string[] = [];
@@ -174,33 +163,34 @@ export function useKQFlowCanvasHelper() {
                 topoOrder.unshift(id);
             };
             for (const n of nodes) dfs(n.id);
-
             const rank = new Map<string, number>();
             for (const id of topoOrder) {
                 const preds = revAdj.get(id) ?? [];
                 rank.set(id, preds.length === 0 ? 0 : Math.max(...preds.map((p) => (rank.get(p) ?? 0) + 1)));
             }
-
-            // ── Group by rank (column), sort within rank by original Y ────
-            const rankGroups = new Map<number, typeof nodes>();
-            for (const n of nodes) {
-                const r = rank.get(n.id) ?? 0;
-                if (!rankGroups.has(r)) rankGroups.set(r, []);
-                rankGroups.get(r)!.push(n);
-            }
-            for (const grp of rankGroups.values()) grp.sort((a, b) => a.position.y - b.position.y);
-
-            // ── Assign positions: rank = column (x), stack vertically (y) ─
-            for (const [r, grp] of [...rankGroups.entries()].sort(([a], [b]) => a - b)) {
-                const x = minX + r * (NODE_W + GAP_X);
-                let y = minY;
-                for (const n of grp) {
-                    const h = n.measured?.height ?? 120;
-                    newPositions.set(n.id, { x, y, h });
-                    y += h + GAP_Y;
-                }
-            }
+            sorted = [...nodes].sort((a, b) => {
+                const ra = rank.get(a.id) ?? 0;
+                const rb = rank.get(b.id) ?? 0;
+                if (ra !== rb) return ra - rb;
+                return a.position.y - b.position.y;
+            });
+        } else {
+            sorted = [...nodes].sort((a, b) =>
+                Math.abs(a.position.y - b.position.y) > 50 ? a.position.y - b.position.y : a.position.x - b.position.x
+            );
         }
+
+        // ── Reading-order grid: root/first node top-left, left→right, top→bottom ──
+        const cols = Math.ceil(Math.sqrt(sorted.length));
+        const rows = Math.ceil(sorted.length / cols);
+        const rowH = Array.from({ length: rows }, (_, r) => { let m = 0; for (let c = 0; c < cols; c++) m = Math.max(m, sorted[r * cols + c]?.measured?.height ?? 120); return m; });
+        const rowOff = rowH.reduce<number[]>((a, _, i) => { a.push(i === 0 ? 0 : a[i - 1] + rowH[i - 1] + GAP_Y); return a; }, []);
+        const nodeGridPos = new Map<string, { row: number; col: number }>();
+        sorted.forEach((n, idx) => {
+            const row = Math.floor(idx / cols); const col = idx % cols; const h = n.measured?.height ?? 120;
+            newPositions.set(n.id, { x: minX + col * (NODE_W + GAP_X), y: minY + rowOff[row] + (rowH[row] - h) / 2, h });
+            nodeGridPos.set(n.id, { row, col });
+        });
 
         // ── Persist node positions ────────────────────────────────────────
         const posUpdate: Record<string, { x: number; y: number }> = {};
@@ -279,6 +269,60 @@ export function useKQFlowCanvasHelper() {
                 else if (!isHoriz(refH) && !isHoriz(h)) edgeHandleMap.set(eid, { sourceHandle: 'right', targetHandle: 'right' });
             }
         }
+
+        // ── Anti-containment: edge A must not be fully inside edge B ─────
+        // Happens when src→t1 and src→t2 share a source AND t1 is between src and t2
+        // (or shared target with source between). Reroute the contained (shorter) edge.
+        const logicalEnds = (e: Edge<KFlowEdgeData>) => {
+            const dir = e.data?.arrowDirection ?? 'forward';
+            return dir === 'backward'
+                ? { lSrc: e.target, lTgt: e.source }
+                : { lSrc: e.source, lTgt: e.target };
+        };
+
+        const fixContained = (
+            sharedId: string, eid1: string, other1: string, eid2: string, other2: string,
+        ) => {
+            const sg = nodeGridPos.get(sharedId);
+            const g1 = nodeGridPos.get(other1);
+            const g2 = nodeGridPos.get(other2);
+            if (!sg || !g1 || !g2) return;
+            const h1 = edgeHandleMap.get(eid1);
+            const h2 = edgeHandleMap.get(eid2);
+            if (!h1 || !h2 || h1.sourceHandle !== h2.sourceHandle || h1.targetHandle !== h2.targetHandle) return;
+            // Same row → horizontal containment
+            if (sg.row === g1.row && sg.row === g2.row) {
+                if ((sg.col < g1.col && g1.col < g2.col) || (sg.col > g1.col && g1.col > g2.col))
+                    edgeHandleMap.set(eid1, { sourceHandle: 'bottom', targetHandle: 'bottom' });
+                else if ((sg.col < g2.col && g2.col < g1.col) || (sg.col > g2.col && g2.col > g1.col))
+                    edgeHandleMap.set(eid2, { sourceHandle: 'bottom', targetHandle: 'bottom' });
+            }
+            // Same col → vertical containment
+            if (sg.col === g1.col && sg.col === g2.col) {
+                if ((sg.row < g1.row && g1.row < g2.row) || (sg.row > g1.row && g1.row > g2.row))
+                    edgeHandleMap.set(eid1, { sourceHandle: 'right', targetHandle: 'right' });
+                else if ((sg.row < g2.row && g2.row < g1.row) || (sg.row > g2.row && g2.row > g1.row))
+                    edgeHandleMap.set(eid2, { sourceHandle: 'right', targetHandle: 'right' });
+            }
+        };
+
+        const bySrc = new Map<string, Array<{ eid: string; lTgt: string }>>();
+        const byTgt = new Map<string, Array<{ eid: string; lSrc: string }>>();
+        for (const edge of edgesToUpdate) {
+            const { lSrc, lTgt } = logicalEnds(edge);
+            if (!bySrc.has(lSrc)) bySrc.set(lSrc, []);
+            bySrc.get(lSrc)!.push({ eid: edge.id, lTgt });
+            if (!byTgt.has(lTgt)) byTgt.set(lTgt, []);
+            byTgt.get(lTgt)!.push({ eid: edge.id, lSrc });
+        }
+        for (const [src, targets] of bySrc)
+            for (let i = 0; i < targets.length; i++)
+                for (let j = i + 1; j < targets.length; j++)
+                    fixContained(src, targets[i].eid, targets[i].lTgt, targets[j].eid, targets[j].lTgt);
+        for (const [tgt, sources] of byTgt)
+            for (let i = 0; i < sources.length; i++)
+                for (let j = i + 1; j < sources.length; j++)
+                    fixContained(tgt, sources[i].eid, sources[i].lSrc, sources[j].eid, sources[j].lSrc);
 
         // ── Persist edge handle changes ───────────────────────────────────
         const edgeUpdateMap = new Map<string, { sourceHandle: string; targetHandle: string }>();

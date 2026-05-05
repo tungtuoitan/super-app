@@ -61,7 +61,9 @@ export function useKQFlowHeadless(knowledgeId: number, questions: KTestQuestion[
         positionsForKeyRef.current = "";
         setPositionsLoaded(false);
         setSavedPositions({});
-        setSavedEdges([]);
+        // Do NOT clear savedEdges here — clearing before fetch causes a race where
+        // edges visible in the canvas disappear permanently if the backend fetch does
+        // not return them (e.g. pagination gap). We merge instead after the fetch.
 
         let cancelled = false;
         const questionIds = questions.map(q => q.id);
@@ -99,11 +101,24 @@ export function useKQFlowHeadless(knowledgeId: number, questions: KTestQuestion[
                     data: { edgeId: e.id, note: e.note, arrowDirection: e.arrowDirection ?? "forward" },
                 }));
 
+            // Merge: backend edges are authoritative. Preserve edges already in local
+            // state that connect current questions but were not returned by backend
+            // (backend may have pagination gaps or return a subset of all edges).
+            const backendIds = new Set(customEdges.map(e => e.id));
+            const mergeWithPrev = (prev: Edge<KFlowEdgeData>[]) => {
+                const preserved = prev.filter(e =>
+                    !backendIds.has(e.id) &&
+                    qIdSet.has(e.source) &&
+                    qIdSet.has(e.target)
+                );
+                return [...customEdges, ...preserved];
+            };
+
             // Mark positions as valid for this question set BEFORE setting
             // positionsLoaded=true, so the rebuild effect's ref-check passes
             positionsForKeyRef.current = questionIdsKey;
-            setSavedEdges(customEdges);
-            setFlowEdges(customEdges);
+            setSavedEdges(mergeWithPrev);
+            setFlowEdges(mergeWithPrev);
             setPositionsLoaded(true);
         }).catch((err) => {
             console.warn("[kflow-headless] fetch failed:", err);

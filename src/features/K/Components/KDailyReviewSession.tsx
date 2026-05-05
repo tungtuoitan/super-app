@@ -42,6 +42,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
     const [timings, setTimings]           = useState<Record<number, number>>({});
     const [isSubmitted, setIsSubmitted]   = useState(false);
     const [selfScores, setSelfScores]     = useState<Record<number, number>>({});
+    const draftedIdsRef = useRef<Set<number>>(new Set());
     const [showResult, setShowResult]     = useState(false);
     const [isDragScoring, setIsDragScoring] = useState(false);
     const [hoveredScore, setHoveredScore]   = useState<number | null>(null);
@@ -62,12 +63,14 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
     showResultRef.current = showResult;
 
     const submitInBackground = (scoresSnap: Record<number, number>, timingsSnap: Record<number, number>) => {
-        const dailyAnswers: KDailyAnswerItem[] = questions.map(q => ({
-            questionId: q.id,
-            answerText: null,
-            responseTimeMs: timingsSnap[q.id] ?? null,
-            selfScore: scoresSnap[q.id] ?? null,
-        }));
+        const dailyAnswers: KDailyAnswerItem[] = questions
+            .filter(q => !draftedIdsRef.current.has(q.id))
+            .map(q => ({
+                questionId: q.id,
+                answerText: null,
+                responseTimeMs: timingsSnap[q.id] ?? null,
+                selfScore: scoresSnap[q.id] ?? null,
+            }));
         KTestService._submitDailyAnswers(knowledgeId, { answers: dailyAnswers })
             .catch(() => { /* silent */ });
     }
@@ -94,6 +97,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
         if (isSubmitted) return;
         const qId = currentQuestion?.id;
         if (qId === undefined) return;
+        draftedIdsRef.current = new Set(draftedIdsRef.current).add(qId);
         KTestService._markQuestionDraft(knowledgeId, qId).catch(() => {});
         if (currentIndex >= totalQuestions - 1) {
             setIsSubmitted(true);
@@ -157,8 +161,9 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
     // ── Summary screen ────────────────────────────────────────────────────────
 
     if (isSubmitted) {
+        const scoredQuestions = questions.filter(q => !draftedIdsRef.current.has(q.id));
         const stats = { remember: 0, ok: 0, forgot: 0 };
-        questions.forEach(q => {
+        scoredQuestions.forEach(q => {
             const s = selfScores[q.id];
             if (s === 5) stats.remember++;
             else if (s === 3) stats.ok++;
@@ -170,7 +175,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
                 <div className="flex flex-col items-center gap-5 px-3 py-6 max-w-lg mx-auto w-full">
                     <div className="text-center">
                         <h2 className="text-base font-semibold">{testTitle}</h2>
-                        <p className="text-xs text-muted-foreground mt-0.5">{totalQuestions} câu</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{scoredQuestions.length} câu</p>
                     </div>
 
                     <div className="flex gap-2.5 w-full">
@@ -187,7 +192,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
                     </div>
 
                     <div className="w-full flex flex-col gap-2">
-                        {questions.map((q, i) => {
+                        {scoredQuestions.map((q, i) => {
                             const score = selfScores[q.id] ?? 3;
                             const cfg = SCORE_CONFIG[score] ?? SCORE_CONFIG[3];
                             return (
