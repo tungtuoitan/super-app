@@ -25,7 +25,7 @@ import { useDebugLog } from "@/shared";
 export const useMultiProjectTaskFlowNodeHelper = () => {
     const { setFlowNodes, setEditingNodeId } = useMultiTaskFlowStore();
     const { handleToggleProcess } = useMultiProjectTaskFlowProcessHelper();
-    const { filteredTasks, flowNodes: currentFlowNodes, projectNameMap } = useMultiProjectTaskFlowSelector();
+    const { filteredTasks, flowNodes: currentFlowNodes, projectNameMap, filteredProjectIds } = useMultiProjectTaskFlowSelector();
     const { tasks, setTasks } = useMpTaskStore();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
@@ -183,28 +183,42 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
     // ── Add task at position (right-click canvas) ─────────────────────────
     // Only creates a temp node — backend call happens on rename confirm.
 
-    const handleAddTaskAtPosition = 
+    const handleAddTaskAtPosition =
         (posX: number, posY: number) => {
-            if (filteredTasks.length === 0) return;
+            // Determine project: prefer nearest existing task node; fall back to first filtered project
+            let projectId: number | null = null;
+            let projectName = "";
 
-            // Find nearest node to determine project
-            let nearestTask = filteredTasks[0];
-            if (currentFlowNodes.length > 0) {
-                let minDist = Infinity;
-                for (const n of currentFlowNodes) {
-                    const dx = n.position.x - posX;
-                    const dy = n.position.y - posY;
-                    const dist = dx * dx + dy * dy;
-                    if (dist < minDist) {
-                        minDist = dist;
-                        const t = (n.data as TaskFlowNodeData).task;
-                        if (t) nearestTask = t;
+            if (filteredTasks.length > 0) {
+                let nearestTask = filteredTasks[0];
+                if (currentFlowNodes.length > 0) {
+                    let minDist = Infinity;
+                    for (const n of currentFlowNodes) {
+                        const dx = n.position.x - posX;
+                        const dy = n.position.y - posY;
+                        const dist = dx * dx + dy * dy;
+                        if (dist < minDist) {
+                            minDist = dist;
+                            const t = (n.data as TaskFlowNodeData).task;
+                            if (t) nearestTask = t;
+                        }
                     }
                 }
+                projectId = nearestTask.projectId;
+                projectName = projectNameMap.get(nearestTask.projectId) ?? "";
+                debugLog.log("taskflow", "add-task-project-from-nearest", { projectId, projectName, posX, posY });
+            } else if (filteredProjectIds.length > 0) {
+                projectId = filteredProjectIds[0];
+                projectName = projectNameMap.get(projectId) ?? "";
+                debugLog.log("taskflow", "add-task-project-from-fallback", { projectId, projectName, posX, posY });
+            }
+
+            if (!projectId) {
+                debugLog.log("taskflow", "add-task-blocked-no-project", { filteredProjectIds });
+                return;
             }
 
             const tempId = `temp-node-${Date.now()}`;
-            const projectName = projectNameMap.get(nearestTask.projectId) ?? "";
 
             const tempNode: Node<TaskFlowNodeData> = {
                 id: tempId,
@@ -212,14 +226,30 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 position: { x: posX, y: posY },
                 data: {
                     task: {
-                        ...nearestTask,
-                        id: 0, title: "", parentTaskId: null,
-                        status: "open", priority: "medium",
-                        processJson: null, checklistJson: null, customTabsJson: null, note: null,
+                        id: 0,
+                        projectId,
+                        title: "",
+                        parentTaskId: null,
+                        type: "task",
+                        taskType: "personal",
+                        status: "open",
+                        priority: "medium",
+                        processJson: null,
+                        checklistJson: null,
+                        customTabsJson: null,
+                        note: null,
+                        startDate: null,
+                        endDate: null,
+                        orderIndex: 0,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        deletedAt: null,
                     } as Task,
                     projectName,
                 },
             };
+
+            debugLog.log("taskflow", "add-task-temp-node-created", { tempId, projectId, projectName, posX, posY });
 
             // Deselect all existing nodes, then add new temp node
             setFlowNodes((prev) => [
