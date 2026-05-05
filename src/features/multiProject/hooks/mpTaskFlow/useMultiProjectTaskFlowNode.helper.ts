@@ -206,12 +206,17 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 }
                 projectId = nearestTask.projectId;
                 projectName = projectNameMap.get(nearestTask.projectId) ?? "";
+                debugLog.log("taskflow", "add-task-project-from-nearest", { projectId, projectName, posX, posY });
             } else if (filteredProjectIds.length > 0) {
                 projectId = filteredProjectIds[0];
                 projectName = projectNameMap.get(projectId) ?? "";
+                debugLog.log("taskflow", "add-task-project-from-fallback", { projectId, projectName, posX, posY });
             }
 
-            if (!projectId) return;
+            if (!projectId) {
+                debugLog.log("taskflow", "add-task-blocked-no-project", { filteredProjectIds });
+                return;
+            }
 
             const tempId = `temp-node-${Date.now()}`;
 
@@ -243,6 +248,8 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                     projectName,
                 },
             };
+
+            debugLog.log("taskflow", "add-task-temp-node-created", { tempId, projectId, projectName, posX, posY });
 
             // Deselect all existing nodes, then add new temp node
             setFlowNodes((prev) => [
