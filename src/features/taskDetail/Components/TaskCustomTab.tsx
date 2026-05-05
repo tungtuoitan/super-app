@@ -65,6 +65,8 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
         setValidationError(null);
     };
 
+    const latestHandlersRef = useRef({ save: async () => {}, discard: () => {} });
+
     const save = async () => {
         if (!tab || !selectedTask) return;
         const error = validateCustomTabFormat(editContent);
@@ -110,9 +112,17 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
         if (isActiveTab) setCustomTabDirty(false);
     };
 
+    // Keep latest save/discard in a ref so the store always calls the current closure
+    useEffect(() => {
+        latestHandlersRef.current = { save, discard };
+    });
+
     // ── Register handlers in store (replaces forwardRef + useImperativeHandle) ──
     useEffect(() => {
-        customTabHandlersRef.current[tabId] = { save, discard };
+        customTabHandlersRef.current[tabId] = {
+            save: () => latestHandlersRef.current.save(),
+            discard: () => latestHandlersRef.current.discard(),
+        };
         return () => { delete customTabHandlersRef.current[tabId]; };
     }, [tabId, customTabHandlersRef]);
 

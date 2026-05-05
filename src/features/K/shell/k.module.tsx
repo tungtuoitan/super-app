@@ -5,8 +5,8 @@ import { KEditorPanel } from "../Components/KEditorPanel";
 import { KNodeEditorPanel } from "../Components/KNodeEditorPanel/KNodeEditorPanel";
 import { KMovingTab } from "../Components/KMovingTree/KMovingTab";
 import { useKStore } from "../store/useK.store";
-import { constants } from "@/shared";
 import type { ModuleDefinition } from "@/shell";
+import { useKSaveActions } from "../hooks/useKSaveActions";
 
 
 const KMovingTabAdapter = () => <KMovingTab />;
@@ -27,6 +27,8 @@ export const kModule: ModuleDefinition = {
         [shellConstants.vscode.tab.tabTypes.kNode]: KNodeEditorPanel,
         [shellConstants.vscode.tab.tabTypes.kDailyReview]: () => null, // handled separately if needed
     },
+
+    useSaveActions: useKSaveActions,
 
     keepAliveTabTypes: [shellConstants.vscode.tab.tabTypes.kKnowledge],
 

@@ -143,7 +143,7 @@ export const useKLoader = () => {
 
 
 
-    const createKnowledge = async (data: { name: string; description?: string; imageBase64?: string }): Promise<KWsResponse | null> => {
+    const createKnowledge = async (data: { name: string; description?: string; imageBase64?: string; status?: string }): Promise<KWsResponse | null> => {
         try {
             const token = $user.userToken;
             const result = await KService._createKnowledge(token, data);

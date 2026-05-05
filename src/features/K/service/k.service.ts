@@ -31,7 +31,7 @@ const _getAllUserWorkspaces = async (_token: string): Promise<KWsResponse[]> => 
 
 const _createKnowledge = async (
     _token: string,
-    data: { name: string; description?: string; imageBase64?: string }
+    data: { name: string; description?: string; imageBase64?: string; status?: string }
 ): Promise<ResultOptions<KWsResponse>> => {
     const res = await apiFetch(`${config.api.baseURL}/api/k`, {
         method: "POST",

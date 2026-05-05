@@ -145,7 +145,7 @@ export const useKNodeDialogHelper = () => {
             }
 
             // Success message based on mode
-            const successMessage = mode === "edit" ? `Folder "${newNodeName}" updated successfully!` : `Folder "${newNodeName}" created successfully!`;
+            const successMessage = mode === "edit" ? `"${newNodeName}" updated successfully!` : `"${newNodeName}" created successfully!`;
 
             _console.success(successMessage);
 

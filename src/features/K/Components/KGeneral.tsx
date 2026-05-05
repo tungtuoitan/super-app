@@ -4,9 +4,9 @@
  */
 
 
+import { useEffect, useCallback } from "react";
 import { Label } from "@/shared";
 import { Input } from "@/shared";
-import { Button } from "@/shared";
 import { useKStore } from "../store/useK.store";
 import type { KWsResponse } from "../types/k.type";
 import { TrackIconPicker } from "@/features/lifeLog";
@@ -34,26 +34,6 @@ export function KGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps) {
         }));
     };
 
-    const handleSave = async () => {
-        if (!knowledge) return;
-        const isNew = knowledge.id < 0;
-        const payload = {
-            name: knowledge.name,
-            description: knowledge.description,
-            imageBase64: knowledge.imageBase64,
-        };
-
-        if (isNew) {
-            const created = await createKnowledge(payload);
-            if (created) {
-                patchTab(tabId, { data: created, data0: created, title: created.name, hasUnsavedChanges: false });
-                setSelectedKId(created.id);
-            }
-        } else {
-            await updateKnowledge(knowledge.id, payload);
-            patchTab(tabId, (cur) => ({ data0: cur.data, hasUnsavedChanges: false }));
-        }
-    };
 
     if (!knowledge) return null;
 
@@ -100,11 +80,6 @@ export function KGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps) {
                     onChange={(v) => handleFieldChange("imageBase64", v || undefined)}
                 />
             </div>
-
-            {/* Save */}
-            <Button onClick={handleSave} disabled={!knowledge.name.trim()} className="self-start">
-                {knowledge.id < 0 ? "Create" : "Save"}
-            </Button>
         </div>
     );
 }
