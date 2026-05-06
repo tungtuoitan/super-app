@@ -33,7 +33,7 @@ export const useKMarkdownImportHelper = () => {
 
         setState({ isLoading: true, insertedCount: null, error: null });
         try {
-            await KService._importTestMarkdown($user.userToken, knowledgeId, {
+            await KService._importQuizMarkdown($user.userToken, knowledgeId, {
                 parentNodeId,
                 tests: parsed.tests,
                 orphanQuestions: parsed.orphanQuestions,

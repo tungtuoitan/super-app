@@ -1,6 +1,6 @@
 ﻿import { useEffect, useRef, useState } from "react";
-import { KTestService } from "@/features/K/service/kTest.service";
-import type { KQuestion } from "@/features/K/types/kTest.type";
+import { KQuizService } from "@/features/K/service/kQuiz.service";
+import type { KQuestion } from "@/features/K/types/kQuiz.type";
 
 export function useKQFlowSrsReset(
     nodeId: number | null,
@@ -25,7 +25,7 @@ export function useKQFlowSrsReset(
                 if (ids.length === 0) return;
                 setResetLoading(true);
                 try {
-                    await KTestService._updateQuestions(nodeId, {
+                    await KQuizService._updateQuestions(nodeId, {
                         addQuestions: [],
                         updateQuestions: [],
                         deleteQuestionIds: [],

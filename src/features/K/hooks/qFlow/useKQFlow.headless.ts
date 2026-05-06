@@ -1,13 +1,13 @@
 ﻿import { useEffect, useRef } from "react";
 import { useKQFlowStore } from "@/features/K/store/useKQFlow.store";
-import type { KTestQuestion } from "@/features/K/types/kTest.type";
+import type { KQuestion } from "@/features/K/types/kQuiz.type";
 import type { KQFlowNodeData, KFlowEdgeData } from "@/features/K/types/kQFlow.type";
 import type { Edge, Node } from "@xyflow/react";
 import { flowService } from "@/shared";
 import { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared";
 import { buildGridPosition } from "@/features/K/utils/kQFlow.utils";
 
-export function useKQFlowHeadless(knowledgeId: number, questions: KTestQuestion[], showDeleted: boolean) {
+export function useKQFlowHeadless(knowledgeId: number, questions: KQuestion[], showDeleted: boolean) {
     const {
         setFlowNodes, setFlowEdges, setSavedEdges,
         savedPositions, setSavedPositions,

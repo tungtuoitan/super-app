@@ -11,7 +11,7 @@ import type {
     KDailySubmitRequest,
     KRetentionSummary,
     KRetentionGraph,
-} from "../types/kTest.type";
+} from "../types/kQuiz.type";
 import { apiFetch } from "@/shared";
 import { ResultOptions } from "@/shared";
 
@@ -158,7 +158,7 @@ const _transcribeAudio = async (audioBlob: Blob): Promise<string> => {
     return res.text();
 };
 
-export const KTestService = {
+export const KQuizService = {
     _getQuestions,
     _getOrphanQuestions,
     _updateQuestions,

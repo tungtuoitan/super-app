@@ -64,8 +64,8 @@ const kContextDefaultValue: KContextData = {
     setNodeScoreMap: () => {},
     showQuestionNodes: false,
     setShowQuestionNodes: () => {},
-    testDropNodeIds: [],
-    setTestDropNodeIds: () => {},
+    quizDropNodeIds: [],
+    setQuizDropNodeIds: () => {},
     dailyReviewDueCount: 0,
     setDailyReviewDueCount: () => {},
 
@@ -114,7 +114,7 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
     const [pendingQuizTabSwitch, setPendingQuizTabSwitch] = useState<number | null | undefined>(undefined);
     const [nodeScoreMap, setNodeScoreMap] = useState<Record<number, number>>({});
     const [showQuestionNodes, setShowQuestionNodes] = useState<boolean>(false);
-    const [testDropNodeIds, setTestDropNodeIds]     = useState<number[]>([]);
+    const [quizDropNodeIds, setQuizDropNodeIds]     = useState<number[]>([]);
     const [dailyReviewDueCount, setDailyReviewDueCount] = useState<number>(0);
     const [kFlowClipboard, setKFlowClipboard] = useState<KFlowClipboard | null>(null);
     const [kFlowViewportMap, setKFlowViewportMap] = useState<Record<number, { x: number; y: number; zoom: number }>>({});
@@ -176,8 +176,8 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
                 setNodeScoreMap,
                 showQuestionNodes,
                 setShowQuestionNodes,
-                testDropNodeIds,
-                setTestDropNodeIds,
+                quizDropNodeIds,
+                setQuizDropNodeIds,
                 dailyReviewDueCount,
                 setDailyReviewDueCount,
 

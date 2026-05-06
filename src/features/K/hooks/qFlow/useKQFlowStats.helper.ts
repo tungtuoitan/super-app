@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { parseAsLocalDate } from "@/shared";
-import type { KQuestion } from "@/features/K/types/kTest.type";
+import type { KQuestion } from "@/features/K/types/kQuiz.type";
 
 const MASTER_STREAK  = 5;
 const GOOD_SCORE_MIN = 4; // 0–5 scale; 4–5 = good recall

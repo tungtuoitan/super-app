@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { KRetentionGraph, KQuestion } from "../../types/kTest.type";
+import type { KRetentionGraph, KQuestion } from "../../types/kQuiz.type";
 
 interface KProgressMasteryChartProps {
     data: KRetentionGraph;

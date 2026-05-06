@@ -31,9 +31,6 @@ export interface KQuestion {
     deletedAt?: string | null;
 }
 
-// Backward-compat alias used by flow canvas / helpers
-export type KTestQuestion = KQuestion;
-
 // ── Question management ──────────────────────────────────────────────────────
 
 export interface KUpdateQuestionsRequest {

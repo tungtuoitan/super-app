@@ -2,10 +2,10 @@
 import { flowService } from "@/shared";
 import type { FlowNodePositionDTO, FlowEdgeDTO } from "@/shared";
 import type { KFlowClipboard } from "@/features/K/types/kContext.type";
-import { KTestService } from "@/features/K/service/kTest.service";
+import { KQuizService } from "@/features/K/service/kQuiz.service";
 import { useKQFlowStore } from "@/features/K/store/useKQFlow.store";
 import type { KQFlowNodeData } from "@/features/K/types/kQFlow.type";
-import type { KUpdateQuestionsRequest } from "@/features/K/types/kTest.type";
+import type { KUpdateQuestionsRequest } from "@/features/K/types/kQuiz.type";
 import { dispatchKFlowQuestionsChanged } from "@/features/K/utils/kEvents.utils";
 import { buildGridPosition, hasPositionOverlap } from "@/features/K/utils/kQFlow.utils";
 import { NODE_HEIGHT } from "@/features/K/utils/kQFlow.constants";
@@ -43,13 +43,13 @@ export function useKQFlowHelper() {
 
     const updateQForNode = (kId: number, request: KUpdateQuestionsRequest) =>
         kId === 0
-            ? KTestService._updateOrphanQuestions(request)
-            : KTestService._updateQuestions(kId, request);
+            ? KQuizService._updateOrphanQuestions(request)
+            : KQuizService._updateQuestions(kId, request);
 
     const getQForNode = (kId: number) =>
         kId === 0
-            ? KTestService._getOrphanQuestions()
-            : KTestService._getQuestions(kId);
+            ? KQuizService._getOrphanQuestions()
+            : KQuizService._getQuestions(kId);
 
     const nodeIdForEvent = (kId: number): number | null => kId === 0 ? null : kId;
 
@@ -250,8 +250,8 @@ export function useKQFlowHelper() {
 
             if (movedPos.length > 0) {
                 const targetQRes = targetNodeId === null
-                    ? await KTestService._getOrphanQuestions()
-                    : await KTestService._getQuestions(targetNodeId);
+                    ? await KQuizService._getOrphanQuestions()
+                    : await KQuizService._getQuestions(targetNodeId);
 
                 const existingIds = (targetQRes.object?.questions ?? [])
                     .filter((q) => !questionIds.includes(q.id))
@@ -282,7 +282,7 @@ export function useKQFlowHelper() {
                 await flowService._upsertPositions("", finalPos);
             }
 
-            await Promise.all(questionIds.map((id) => KTestService._moveQuestion(id, targetNodeId)));
+            await Promise.all(questionIds.map((id) => KQuizService._moveQuestion(id, targetNodeId)));
 
             dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
             const targetEvent = targetNodeId === null ? null : targetNodeId;
@@ -352,7 +352,7 @@ export function useKQFlowHelper() {
         await Promise.all([
             edgeDeletePayload.length ? flowService._upsertEdges("", edgeDeletePayload) : Promise.resolve(),
             flowService._upsertPositions("", finalPos),
-            ...questionIds.map((id) => KTestService._moveQuestion(id, targetNodeId)),
+            ...questionIds.map((id) => KQuizService._moveQuestion(id, targetNodeId)),
         ]);
 
         const patchedPosMap: Record<string, { x: number; y: number }> = {};

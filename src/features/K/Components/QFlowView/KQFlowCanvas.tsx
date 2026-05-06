@@ -12,20 +12,20 @@ import { useKQFlowShortcuts } from "@/features/K/hooks/qFlow/useKQFlowShortcuts.
 import { useMenuContextHelper } from "@/shared";
 import { KQFlowNode } from "./small/KQFlowNode";
 import { KQFlowEdge } from "./small/KQFlowEdge";
-import type { KTestQuestion } from "@/features/K/types/kTest.type";
+import type { KQuestion } from "@/features/K/types/kQuiz.type";
 import type { KQFlowNodeData } from "@/features/K/types/kQFlow.type";
 import type { Edge, Node } from "@xyflow/react";
 
 const nodeTypes = { questionFlowNode: KQFlowNode };
 const edgeTypes = { kQuestionEdge: KQFlowEdge };
 
-function makeTempQuestion(): KTestQuestion {
+function makeTempQuestion(): KQuestion {
     return { id: 0, nodeId: null, nodeName: "", question: "", answer: null, statusCode: "learning", sortOrder: 0, scoreHistory: [], retention: 0 };
 }
 
 interface CanvasContentProps {
     knowledgeId: number;
-    questions: KTestQuestion[];
+    questions: KQuestion[];
     showDeleted: boolean;
     loading: boolean;
 }
@@ -127,7 +127,7 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
 
         showContextMenu(
             event as React.MouseEvent,
-            "k-test-flow",
+            "k-quiz-flow",
             {
                 onAddQuestion: () => {
                     const tempId = `temp-node-${Date.now()}`;
@@ -227,7 +227,7 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
 
 interface KQFlowCanvasProps {
     knowledgeId: number;
-    questions: KTestQuestion[];
+    questions: KQuestion[];
     showDeleted: boolean;
     loading: boolean;
 }

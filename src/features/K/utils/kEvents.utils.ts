@@ -16,8 +16,8 @@
 export const kEvents = {
     /** Dispatched from KNodePanel menus to trigger inline node creation */
     nodeInlineCreate: "k-node-inline-create",
-    /** Dispatched when a test is drag-dropped to a different K tree node */
-    testMoved: "k-test-moved",
+    /** Dispatched when a quiz is drag-dropped to a different K tree node */
+    quizMoved: "k-quiz-moved",
     /** Dispatched after a question is added / updated / deleted / restored in a test flow */
     flowQuestionsChanged: "kflow:questions-changed",
 } as const;
@@ -29,7 +29,7 @@ export interface KNodeInlineCreateDetail {
     parentId: number | null;
 }
 
-export interface KTestMovedDetail {
+export interface KQuizMovedDetail {
     sourceNodeId: number;
     knowledgeId: number;
 }
@@ -43,7 +43,7 @@ export interface KFlowQuestionsChangedDetail {
 declare global {
     interface WindowEventMap {
         "k-node-inline-create":    CustomEvent<KNodeInlineCreateDetail>;
-        "k-test-moved":            CustomEvent<KTestMovedDetail>;
+        "k-quiz-moved":            CustomEvent<KQuizMovedDetail>;
         "kflow:questions-changed": CustomEvent<KFlowQuestionsChangedDetail>;
     }
 }
@@ -54,8 +54,8 @@ export const dispatchKNodeInlineCreate = (detail: KNodeInlineCreateDetail) => {
     window.dispatchEvent(new CustomEvent(kEvents.nodeInlineCreate, { detail }));
 };
 
-export const dispatchKTestMoved = (detail: KTestMovedDetail) => {
-    window.dispatchEvent(new CustomEvent(kEvents.testMoved, { detail }));
+export const dispatchKQuizMoved = (detail: KQuizMovedDetail) => {
+    window.dispatchEvent(new CustomEvent(kEvents.quizMoved, { detail }));
 };
 
 export const dispatchKFlowQuestionsChanged = (detail: KFlowQuestionsChangedDetail) => {

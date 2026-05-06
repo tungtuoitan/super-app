@@ -3,25 +3,25 @@ export interface KMdQuestion {
     answer: string;
 }
 
-export interface KMdTest {
+export interface KMdQuiz {
     name: string;
     questions: KMdQuestion[];
 }
 
 export interface KMdParsed {
     keyword: string | null;
-    tests: KMdTest[];
+    tests: KMdQuiz[];
     orphanQuestions: KMdQuestion[];
 }
 
-export interface KExistingTestAddition {
+export interface KExistingQuizAddition {
     testId: number;
     questions: KMdQuestion[];
 }
 
-export interface KImportTestMarkdownRequest {
+export interface KImportQuizMarkdownRequest {
     parentNodeId: number;
-    tests: KMdTest[];
+    tests: KMdQuiz[];
     orphanQuestions: KMdQuestion[];
-    existingTestAdditions: KExistingTestAddition[];
+    existingTestAdditions: KExistingQuizAddition[];
 }

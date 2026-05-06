@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Brain, BookOpen, CalendarClock, CheckCircle } from "lucide-react";
-import { KTestService } from "../service/kTest.service";
+import { KQuizService } from "../service/kQuiz.service";
 import { KService } from "../service/k.service";
-import type { KRetentionSummary, KRetentionGraph, KDailyQueueItem, KQuestion } from "../types/kTest.type";
+import type { KRetentionSummary, KRetentionGraph, KDailyQueueItem, KQuestion } from "../types/kQuiz.type";
 import type { KItemV2 } from "../types/kV2.type";
 import { KProgressRetentionChart } from "./small/KProgressRetentionChart";
 import { KProgressMasteryChart } from "./small/KProgressMasteryChart";
@@ -106,10 +106,10 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
     useEffect(() => {
         setLoading(true);
         Promise.allSettled([
-            KTestService._getQuestions(knowledgeId),
-            KTestService._getRetention(knowledgeId),
-            KTestService._getRetentionGraph(knowledgeId, 14),
-            KTestService._getDailyQueue(knowledgeId),
+            KQuizService._getQuestions(knowledgeId),
+            KQuizService._getRetention(knowledgeId),
+            KQuizService._getRetentionGraph(knowledgeId, 14),
+            KQuizService._getDailyQueue(knowledgeId),
             KService._getWorkspaceTreeV2("", knowledgeId),
         ]).then(([qRes, retRes, graphRes, queueRes, treeRes]) => {
             const rawQs = qRes.status === "fulfilled" && qRes.value.success
