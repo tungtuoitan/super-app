@@ -84,12 +84,12 @@ export function KEditorPanel() {
         }
     }, [selectedItemIds]);
 
-    // pendingQuizTabSwitch carries the clicked nodeId → switch to progress (dashboard) as default
+    // pendingQuizTabSwitch carries the clicked nodeId → switch to qflow tab
     useEffect(() => {
         if (pendingQuizTabSwitch === undefined || isNew) return;
         const nodeId = pendingQuizTabSwitch;
         setPendingQuizTabSwitch(undefined);
-        setActiveTab("progress");
+        setActiveTab("qflow");
         setSelectedNodeId(nodeId);
         if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, selectedNodeId: nodeId } }));
     }, [pendingQuizTabSwitch]);
@@ -129,7 +129,14 @@ export function KEditorPanel() {
                     {TABS.map((t) => (
                         <button
                             key={t.id}
-                            onClick={() => setActiveTab(t.id)}
+                            onClick={() => {
+                                if (t.id === "qflow" && selectedItemIds.length > 0) {
+                                    const nodeId = selectedItemIds[0];
+                                    setSelectedNodeId(nodeId);
+                                    if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, selectedNodeId: nodeId } }));
+                                }
+                                setActiveTab(t.id);
+                            }}
                             disabled={t.id !== "general" && isNew}
                             className={cn(
                                 "relative flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
