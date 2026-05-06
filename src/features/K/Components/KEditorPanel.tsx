@@ -1,5 +1,5 @@
 ﻿import { useEffect, useRef, useState } from "react";
-import { Settings, GitBranch, BarChart2 } from "lucide-react";
+import { Settings, GitBranch, BarChart2, Play, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CardContent } from "@/shared";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared";
@@ -7,11 +7,14 @@ import { KGeneral } from "./KGeneral";
 import { KMarkdownImportPanel } from "./KMarkdownImportPanel";
 import { KQFlowView } from "./QFlowView/KQFlowView";
 import { KProgressDashboard } from "./KProgressDashboard";
+import { KDailyReviewSession } from "./KDailyReviewSession";
 import { useKStore } from "../store/useK.store";
 import type { KWsResponse } from "../types/k.type";
 import type { KItemV2 } from "../types/kV2.type";
+import type { KDailySessionQuestion } from "../types/kQuiz.type";
 import { useEditorTabBarHelper } from "@/shell";
 import { dispatchKFlowQuestionsChanged } from "../utils/kEvents.utils";
+import { KQuizService } from "../service/kQuiz.service";
 
 type KTab = "general" | "qflow" | "progress";
 
@@ -42,6 +45,9 @@ export function KEditorPanel() {
     });
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [importParentNode, setImportParentNode] = useState<KItemV2 | null>(null);
+    const [dailyTotal, setDailyTotal] = useState(0);
+    const [sessionLoading, setSessionLoading] = useState(false);
+    const [reviewSession, setReviewSession] = useState<KDailySessionQuestion[] | null>(null);
 
     // Track previous knowledge.id — initialized to the CURRENT value so the effect
     // is a no-op on first mount (and on StrictMode double-mount since the ref persists).
@@ -84,12 +90,12 @@ export function KEditorPanel() {
         }
     }, [selectedItemIds]);
 
-    // pendingQuizTabSwitch carries the clicked nodeId → switch to progress (dashboard) as default
+    // pendingQuizTabSwitch carries the clicked nodeId → switch to qflow
     useEffect(() => {
         if (pendingQuizTabSwitch === undefined || isNew) return;
         const nodeId = pendingQuizTabSwitch;
         setPendingQuizTabSwitch(undefined);
-        setActiveTab("progress");
+        setActiveTab("qflow");
         setSelectedNodeId(nodeId);
         if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, selectedNodeId: nodeId } }));
     }, [pendingQuizTabSwitch]);
@@ -104,6 +110,47 @@ export function KEditorPanel() {
         setIsImportOpen(true);
         setPendingImportNodeId(undefined);
     }, [pendingImportNodeId]);
+
+    // Fetch daily queue count for the review button
+    useEffect(() => {
+        if (isNew) { setDailyTotal(0); return; }
+        KQuizService._getDailyQueue(knowledge.id)
+            .then(res => {
+                if (res.success && res.object) {
+                    setDailyTotal(res.object.reduce((s, q) => s + q.dueCount + q.newCount, 0));
+                }
+            })
+            .catch(() => {});
+    }, [knowledge.id]);
+
+    const handleReview = async () => {
+        if (sessionLoading || isNew) return;
+        console.log("[Review] clicked — knowledgeId:", knowledge.id);
+        setSessionLoading(true);
+        try {
+            const res = await KQuizService._getKnowledgeDailySession(knowledge.id);
+            console.log("[Review] session response:", res);
+            if (res.success && res.object && res.object.length > 0) {
+                console.log("[Review] starting session with", res.object.length, "questions");
+                setReviewSession(res.object);
+            } else {
+                console.warn("[Review] no questions returned — success:", res.success, "count:", res.object?.length ?? 0);
+            }
+        } catch (err) {
+            console.error("[Review] fetch error:", err);
+        } finally { setSessionLoading(false); }
+    };
+
+    const refreshDailyTotal = () => {
+        if (isNew) return;
+        KQuizService._getDailyQueue(knowledge.id)
+            .then(res => {
+                if (res.success && res.object) {
+                    setDailyTotal(res.object.reduce((s, q) => s + q.dueCount + q.newCount, 0));
+                }
+            })
+            .catch(() => {});
+    };
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -122,7 +169,7 @@ export function KEditorPanel() {
     };
 
     return (
-        <CardContent className="flex flex-col flex-1 min-h-0 w-full p-0 h-full">
+        <CardContent className="relative flex flex-col flex-1 min-h-0 w-full p-0 h-full">
             {/* Tab bar */}
             <div className="flex items-center border-b-2 border-primary/20 bg-muted/20 shrink-0">
                 <div className="flex flex-1">
@@ -145,12 +192,41 @@ export function KEditorPanel() {
                         </button>
                     ))}
                 </div>
+                {!isNew && dailyTotal > 0 && (
+                    <div className="px-3 flex items-center shrink-0">
+                        <button
+                            onClick={handleReview}
+                            disabled={sessionLoading}
+                            title={`Review ${dailyTotal} question${dailyTotal !== 1 ? "s" : ""} due today`}
+                            className="h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border border-blue-700/60 bg-blue-900/20 text-blue-300 hover:bg-blue-900/40 hover:border-blue-600 transition-colors disabled:opacity-50"
+                        >
+                            {sessionLoading
+                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                : <Play className="w-3 h-3 fill-current" />
+                            }
+                            {dailyTotal}
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Content */}
             <div className="flex-1 min-h-0 w-full overflow-hidden h-full">
                 {renderTabContent()}
             </div>
+
+            {/* Review session overlay */}
+            {reviewSession && !isNew && (
+                <div className="absolute inset-0 z-50 bg-zinc-950 flex flex-col">
+                    <KDailyReviewSession
+                        knowledgeId={knowledge.id}
+                        quizTitle={tab?.title ?? "Daily Review"}
+                        questions={reviewSession}
+                        onComplete={() => { setReviewSession(null); refreshDailyTotal(); }}
+                        onBack={() => setReviewSession(null)}
+                    />
+                </div>
+            )}
 
             {/* ── Import popup — triggered by right-click in tree ── */}
             <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>

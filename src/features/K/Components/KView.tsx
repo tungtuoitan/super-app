@@ -52,6 +52,8 @@ export function KView() {
         const newWorkspaceId = newValue?.id ? parseInt(newValue.id.toString()) : null;
         if (newWorkspaceId === selectedKId) return;
         setSelectedKId(newWorkspaceId);
+        const newK = newWorkspaceId != null ? allK.find(k => k.id === newWorkspaceId) : null;
+        if (newK) openKnowledgeTab(newK);
     };
 
     // Right-click context menu on the selector area

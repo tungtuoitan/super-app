@@ -1,9 +1,8 @@
 import { useState } from "react";
-import type { KRetentionGraph, KQuestion } from "../../types/kQuiz.type";
+import type { KRetentionGraph } from "../../types/kQuiz.type";
 
 interface KProgressMasteryChartProps {
     data: KRetentionGraph;
-    questions: KQuestion[];
     height?: number;
 }
 
@@ -12,37 +11,23 @@ const PAD = { top: 10, right: 8, bottom: 22, left: 24 };
 const PLOT_W = W - PAD.left - PAD.right;
 
 const SERIES = [
-    { key: "mastered" as const, label: "Mastered", color: "#30d158", fillOpacity: 0.05 },
-    { key: "learning" as const, label: "Learning",  color: "#ff9f0a", fillOpacity: 0.04 },
-    { key: "inactive" as const, label: "Inactive",  color: "#8e8e93", fillOpacity: 0.03 },
+    { key: "strong"     as const, label: "Strong",      color: "#30d158", fillOpacity: 0.05 },
+    { key: "learning"   as const, label: "Learning",    color: "#ff9f0a", fillOpacity: 0.04 },
+    { key: "notStarted" as const, label: "Not started", color: "#8e8e93", fillOpacity: 0.03 },
 ];
 
-interface DayPoint { mastered: number; learning: number; inactive: number; }
+interface DayPoint { strong: number; learning: number; notStarted: number; }
 
-function buildNodeMasteryData(data: KRetentionGraph, questions: KQuestion[]): DayPoint[] {
-    const qToNode = new Map<number, number | null>();
-    questions.forEach(q => qToNode.set(q.id, q.nodeId));
-
+/** Classify each question's per-day retention directly — no node grouping needed. */
+function buildQuestionStrengthData(data: KRetentionGraph): DayPoint[] {
     return data.days.map(day => {
-        const nodeRetentions = new Map<number, number[]>();
-        day.retentions.forEach((ret, i) => {
-            const qId = data.questions[i]?.id;
-            if (qId == null) return;
-            const nodeId = qToNode.get(qId);
-            if (nodeId == null) return;
-            const arr = nodeRetentions.get(nodeId) ?? [];
-            arr.push(ret);
-            nodeRetentions.set(nodeId, arr);
+        let strong = 0, learning = 0, notStarted = 0;
+        day.retentions.forEach(ret => {
+            if (ret >= 80)    strong++;
+            else if (ret > 0) learning++;
+            else              notStarted++;
         });
-
-        let mastered = 0, learning = 0, inactive = 0;
-        nodeRetentions.forEach(rets => {
-            const avg = rets.reduce((s, r) => s + r, 0) / rets.length;
-            if (avg >= 80)    mastered++;
-            else if (avg > 0) learning++;
-            else              inactive++;
-        });
-        return { mastered, learning, inactive };
+        return { strong, learning, notStarted };
     });
 }
 
@@ -73,15 +58,15 @@ function smoothAreaPath(pts: Array<{ x: number; y: number }>, tension: number, b
     return `${line} L${last.x.toFixed(1)},${bottomY.toFixed(1)} L${first.x.toFixed(1)},${bottomY.toFixed(1)} Z`;
 }
 
-export function KProgressMasteryChart({ data, questions, height = 160 }: KProgressMasteryChartProps) {
+export function KProgressMasteryChart({ data, height = 160 }: KProgressMasteryChartProps) {
     const [hovered, setHovered] = useState<number | null>(null);
 
     const PLOT_H = height - PAD.top - PAD.bottom;
     const days = data.days;
     if (days.length === 0) return null;
 
-    const pts = buildNodeMasteryData(data, questions);
-    const maxVal = Math.max(...pts.flatMap(p => [p.mastered, p.learning, p.inactive]), 1);
+    const pts = buildQuestionStrengthData(data);
+    const maxVal = Math.max(...pts.flatMap(p => [p.strong, p.learning, p.notStarted]), 1);
 
     const xStep = PLOT_W / Math.max(days.length - 1, 1);
     const toX   = (i: number) => PAD.left + i * xStep;
@@ -145,7 +130,7 @@ export function KProgressMasteryChart({ data, questions, height = 160 }: KProgre
                         fill="none" stroke={s.color} strokeWidth={1.5} strokeLinejoin="round" />
                 ))}
 
-                {/* Dots — only on hover (pointHoverRadius: 4) */}
+                {/* Dots — only on hover */}
                 {hovered != null && SERIES.map(s => (
                     <circle key={s.key}
                         cx={toX(hovered)} cy={toY(pts[hovered][s.key])}
@@ -153,7 +138,7 @@ export function KProgressMasteryChart({ data, questions, height = 160 }: KProgre
                 ))}
             </svg>
 
-            {/* Tooltip — styled like demo: white bg + border */}
+            {/* Tooltip */}
             {hovered != null && (
                 <div className="absolute z-10 pointer-events-none text-[11px] rounded-[8px] shadow-lg"
                     style={{

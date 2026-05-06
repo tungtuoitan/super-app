@@ -34,19 +34,19 @@ function getScoreFromDelta(dx: number, dy: number): number | null {
 
 
 const SCORE_BUTTONS = [
-    { score: 1, label: "Rất quên", btnClass: "border-red-600/50 text-red-400 hover:bg-red-600/20" },
-    { score: 2, label: "Quên", btnClass: "border-orange-500/40 text-orange-400 hover:bg-orange-500/20" },
-    { score: 3, label: "Ổn", btnClass: "border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/20" },
-    { score: 4, label: "Tốt", btnClass: "border-green-400/40 text-green-400 hover:bg-green-500/20" },
-    { score: 5, label: "Rất tốt", btnClass: "border-green-500/40 text-green-400 hover:bg-green-600/20" },
+    { score: 1, label: "Again",  btnClass: "border-red-600/50 text-red-400 hover:bg-red-600/20" },
+    { score: 2, label: "Hard",   btnClass: "border-orange-500/40 text-orange-400 hover:bg-orange-500/20" },
+    { score: 3, label: "Okay",   btnClass: "border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/20" },
+    { score: 4, label: "Good",   btnClass: "border-green-400/40 text-green-400 hover:bg-green-500/20" },
+    { score: 5, label: "Easy",   btnClass: "border-green-500/40 text-green-400 hover:bg-green-600/20" },
 ] as const;
 
 const SCORE_CONFIG: Record<number, { label: string; color: string; bg: string }> = {
-    1: { label: "Rất quên", color: "text-red-400", bg: "bg-red-500/10 border-red-500/30" },
-    2: { label: "Quên", color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/30" },
-    3: { label: "Ổn", color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30" },
-    4: { label: "Tốt", color: "text-green-400", bg: "bg-green-500/10 border-green-500/30" },
-    5: { label: "Rất tốt", color: "text-green-400", bg: "bg-green-500/10 border-green-500/30" },
+    1: { label: "Again",  color: "text-red-400",    bg: "bg-red-500/10 border-red-500/30" },
+    2: { label: "Hard",   color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/30" },
+    3: { label: "Okay",   color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30" },
+    4: { label: "Good",   color: "text-green-400",  bg: "bg-green-500/10 border-green-500/30" },
+    5: { label: "Easy",   color: "text-green-400",  bg: "bg-green-500/10 border-green-500/30" },
 };
 
 export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onComplete, onBack, isQuickQuiz }: KDailyReviewSessionProps) {
@@ -187,7 +187,7 @@ export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onCompl
                 <div className="flex flex-col items-center gap-5 px-3 py-6 max-w-lg mx-auto w-full">
                     <div className="text-center">
                         <h2 className="text-base font-semibold">{quizTitle}</h2>
-                        <p className="text-xs text-muted-foreground mt-0.5">{scoredQuestions.length} câu</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{scoredQuestions.length} question{scoredQuestions.length !== 1 ? "s" : ""}</p>
                     </div>
 
                     <div className="flex gap-2.5 w-full flex-wrap">
@@ -351,14 +351,11 @@ export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onCompl
                             key={z.score + z.label}
                             onClick={() => advanceWithScore(z.score)}
                             className={cn(
-                                "flex-1 py-2.5 rounded-lg border text-sm font-bold transition-colors bg-transparent flex flex-col items-center gap-0.5",
+                                "flex-1 py-2.5 rounded-lg border text-sm font-bold transition-colors bg-transparent flex items-center justify-center",
                                 z.btnClass
                             )}
                         >
                             <span className="text-xs">{z.label}</span>
-                            <span className="text-xs opacity-70">
-                                {fmtInterval(currentQuestion.previewIntervalSeconds?.[z.score] ?? 0)}
-                            </span>
                         </button>
                     ))}
                 </div>

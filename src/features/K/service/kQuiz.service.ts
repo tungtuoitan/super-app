@@ -19,6 +19,12 @@ const base = (knowledgeId: number) => `${config.api.baseURL}/api/k/${knowledgeId
 
 // ── Questions CRUD ─────────────────────────────────────────────────────────
 
+const _getNodeQuestions = async (nodeId: number): Promise<ResultOptions<KQuestionsListResponse>> => {
+    const res = await apiFetch(`${base(nodeId)}/node-questions`, { method: "GET" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
 const _getQuestions = async (knowledgeId: number): Promise<ResultOptions<KQuestionsListResponse>> => {
     const res = await apiFetch(`${base(knowledgeId)}/questions`, { method: "GET" });
     if (res.ok) return res.json();
@@ -114,6 +120,15 @@ const _getDailySession = async (
     return Promise.reject(res);
 };
 
+const _getKnowledgeDailySession = async (
+    knowledgeId: number,
+    limit = 30,
+): Promise<ResultOptions<KDailySessionQuestion[]>> => {
+    const res = await apiFetch(`${base(knowledgeId)}/knowledge-daily-session?limit=${limit}`, { method: "GET" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
 const _submitDailyAnswers = async (
     knowledgeId: number,
     request: KDailySubmitRequest,
@@ -159,6 +174,7 @@ const _transcribeAudio = async (audioBlob: Blob): Promise<string> => {
 };
 
 export const KQuizService = {
+    _getNodeQuestions,
     _getQuestions,
     _getOrphanQuestions,
     _updateQuestions,
@@ -170,6 +186,7 @@ export const KQuizService = {
     _getDailyQueue,
     _getGlobalDailyQueue,
     _getDailySession,
+    _getKnowledgeDailySession,
     _submitDailyAnswers,
     _getRetention,
     _getRetentionGraph,

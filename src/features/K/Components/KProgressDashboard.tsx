@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Brain, BookOpen, CalendarClock, CheckCircle } from "lucide-react";
+import { Brain, BookOpen, CalendarClock, TrendingUp } from "lucide-react";
 import { KQuizService } from "../service/kQuiz.service";
 import { KService } from "../service/k.service";
 import type { KRetentionSummary, KRetentionGraph, KDailyQueueItem, KQuestion } from "../types/kQuiz.type";
@@ -68,23 +68,6 @@ function NodeRetentionDonut({ high, mid, low }: { high: number; mid: number; low
     );
 }
 
-// Kept for the score-history-per-node section (currently commented out)
-function SparkBars({ scores }: { scores: number[] }) {
-    if (scores.length === 0) return (
-        <div className="h-10 flex items-center justify-center text-[11px] text-muted-foreground">No sessions yet</div>
-    );
-    const pcts = scores.map(s => s * 20);
-    const barColor = (p: number) =>
-        p >= 90 ? "#a0e8be" : p >= 75 ? "#c2f0d4" : p >= 65 ? "#fff3b0" : p >= 50 ? "#ffe5b0" : "#ffd2d2";
-    return (
-        <div className="flex items-end gap-[3px] h-10">
-            {pcts.map((p, i) => (
-                <div key={i} className="flex-1 rounded-t-[3px] min-h-[2px]"
-                    style={{ height: Math.max(2, p * 0.38), background: p ? barColor(p) : "rgba(0,0,0,0.06)" }} />
-            ))}
-        </div>
-    );
-}
 
 interface DashboardData {
     questions: KQuestion[];
@@ -134,34 +117,26 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
 
     const { questions, nodes, retention, retentionGraph, dailyQueue } = data;
 
-    // Active node ids — used to exclude questions inside deleted/draft nodes
+    // Active node ids — nodes that are not deleted and not draft
     const activeNodeIds = new Set(nodes.map(n => n.id));
 
-    // Questions bucketed by status (exclude orphans from node-level stats)
-    const learningQs = questions.filter(q =>
-        q.statusCode === "learning" && (q.nodeId == null || activeNodeIds.has(q.nodeId))
-    );
-    const masteredQsList = questions.filter(q =>
-        q.statusCode === "mastered" && (q.nodeId == null || activeNodeIds.has(q.nodeId))
-    );
-    const draftQs = questions.filter(q =>
-        q.statusCode === "draft" && (q.nodeId == null || activeNodeIds.has(q.nodeId))
-    );
-    // activeQs = learning (used for "Learning Questions" stat)
-    const activeQs = learningQs;
+    // Helper: question belongs to a real, active node (excludes orphans & deleted/draft nodes)
+    const isActiveNodeQ = (q: KQuestion) =>
+        q.nodeId != null && q.nodeId !== 0 && activeNodeIds.has(q.nodeId);
+
+    // Questions bucketed by status — orphans (nodeId null/0) and deleted nodes excluded
+    const learningQs = questions.filter(q => q.statusCode === "learning" && isActiveNodeQ(q));
+    const draftQs    = questions.filter(q => q.statusCode === "draft"    && isActiveNodeQ(q));
 
     const dueToday = dailyQueue.reduce((s, q) => s + q.dueCount, 0);
     const newToday = dailyQueue.reduce((s, q) => s + q.newCount, 0);
 
     // ── Node-level retention groups ─────────────────────────────────────────────
-    // Use learning + mastered for retention tracking (both have SRS state / retention values)
-    const allReviewQs = [...learningQs, ...masteredQsList];
     const qByNode = new Map<number, KQuestion[]>();
-    allReviewQs.forEach(q => {
-        if (q.nodeId == null) return;
-        const arr = qByNode.get(q.nodeId) ?? [];
+    learningQs.forEach(q => {
+        const arr = qByNode.get(q.nodeId!) ?? [];
         arr.push(q);
-        qByNode.set(q.nodeId, arr);
+        qByNode.set(q.nodeId!, arr);
     });
 
     const nodeRetentionGroups = nodes
@@ -171,17 +146,12 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                 ? Math.round(qs.reduce((s, q) => s + q.retention, 0) / qs.length)
                 : 0;
             const level = nodeLevel(avgRet);
-            // A node is SRS-mastered when ALL its non-draft questions have statusCode "mastered"
-            const isSrsMastered = qs.length > 0 && qs.every(q => q.statusCode === "mastered");
-            return { nodeId: n.id, nodeName: n.name, qs, avgRet, level, isSrsMastered };
+            return { nodeId: n.id, nodeName: n.name, qs, avgRet, level };
         })
         .filter(g => g.qs.length > 0)
         .sort((a, b) => b.avgRet - a.avgRet);
 
-    // SRS-mastered nodes (for stat cards only)
-    const masteredNodes = nodeRetentionGroups.filter(g => g.isSrsMastered).length;
-    const totalNodes    = nodeRetentionGroups.length;
-    const masteredPct   = totalNodes > 0 ? Math.round((masteredNodes / totalNodes) * 100) : 0;
+    const totalNodes = nodeRetentionGroups.length;
 
     // Retention-level counts (for donut — pure retention, no SRS concept)
     const highNodes   = nodeRetentionGroups.filter(g => g.level === "high").length;
@@ -207,20 +177,28 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
     }
 
     // ── Stat cards ──────────────────────────────────────────────────────────────
+    const avgRetention = retention?.average != null ? `${retention.average}%` : "—";
     const STATS = [
         {
-            lbl: "% Mastered", val: totalNodes > 0 ? `${masteredPct}%` : "—",
-            pill: `${mediumNodes} medium · ${lowNodes} low`,
-            pillCls: "bg-[rgba(142,142,147,0.12)] text-[#636366]",
+            lbl: "Active Questions", val: learningQs.length,
+            pill: `across ${totalNodes} nodes`,
+            pillCls: "bg-[rgba(48,209,88,0.12)] text-[#1a7a32] dark:text-[#52e57a]",
             iconBg: "rgba(48,209,88,0.12)", stroke: C.high,
             icon: <Brain className="w-4 h-4" />,
         },
         {
-            lbl: "Mastered Nodes", val: masteredNodes,
-            pill: `of ${totalNodes} active nodes`,
+            lbl: "Avg Retention", val: avgRetention,
+            pill: `${highNodes} high · ${mediumNodes} mid · ${lowNodes} low`,
             pillCls: "bg-[rgba(48,209,88,0.12)] text-[#1a7a32] dark:text-[#52e57a]",
             iconBg: "rgba(48,209,88,0.12)", stroke: C.high,
-            icon: <CheckCircle className="w-4 h-4" />,
+            icon: <TrendingUp className="w-4 h-4" />,
+        },
+        {
+            lbl: "Due Today", val: dueToday,
+            pill: `${newToday} new cards`,
+            pillCls: "bg-[rgba(255,107,53,0.12)] text-[#a83800] dark:text-[#ff8f6b]",
+            iconBg: "rgba(255,159,10,0.12)", stroke: C.mid,
+            icon: <CalendarClock className="w-4 h-4" />,
         },
         {
             lbl: "Draft Questions", val: draftQs.length,
@@ -229,27 +207,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
             iconBg: "rgba(142,142,147,0.12)", stroke: C.low,
             icon: <BookOpen className="w-4 h-4" />,
         },
-        {
-            lbl: "Learning Questions", val: activeQs.length,
-            pill: `${newToday} new · ${dueToday} due`,
-            pillCls: "bg-[rgba(255,107,53,0.12)] text-[#a83800] dark:text-[#ff8f6b]",
-            iconBg: "rgba(255,159,10,0.12)", stroke: C.mid,
-            icon: <CalendarClock className="w-4 h-4" />,
-        },
     ];
-
-    // Spark groups — for future score-history section
-    const qWithHistoryByNode = new Map<number, KQuestion[]>();
-    questions
-        .filter(q => q.scoreHistory.length > 0 && q.nodeId != null && activeNodeIds.has(q.nodeId!))
-        .forEach(q => {
-            const arr = qWithHistoryByNode.get(q.nodeId!) ?? [];
-            arr.push(q);
-            qWithHistoryByNode.set(q.nodeId!, arr);
-        });
-    const nodeSparkGroups = nodes
-        .map(n => ({ nodeId: n.id, nodeName: n.name, qs: qWithHistoryByNode.get(n.id) ?? [] }))
-        .filter(g => g.qs.length > 0);
 
     return (
         <div className="p-6 space-y-3 overflow-auto h-full" style={{ maxWidth: 940, margin: "0 auto" }}>
@@ -317,9 +275,9 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                 </div>
                 <div className={`${CARD} p-5`}>
                     <div className="flex items-center mb-[14px]">
-                        <span className={CARD_LBL}>Mastery over time</span>
+                        <span className={CARD_LBL}>Memory strength over time</span>
                         <div className="ml-auto flex items-center gap-[14px]">
-                            {[{ c: C.high, l: "Mastered" }, { c: C.mid, l: "Learning" }, { c: C.low, l: "Inactive" }].map(({ c, l }) => (
+                            {[{ c: C.high, l: "Strong" }, { c: C.mid, l: "Learning" }, { c: C.low, l: "Not started" }].map(({ c, l }) => (
                                 <div key={l} className="flex items-center gap-1.5">
                                     <span className="w-[7px] h-[7px] rounded-[2px]" style={{ background: c }} />
                                     <span className="text-[11px] text-muted-foreground">{l}</span>
@@ -329,7 +287,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                     </div>
                     {retentionGraph && retentionGraph.days.length > 0
                         ? <div className="overflow-x-auto">
-                            <KProgressMasteryChart data={retentionGraph} questions={questions} height={160} />
+                            <KProgressMasteryChart data={retentionGraph} height={160} />
                           </div>
                         : <div className="flex items-center justify-center h-[160px] text-[11px] text-muted-foreground text-center px-4">
                             Complete a review session to see your mastery trend.
@@ -385,29 +343,6 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                 </div>
             </div>
 
-            {/* Score history per node — reserved for future */}
-            {/* {nodeSparkGroups.length > 0 && nodeSparkGroups.map(({ nodeId, nodeName, qs }) => (
-                <div key={nodeId ?? -1}>
-                    <div className={`${CARD_LBL} px-1 mb-2`}>{nodeName}</div>
-                    <div className="grid grid-cols-2 gap-3">
-                        {qs.map(q => {
-                            const lastPct = q.scoreHistory.length ? Math.round(q.scoreHistory[q.scoreHistory.length - 1] * 20) : 0;
-                            return (
-                                <div key={q.id} className={`${CARD} p-5`}>
-                                    <div className="flex justify-between items-center mb-3">
-                                        <span className="text-[13px] font-medium truncate max-w-[65%]">{q.question}</span>
-                                    </div>
-                                    <SparkBars scores={q.scoreHistory} />
-                                    <div className="text-[11px] text-muted-foreground mt-2.5">
-                                        Last <b className="text-foreground/70 font-medium">{lastPct}%</b>
-                                        {" · "}Retention <b className="text-foreground/70 font-medium">{Math.round(q.retention)}%</b>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            ))} */}
         </div>
     );
 }

@@ -58,7 +58,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
         try {
             const res = nodeId === null
                 ? await KQuizService._getOrphanQuestions()
-                : await KQuizService._getQuestions(nodeId);
+                : await KQuizService._getNodeQuestions(nodeId);
             if (res.success && res.object) {
                 setQuestions(res.object.questions);
             }
