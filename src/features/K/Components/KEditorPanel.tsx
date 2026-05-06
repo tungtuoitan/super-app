@@ -129,7 +129,14 @@ export function KEditorPanel() {
                     {TABS.map((t) => (
                         <button
                             key={t.id}
-                            onClick={() => setActiveTab(t.id)}
+                            onClick={() => {
+                                if (t.id === "qflow" && selectedItemIds.length > 0) {
+                                    const nodeId = selectedItemIds[0];
+                                    setSelectedNodeId(nodeId);
+                                    if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, selectedNodeId: nodeId } }));
+                                }
+                                setActiveTab(t.id);
+                            }}
                             disabled={t.id !== "general" && isNew}
                             className={cn(
                                 "relative flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
