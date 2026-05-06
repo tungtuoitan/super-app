@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "k-dashboard-demo",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "C:/Users/Admin/source/SuperApp/.claude/worktrees/dreamy-noyce-c059b0", "-l", "5199", "--no-clipboard"],
+      "port": 5199
+    }
+  ]
+}

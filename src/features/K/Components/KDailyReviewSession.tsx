@@ -14,6 +14,14 @@ interface KDailyReviewSessionProps {
     isQuickTest?: boolean;
 }
 
+function fmtInterval(seconds: number): string {
+    if (seconds < 3600)           return `${Math.round(seconds / 60)}m`;
+    if (seconds < 86400)          return `${Math.round(seconds / 3600)}h`;
+    if (seconds < 86400 * 30)     return `${Math.round(seconds / 86400)}d`;
+    if (seconds < 86400 * 365)    return `${Math.round(seconds / (86400 * 30))}mo`;
+    return `${Math.round(seconds / (86400 * 365))}y`;
+}
+
 // right=5 (nhớ), left=0 (quên), top=3 (ổn), bottom=null (cancel)
 function getScoreFromDelta(dx: number, dy: number): number | null {
     const angle = Math.atan2(-dy, dx) * (180 / Math.PI);
@@ -26,15 +34,19 @@ function getScoreFromDelta(dx: number, dy: number): number | null {
 
 
 const SCORE_BUTTONS = [
-    { score: 0, label: "Quên", btnClass: "border-red-500/40 text-red-400 hover:bg-red-600/20" },
-    { score: 3, label: "Quên Nhẹ",   btnClass: "border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/20" },
-    { score: 5, label: "Nhớ",  btnClass: "border-green-500/40 text-green-400 hover:bg-green-500/20" },
+    { score: 1, label: "Rất quên", btnClass: "border-red-600/50 text-red-400 hover:bg-red-600/20" },
+    { score: 2, label: "Quên", btnClass: "border-orange-500/40 text-orange-400 hover:bg-orange-500/20" },
+    { score: 3, label: "Ổn", btnClass: "border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/20" },
+    { score: 4, label: "Tốt", btnClass: "border-green-400/40 text-green-400 hover:bg-green-500/20" },
+    { score: 5, label: "Rất tốt", btnClass: "border-green-500/40 text-green-400 hover:bg-green-600/20" },
 ] as const;
 
 const SCORE_CONFIG: Record<number, { label: string; color: string; bg: string }> = {
-    0: { label: "Quên", color: "text-red-400",    bg: "bg-red-500/10 border-red-500/30" },
-    3: { label: "Quên Nhẹ",   color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30" },
-    5: { label: "Nhớ",  color: "text-green-400",  bg: "bg-green-500/10 border-green-500/30" },
+    1: { label: "Rất quên", color: "text-red-400", bg: "bg-red-500/10 border-red-500/30" },
+    2: { label: "Quên", color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/30" },
+    3: { label: "Ổn", color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/30" },
+    4: { label: "Tốt", color: "text-green-400", bg: "bg-green-500/10 border-green-500/30" },
+    5: { label: "Rất tốt", color: "text-green-400", bg: "bg-green-500/10 border-green-500/30" },
 };
 
 export function KDailyReviewSession({ knowledgeId, testTitle, questions, onComplete, onBack, isQuickTest }: KDailyReviewSessionProps) {
@@ -162,12 +174,12 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
 
     if (isSubmitted) {
         const scoredQuestions = questions.filter(q => !draftedIdsRef.current.has(q.id));
-        const stats = { remember: 0, ok: 0, forgot: 0 };
+        const stats = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
         scoredQuestions.forEach(q => {
             const s = selfScores[q.id];
-            if (s === 5) stats.remember++;
-            else if (s === 3) stats.ok++;
-            else stats.forgot++;
+            if (s !== undefined && s in stats) {
+                stats[s as keyof typeof stats]++;
+            }
         });
 
         return (
@@ -178,15 +190,11 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
                         <p className="text-xs text-muted-foreground mt-0.5">{scoredQuestions.length} câu</p>
                     </div>
 
-                    <div className="flex gap-2.5 w-full">
-                        {[
-                            { count: stats.forgot,   label: "Quên", cls: "text-red-400 bg-red-500/10 border-red-500/20" },
-                            { count: stats.ok,       label: "Quên Nhẹ",   cls: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" },
-                            { count: stats.remember, label: "Nhớ",  cls: "text-green-400 bg-green-500/10 border-green-500/20" },
-                        ].map(s => (
-                            <div key={s.label} className={cn("flex-1 text-center rounded-lg border py-3", s.cls)}>
-                                <p className="text-2xl font-bold">{s.count}</p>
-                                <p className="text-xs opacity-70">{s.label}</p>
+                    <div className="flex gap-2.5 w-full flex-wrap">
+                        {SCORE_BUTTONS.map(btn => (
+                            <div key={btn.score} className={cn("flex-1 min-w-fit text-center rounded-lg border py-3", SCORE_CONFIG[btn.score].bg)}>
+                                <p className="text-2xl font-bold">{stats[btn.score as keyof typeof stats]}</p>
+                                <p className="text-xs opacity-70">{btn.label}</p>
                             </div>
                         ))}
                     </div>
@@ -223,10 +231,10 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
         <div
             className="relative flex flex-col h-full bg-background select-none w-full"
             style={{ touchAction: showResult ? "none" : undefined }}
-            onPointerDown={handleDragStart}
+            // onPointerDown={handleDragStart}
         >
-            {/* Drag-to-score overlay */}
-            {isDragScoring && (
+            {/* Drag-to-score overlay — temporarily disabled */}
+            {false && isDragScoring && (
                 <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
                     <div className={cn(
                         "absolute inset-0 transition-colors duration-150",
@@ -343,11 +351,14 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
                             key={z.score + z.label}
                             onClick={() => advanceWithScore(z.score)}
                             className={cn(
-                                "flex-1 py-2.5 rounded-lg border text-sm font-bold transition-colors bg-transparent",
+                                "flex-1 py-2.5 rounded-lg border text-sm font-bold transition-colors bg-transparent flex flex-col items-center gap-0.5",
                                 z.btnClass
                             )}
                         >
-                            {z.label}
+                            <span className="text-xs">{z.label}</span>
+                            <span className="text-xs opacity-70">
+                                {fmtInterval(currentQuestion.previewIntervalSeconds?.[z.score] ?? 0)}
+                            </span>
                         </button>
                     ))}
                 </div>
@@ -356,7 +367,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
             {/* Footer hint */}
             <div className="shrink-0 px-3 py-3 border-t border-border text-center">
                 <p className="text-xs text-muted-foreground/30">
-                    {showResult ? "← Quên  ↑ Quên Nhẹ  → Nhớ  ↓ Hủy" : "Tap to reveal"}
+                    {showResult ? "Click button to score" : "Tap to reveal"}
                 </p>
             </div>
         </div>

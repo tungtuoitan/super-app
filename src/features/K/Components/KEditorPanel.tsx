@@ -1,22 +1,24 @@
 ﻿import { useEffect, useRef, useState } from "react";
-import { Settings, GitBranch } from "lucide-react";
+import { Settings, GitBranch, BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CardContent } from "@/shared";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared";
 import { KGeneral } from "./KGeneral";
 import { KMarkdownImportPanel } from "./KMarkdownImportPanel";
 import { KQFlowView } from "./QFlowView/KQFlowView";
+import { KProgressDashboard } from "./KProgressDashboard";
 import { useKStore } from "../store/useK.store";
 import type { KWsResponse } from "../types/k.type";
 import type { KItemV2 } from "../types/kV2.type";
 import { useEditorTabBarHelper } from "@/shell";
 import { dispatchKFlowQuestionsChanged } from "../utils/kEvents.utils";
 
-type KTab = "general" | "qflow";
+type KTab = "general" | "qflow" | "progress";
 
 const TABS: { id: KTab; label: string; icon: React.ReactNode }[] = [
-    { id: "general", label: "GENERAL", icon: <Settings className="h-4 w-4" /> },
-    { id: "qflow", label: "Q FLOW", icon: <GitBranch className="h-4 w-4" /> },
+    { id: "general",  label: "GENERAL",  icon: <Settings className="h-4 w-4" /> },
+    { id: "progress", label: "K PROGRESS", icon: <BarChart2 className="h-4 w-4" /> },
+    { id: "qflow",    label: "Q FLOW",   icon: <GitBranch className="h-4 w-4" /> },
 ];
 
 export function KEditorPanel() {
@@ -82,12 +84,12 @@ export function KEditorPanel() {
         }
     }, [selectedItemIds]);
 
-    // pendingQuizTabSwitch carries the clicked nodeId → switch to qflow and show that node's questions
+    // pendingQuizTabSwitch carries the clicked nodeId → switch to progress (dashboard) as default
     useEffect(() => {
         if (pendingQuizTabSwitch === undefined || isNew) return;
         const nodeId = pendingQuizTabSwitch;
         setPendingQuizTabSwitch(undefined);
-        setActiveTab("qflow");
+        setActiveTab("progress");
         setSelectedNodeId(nodeId);
         if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, selectedNodeId: nodeId } }));
     }, [pendingQuizTabSwitch]);
@@ -111,6 +113,9 @@ export function KEditorPanel() {
                 if (isNew) return null;
                 // key changes on every node switch (null = "orphans" view)
                 return <KQFlowView nodeId={selectedNodeId} />;
+            case "progress":
+                if (isNew) return null;
+                return <KProgressDashboard knowledgeId={knowledge.id} />;
             default:
                 return null;
         }

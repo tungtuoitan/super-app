@@ -9,6 +9,10 @@ export interface KQuestionsListResponse {
 export interface KQuestion {
     /** k.question.id */
     id: number;
+    /** k.node.id — null if orphan */
+    nodeId: number | null;
+    /** k.node.name — empty string if orphan */
+    nodeName: string;
     /** k.question.name — the question text */
     question: string;
     /** k.question.description — expected answer */
@@ -108,6 +112,8 @@ export interface KDailySessionQuestion {
     id: number;
     question: string;
     answer: string | null;
+    /** Seconds from now until next review for each score 1–5 */
+    previewIntervalSeconds: Record<number, number>;
 }
 
 export interface KDailyAnswerItem {
