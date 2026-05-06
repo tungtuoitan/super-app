@@ -15,7 +15,7 @@ import {useConsoleHelper} from "@/shared";
 import {useAuthStore} from "@/shared";
 import {useKMovingTreeStore} from "../../store/useKMovingTree.store";
 import {useKStore} from "../../store/useK.store";
-import {KTestService} from "../../service/kTest.service";
+import {KQuizService} from "../../service/kQuiz.service";
 import {KItemV2} from "../../types/kV2.type";
 import {KDTO} from "../../types/kDto.type";
 import {KWsResponse} from "../../types/k.type";
@@ -68,7 +68,7 @@ export const useKLoader = () => {
     /** Load global daily review due count (for ActivityBar badge) */
     const loadDailyReviewCount = async () => {
         try {
-            const res = await KTestService._getGlobalDailyQueue();
+            const res = await KQuizService._getGlobalDailyQueue();
             if (res.success && res.object) {
                 const dueCount = res.object.reduce((sum, q) => sum + q.dueCount, 0);
                 setDailyReviewDueCount(dueCount);
@@ -199,7 +199,7 @@ export const useKLoader = () => {
     /** Load per-question-node latest scores and store in nodeScoreMap */
     // const loadNodeScores = async (knowledgeId: number): Promise<void> => {
     //     try {
-    //         const scores = await KTestService._getNodeScores(knowledgeId);
+    //         const scores = await KQuizService._getNodeScores(knowledgeId);
     //         setNodeScoreMap(scores ?? {});
     //     } catch {
     //         // non-critical — silently ignore

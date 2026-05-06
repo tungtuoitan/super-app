@@ -87,9 +87,9 @@ export interface KContextData {
     showQuestionNodes: boolean;
     setShowQuestionNodes: Dispatch<SetStateAction<boolean>>;
 
-    /** Node IDs being dragged from the tree toward the test panel */
-    testDropNodeIds: number[];
-    setTestDropNodeIds: Dispatch<SetStateAction<number[]>>;
+    /** Node IDs being dragged from the tree toward the quiz panel */
+    quizDropNodeIds: number[];
+    setQuizDropNodeIds: Dispatch<SetStateAction<number[]>>;
 
     /** Global daily review: number of tests with due questions (for ActivityBar badge) */
     dailyReviewDueCount: number;

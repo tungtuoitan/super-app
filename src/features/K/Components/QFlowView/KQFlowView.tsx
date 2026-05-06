@@ -1,18 +1,18 @@
 ﻿import { useCallback, useEffect, useState } from "react";
 import { BookDashed, BookOpen, Eye, EyeOff, Loader2, Play, RotateCcw, Trophy } from "lucide-react";
-import { KTestService } from "../../service/kTest.service";
+import { KQuizService } from "../../service/kQuiz.service";
 import { KService } from "../../service/k.service";
 import { KQFlowProvider } from "../../store/useKQFlow.store";
 import { KQFlowCanvas } from "./KQFlowCanvas";
 import { KDailyReviewSession } from "../KDailyReviewSession";
 import { sortQuestionsByFlowOrder } from "../../utils/kQFlow.utils";
-import type { KDailySessionQuestion } from "../../types/kTest.type";
+import type { KDailySessionQuestion } from "../../types/kQuiz.type";
 import { KScoreSparkline } from "../small/KScoreSparkline";
 import { useKStore } from "../../store/useK.store";
 import { useKLoader } from "../../hooks/kTree/useK.loader";
 import { useAuthStore } from "@/shared";
 import { KItemAction } from "../../types/k.type";
-import type { KQuestion } from "../../types/kTest.type";
+import type { KQuestion } from "../../types/kQuiz.type";
 import { kEvents } from "../../utils/kEvents.utils";
 import type { KFlowQuestionsChangedDetail } from "../../utils/kEvents.utils";
 import { useKQFlowStats } from "../../hooks/qFlow/useKQFlowStats.helper";
@@ -57,8 +57,8 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
         setLoading(true);
         try {
             const res = nodeId === null
-                ? await KTestService._getOrphanQuestions()
-                : await KTestService._getQuestions(nodeId);
+                ? await KQuizService._getOrphanQuestions()
+                : await KQuizService._getQuestions(nodeId);
             if (res.success && res.object) {
                 setQuestions(res.object.questions);
             }
@@ -178,7 +178,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                                 if (sessionLoading) return;
                                 setSessionLoading(true);
                                 try {
-                                    const res = await KTestService._getDailySession(nodeId);
+                                    const res = await KQuizService._getDailySession(nodeId);
                                     if (res.success && res.object && res.object.length > 0) {
                                         const sorted = await sortQuestionsByFlowOrder(res.object);
                                         setReviewSession(sorted);
@@ -257,7 +257,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                 <div className="absolute inset-0 z-50 bg-zinc-950 flex flex-col">
                     <KDailyReviewSession
                         knowledgeId={nodeId}
-                        testTitle={node?.name ?? ""}
+                        quizTitle={node?.name ?? ""}
                         questions={reviewSession}
                         onComplete={() => { setReviewSession(null); loadQuestions(); loadTree(); }}
                         onBack={() => setReviewSession(null)}

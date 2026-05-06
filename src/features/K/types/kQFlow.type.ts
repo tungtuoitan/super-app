@@ -1,9 +1,9 @@
-﻿import type { KTestQuestion } from "./kTest.type";
+﻿import type { KQuestion } from "./kQuiz.type";
 
 export type ArrowDirection = "forward" | "backward" | "both";
 
 export interface KQFlowNodeData extends Record<string, unknown> {
-    question: KTestQuestion;
+    question: KQuestion;
 }
 
 export interface KFlowEdgeData extends Record<string, unknown> {

@@ -1,17 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { ArrowLeft, PenLine } from "lucide-react";
 import { Button } from "@/shared";
-import { KTestService } from "../service/kTest.service";
+import { KQuizService } from "../service/kQuiz.service";
 import { cn } from "@/lib/utils";
-import type { KDailySessionQuestion, KDailyAnswerItem } from "../types/kTest.type";
+import type { KDailySessionQuestion, KDailyAnswerItem } from "../types/kQuiz.type";
 
 interface KDailyReviewSessionProps {
     knowledgeId: number;
-    testTitle: string;
+    quizTitle: string;
     questions: KDailySessionQuestion[];
     onComplete: () => void;
     onBack: () => void;
-    isQuickTest?: boolean;
+    isQuickQuiz?: boolean;
 }
 
 // right=5 (nhớ), left=0 (quên), top=3 (ổn), bottom=null (cancel)
@@ -37,7 +37,7 @@ const SCORE_CONFIG: Record<number, { label: string; color: string; bg: string }>
     5: { label: "Nhớ",  color: "text-green-400",  bg: "bg-green-500/10 border-green-500/30" },
 };
 
-export function KDailyReviewSession({ knowledgeId, testTitle, questions, onComplete, onBack, isQuickTest }: KDailyReviewSessionProps) {
+export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onComplete, onBack, isQuickQuiz }: KDailyReviewSessionProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [timings, setTimings]           = useState<Record<number, number>>({});
     const [isSubmitted, setIsSubmitted]   = useState(false);
@@ -71,7 +71,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
                 responseTimeMs: timingsSnap[q.id] ?? null,
                 selfScore: scoresSnap[q.id] ?? null,
             }));
-        KTestService._submitDailyAnswers(knowledgeId, { answers: dailyAnswers })
+        KQuizService._submitDailyAnswers(knowledgeId, { answers: dailyAnswers })
             .catch(() => { /* silent */ });
     }
 
@@ -84,7 +84,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
         if (qId !== undefined) { setTimings(newTimings); setSelfScores(newScores); }
         if (currentIndex >= totalQuestions - 1) {
             setIsSubmitted(true);
-            if (!isQuickTest) submitInBackground(newScores, newTimings);
+            if (!isQuickQuiz) submitInBackground(newScores, newTimings);
             return;
         }
         setShowResult(false);
@@ -98,10 +98,10 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
         const qId = currentQuestion?.id;
         if (qId === undefined) return;
         draftedIdsRef.current = new Set(draftedIdsRef.current).add(qId);
-        KTestService._markQuestionDraft(knowledgeId, qId).catch(() => {});
+        KQuizService._markQuestionDraft(knowledgeId, qId).catch(() => {});
         if (currentIndex >= totalQuestions - 1) {
             setIsSubmitted(true);
-            if (!isQuickTest) submitInBackground(selfScores, timings);
+            if (!isQuickQuiz) submitInBackground(selfScores, timings);
             return;
         }
         setShowResult(false);
@@ -174,7 +174,7 @@ export function KDailyReviewSession({ knowledgeId, testTitle, questions, onCompl
             <div className="flex flex-col h-full overflow-auto">
                 <div className="flex flex-col items-center gap-5 px-3 py-6 max-w-lg mx-auto w-full">
                     <div className="text-center">
-                        <h2 className="text-base font-semibold">{testTitle}</h2>
+                        <h2 className="text-base font-semibold">{quizTitle}</h2>
                         <p className="text-xs text-muted-foreground mt-0.5">{scoredQuestions.length} câu</p>
                     </div>
 

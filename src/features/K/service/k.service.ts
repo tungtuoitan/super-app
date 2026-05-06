@@ -11,7 +11,7 @@
 import { config } from "config/app.config";
 import type { KDeleteItemsRequest, KOperationResult, KWsResponse, KUpsertWorkspaceItemRequest } from "../types/k.type";
 import type { KDTO } from "../types/kDto.type";
-import type { KImportTestMarkdownRequest } from "../types/kMarkdownImport.type";
+import type { KImportQuizMarkdownRequest } from "../types/kMarkdownImport.type";
 import {ResultOptions} from "@/shared";
 import {apiFetch} from "@/shared";
 
@@ -136,12 +136,12 @@ const _importMarkdown = async (
     return Promise.reject(res);
 };
 
-// ── Import tests from structured markdown ─────────────────────────────────────
+// ── Import quizzes from structured markdown ────────────────────────────────────
 
-const _importTestMarkdown = async (
+const _importQuizMarkdown = async (
     _token: string,
     knowledgeId: number,
-    request: KImportTestMarkdownRequest,
+    request: KImportQuizMarkdownRequest,
 ): Promise<ResultOptions> => {
     const res = await apiFetch(`${config.api.baseURL}/api/k/${knowledgeId}/import-test-markdown`, {
         method: "POST",
@@ -163,5 +163,5 @@ export const KService = {
     _upsertWorkspaceItems,
     _deleteWorkspaceItems,
     _importMarkdown,
-    _importTestMarkdown,
+    _importQuizMarkdown,
 };
