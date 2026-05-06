@@ -34,10 +34,12 @@ export const useTaskGridMenuHelper = () => {
     const addTask = () => {
         setIsMenuContextOpen(false);
         if (onAddTask) {
+            console.log("[task-grid-menu] addTask via onAddTask callback (multi-project)");
             onAddTask();
             return;
         }
         if (!projectId) {
+            console.log("[task-grid-menu] addTask blocked — no projectId in context data");
             return;
         }
         const newTask = createNewTask(projectId);
