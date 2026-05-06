@@ -84,12 +84,12 @@ export function KEditorPanel() {
         }
     }, [selectedItemIds]);
 
-    // pendingQuizTabSwitch carries the clicked nodeId → switch to progress (dashboard) as default
+    // pendingQuizTabSwitch carries the clicked nodeId → switch to qflow tab
     useEffect(() => {
         if (pendingQuizTabSwitch === undefined || isNew) return;
         const nodeId = pendingQuizTabSwitch;
         setPendingQuizTabSwitch(undefined);
-        setActiveTab("progress");
+        setActiveTab("qflow");
         setSelectedNodeId(nodeId);
         if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, selectedNodeId: nodeId } }));
     }, [pendingQuizTabSwitch]);
