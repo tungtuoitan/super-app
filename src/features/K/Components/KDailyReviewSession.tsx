@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { ArrowLeft, PenLine } from "lucide-react";
-import { Button } from "@/shared";
 import { KQuizService } from "../service/kQuiz.service";
 import { cn } from "@/lib/utils";
 import type { KDailySessionQuestion, KDailyAnswerItem } from "../types/kQuiz.type";
@@ -95,8 +94,10 @@ export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onCompl
         const newScores  = qId !== undefined ? { ...selfScores, [qId]: score } : selfScores;
         if (qId !== undefined) { setTimings(newTimings); setSelfScores(newScores); }
         if (currentIndex >= totalQuestions - 1) {
+            // Last question — submit then complete immediately (no summary screen)
             setIsSubmitted(true);
             if (!isQuickQuiz) submitInBackground(newScores, newTimings);
+            onComplete();
             return;
         }
         setShowResult(false);
@@ -112,8 +113,10 @@ export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onCompl
         draftedIdsRef.current = new Set(draftedIdsRef.current).add(qId);
         KQuizService._markQuestionDraft(knowledgeId, qId).catch(() => {});
         if (currentIndex >= totalQuestions - 1) {
+            // Last question — submit then complete immediately (no summary screen)
             setIsSubmitted(true);
             if (!isQuickQuiz) submitInBackground(selfScores, timings);
+            onComplete();
             return;
         }
         setShowResult(false);
@@ -170,60 +173,61 @@ export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onCompl
         document.addEventListener("pointercancel", onCancel);
     }
 
-    // ── Summary screen ────────────────────────────────────────────────────────
-
-    if (isSubmitted) {
-        const scoredQuestions = questions.filter(q => !draftedIdsRef.current.has(q.id));
-        const stats = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-        scoredQuestions.forEach(q => {
-            const s = selfScores[q.id];
-            if (s !== undefined && s in stats) {
-                stats[s as keyof typeof stats]++;
-            }
-        });
-
-        return (
-            <div className="flex flex-col h-full overflow-auto">
-                <div className="flex flex-col items-center gap-5 px-3 py-6 max-w-lg mx-auto w-full">
-                    <div className="text-center">
-                        <h2 className="text-base font-semibold">{quizTitle}</h2>
-                        <p className="text-xs text-muted-foreground mt-0.5">{scoredQuestions.length} question{scoredQuestions.length !== 1 ? "s" : ""}</p>
-                    </div>
-
-                    <div className="flex gap-2.5 w-full flex-wrap">
-                        {SCORE_BUTTONS.map(btn => (
-                            <div key={btn.score} className={cn("flex-1 min-w-fit text-center rounded-lg border py-3", SCORE_CONFIG[btn.score].bg)}>
-                                <p className="text-2xl font-bold">{stats[btn.score as keyof typeof stats]}</p>
-                                <p className="text-xs opacity-70">{btn.label}</p>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="w-full flex flex-col gap-2">
-                        {scoredQuestions.map((q, i) => {
-                            const score = selfScores[q.id] ?? 3;
-                            const cfg = SCORE_CONFIG[score] ?? SCORE_CONFIG[3];
-                            return (
-                                <div key={q.id} className={cn("text-left rounded-lg border p-2.5 flex flex-col gap-1.5", cfg.bg)}>
-                                    <div className="flex items-start justify-between gap-2">
-                                        <p className="text-sm font-medium flex-1 whitespace-pre-wrap">{i + 1}. {q.question}</p>
-                                        <span className={cn("text-xs font-bold shrink-0", cfg.color)}>{cfg.label}</span>
-                                    </div>
-                                    {q.answer && (
-                                        <p className="text-xs text-muted-foreground/50 border-t border-border/20 pt-1.5 whitespace-pre-wrap">
-                                            {q.answer}
-                                        </p>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    <Button onClick={onComplete} className="w-full">Done</Button>
-                </div>
-            </div>
-        );
-    }
+    // ── Summary screen (disabled — session auto-completes on last answer) ────
+    // Uncomment the block below to re-enable the summary + Done button flow.
+    //
+    // if (isSubmitted) {
+    //     const scoredQuestions = questions.filter(q => !draftedIdsRef.current.has(q.id));
+    //     const stats = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    //     scoredQuestions.forEach(q => {
+    //         const s = selfScores[q.id];
+    //         if (s !== undefined && s in stats) {
+    //             stats[s as keyof typeof stats]++;
+    //         }
+    //     });
+    //
+    //     return (
+    //         <div className="flex flex-col h-full overflow-auto">
+    //             <div className="flex flex-col items-center gap-5 px-3 py-6 max-w-lg mx-auto w-full">
+    //                 <div className="text-center">
+    //                     <h2 className="text-base font-semibold">{quizTitle}</h2>
+    //                     <p className="text-xs text-muted-foreground mt-0.5">{scoredQuestions.length} question{scoredQuestions.length !== 1 ? "s" : ""}</p>
+    //                 </div>
+    //
+    //                 <div className="flex gap-2.5 w-full flex-wrap">
+    //                     {SCORE_BUTTONS.map(btn => (
+    //                         <div key={btn.score} className={cn("flex-1 min-w-fit text-center rounded-lg border py-3", SCORE_CONFIG[btn.score].bg)}>
+    //                             <p className="text-2xl font-bold">{stats[btn.score as keyof typeof stats]}</p>
+    //                             <p className="text-xs opacity-70">{btn.label}</p>
+    //                         </div>
+    //                     ))}
+    //                 </div>
+    //
+    //                 <div className="w-full flex flex-col gap-2">
+    //                     {scoredQuestions.map((q, i) => {
+    //                         const score = selfScores[q.id] ?? 3;
+    //                         const cfg = SCORE_CONFIG[score] ?? SCORE_CONFIG[3];
+    //                         return (
+    //                             <div key={q.id} className={cn("text-left rounded-lg border p-2.5 flex flex-col gap-1.5", cfg.bg)}>
+    //                                 <div className="flex items-start justify-between gap-2">
+    //                                     <p className="text-sm font-medium flex-1 whitespace-pre-wrap">{i + 1}. {q.question}</p>
+    //                                     <span className={cn("text-xs font-bold shrink-0", cfg.color)}>{cfg.label}</span>
+    //                                 </div>
+    //                                 {q.answer && (
+    //                                     <p className="text-xs text-muted-foreground/50 border-t border-border/20 pt-1.5 whitespace-pre-wrap">
+    //                                         {q.answer}
+    //                                     </p>
+    //                                 )}
+    //                             </div>
+    //                         );
+    //                     })}
+    //                 </div>
+    //
+    //                 <Button onClick={onComplete} className="w-full">Done</Button>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     if (!currentQuestion) return null;
 

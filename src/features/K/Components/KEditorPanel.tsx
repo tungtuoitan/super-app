@@ -192,6 +192,7 @@ export function KEditorPanel() {
                         </button>
                     ))}
                 </div>
+                {/* Review button hidden — kept for re-use if needed
                 {!isNew && dailyTotal > 0 && (
                     <div className="px-3 flex items-center shrink-0">
                         <button
@@ -208,6 +209,7 @@ export function KEditorPanel() {
                         </button>
                     </div>
                 )}
+                */}
             </div>
 
             {/* Content */}

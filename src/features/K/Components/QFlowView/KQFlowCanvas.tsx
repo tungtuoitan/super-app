@@ -127,7 +127,7 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
 
         showContextMenu(
             event as React.MouseEvent,
-            "k-quiz-flow",
+            "k-test-flow",
             {
                 onAddQuestion: () => {
                     const tempId = `temp-node-${Date.now()}`;

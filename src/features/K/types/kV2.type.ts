@@ -50,6 +50,9 @@ export interface KItemV2 {
   /** Questions with srsNextReviewAt <= now for this node (from tree API) */
   dueSrsCount?: number;
 
+  /** Questions with statusCode = "draft" in this node (from tree API) */
+  draftQuestionCount?: number;
+
   // ── UI state ──────────────────────────────
   isExpanded?: boolean;
   isSelected?: boolean;

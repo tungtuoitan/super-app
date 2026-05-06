@@ -300,6 +300,13 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                                 className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400"
                             />
                         )}
+                        {/* Draft question dot — node has draft questions */}
+                        {treeType === "workspaceTree" && (nodeItem.draftQuestionCount ?? 0) > 0 && (
+                            <span
+                                title={`${nodeItem.draftQuestionCount} draft question${nodeItem.draftQuestionCount !== 1 ? "s" : ""}`}
+                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-800"
+                            />
+                        )}
                         {/* Draft badge — commented out, kept for reference */}
                         {/* {nodeItem.statusCode === "draft" && treeType === "workspaceTree" && (
                             <button
