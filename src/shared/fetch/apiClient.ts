@@ -18,6 +18,45 @@ type ApiClientConfig = {
 let _config: ApiClientConfig | null = null;
 let isRefreshing = false;
 let refreshPromise: Promise<string> | null = null;
+let proactiveTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Parse JWT exp claim → ms timestamp, returns null if unreadable */
+function getTokenExpiryMs(token: string): number | null {
+    try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return typeof payload.exp === "number" ? payload.exp * 1000 : null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Schedule a proactive refresh ~60s before the token expires.
+ * Call this whenever a new access token is stored.
+ * Cancels any pending timer from the previous token.
+ */
+export function scheduleProactiveRefresh(token: string): void {
+    if (proactiveTimer) clearTimeout(proactiveTimer);
+    proactiveTimer = null;
+    if (!_config) return;
+
+    const expiryMs = getTokenExpiryMs(token);
+    if (!expiryMs) return;
+
+    const delay = expiryMs - Date.now() - 60_000; // refresh 60s early
+    if (delay <= 0) return; // already expired or too close — let 401 handle it
+
+    proactiveTimer = setTimeout(async () => {
+        try {
+            const newToken = await acquireRefreshToken();
+            _config?.setToken(newToken);
+            scheduleProactiveRefresh(newToken); // chain to next expiry
+            debugLog.log("apiClient", "proactive-refresh-done", {});
+        } catch {
+            // refresh token exhausted — 401 interceptor will handle the next request
+        }
+    }, delay);
+}
 
 const AUTH_ENDPOINTS = ["/api/auth/", "/api/diagnostic/"];
 

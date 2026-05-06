@@ -12,7 +12,7 @@
 import { useEffect } from "react";
 import { getDeviceFingerprint } from "../device/deviceFingerprint";
 import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
-import { configureApiClient } from "../fetch/apiClient";
+import { configureApiClient, acquireRefreshToken, scheduleProactiveRefresh } from "../fetch/apiClient";
 import {useAuthHelper} from "./useAuth.helpers";
 import {useAuthStore} from "./Auth.store";
 import { debugLog } from "../debug/useDebugLog"
@@ -43,6 +43,32 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             debugLog.flush();
         });
     }, []);
+
+    // Proactive refresh when user returns to tab after idle
+    useEffect(() => {
+        const handleVisibility = () => {
+            if (document.visibilityState !== "visible") return;
+            const token = $user.userToken;
+            if (!token) return;
+            // If less than 5 minutes left, refresh now instead of waiting for 401
+            try {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                const expiryMs: number = payload.exp * 1000;
+                if (expiryMs - Date.now() < 5 * 60_000) {
+                    acquireRefreshToken()
+                        .then((newToken) => {
+                            set$User((prev) => ({ ...prev, userToken: newToken }));
+                            scheduleProactiveRefresh(newToken);
+                        })
+                        .catch(() => {/* 401 interceptor handles full logout */});
+                }
+            } catch {
+                // malformed token — let 401 handle it
+            }
+        };
+        document.addEventListener("visibilitychange", handleVisibility);
+        return () => document.removeEventListener("visibilitychange", handleVisibility);
+    }, [$user.userToken]);
 
     // Listen for 401 events dispatched by apiClient interceptor
     useEffect(() => {

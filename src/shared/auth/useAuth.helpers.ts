@@ -18,7 +18,7 @@ import { useAuthCallbackStore } from "./AuthCallback.store";
 import { parseApiError, isUnauthorizedError } from "../fetch/api-error.utils";
 import { debugLog } from "../debug/useDebugLog";
 import { getDeviceFingerprint } from "../device/deviceFingerprint";
-import { acquireRefreshToken } from "../fetch/apiClient";
+import { acquireRefreshToken, scheduleProactiveRefresh } from "../fetch/apiClient";
 import {STORAGE_KEYS} from "../localStorage/storage.config";
 
 const DEFAULT_USER: User = {
@@ -74,6 +74,7 @@ export function useAuthHelper() {
             const newToken = await acquireRefreshToken();
             set$User({ ...cached, userToken: newToken });
             setIsAuthenticated(true);
+            scheduleProactiveRefresh(newToken);
             debugLog.log("auth", "init-from-storage-ok", { email: cached.email, device });
             debugLog.flush();
             return true;
@@ -113,6 +114,7 @@ export function useAuthHelper() {
             storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile });
             set$User(userProfile);
             setIsAuthenticated(true);
+            scheduleProactiveRefresh(response.token);
 
             debugLog.log("auth", "local-login-store-updated", { userId: userProfile.userId, device });
             debugLog.flush();
@@ -210,6 +212,7 @@ export function useAuthHelper() {
             storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile, userToken: "" });
             set$User(userProfile);
             setIsAuthenticated(true);
+            scheduleProactiveRefresh(response.user.token);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "Google login failed";
             debugLog.log("auth", "google-exchange-exception", { error: errorMessage, device });
