@@ -24,22 +24,22 @@ function makeTempQuestion(): KQuestion {
 }
 
 interface CanvasContentProps {
-    knowledgeId: number;
+    nodeId: number;
     questions: KQuestion[];
     showDeleted: boolean;
     loading: boolean;
 }
 
-function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: CanvasContentProps) {
-    useKQFlowHeadless(knowledgeId, questions, showDeleted);
-    const { setKnowledgeId, setFlowNodes, setEditingNodeId, positionsLoaded, flowNodes, flowEdges } = useKQFlowStore();
+function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: CanvasContentProps) {
+    useKQFlowHeadless(nodeId, questions, showDeleted);
+    const { setNodeId, setFlowNodes, setEditingNodeId, positionsLoaded, flowNodes, flowEdges } = useKQFlowStore();
     const storeNodes = flowNodes;
     const rfInstance = useReactFlow();
     const storeApi = useStoreApi();
 
     // ── Canvas reveal (overlay / viewport restore / fitView) ─────────────────
     const { isCanvasReady } = useKQFlowCanvasReveal({
-        knowledgeId,
+        nodeId,
         loading,
         questionsLength: questions.length,
         storeNodesLength: storeNodes.length,
@@ -50,7 +50,7 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
     const { isMobile } = useDeviceStore();
 
     // ── Custom wheel zoom + viewport persistence ───────────────────────────
-    const { handleMoveEnd } = useKQFlowWheelZoom(containerRef, knowledgeId);
+    const { handleMoveEnd } = useKQFlowWheelZoom(containerRef, nodeId);
 
     const {
         selectionLockRef, lockSelection,
@@ -76,7 +76,7 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
     const selectedStringIds = isMobile ? [] : flowNodes
         .filter((n) => n.selected && !n.id.startsWith("temp-node-") && !(n.data as KQFlowNodeData).question.deletedAt)
         .map((n) => n.id);
-    const targetNodeId = knowledgeId === 0 ? null : knowledgeId;
+    const targetNodeId = nodeId === 0 ? null : nodeId;
 
     useKQFlowShortcuts({
         selectedEdgeIds,
@@ -98,6 +98,14 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
     const handleNodeClick = (e: React.MouseEvent, node: Node) => {
         if (e.shiftKey && node.selected) {
             handleNodesChange([{ id: node.id, type: "select" as const, selected: false }]);
+            return;
+        }
+        // Plain click (no modifier) while multiple nodes selected → keep only this node
+        if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+            const otherSelected = flowNodes.filter((n) => n.selected && n.id !== node.id);
+            if (otherSelected.length > 0) {
+                handleNodesChange(otherSelected.map((n) => ({ id: n.id, type: "select" as const, selected: false })));
+            }
         }
     };
 
@@ -115,7 +123,7 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
         }
     };
 
-    useEffect(() => { setKnowledgeId(knowledgeId); }, [knowledgeId]);
+    useEffect(() => { setNodeId(nodeId); }, [nodeId]);
 
     const handlePaneContextMenu = (event: MouseEvent | React.MouseEvent) => {
         event.preventDefault();
@@ -230,17 +238,17 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
 }
 
 interface KQFlowCanvasProps {
-    knowledgeId: number;
+    nodeId: number;
     questions: KQuestion[];
     showDeleted: boolean;
     loading: boolean;
 }
 
-export function KQFlowCanvas({ knowledgeId, questions, showDeleted, loading }: KQFlowCanvasProps) {
+export function KQFlowCanvas({ nodeId, questions, showDeleted, loading }: KQFlowCanvasProps) {
     return (
         <ReactFlowProvider>
             <KQFlowCanvasContent
-                knowledgeId={knowledgeId}
+                nodeId={nodeId}
                 questions={questions}
                 showDeleted={showDeleted}
                 loading={loading}

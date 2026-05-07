@@ -7,7 +7,7 @@ import { flowService } from "@/shared";
 import { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared";
 import { buildGridPosition } from "@/features/K/utils/kQFlow.utils";
 
-export function useKQFlowHeadless(knowledgeId: number, questions: KQuestion[], showDeleted: boolean) {
+export function useKQFlowHeadless(nodeId: number, questions: KQuestion[], showDeleted: boolean) {
     const {
         setFlowNodes, setFlowEdges, setSavedEdges,
         savedPositions, setSavedPositions,
@@ -44,11 +44,11 @@ export function useKQFlowHeadless(knowledgeId: number, questions: KQuestion[], s
         setConnectingSourceId(null);
         setPendingSelectIds([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [knowledgeId]);
+    }, [nodeId]);
 
     // ── Fetch positions + edges ───────────────────────────────────────────────
     // Runs after questions for the current knowledge are available.
-    // knowledgeId=0 is valid (orphan mode) — do NOT guard on !knowledgeId.
+    // nodeId=0 is valid (orphan mode) — do NOT guard on !nodeId.
     useEffect(() => {
         if (!questionIdsKey) {
             // No questions — nothing to fetch; mark loaded so canvas reveals empty
@@ -60,10 +60,11 @@ export function useKQFlowHeadless(knowledgeId: number, questions: KQuestion[], s
         // Invalidate ref so rebuild skips until fetch completes
         positionsForKeyRef.current = "";
         setPositionsLoaded(false);
-        setSavedPositions({});
-        // Do NOT clear savedEdges here — clearing before fetch causes a race where
-        // edges visible in the canvas disappear permanently if the backend fetch does
-        // not return them (e.g. pagination gap). We merge instead after the fetch.
+        // Do NOT clear savedPositions or savedEdges here — clearing before the fetch
+        // completes causes a race where locally-set positions (e.g. newly created
+        // question) or edges disappear if the backend hasn't persisted them yet.
+        // We merge after the fetch so backend positions are authoritative while
+        // locally-set ones survive when the backend hasn't caught up yet.
 
         let cancelled = false;
         const questionIds = questions.map(q => q.id);
@@ -81,7 +82,9 @@ export function useKQFlowHeadless(knowledgeId: number, questions: KQuestion[], s
             for (const p of posDtos) {
                 positions[String(p.nodeId)] = { x: p.x, y: p.y };
             }
-            setSavedPositions(positions);
+            // Merge: backend positions take precedence, but locally-set positions
+            // for questions not yet persisted by the backend are preserved.
+            setSavedPositions(prev => ({ ...prev, ...positions }));
 
             const qIdSet = new Set(questionIds.map(String));
             const customEdges: Edge<KFlowEdgeData>[] = edgeDtos
@@ -127,7 +130,7 @@ export function useKQFlowHeadless(knowledgeId: number, questions: KQuestion[], s
 
         return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [knowledgeId, questionIdsKey]);
+    }, [nodeId, questionIdsKey]);
 
     // ── Rebuild nodes ─────────────────────────────────────────────────────────
     // Re-runs whenever questions, positions, or visibility (showDeleted) changes.
@@ -144,20 +147,40 @@ export function useKQFlowHeadless(knowledgeId: number, questions: KQuestion[], s
         const selectSet = new Set(pendingSelectIds);
         const visibleQuestions = showDeleted ? questions : questions.filter(q => !q.deletedAt);
 
-        // Functional update preserves prior selection when pendingSelectIds is
-        // empty — prevents a double-run after setPendingSelectIds([]) from
-        // overwriting selected:true with undefined.
+        // Reuse existing node references when nothing rendered has changed.
+        // This prevents React Flow from re-processing all nodes after every
+        // background fetch, which would cause a visible jitter even when positions
+        // and question data are identical (new API response objects, same values).
         setFlowNodes((prevNodes) => {
-            const prevSelMap = new Map(prevNodes.map(n => [n.id, !!n.selected]));
-            return visibleQuestions.map((q, i) => ({
-                id: String(q.id),
-                type: "questionFlowNode" as const,
-                position: savedPositions[String(q.id)] ?? buildGridPosition(i),
-                data: { question: q } as KQFlowNodeData,
-                selected: selectSet.size > 0
+            const prevMap = new Map(prevNodes.map(n => [n.id, n]));
+            return visibleQuestions.map((q, i) => {
+                const newPos = savedPositions[String(q.id)] ?? buildGridPosition(i);
+                const newSelected = selectSet.size > 0
                     ? selectSet.has(q.id)
-                    : (prevSelMap.get(String(q.id)) ?? false),
-            })) as Node<KQFlowNodeData>[];
+                    : (prevMap.get(String(q.id))?.selected ?? false);
+                const prev = prevMap.get(String(q.id));
+                if (prev) {
+                    const prevQ = (prev.data as KQFlowNodeData).question;
+                    if (prev.position.x === newPos.x && prev.position.y === newPos.y &&
+                        prev.selected === newSelected &&
+                        prevQ.question === q.question &&
+                        prevQ.answer === q.answer &&
+                        prevQ.statusCode === q.statusCode &&
+                        prevQ.deletedAt === q.deletedAt &&
+                        prevQ.scoreHistory.length === q.scoreHistory.length &&
+                        prevQ.srsNextReviewAt === q.srsNextReviewAt &&
+                        prevQ.retention === q.retention) {
+                        return prev;
+                    }
+                }
+                return {
+                    id: String(q.id),
+                    type: "questionFlowNode" as const,
+                    position: newPos,
+                    data: { question: q } as KQFlowNodeData,
+                    selected: newSelected,
+                };
+            }) as Node<KQFlowNodeData>[];
         });
 
         // Only clear pendingSelectIds once ALL requested IDs are present in the

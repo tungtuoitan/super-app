@@ -22,14 +22,14 @@ const Q_TEXT = "w-full text-xs font-semibold text-zinc-100 leading-relaxed";
 const A_TEXT = "w-full text-[11px] text-zinc-400 leading-relaxed";
 
 export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData>>) {
-    const { editingNodeId, connectingSourceId, flowNodes, flowEdges, knowledgeId: currentNodeId } = useKQFlowStore();
+    const { editingNodeId, connectingSourceId, flowNodes, flowEdges, nodeId } = useKQFlowStore();
 
-    // Collect all selected non-deleted question IDs; always includes nodeId
-    const getMovableIds = (nodeId: number): number[] => {
+    // Collect all selected non-deleted question IDs; always includes questionId
+    const getMovableIds = (questionId: number): number[] => {
         const ids = flowNodes
             .filter((n) => n.selected && !n.id.startsWith("temp-node-") && !(n.data as KQFlowNodeData).question.deletedAt)
             .map((n) => parseInt(n.id, 10));
-        if (!ids.includes(nodeId)) ids.push(nodeId);
+        if (!ids.includes(questionId)) ids.push(questionId);
         return ids;
     };
     const { isMobile } = useDeviceStore();
@@ -363,7 +363,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                                         </div>
                                         <div className="overflow-y-auto max-h-[200px]">
                                             {/* Orphan — always first, hidden only when already orphan */}
-                                            {currentNodeId !== 0 && "orphan".includes(moveSearch.toLowerCase()) && (
+                                            {nodeId !== 0 && "orphan".includes(moveSearch.toLowerCase()) && (
                                                 <button
                                                     onMouseDown={(e) => { e.stopPropagation(); setCtxMenu(null); setShowMoveMenu(false); handleMoveQuestion(getMovableIds(question.id), null); }}
                                                     className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-zinc-400 italic text-xs"
@@ -372,7 +372,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                                                 </button>
                                             )}
                                             {currentK?.flatData
-                                                .filter((n) => !n.deletedAt && n.id !== currentNodeId && n.name.toLowerCase().includes(moveSearch.toLowerCase()))
+                                                .filter((n) => !n.deletedAt && n.id !== nodeId && n.name.toLowerCase().includes(moveSearch.toLowerCase()))
                                                 .map((n) => (
                                                     <button
                                                         key={n.id}

@@ -20,9 +20,9 @@ export interface KQFlowContextData {
     setEditingEdgeId: Dispatch<SetStateAction<string | null>>;
     connectingSourceId: string | null;
     setConnectingSourceId: Dispatch<SetStateAction<string | null>>;
-    /** The knowledge whose questions are shown in this canvas */
-    knowledgeId: number;
-    setKnowledgeId: Dispatch<SetStateAction<number>>;
+    /** The K tree node whose questions are shown in this canvas (0 = orphan mode) */
+    nodeId: number;
+    setNodeId: Dispatch<SetStateAction<number>>;
     /** Node IDs to auto-select after the next rebuild (cleared once applied) */
     pendingSelectIds: number[];
     setPendingSelectIds: Dispatch<SetStateAction<number[]>>;
@@ -37,7 +37,7 @@ const defaultValue: KQFlowContextData = {
     editingNodeId: null, setEditingNodeId: () => {},
     editingEdgeId: null, setEditingEdgeId: () => {},
     connectingSourceId: null, setConnectingSourceId: () => {},
-    knowledgeId: 0, setKnowledgeId: () => {},
+    nodeId: 0, setNodeId: () => {},
     pendingSelectIds: [], setPendingSelectIds: () => {},
 };
 
@@ -54,7 +54,7 @@ export const KQFlowProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
     const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
     const [editingEdgeId, setEditingEdgeId] = useState<string | null>(null);
     const [connectingSourceId, setConnectingSourceId] = useState<string | null>(null);
-    const [knowledgeId, setKnowledgeId] = useState(0);
+    const [nodeId, setNodeId] = useState(0);
     const [pendingSelectIds, setPendingSelectIds] = useState<number[]>([]);
 
     return (
@@ -67,7 +67,7 @@ export const KQFlowProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
             editingNodeId, setEditingNodeId,
             editingEdgeId, setEditingEdgeId,
             connectingSourceId, setConnectingSourceId,
-            knowledgeId, setKnowledgeId,
+            nodeId, setNodeId,
             pendingSelectIds, setPendingSelectIds,
         }}>
             {children}

@@ -177,14 +177,14 @@ export function KEditorPanel() {
                         <button
                             key={t.id}
                             onClick={() => setActiveTab(t.id)}
-                            disabled={t.id !== "general" && isNew}
+                            disabled={t.id !== "general" && (isNew || (t.id === "progress" && selectedNodeId === null))}
                             className={cn(
                                 "relative flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
                                 "border-b-3 -mb-[2px]",
                                 activeTab === t.id
                                     ? "border-primary text-primary bg-primary/5"
                                     : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                                t.id !== "general" && isNew && "opacity-50 cursor-not-allowed"
+                                t.id !== "general" && (isNew || (t.id === "progress" && selectedNodeId === null)) && "opacity-50 cursor-not-allowed"
                             )}
                         >
                             {t.icon}
@@ -221,7 +221,7 @@ export function KEditorPanel() {
             {reviewSession && !isNew && (
                 <div className="absolute inset-0 z-50 bg-zinc-950 flex flex-col">
                     <KDailyReviewSession
-                        knowledgeId={knowledge.id}
+                        nodeId={knowledge.id}
                         quizTitle={tab?.title ?? "Daily Review"}
                         questions={reviewSession}
                         onComplete={() => { setReviewSession(null); refreshDailyTotal(); }}
@@ -245,7 +245,7 @@ export function KEditorPanel() {
                                     setIsImportOpen(false);
                                     // Reload the flow canvas if it's currently viewing the imported node
                                     if (importParentNode) {
-                                        dispatchKFlowQuestionsChanged({ knowledgeId: importParentNode.id });
+                                        dispatchKFlowQuestionsChanged({ nodeId: importParentNode.id });
                                     }
                                 }}
                             />

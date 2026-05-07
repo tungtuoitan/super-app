@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import type { KDailySessionQuestion, KDailyAnswerItem } from "../types/kQuiz.type";
 
 interface KDailyReviewSessionProps {
-    knowledgeId: number;
+    nodeId: number;
     quizTitle: string;
     questions: KDailySessionQuestion[];
     onComplete: () => void;
@@ -48,7 +48,7 @@ const SCORE_CONFIG: Record<number, { label: string; color: string; bg: string }>
     5: { label: "Easy",   color: "text-green-400",  bg: "bg-green-500/10 border-green-500/30" },
 };
 
-export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onComplete, onBack, isQuickQuiz }: KDailyReviewSessionProps) {
+export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, onBack, isQuickQuiz }: KDailyReviewSessionProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [timings, setTimings]           = useState<Record<number, number>>({});
     const [isSubmitted, setIsSubmitted]   = useState(false);
@@ -82,7 +82,7 @@ export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onCompl
                 responseTimeMs: timingsSnap[q.id] ?? null,
                 selfScore: scoresSnap[q.id] ?? null,
             }));
-        return KQuizService._submitDailyAnswers(knowledgeId, { answers: dailyAnswers })
+        return KQuizService._submitDailyAnswers(nodeId, { answers: dailyAnswers })
             .then(() => {})
             .catch(() => { /* silent */ });
     };
@@ -115,12 +115,12 @@ export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onCompl
         if (currentIndex >= totalQuestions - 1) {
             // Last question — await both calls so loadQuestions() sees the updated state
             setIsSubmitted(true);
-            await KQuizService._markQuestionDraft(knowledgeId, qId).catch(() => {});
+            await KQuizService._markQuestionDraft(nodeId, qId).catch(() => {});
             if (!isQuickQuiz) await submitInBackground(selfScores, timings);
             onComplete();
             return;
         }
-        KQuizService._markQuestionDraft(knowledgeId, qId).catch(() => {});
+        KQuizService._markQuestionDraft(nodeId, qId).catch(() => {});
         setShowResult(false);
         setCurrentIndex(i => i + 1);
     };

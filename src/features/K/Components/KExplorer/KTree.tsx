@@ -4,8 +4,9 @@ import { Tree, NodeApi } from "react-arborist";
 import { useDragDropManager } from "react-dnd";
 import { Loader2 } from "lucide-react";
 import { useKStore } from "../../store/useK.store";
-import { useSideBarHelper } from "@/shell";
+import { useSideBarHelper, useEditorTabBarHelper, shellConstants } from "@/shell";
 import { useKTreeHelper } from "../../hooks/kTree/useKTree.helper";
+import type { KWsResponse } from "../../types/k.type";
 import { useMenuContextHelper } from "@/shared";
 
 import { KCustomDragPreview } from "./KCustomDragPreview";
@@ -21,7 +22,8 @@ import {KTreeNode} from "../../types/kV2.type";
 import {kconstants} from "../../utils/k.constants";
 
 export function KTree() {
-    const { isDragging, currentK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, treeData: _storeTD, setTreeData } = useKStore();
+    const { isDragging, currentK, allK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, treeData: _storeTD, setTreeData } = useKStore();
+    const { openTabs, patchTab, openSingletonTab, updateActiveTab } = useEditorTabBarHelper();
     const { searchQuery } = useSideBarHelper();
     const { handleSelectionChange, handleKeyDown } = useKTreeSelectionHelper();
     const { handleMove } = useKTreeHelper();
@@ -117,6 +119,38 @@ export function KTree() {
         };
     }, [allVisibleFolderIds]);
 
+    // Open or focus the singleton K tab — shared by container click and empty-space deselect
+    const openOrFocusKTab = () => {
+        const kTab = openTabs.find(
+            (t) => t.type === shellConstants.vscode.tab.tabTypes.kKnowledge,
+        );
+        if (kTab) {
+            const tabKId = (kTab.data as KWsResponse).id;
+            if (tabKId !== currentK?.id && currentK) {
+                const ks = allK.find((k) => k.id === currentK.id);
+                if (ks) patchTab(kTab.id, { data: ks, data0: ks, title: ks.name || "Knowledge", hasUnsavedChanges: false });
+            }
+            updateActiveTab(kTab.id);
+        } else if (currentK) {
+            const ks = allK.find((k) => k.id === currentK.id);
+            if (ks) {
+                openSingletonTab(
+                    shellConstants.vscode.tab.tabTypes.kKnowledge,
+                    { title: ks.name || "Knowledge", tabId: `k-knowledge-tab-${Date.now()}`, hasUnsavedChanges: false },
+                    ks,
+                );
+            }
+        }
+    };
+
+    // Handle click on padding area outside Tree rows
+    const handleContainerClick = (e: React.MouseEvent) => {
+        const target = e.target as HTMLElement;
+        const isTreeNode = target.closest('[role="treeitem"]') || target.closest(".tree-node");
+        if (isTreeNode) return;
+        openOrFocusKTab();
+    };
+
     // Handle context menu on empty space (treat as root workspace)
     const handleContainerContextMenu = (e: React.MouseEvent) => {
         const target = e.target as HTMLElement;
@@ -141,6 +175,7 @@ export function KTree() {
                 ref={treeContainerRef}
                 data-workspace-tree
                 tabIndex={0}
+                onClick={handleContainerClick}
                 onContextMenu={handleContainerContextMenu}
                 className="h-full flex flex-col py-4 pl-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
             >
@@ -167,7 +202,10 @@ export function KTree() {
                         await handleMove(args, treeData);
                     }}
                     // onToggle={handleToggle}
-                    onSelect={(nodes: NodeApi<KTreeNode>[]) => handleSelectionChange(nodes)}
+                    onSelect={(nodes: NodeApi<KTreeNode>[]) => {
+                        handleSelectionChange(nodes);
+                        if (nodes.length === 0) openOrFocusKTab();
+                    }}
                     disableMultiSelection={false}
                     disableEdit={true}
                     renderDragPreview={(props) => <KCustomDragPreview {...props} treeData={treeData} />}

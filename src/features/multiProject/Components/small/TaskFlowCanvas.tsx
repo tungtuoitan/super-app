@@ -70,6 +70,14 @@ export function TaskFlowCanvas() {
     const handleNodeClick = (e: React.MouseEvent, node: { id: string; selected?: boolean }) => {
         if (e.shiftKey && node.selected) {
             handleNodesChange([{ id: node.id, type: "select" as const, selected: false }]);
+            return;
+        }
+        // Plain click (no modifier) while multiple nodes selected → keep only this node
+        if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+            const otherSelected = flowNodes.filter((n) => n.selected && n.id !== node.id);
+            if (otherSelected.length > 0) {
+                handleNodesChange(otherSelected.map((n) => ({ id: n.id, type: "select" as const, selected: false })));
+            }
         }
     };
 

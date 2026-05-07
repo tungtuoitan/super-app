@@ -15,7 +15,7 @@ import type {
 import { apiFetch } from "@/shared";
 import { ResultOptions } from "@/shared";
 
-const base = (knowledgeId: number) => `${config.api.baseURL}/api/k/${knowledgeId}`;
+const base = (nodeId: number) => `${config.api.baseURL}/api/k/${nodeId}`;
 
 // ── Questions CRUD ─────────────────────────────────────────────────────────
 
@@ -57,8 +57,8 @@ const _moveQuestion = async (questionId: number, targetNodeId: number | null): P
     return Promise.reject(res);
 };
 
-const _markQuestionDraft = async (knowledgeId: number, questionId: number): Promise<ResultOptions> => {
-    const res = await apiFetch(`${base(knowledgeId)}/questions/${questionId}/mark-draft`, {
+const _markQuestionDraft = async (nodeId: number, questionId: number): Promise<ResultOptions> => {
+    const res = await apiFetch(`${base(nodeId)}/questions/${questionId}/mark-draft`, {
         method: "PATCH",
     });
     if (res.ok) return res.json();
@@ -66,10 +66,10 @@ const _markQuestionDraft = async (knowledgeId: number, questionId: number): Prom
 };
 
 const _updateQuestions = async (
-    knowledgeId: number,
+    nodeId: number,
     request: KUpdateQuestionsRequest,
 ): Promise<ResultOptions> => {
-    const res = await apiFetch(`${base(knowledgeId)}/questions`, {
+    const res = await apiFetch(`${base(nodeId)}/questions`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request),
@@ -79,10 +79,10 @@ const _updateQuestions = async (
 };
 
 const _submitAnswers = async (
-    knowledgeId: number,
+    nodeId: number,
     request: KSubmitAnswersRequest,
 ): Promise<ResultOptions<KSubmitAnswersResult>> => {
-    const res = await apiFetch(`${base(knowledgeId)}/questions/submit`, {
+    const res = await apiFetch(`${base(nodeId)}/questions/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request),
@@ -91,16 +91,16 @@ const _submitAnswers = async (
     return Promise.reject(res);
 };
 
-const _getQuestionScores = async (knowledgeId: number): Promise<KQuestionScoreMap> => {
-    const res = await apiFetch(`${base(knowledgeId)}/question-scores`, { method: "GET" });
+const _getQuestionScores = async (nodeId: number): Promise<KQuestionScoreMap> => {
+    const res = await apiFetch(`${base(nodeId)}/question-scores`, { method: "GET" });
     if (res.ok) return res.json();
     return Promise.reject(res);
 };
 
 // ── SRS / Daily Review ─────────────────────────────────────────────────────
 
-const _getDailyQueue = async (knowledgeId: number): Promise<ResultOptions<KDailyQueueItem[]>> => {
-    const res = await apiFetch(`${base(knowledgeId)}/daily-queue`, { method: "GET" });
+const _getDailyQueue = async (nodeId: number): Promise<ResultOptions<KDailyQueueItem[]>> => {
+    const res = await apiFetch(`${base(nodeId)}/daily-queue`, { method: "GET" });
     if (res.ok) return res.json();
     return Promise.reject(res);
 };
@@ -112,28 +112,28 @@ const _getGlobalDailyQueue = async (): Promise<ResultOptions<KDailyQueueItem[]>>
 };
 
 const _getDailySession = async (
-    knowledgeId: number,
+    nodeId: number,
     limit = 30,
 ): Promise<ResultOptions<KDailySessionQuestion[]>> => {
-    const res = await apiFetch(`${base(knowledgeId)}/daily-session?limit=${limit}`, { method: "GET" });
+    const res = await apiFetch(`${base(nodeId)}/daily-session?limit=${limit}`, { method: "GET" });
     if (res.ok) return res.json();
     return Promise.reject(res);
 };
 
 const _getKnowledgeDailySession = async (
-    knowledgeId: number,
+    nodeId: number,
     limit = 30,
 ): Promise<ResultOptions<KDailySessionQuestion[]>> => {
-    const res = await apiFetch(`${base(knowledgeId)}/knowledge-daily-session?limit=${limit}`, { method: "GET" });
+    const res = await apiFetch(`${base(nodeId)}/knowledge-daily-session?limit=${limit}`, { method: "GET" });
     if (res.ok) return res.json();
     return Promise.reject(res);
 };
 
 const _submitDailyAnswers = async (
-    knowledgeId: number,
+    nodeId: number,
     request: KDailySubmitRequest,
 ): Promise<ResultOptions<KSubmitAnswersResult>> => {
-    const res = await apiFetch(`${base(knowledgeId)}/daily-submit`, {
+    const res = await apiFetch(`${base(nodeId)}/daily-submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request),
@@ -144,14 +144,14 @@ const _submitDailyAnswers = async (
 
 // ── Retention ──────────────────────────────────────────────────────────────
 
-const _getRetention = async (knowledgeId: number): Promise<KRetentionSummary> => {
-    const res = await apiFetch(`${base(knowledgeId)}/retention`, { method: "GET" });
+const _getRetention = async (nodeId: number): Promise<KRetentionSummary> => {
+    const res = await apiFetch(`${base(nodeId)}/retention`, { method: "GET" });
     if (res.ok) return res.json();
     return Promise.reject(res);
 };
 
-const _getRetentionGraph = async (knowledgeId: number, days = 14): Promise<KRetentionGraph> => {
-    const res = await apiFetch(`${base(knowledgeId)}/retention-graph?days=${days}`, { method: "GET" });
+const _getRetentionGraph = async (nodeId: number, days = 14): Promise<KRetentionGraph> => {
+    const res = await apiFetch(`${base(nodeId)}/retention-graph?days=${days}`, { method: "GET" });
     if (res.ok) return res.json();
     return Promise.reject(res);
 };

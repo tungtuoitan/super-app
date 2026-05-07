@@ -26,32 +26,32 @@ export function useKQFlowHelper() {
         setSavedEdges,
         setSavedPositions,
         editingNodeId, setEditingNodeId,
-        knowledgeId,
+        nodeId,
         setPendingSelectIds,
     } = useKQFlowStore();
 
     const flowNodesRef = useRef(flowNodes);
     const savedEdgesRef = useRef(savedEdges);
-    const knowledgeIdRef = useRef(knowledgeId);
+    const nodeIdRef = useRef(nodeId);
 
     useEffect(() => { flowNodesRef.current = flowNodes; }, [flowNodes]);
     useEffect(() => { savedEdgesRef.current = savedEdges; }, [savedEdges]);
-    useEffect(() => { knowledgeIdRef.current = knowledgeId; }, [knowledgeId]);
+    useEffect(() => { nodeIdRef.current = nodeId; }, [nodeId]);
 
     // ── Orphan-aware API helpers ───────────────────────────────────────────
-    // kId === 0 means "orphan mode" (nodeId = null in DB)
+    // nodeId === 0 means "orphan mode" (node_id IS NULL in DB)
 
-    const updateQForNode = (kId: number, request: KUpdateQuestionsRequest) =>
-        kId === 0
+    const updateQForNode = (nodeId: number, request: KUpdateQuestionsRequest) =>
+        nodeId === 0
             ? KQuizService._updateOrphanQuestions(request)
-            : KQuizService._updateQuestions(kId, request);
+            : KQuizService._updateQuestions(nodeId, request);
 
-    const getQForNode = (kId: number) =>
-        kId === 0
+    const getQForNode = (nodeId: number) =>
+        nodeId === 0
             ? KQuizService._getOrphanQuestions()
-            : KQuizService._getQuestions(kId);
+            : KQuizService._getNodeQuestions(nodeId);
 
-    const nodeIdForEvent = (kId: number): number | null => kId === 0 ? null : kId;
+    const toEventNodeId = (nodeId: number): number | null => nodeId === 0 ? null : nodeId;
 
     // ── Rename: start / cancel ─────────────────────────────────────────────
 
@@ -70,7 +70,7 @@ export function useKQFlowHelper() {
     // ── Rename confirm — create or update question ─────────────────────────
 
     const handleRenameConfirm = async (nodeId: string, questionText: string, answerText: string) => {
-        const kId = knowledgeIdRef.current;
+        const currNodeId = nodeIdRef.current;
         const trimmedQ = questionText.trim();
         const trimmedA = answerText.trim();
 
@@ -102,19 +102,19 @@ export function useKQFlowHelper() {
             );
 
             try {
-                await updateQForNode(kId, {
+                await updateQForNode(currNodeId, {
                     addQuestions: [{ name: trimmedQ, description: cleanedAnswer || null }],
                     updateQuestions: [],                    deleteQuestionIds: [], restoreQuestionIds: [],
                 });
 
-                const res = await getQForNode(kId);
+                const res = await getQForNode(currNodeId);
                 if (!res.success || !res.object) throw new Error();
 
                 const newQ = res.object.questions.find((q) => !existingIds.has(q.id) && q.question === trimmedQ);
                 if (!newQ) throw new Error();
 
                 if (shouldBeDraft) {
-                    await updateQForNode(kId, {
+                    await updateQForNode(currNodeId, {
                         addQuestions: [], updateQuestions: [],                        deleteQuestionIds: [], restoreQuestionIds: [],
                         toggleDraftQuestionIds: [newQ.id],
                     });
@@ -133,7 +133,7 @@ export function useKQFlowHelper() {
                         ? { id: realId, type: "questionFlowNode" as const, position: pos, data: { question: { ...newQ, statusCode: shouldBeDraft ? "draft" : newQ.statusCode } } as KQFlowNodeData }
                         : n,
                 ));
-                dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
+                dispatchKFlowQuestionsChanged({ nodeId: toEventNodeId(currNodeId) });
             } catch {
                 setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));
             }
@@ -157,67 +157,67 @@ export function useKQFlowHelper() {
         ));
 
         try {
-            await updateQForNode(kId, {
+            await updateQForNode(currNodeId, {
                 addQuestions: [],                updateQuestions: [{ id: questionId, name: trimmedQ, description: cleanedAnswer || null }],
                 deleteQuestionIds: [], restoreQuestionIds: [],
                 ...(needsDraftToggle ? { toggleDraftQuestionIds: [questionId] } : {}),
             });
-            dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
+            dispatchKFlowQuestionsChanged({ nodeId: toEventNodeId(currNodeId) });
         } catch { /* silent — optimistic already applied */ }
     };
 
     // ── Delete / restore question ──────────────────────────────────────────
 
     const handleDeleteQuestion = async (questionId: number) => {
-        const kId = knowledgeIdRef.current;
+        const currNodeId = nodeIdRef.current;
         setFlowNodes((prev) => prev.map((n) =>
             n.id === String(questionId)
                 ? { ...n, data: { ...(n.data as KQFlowNodeData), question: { ...(n.data as KQFlowNodeData).question, deletedAt: new Date().toISOString() } } }
                 : n,
         ));
         try {
-            await updateQForNode(kId, {
+            await updateQForNode(currNodeId, {
                 addQuestions: [], updateQuestions: [],                deleteQuestionIds: [questionId], restoreQuestionIds: [],
             });
-            dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
+            dispatchKFlowQuestionsChanged({ nodeId: toEventNodeId(currNodeId) });
         } catch { /* silent — optimistic applied */ }
     };
 
     const handleRestoreQuestion = async (questionId: number) => {
-        const kId = knowledgeIdRef.current;
+        const currNodeId = nodeIdRef.current;
         setFlowNodes((prev) => prev.map((n) =>
             n.id === String(questionId)
                 ? { ...n, data: { ...(n.data as KQFlowNodeData), question: { ...(n.data as KQFlowNodeData).question, deletedAt: undefined } } }
                 : n,
         ));
         try {
-            await updateQForNode(kId, {
+            await updateQForNode(currNodeId, {
                 addQuestions: [], updateQuestions: [],                deleteQuestionIds: [], restoreQuestionIds: [questionId],
             });
-            dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
+            dispatchKFlowQuestionsChanged({ nodeId: toEventNodeId(currNodeId) });
         } catch { /* silent — optimistic applied */ }
     };
 
     const handleToggleDraft = async (questionId: number) => {
-        const kId = knowledgeIdRef.current;
+        const currNodeId = nodeIdRef.current;
         setFlowNodes((prev) => prev.map((n) =>
             n.id === String(questionId)
                 ? { ...n, data: { ...(n.data as KQFlowNodeData), question: { ...(n.data as KQFlowNodeData).question, statusCode: (n.data as KQFlowNodeData).question.statusCode === "draft" ? "learning" : "draft" } } }
                 : n,
         ));
         try {
-            await updateQForNode(kId, {
+            await updateQForNode(currNodeId, {
                 addQuestions: [], updateQuestions: [],                deleteQuestionIds: [], restoreQuestionIds: [],
                 toggleDraftQuestionIds: [questionId],
             });
-            dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
+            dispatchKFlowQuestionsChanged({ nodeId: toEventNodeId(currNodeId) });
         } catch { /* silent — optimistic applied */ }
     };
 
     // ── Move question(s) ──────────────────────────────────────────────────
 
     const handleMoveQuestion = async (questionIds: number[], targetNodeId: number | null) => {
-        const kId = knowledgeIdRef.current;
+        const currNodeId = nodeIdRef.current;
         const idSet = new Set(questionIds.map(String));
 
         const movedNodes = flowNodesRef.current.filter((n) => idSet.has(n.id));
@@ -251,7 +251,7 @@ export function useKQFlowHelper() {
             if (movedPos.length > 0) {
                 const targetQRes = targetNodeId === null
                     ? await KQuizService._getOrphanQuestions()
-                    : await KQuizService._getQuestions(targetNodeId);
+                    : await KQuizService._getNodeQuestions(targetNodeId);
 
                 const existingIds = (targetQRes.object?.questions ?? [])
                     .filter((q) => !questionIds.includes(q.id))
@@ -284,13 +284,13 @@ export function useKQFlowHelper() {
 
             await Promise.all(questionIds.map((id) => KQuizService._moveQuestion(id, targetNodeId)));
 
-            dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
+            dispatchKFlowQuestionsChanged({ nodeId: toEventNodeId(currNodeId) });
             const targetEvent = targetNodeId === null ? null : targetNodeId;
-            if (targetEvent !== nodeIdForEvent(kId)) {
-                dispatchKFlowQuestionsChanged({ knowledgeId: targetEvent });
+            if (targetEvent !== toEventNodeId(currNodeId)) {
+                dispatchKFlowQuestionsChanged({ nodeId: targetEvent });
             }
         } catch {
-            dispatchKFlowQuestionsChanged({ knowledgeId: nodeIdForEvent(kId) });
+            dispatchKFlowQuestionsChanged({ nodeId: toEventNodeId(currNodeId) });
         }
     };
 
@@ -362,8 +362,8 @@ export function useKQFlowHelper() {
         setPendingSelectIds(questionIds);
 
         if (targetNodeId !== sourceNodeId) {
-            dispatchKFlowQuestionsChanged({ knowledgeId: sourceNodeId });
-            dispatchKFlowQuestionsChanged({ knowledgeId: targetNodeId });
+            dispatchKFlowQuestionsChanged({ nodeId: sourceNodeId });
+            dispatchKFlowQuestionsChanged({ nodeId: targetNodeId });
         }
     };
 

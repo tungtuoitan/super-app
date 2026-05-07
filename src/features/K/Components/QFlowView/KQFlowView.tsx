@@ -55,30 +55,28 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
         setLoading(true);
     }, [nodeId]);
 
+    const fetchQuestions = useCallback(async () => {
+        const res = nodeId === null
+            ? await KQuizService._getOrphanQuestions()
+            : await KQuizService._getNodeQuestions(nodeId);
+        if (res.success && res.object) setQuestions(res.object.questions);
+    }, [nodeId]);
+
     const loadQuestions = useCallback(async () => {
         setLoading(true);
-        try {
-            const res = nodeId === null
-                ? await KQuizService._getOrphanQuestions()
-                : await KQuizService._getNodeQuestions(nodeId);
-            if (res.success && res.object) {
-                setQuestions(res.object.questions);
-            }
-        } finally {
-            setLoading(false);
-        }
-    }, [nodeId]);
+        try { await fetchQuestions(); } finally { setLoading(false); }
+    }, [fetchQuestions]);
 
     useEffect(() => { loadQuestions(); }, [loadQuestions]);
 
-    // Reload when a question operation fires for this node (or orphans when nodeId=null)
+    // Silent refresh when a question operation fires — no spinner so the canvas doesn't flash
     useEffect(() => {
         const handler = (e: CustomEvent<KFlowQuestionsChangedDetail>) => {
-            if (e.detail.knowledgeId === nodeId) loadQuestions();
+            if (e.detail.nodeId === nodeId) fetchQuestions();
         };
         window.addEventListener(kEvents.flowQuestionsChanged, handler as EventListener);
         return () => window.removeEventListener(kEvents.flowQuestionsChanged, handler as EventListener);
-    }, [nodeId, loadQuestions]);
+    }, [nodeId, fetchQuestions]);
 
     // ── Stats ─────────────────────────────────────────────────────────────────
     const {
@@ -242,7 +240,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
             {/* Flow canvas */}
             <div className="flex-1 min-h-0 relative">
                 <KQFlowCanvas
-                    knowledgeId={canvasNodeId}
+                    nodeId={canvasNodeId}
                     questions={questions}
                     showDeleted={showDeleted}
                     loading={loading}
@@ -258,7 +256,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
             {reviewSession && nodeId !== null && (
                 <div className="absolute inset-0 z-50 bg-zinc-950 flex flex-col">
                     <KDailyReviewSession
-                        knowledgeId={nodeId}
+                        nodeId={nodeId}
                         quizTitle={node?.name ?? ""}
                         questions={reviewSession}
                         onComplete={() => { setReviewSession(null); loadQuestions(); loadTree(); }}

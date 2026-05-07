@@ -3,7 +3,7 @@ import { useReactFlow, useNodesInitialized } from "@xyflow/react";
 import { useKStore } from "@/features/K/store/useK.store";
 
 interface UseKFlowCanvasRevealArgs {
-    knowledgeId: number;
+    nodeId: number;
     loading: boolean;
     questionsLength: number;
     storeNodesLength: number;
@@ -11,7 +11,7 @@ interface UseKFlowCanvasRevealArgs {
 }
 
 export function useKQFlowCanvasReveal({
-    knowledgeId,
+    nodeId,
     loading,
     questionsLength,
     storeNodesLength,
@@ -24,14 +24,14 @@ export function useKQFlowCanvasReveal({
     const { kFlowViewportMap } = useKStore();
 
     // WHY useLayoutEffect: fires synchronously after DOM commit but BEFORE paint,
-    // ensuring the overlay is opaque on the very first frame the new knowledgeId renders.
+    // ensuring the overlay is opaque on the very first frame the new nodeId renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useLayoutEffect(() => { setIsCanvasReady(false); }, [knowledgeId]);
+    useLayoutEffect(() => { setIsCanvasReady(false); }, [nodeId]);
 
     // Restore saved viewport AFTER paint (overlay is already opaque by this point).
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        const saved = kFlowViewportMap[knowledgeId];
+        const saved = kFlowViewportMap[nodeId];
         if (saved) {
             setHasFitView(true);
             requestAnimationFrame(() => rfInstance.setViewport(saved));
@@ -39,7 +39,7 @@ export function useKQFlowCanvasReveal({
             setHasFitView(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [knowledgeId]);
+    }, [nodeId]);
 
     // Lift overlay only when: data loaded + positions loaded + nodes measured (or canvas empty)
     useEffect(() => {

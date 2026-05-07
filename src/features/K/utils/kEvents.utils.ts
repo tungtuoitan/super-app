@@ -35,7 +35,7 @@ export interface KQuizMovedDetail {
 }
 
 export interface KFlowQuestionsChangedDetail {
-    knowledgeId: number | null; // null = orphan view
+    nodeId: number | null; // null = orphan view
 }
 
 // ── 3. WindowEventMap augmentation ────────────────────────────────────────

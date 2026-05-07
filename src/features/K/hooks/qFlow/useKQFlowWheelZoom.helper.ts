@@ -7,7 +7,7 @@ const PAN_SPEED = 0.8;
 
 export function useKQFlowWheelZoom(
     containerRef: React.RefObject<HTMLDivElement>,
-    knowledgeId: number,
+    nodeId: number,
 ) {
     const rfInstance = useReactFlow();
     const { setKFlowViewportMap } = useKStore();
@@ -16,12 +16,12 @@ export function useKQFlowWheelZoom(
     const saveViewport = (vp: { x: number; y: number; zoom: number }) => {
         clearTimeout(saveViewportTimer.current);
         saveViewportTimer.current = setTimeout(() => {
-            setKFlowViewportMap((prev) => ({ ...prev, [knowledgeId]: vp }));
+            setKFlowViewportMap((prev) => ({ ...prev, [nodeId]: vp }));
         }, 250);
     };
 
     const handleMoveEnd = (_: unknown, viewport: Viewport) => {
-        setKFlowViewportMap((prev) => ({ ...prev, [knowledgeId]: viewport }));
+        setKFlowViewportMap((prev) => ({ ...prev, [nodeId]: viewport }));
     };
 
     // Custom wheel handler:
