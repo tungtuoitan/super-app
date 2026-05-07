@@ -150,6 +150,9 @@ export function TaskFlowCanvas() {
                 onNodeDragStart={handleNodeDragStart}
                 onNodeDrag={handleNodeDrag}
                 onNodeDragStop={handleNodeDragStop}
+                onSelectionDragStart={(e, nodes) => { if (nodes.length) handleNodeDragStart(e, nodes[0]); }}
+                onSelectionDrag={(e, nodes) => { if (nodes.length) handleNodeDrag(e, nodes[0], nodes); }}
+                onSelectionDragStop={(e, nodes) => { if (nodes.length) handleNodeDragStop(e, nodes[0], nodes); }}
                 onConnect={isMobile ? undefined : handleConnect}
                 onConnectStart={isMobile ? undefined : handleConnectStart}
                 onConnectEnd={isMobile ? undefined : handleConnectEnd}

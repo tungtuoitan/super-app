@@ -10,6 +10,7 @@ import { storageService, STORAGE_KEYS } from "@/shared";
 import { useSideBarHelper } from "@/shell";
 import { useKNodeSelection } from "../../hooks/kTree/useKNodeSelection.helper";
 import {KTreeNode} from "../../types/kV2.type";
+import { $hasDescendantWithBlueDot, $hasDescendantWithBrownDot } from "../../hooks/kTree/kTree.miniHelper";
 import {kconstants} from "../../utils/k.constants";
 
 interface NodeProps {
@@ -93,6 +94,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
     const nodeColor = nodeItem.color;
     const nodeIcon = nodeItem.icon as IconKey | undefined;
     const hasChildren = (node.data.children?.length ?? 0) > 0;
+    const isCollapsed = !node.isOpen && hasChildren;
     const isSelected = isNodeSelected(nodeId);
     const isWorkspaceRoot = nodeItem.id < 0;
 
@@ -209,6 +211,8 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
             className={`
                 ${ treeType === "workspaceTree" && isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover-light"}
                 rounded
+                border-l-2 
+                ${nodeItem.statusCode === "learning" && treeType === "workspaceTree" ? "border-blue-400/30" : "border-transparent"}
             `}
         >
             <div
@@ -300,11 +304,25 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                                 className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400"
                             />
                         )}
+                        {/* Blue dot bubble-up — collapsed node has hidden descendants with due SRS questions */}
+                        {isCollapsed && treeType === "workspaceTree" && !(nodeItem.statusCode === "learning" && (nodeItem.dueSrsCount ?? 0) > 0) && $hasDescendantWithBlueDot(node.data.children ?? []) && (
+                            <span
+                                title="Descendants have questions due"
+                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400 opacity-60"
+                            />
+                        )}
                         {/* Draft question dot — node has draft questions */}
                         {treeType === "workspaceTree" && (nodeItem.draftQuestionCount ?? 0) > 0 && (
                             <span
                                 title={`${nodeItem.draftQuestionCount} draft question${nodeItem.draftQuestionCount !== 1 ? "s" : ""}`}
                                 className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-800"
+                            />
+                        )}
+                        {/* Brown dot bubble-up — collapsed node has hidden descendants with draft questions */}
+                        {isCollapsed && treeType === "workspaceTree" && (nodeItem.draftQuestionCount ?? 0) <= 0 && $hasDescendantWithBrownDot(node.data.children ?? []) && (
+                            <span
+                                title="Descendants have draft questions"
+                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-800 opacity-60"
                             />
                         )}
                         {/* Draft badge — commented out, kept for reference */}

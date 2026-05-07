@@ -34,8 +34,10 @@ export const TASK_FLOW_CSS = `
     background: rgba(59, 130, 246, 0.06) !important;
     border: 1.5px solid rgba(59, 130, 246, 0.4) !important;
     border-radius: 12px !important;
-    pointer-events: none !important;
+    pointer-events: all !important;
+    cursor: grab !important;
 }
+.react-flow__nodesselection-rect:active { cursor: grabbing !important; }
 /* Drag selection rectangle */
 .react-flow__selection {
     background: rgba(59, 130, 246, 0.06) !important;

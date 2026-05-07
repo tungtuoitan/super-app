@@ -169,7 +169,8 @@ function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: Canvas
                 Edges must render below nodes even when their path geometrically
                 crosses a node rectangle. */}
             <style>{`
-                .kflow-canvas .react-flow__nodesselection-rect { pointer-events: none !important; }
+                .kflow-canvas .react-flow__nodesselection-rect { pointer-events: all !important; cursor: grab !important; }
+                .kflow-canvas .react-flow__nodesselection-rect:active { cursor: grabbing !important; }
                 .kflow-canvas .react-flow__edges      { z-index: 0; }
                 .kflow-canvas .react-flow__nodes      { z-index: 1; }
                 .kflow-canvas .react-flow__edgelabels { z-index: 2; }
@@ -195,6 +196,9 @@ function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: Canvas
                 onNodeDragStart={handleNodeDragStart}
                 onNodeDrag={handleNodeDrag}
                 onNodeDragStop={handleNodeDragStop}
+                onSelectionDragStart={(e, nodes) => { if (nodes.length) handleNodeDragStart(e, nodes[0]); }}
+                onSelectionDrag={(e, nodes) => { if (nodes.length) handleNodeDrag(e, nodes[0], nodes); }}
+                onSelectionDragStop={(e, nodes) => { if (nodes.length) handleNodeDragStop(e, nodes[0], nodes); }}
                 onConnect={isMobile ? undefined : handleConnect}
                 onConnectStart={isMobile ? undefined : handleConnectStart}
                 onConnectEnd={isMobile ? undefined : handleConnectEnd}

@@ -27,22 +27,35 @@ export const useMultiProjectTaskFlowDragHelper = () => {
     const dragStartRef = useRef<Map<string, { x: number; y: number }>>(new Map());
     const dragAxisRef = useRef<Map<string, "x" | "y" | null>>(new Map());
     const lastSnappedRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+    const selectionLockRef = useRef<Set<string>>(new Set());
+    const selectionLockTimer = useRef<ReturnType<typeof setTimeout>>();
+
+    const lockSelection = (ids: string[], ms = 400) => {
+        ids.forEach(id => selectionLockRef.current.add(id));
+        clearTimeout(selectionLockTimer.current);
+        selectionLockTimer.current = setTimeout(() => selectionLockRef.current.clear(), ms);
+    };
 
     // ── Node changes — must live here to share lastSnappedRef ──────────────
 
     const handleNodesChange =
         (changes: NodeChange[]) => {
+            const locked = selectionLockRef.current;
+            const afterDeselectLock = locked.size > 0
+                ? changes.filter(c => !(c.type === "select" && !(c as { selected: boolean }).selected && locked.has((c as { id: string }).id)))
+                : changes;
+
             setFlowNodes((prev) => {
                 const lockedIds = lockOldNodes
                     ? new Set(prev.filter((n) => { const s = (n.data as TaskFlowNodeData)?.task?.status; return s === "completed" || s === "cancelled" || s === "failed"; }).map((n) => n.id))
                     : null;
 
                 const filtered = lockedIds
-                    ? changes.filter((c) => {
+                    ? afterDeselectLock.filter((c) => {
                         if (!("id" in c) || !lockedIds.has(c.id as string)) return true;
                         return c.type !== "position";
                     })
-                    : changes;
+                    : afterDeselectLock;
 
                 const patched = filtered.map((c) => {
                     if (
@@ -159,6 +172,7 @@ export const useMultiProjectTaskFlowDragHelper = () => {
             }
 
             const draggedIds = new Set(unlocked.map((n) => n.id));
+            lockSelection([...draggedIds]);
             const snapshotSnapped = new Map(lastSnappedRef.current);
 
             requestAnimationFrame(() => {

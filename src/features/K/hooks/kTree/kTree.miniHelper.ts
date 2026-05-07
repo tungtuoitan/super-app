@@ -25,6 +25,22 @@ export function $traverse<T extends { children?: T[] }>(nodes: T[], predicate: (
     return result;
 }
 
+export function $hasDescendantWithBlueDot(children: KTreeNode[]): boolean {
+    for (const child of children) {
+        if (child.data.statusCode === "learning" && (child.data.dueSrsCount ?? 0) > 0) return true;
+        if ($hasDescendantWithBlueDot(child.children ?? [])) return true;
+    }
+    return false;
+}
+
+export function $hasDescendantWithBrownDot(children: KTreeNode[]): boolean {
+    for (const child of children) {
+        if ((child.data.draftQuestionCount ?? 0) > 0) return true;
+        if ($hasDescendantWithBrownDot(child.children ?? [])) return true;
+    }
+    return false;
+}
+
 export function $checkSubtree(node: KTreeNode, targetId: number): boolean {
     if (node.data.id === targetId) return true;
     if (node.children && node.children.length > 0)
