@@ -180,14 +180,17 @@ export function useKQFlowCanvasHelper() {
             );
         }
 
-        // ── Reading-order grid: root/first node top-left, left→right, top→bottom ──
+        // ── Snake grid: row 0 left→right, row 1 right→left, row 2 left→right, …
+        //    Keeps consecutive nodes adjacent across row boundaries (short edges).
         const cols = Math.ceil(Math.sqrt(sorted.length));
         const rows = Math.ceil(sorted.length / cols);
         const rowH = Array.from({ length: rows }, (_, r) => { let m = 0; for (let c = 0; c < cols; c++) m = Math.max(m, sorted[r * cols + c]?.measured?.height ?? 120); return m; });
         const rowOff = rowH.reduce<number[]>((a, _, i) => { a.push(i === 0 ? 0 : a[i - 1] + rowH[i - 1] + GAP_Y); return a; }, []);
         const nodeGridPos = new Map<string, { row: number; col: number }>();
         sorted.forEach((n, idx) => {
-            const row = Math.floor(idx / cols); const col = idx % cols; const h = n.measured?.height ?? 120;
+            const row = Math.floor(idx / cols);
+            const col = row % 2 === 1 ? (cols - 1 - (idx % cols)) : (idx % cols);
+            const h = n.measured?.height ?? 120;
             newPositions.set(n.id, { x: minX + col * (NODE_W + GAP_X), y: minY + rowOff[row] + (rowH[row] - h) / 2, h });
             nodeGridPos.set(n.id, { row, col });
         });

@@ -104,3 +104,5 @@ export const TASK_FLOW_CSS = `
 export const MIN_ZOOM = 0.05;
 export const MAX_ZOOM = 1;
 export const PAN_SPEED = 0.8;
+export const ZOOM_FACTOR_OUT = 0.716;
+export const ZOOM_FACTOR_IN = 1.360;

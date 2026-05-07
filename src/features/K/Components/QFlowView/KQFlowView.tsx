@@ -17,6 +17,7 @@ import { kEvents } from "../../utils/kEvents.utils";
 import type { KFlowQuestionsChangedDetail } from "../../utils/kEvents.utils";
 import { useKQFlowStats } from "../../hooks/qFlow/useKQFlowStats.helper";
 import { useKQFlowSrsReset } from "../../hooks/qFlow/useKQFlowSrsReset.helper";
+import { useDeviceStore } from "@/shared";
 
 interface KQFlowViewProps {
     nodeId: number | null; // null = show orphan questions (node_id IS NULL)
@@ -41,6 +42,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
     const { currentK, selectedKId } = useKStore();
     const { loadTree }              = useKLoader();
     const { $user }                 = useAuthStore();
+    const { isMobile }              = useDeviceStore();
 
     const node       = nodeId !== null ? currentK?.flatData.find(n => n.id === nodeId) : null;
     const nodeStatus = node?.statusCode ?? null;
@@ -128,8 +130,8 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                     <span className="text-xs text-zinc-500 italic">Orphaned questions</span>
                 )}
 
-                {/* Status badge + toggle */}
-                {nodeId !== null && node && (
+                {/* Status badge + toggle — hidden on mobile (read-only) */}
+                {nodeId !== null && node && !isMobile && (
                     <button
                         onClick={handleToggleStatus}
                         disabled={statusUpdating}

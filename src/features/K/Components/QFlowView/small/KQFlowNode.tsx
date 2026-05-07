@@ -8,7 +8,7 @@ import { useKQFlowStore } from "@/features/K/store/useKQFlow.store";
 import { useKQFlowHelper } from "@/features/K/hooks/qFlow/useKQFlow.helper";
 import { useKQFlowCanvasHelper } from "@/features/K/hooks/qFlow/useKQFlowCanvas.helper";
 import { useKStore } from "@/features/K/store/useK.store";
-import { useGlobalShortcut } from "@/shared";
+import { useGlobalShortcut, useDeviceStore } from "@/shared";
 import type { KQFlowNodeData } from "@/features/K/types/kQFlow.type";
 
 const HANDLES = [Position.Top, Position.Right, Position.Bottom, Position.Left];
@@ -32,6 +32,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
         if (!ids.includes(nodeId)) ids.push(nodeId);
         return ids;
     };
+    const { isMobile } = useDeviceStore();
     const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleDeleteQuestion, handleRestoreQuestion, handleToggleDraft, handleMoveQuestion } = useKQFlowHelper();
     const { handleOrganize } = useKQFlowCanvasHelper();
     const { currentK, kFlowClipboard } = useKStore();
@@ -71,7 +72,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
     draftARef.current = draftA;
     idRef.current = id;
     
-    const showHandles = !isTempNode && !anyEdgeSelected && !isEditing && isHovered && !multiSelected;
+    const showHandles = !isMobile && !isTempNode && !anyEdgeSelected && !isEditing && isHovered && !multiSelected;
 
     // Sync drafts when question changes (but not while editing)
     useEffect(() => {
@@ -175,7 +176,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                     : "border-zinc-700/60 bg-zinc-900/80"
             } ${isFlashing ? "ring-2 ring-amber-400/20 scale-[1.02] brightness-125 transition-all duration-150" : ""}`}
             style={{ width: 280 }}
-            onDoubleClick={(e) => {
+            onDoubleClick={isMobile ? undefined : (e) => {
                 if (!isDeleted && editingNodeId === null) {
                     e.stopPropagation();
                     setDraftQ(question.question);
@@ -185,7 +186,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onContextMenu={(e) => {
+            onContextMenu={isMobile ? undefined : (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setCtxMenu({ x: e.clientX, y: e.clientY });
@@ -290,7 +291,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
 
             <div className="flex items-center px-3 pb-2 pt-0.5">
                 <KScoreBar scores={question.scoreHistory} srsNextReviewAt={question.srsNextReviewAt} retention={question.retention} />
-                {!isDeleted && !isEditing && (
+                {!isDeleted && !isEditing && !isMobile && (
                     <button
                         onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleDraft(question.id); }}
                         title={isDraft ? "Unmark draft" : "Mark as draft"}

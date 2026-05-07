@@ -73,7 +73,7 @@ export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onCompl
 
     showResultRef.current = showResult;
 
-    const submitInBackground = (scoresSnap: Record<number, number>, timingsSnap: Record<number, number>) => {
+    const submitInBackground = (scoresSnap: Record<number, number>, timingsSnap: Record<number, number>): Promise<void> => {
         const dailyAnswers: KDailyAnswerItem[] = questions
             .filter(q => !draftedIdsRef.current.has(q.id))
             .map(q => ({
@@ -82,11 +82,12 @@ export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onCompl
                 responseTimeMs: timingsSnap[q.id] ?? null,
                 selfScore: scoresSnap[q.id] ?? null,
             }));
-        KQuizService._submitDailyAnswers(knowledgeId, { answers: dailyAnswers })
+        return KQuizService._submitDailyAnswers(knowledgeId, { answers: dailyAnswers })
+            .then(() => {})
             .catch(() => { /* silent */ });
-    }
+    };
 
-    const advanceWithScore = (score: number) => {
+    const advanceWithScore = async (score: number) => {
         if (isSubmitted) return;
         const qId = currentQuestion?.id;
         const elapsed = Date.now() - questionStartRef.current;
@@ -94,31 +95,32 @@ export function KDailyReviewSession({ knowledgeId, quizTitle, questions, onCompl
         const newScores  = qId !== undefined ? { ...selfScores, [qId]: score } : selfScores;
         if (qId !== undefined) { setTimings(newTimings); setSelfScores(newScores); }
         if (currentIndex >= totalQuestions - 1) {
-            // Last question — submit then complete immediately (no summary screen)
+            // Last question — await submit so loadQuestions() sees the updated SRS state
             setIsSubmitted(true);
-            if (!isQuickQuiz) submitInBackground(newScores, newTimings);
+            if (!isQuickQuiz) await submitInBackground(newScores, newTimings);
             onComplete();
             return;
         }
         setShowResult(false);
         setCurrentIndex(i => i + 1);
-    }
+    };
     advanceWithScoreRef.current = advanceWithScore;
 
     // Mark current question as draft, clear its review history, then skip it
-    const handleMarkDraft = () => {
+    const handleMarkDraft = async () => {
         if (isSubmitted) return;
         const qId = currentQuestion?.id;
         if (qId === undefined) return;
         draftedIdsRef.current = new Set(draftedIdsRef.current).add(qId);
-        KQuizService._markQuestionDraft(knowledgeId, qId).catch(() => {});
         if (currentIndex >= totalQuestions - 1) {
-            // Last question — submit then complete immediately (no summary screen)
+            // Last question — await both calls so loadQuestions() sees the updated state
             setIsSubmitted(true);
-            if (!isQuickQuiz) submitInBackground(selfScores, timings);
+            await KQuizService._markQuestionDraft(knowledgeId, qId).catch(() => {});
+            if (!isQuickQuiz) await submitInBackground(selfScores, timings);
             onComplete();
             return;
         }
+        KQuizService._markQuestionDraft(knowledgeId, qId).catch(() => {});
         setShowResult(false);
         setCurrentIndex(i => i + 1);
     };

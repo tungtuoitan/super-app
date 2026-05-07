@@ -26,9 +26,9 @@ import { useMultiProjectTaskFlowDragHelper } from "../../hooks/mpTaskFlow/useMul
 import { useMultiProjectTaskFlowEdgeHelper } from "../../hooks/mpTaskFlow/useMultiProjectTaskFlowEdge.helper";
 import { useMultiProjectTaskFlowNodeHelper } from "../../hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
 import { useTaskFlowViewControlsHelper } from "../../hooks/mpTaskFlow/useTaskFlowViewControls.helper";
-import { useMenuContextHelper } from "@/shared";
+import { useMenuContextHelper, useDeviceStore } from "@/shared";
 import { storageService, STORAGE_KEYS } from "@/shared";
-import { TASK_FLOW_CSS, MIN_ZOOM, MAX_ZOOM, PAN_SPEED } from "../../utils/multiProjectTaskFlow.constants";
+import { TASK_FLOW_CSS, MIN_ZOOM, MAX_ZOOM, PAN_SPEED, ZOOM_FACTOR_OUT, ZOOM_FACTOR_IN } from "../../utils/multiProjectTaskFlow.constants";
 import { TaskFlowNode } from "./TaskFlowNode";
 import { FlowEdgeWithNote } from "./FlowEdgeWithNote";
 import { cn } from "@/lib/utils";
@@ -52,6 +52,7 @@ export function TaskFlowCanvas() {
     const storeApi = useStoreApi();
 
     const { viewMode, showMiniMap, setShowMiniMap, dynMinZoomRef, handleF1Toggle, handleBackToCenter } = useTaskFlowViewControlsHelper(containerRef);
+    const { isMobile } = useDeviceStore();
 
     // Drag-select only nodes — deselect edges caught in the selection box
     const handleSelectionChange = ({ nodes: selectedNodes, edges: selectedEdges }: { nodes: { id: string }[]; edges: { id: string }[] }) => {
@@ -96,7 +97,7 @@ export function TaskFlowCanvas() {
             e.stopImmediatePropagation();
             const { x, y, zoom } = rfInstance.getViewport();
             if (e.ctrlKey) {
-                const factor = e.deltaY > 0 ? 0.92 : 1.08;
+                const factor = e.deltaY > 0 ? ZOOM_FACTOR_OUT : ZOOM_FACTOR_IN;
                 const newZoom = Math.min(Math.max(zoom * factor, dynMinZoomRef.current), MAX_ZOOM);
                 const rect = el.getBoundingClientRect();
                 const cx = e.clientX - rect.left;
@@ -141,13 +142,13 @@ export function TaskFlowCanvas() {
                 onNodeDragStart={handleNodeDragStart}
                 onNodeDrag={handleNodeDrag}
                 onNodeDragStop={handleNodeDragStop}
-                onConnect={handleConnect}
-                onConnectStart={handleConnectStart}
-                onConnectEnd={handleConnectEnd}
-                onReconnectStart={handleReconnectStart}
-                onReconnectEnd={handleReconnectEnd}
-                onReconnect={handleReconnect}
-                onPaneContextMenu={handlePaneContextMenu}
+                onConnect={isMobile ? undefined : handleConnect}
+                onConnectStart={isMobile ? undefined : handleConnectStart}
+                onConnectEnd={isMobile ? undefined : handleConnectEnd}
+                onReconnectStart={isMobile ? undefined : handleReconnectStart}
+                onReconnectEnd={isMobile ? undefined : handleReconnectEnd}
+                onReconnect={isMobile ? undefined : handleReconnect}
+                onPaneContextMenu={isMobile ? undefined : handlePaneContextMenu}
                 onMoveEnd={handleMoveEnd}
                 onNodeClick={handleNodeClick}
                 onSelectionChange={handleSelectionChange}
@@ -163,10 +164,12 @@ export function TaskFlowCanvas() {
                 deleteKeyCode={null}
                 selectionKeyCode={null}
                 multiSelectionKeyCode="Shift"
-                selectionOnDrag
+                nodesDraggable={!isMobile}
+                nodesConnectable={!isMobile}
+                selectionOnDrag={!isMobile}
                 selectionMode={SelectionMode.Partial}
-                panOnDrag={[1]}
-                selectNodesOnDrag={true}
+                panOnDrag={isMobile ? [0] : [1]}
+                selectNodesOnDrag={!isMobile}
                 connectionMode={ConnectionMode.Loose}
                 connectionRadius={80}
                 zoomOnScroll={false}
@@ -182,7 +185,7 @@ export function TaskFlowCanvas() {
                         zoomable
                         maskColor="transparent"
                         className="!bg-card !border !border-border !rounded-lg !shadow-lg minimap-yellow-frame"
-                        style={{ width: 180, height: 120 }}
+                        style={{ width: isMobile ? 110 : 180, height: isMobile ? 70 : 120 }}
                         nodeColor={(node) => {
                             const status = (node.data as { task?: { status: string } })?.task?.status;
                             if (status === "in_progress") return "hsl(var(--primary))";
@@ -207,26 +210,34 @@ export function TaskFlowCanvas() {
                     <button onClick={handleBackToCenter} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground" title="Center on in-progress task (F2)">
                         <Crosshair className="h-3.5 w-3.5" />
                     </button>
-                    <div className="w-px h-5 bg-border" />
-                    <button onClick={handleAutoLayout} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold border rounded-md shadow-sm transition-colors bg-card border-border text-foreground hover:bg-muted" title="Gather orphan nodes into a tidy group">
-                        <Wand2 className="h-3.5 w-3.5" />
-                        Tidy Up
-                    </button>
+                    {!isMobile && (
+                        <>
+                            <div className="w-px h-5 bg-border" />
+                            <button onClick={handleAutoLayout} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold border rounded-md shadow-sm transition-colors bg-card border-border text-foreground hover:bg-muted" title="Gather orphan nodes into a tidy group">
+                                <Wand2 className="h-3.5 w-3.5" />
+                                Tidy Up
+                            </button>
+                        </>
+                    )}
                     <div className="w-px h-5 bg-border" />
                     <button onClick={() => loadTaskFlowTasks()} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground" title="Refresh tasks from server">
                         <RefreshCw className="h-3.5 w-3.5" />
                     </button>
-                    <div className="w-px h-5 bg-border" />
-                    <button
-                        onClick={handleToggleLock}
-                        className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md shadow-sm transition-colors",
-                            lockOldNodes ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border border-red-500 text-foreground hover:bg-muted",
-                        )}
-                        title={lockOldNodes ? "Unlock completed/cancelled tasks" : "Lock completed/cancelled tasks"}
-                    >
-                        {lockOldNodes ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5 text-red-500" />}
-                    </button>
+                    {!isMobile && (
+                        <>
+                            <div className="w-px h-5 bg-border" />
+                            <button
+                                onClick={handleToggleLock}
+                                className={cn(
+                                    "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md shadow-sm transition-colors",
+                                    lockOldNodes ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border border-red-500 text-foreground hover:bg-muted",
+                                )}
+                                title={lockOldNodes ? "Unlock completed/cancelled tasks" : "Lock completed/cancelled tasks"}
+                            >
+                                {lockOldNodes ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5 text-red-500" />}
+                            </button>
+                        </>
+                    )}
                     <div className="w-px h-5 bg-border" />
                     <button
                         onClick={() => setShowMiniMap((v) => !v)}

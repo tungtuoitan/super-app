@@ -9,7 +9,7 @@ import { useKQFlowHeadless } from "@/features/K/hooks/qFlow/useKQFlow.headless";
 import { useKQFlowCanvasReveal } from "@/features/K/hooks/qFlow/useKQFlowCanvasReveal.helper";
 import { useKQFlowWheelZoom } from "@/features/K/hooks/qFlow/useKQFlowWheelZoom.helper";
 import { useKQFlowShortcuts } from "@/features/K/hooks/qFlow/useKQFlowShortcuts.helper";
-import { useMenuContextHelper } from "@/shared";
+import { useMenuContextHelper, useDeviceStore } from "@/shared";
 import { KQFlowNode } from "./small/KQFlowNode";
 import { KQFlowEdge } from "./small/KQFlowEdge";
 import type { KQuestion } from "@/features/K/types/kQuiz.type";
@@ -47,6 +47,7 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
     });
 
     const containerRef = useRef<HTMLDivElement>(null);
+    const { isMobile } = useDeviceStore();
 
     // ── Custom wheel zoom + viewport persistence ───────────────────────────
     const { handleMoveEnd } = useKQFlowWheelZoom(containerRef, knowledgeId);
@@ -67,11 +68,12 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
     const { showContextMenu } = useMenuContextHelper();
 
     // ── Keyboard shortcuts (delete / cut / paste / escape / ctrl+o) ──────────
-    const selectedEdgeIds = flowEdges.filter((e) => e.selected).map((e) => e.id);
-    const selectedNodeIds = flowNodes
+    // Shortcuts are disabled on mobile (read-only) — passing empty arrays turns off all enabled flags
+    const selectedEdgeIds = isMobile ? [] : flowEdges.filter((e) => e.selected).map((e) => e.id);
+    const selectedNodeIds = isMobile ? [] : flowNodes
         .filter((n) => n.selected && !n.id.startsWith("temp-node-") && !(n.data as KQFlowNodeData).question.deletedAt)
         .map((n) => parseInt(n.id, 10));
-    const selectedStringIds = flowNodes
+    const selectedStringIds = isMobile ? [] : flowNodes
         .filter((n) => n.selected && !n.id.startsWith("temp-node-") && !(n.data as KQFlowNodeData).question.deletedAt)
         .map((n) => n.id);
     const targetNodeId = knowledgeId === 0 ? null : knowledgeId;
@@ -185,21 +187,23 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
                 onNodeDragStart={handleNodeDragStart}
                 onNodeDrag={handleNodeDrag}
                 onNodeDragStop={handleNodeDragStop}
-                onConnect={handleConnect}
-                onConnectStart={handleConnectStart}
-                onConnectEnd={handleConnectEnd}
-                onReconnectStart={handleReconnectStart}
-                onReconnectEnd={handleReconnectEnd}
-                onReconnect={handleReconnect}
-                onEdgeDoubleClick={(_: React.MouseEvent, edge: Edge) => handleEdgeReoptimize(edge.id)}
-                onPaneContextMenu={handlePaneContextMenu}
+                onConnect={isMobile ? undefined : handleConnect}
+                onConnectStart={isMobile ? undefined : handleConnectStart}
+                onConnectEnd={isMobile ? undefined : handleConnectEnd}
+                onReconnectStart={isMobile ? undefined : handleReconnectStart}
+                onReconnectEnd={isMobile ? undefined : handleReconnectEnd}
+                onReconnect={isMobile ? undefined : handleReconnect}
+                onEdgeDoubleClick={isMobile ? undefined : (_: React.MouseEvent, edge: Edge) => handleEdgeReoptimize(edge.id)}
+                onPaneContextMenu={isMobile ? undefined : handlePaneContextMenu}
                 onNodeClick={handleNodeClick}
                 onSelectionChange={handleSelectionChange}
                 onSelectionStart={() => { isDragSelecting.current = true; }}
                 onSelectionEnd={() => { isDragSelecting.current = false; }}
                 onMoveEnd={handleMoveEnd}
-                selectionOnDrag
-                selectNodesOnDrag
+                nodesDraggable={!isMobile}
+                nodesConnectable={!isMobile}
+                selectionOnDrag={!isMobile}
+                selectNodesOnDrag={!isMobile}
                 connectionMode={ConnectionMode.Loose}
                 connectionRadius={80}
                 minZoom={0.15}
@@ -211,14 +215,14 @@ function KQFlowCanvasContent({ knowledgeId, questions, showDeleted, loading }: C
                 selectionMode={SelectionMode.Partial}
                 zoomOnScroll={false}
                 panOnScroll={false}
-                panOnDrag={[1]}
+                panOnDrag={isMobile ? [0] : [1]}
             >
                 <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgba(113,113,122,0.2)" />
                 <Controls showInteractive={false} />
                 <MiniMap
                     nodeColor={() => "rgba(99,102,241,0.4)"}
                     maskColor="rgba(0,0,0,0.6)"
-                    style={{ background: "rgba(24,24,27,0.9)" }}
+                    style={{ background: "rgba(24,24,27,0.9)", ...(isMobile && { width: 110, height: 70 }) }}
                 />
             </ReactFlow>
         </div>
