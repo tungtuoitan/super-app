@@ -49,6 +49,14 @@ export function useKQFlowHeadless(nodeId: number, questions: KQuestion[], showDe
     // ── Fetch positions + edges ───────────────────────────────────────────────
     // Runs after questions for the current knowledge are available.
     // nodeId=0 is valid (orphan mode) — do NOT guard on !nodeId.
+    //
+    // PROBLEM SOLVED HERE:
+    // When a user creates a new question (temp node placed immediately), then saves,
+    // this fetch fires and merges backend positions. The merge must NOT clear
+    // locally-set positions (e.g., the temp node's position) that the backend
+    // hasn't persisted yet, otherwise those positions disappear until fetch completes.
+    // Solution: Use "merge" strategy (prev → {...prev, ...positions}) instead of
+    // replacing. This keeps local positions while trusting backend as authoritative.
     useEffect(() => {
         if (!questionIdsKey) {
             // No questions — nothing to fetch; mark loaded so canvas reveals empty
@@ -58,6 +66,7 @@ export function useKQFlowHeadless(nodeId: number, questions: KQuestion[], showDe
         }
 
         // Invalidate ref so rebuild skips until fetch completes
+        // (See rebuild effect below for explanation of the race condition)
         positionsForKeyRef.current = "";
         setPositionsLoaded(false);
         // Do NOT clear savedPositions or savedEdges here — clearing before the fetch
@@ -134,15 +143,48 @@ export function useKQFlowHeadless(nodeId: number, questions: KQuestion[], showDe
 
     // ── Rebuild nodes ─────────────────────────────────────────────────────────
     // Re-runs whenever questions, positions, or visibility (showDeleted) changes.
+    //
+    // PROBLEM SOLVED HERE:
+    // After creating a question and saving, two problems occurred:
+    // 1. FLASH: Node visible → disappears briefly → reappears
+    //    Root cause: When a new real node arrives (from API response), it takes
+    //    a different identity. The rebuild creates a new Node object reference
+    //    even if all displayed fields are identical. React Flow re-processes this
+    //    "new" node and causes visible jitter.
+    //    Solution: "Smart rebuild" — compare rendered fields (position, selected,
+    //    question text, status, etc.) and REUSE the exact same Node object if
+    //    nothing visible changed. This prevents React Flow from flickering.
+    //
+    // 2. OPTIMISTIC UPDATES: After create API call completes, the backend auto-
+    //    fetches updated questions. But between "replace temp→real" and "fetch
+    //    completes", a rebuild fires with stale savedPositions (still empty).
+    //    This rebuild would drop the optimistic real node because it doesn't exist
+    //    in the fetch response yet.
+    //    Solution: "Optimistic node preservation" — preserve nodes from prevNodes
+    //    that aren't yet in visibleQuestions (the fetch response). When fetch
+    //    finally arrives with the real data, the next rebuild finds the node in
+    //    visibleQuestions and takes over, no flash.
+    //
+    // 3. STALE CLOSURE RACE: In the render cycle where new questions arrive:
+    //    - Fetch effect: calls setPositionsLoaded(false)
+    //    - Rebuild effect: still sees positionsLoaded=true (stale closure)
+    //    Without the ref check below, rebuild runs with questions=new but
+    //    savedPositions={} (hasn't updated yet), causing nodes to appear at
+    //    fallback positions, then jump when positions load. Visible flash.
+    //    Solution: positionsForKeyRef tracks which questionIdsKey the current
+    //    savedPositions belong to. Both effects update this ref synchronously,
+    //    allowing rebuild to detect stale data IN THE SAME CYCLE before paint.
+    const rebuildRunRef = useRef(0);
     useEffect(() => {
-        if (!positionsLoaded) return;
+        const runId = ++rebuildRunRef.current;
 
-        // Guard against the stale-closure race: in the same render where new
-        // questions arrive, the fetch effect schedules setPositionsLoaded(false)
-        // but the rebuild effect still sees the OLD closure value (true). Without
-        // this ref check, rebuild would run with questions=new but savedPositions={}
-        // → nodes appear at fallback grid positions then jump when fetch completes.
-        if (positionsForKeyRef.current !== questionIdsKey) return;
+        if (!positionsLoaded) {
+            return;
+        }
+
+        if (positionsForKeyRef.current !== questionIdsKey) {
+            return;
+        }
 
         const selectSet = new Set(pendingSelectIds);
         const visibleQuestions = showDeleted ? questions : questions.filter(q => !q.deletedAt);
@@ -151,9 +193,54 @@ export function useKQFlowHeadless(nodeId: number, questions: KQuestion[], showDe
         // This prevents React Flow from re-processing all nodes after every
         // background fetch, which would cause a visible jitter even when positions
         // and question data are identical (new API response objects, same values).
+        //
+        // HOW SMART REBUILD WORKS:
+        // For each visible question, check if the previous node for that question
+        // still has the SAME rendered values (position, selected state, question text,
+        // answer, status, score history length, SRS date, retention). If YES, return
+        // the exact same Node object reference. If NO, create a new one.
+        //
+        // This is critical for performance: React Flow tracks node identity by reference.
+        // If we create a new Node object even when nothing visible changed, React Flow
+        // sees it as "new node" and re-processes the entire node (recalculate layout,
+        // re-render internals, etc.), causing visible flicker.
+        //
+        // NULLISH COALESCING IN COMPARISONS:
+        // The backend returns null for nullable fields (answer, deletedAt, srsNextReviewAt).
+        // But when we construct nodes locally (e.g., after create, before fetch),
+        // we might set them to null explicitly. JSON serialization can sometimes
+        // leave fields undefined. To compare fairly, we use (a ?? null) === (b ?? null)
+        // so undefined and null are treated as equal. This prevents false "changed"
+        // detections just because of serialization differences.
         setFlowNodes((prevNodes) => {
             const prevMap = new Map(prevNodes.map(n => [n.id, n]));
-            return visibleQuestions.map((q, i) => {
+            const visibleQIds = new Set(visibleQuestions.map(q => String(q.id)));
+
+            // OPTIMISTIC NODE PRESERVATION:
+            // After a new question is created, the flow is:
+            // 1. handleRenameConfirm: replace temp-node-123 → real node 456 (id from API)
+            // 2. handleRenameConfirm: dispatch event to trigger fetchQuestions
+            // 3. Event handler: fetches updated questions (no spinner, silent reload)
+            // 4. Meanwhile: THIS rebuild fires with the PREVIOUS fetch result (no node 456 yet)
+            //
+            // Without this guard, the rebuild sees node 456 in prevNodes but NOT in
+            // visibleQuestions (the fetch response is still in-flight). So it drops node 456,
+            // intending to recreate it when fetch completes. But React has already painted
+            // the node, and dropping it looks like the node disappeared.
+            //
+            // Solution: Preserve nodes from prevNodes that are:
+            // - NOT temp nodes (already replaced)
+            // - NOT in visibleQuestions (haven't been returned by fetch yet)
+            // - NOT soft-deleted (marked as deleted)
+            // These are "optimistic" nodes — placed immediately, waiting for fetch confirmation.
+            const optimisticNodes = prevNodes.filter((n) => {
+                if (n.id.startsWith("temp-node-")) return false; // temp was replaced
+                if (visibleQIds.has(n.id)) return false; // already in fetch response
+                const q = (n.data as KQFlowNodeData).question;
+                if (q.deletedAt) return false; // soft-deleted, exclude
+                return true; // preserve optimistic node
+            });
+            const result = visibleQuestions.map((q, i) => {
                 const newPos = savedPositions[String(q.id)] ?? buildGridPosition(i);
                 const newSelected = selectSet.size > 0
                     ? selectSet.has(q.id)
@@ -161,17 +248,26 @@ export function useKQFlowHeadless(nodeId: number, questions: KQuestion[], showDe
                 const prev = prevMap.get(String(q.id));
                 if (prev) {
                     const prevQ = (prev.data as KQFlowNodeData).question;
-                    if (prev.position.x === newPos.x && prev.position.y === newPos.y &&
-                        prev.selected === newSelected &&
-                        prevQ.question === q.question &&
-                        prevQ.answer === q.answer &&
-                        prevQ.statusCode === q.statusCode &&
-                        prevQ.deletedAt === q.deletedAt &&
-                        prevQ.scoreHistory.length === q.scoreHistory.length &&
-                        prevQ.srsNextReviewAt === q.srsNextReviewAt &&
-                        prevQ.retention === q.retention) {
+                    // Nullish-coalesce nullable fields so undefined and null compare
+                    // equal — JSON serialization and local construction can differ
+                    // (e.g. backend returns null, local construction may have undefined).
+                    const checks: Record<string, boolean> = {
+                        position: prev.position.x === newPos.x && prev.position.y === newPos.y,
+                        selected: (prev.selected ?? false) === newSelected,
+                        question: prevQ.question === q.question,
+                        answer: (prevQ.answer ?? null) === (q.answer ?? null),
+                        statusCode: prevQ.statusCode === q.statusCode,
+                        deletedAt: (prevQ.deletedAt ?? null) === (q.deletedAt ?? null),
+                        scoreHistoryLen: prevQ.scoreHistory.length === q.scoreHistory.length,
+                        srsNextReviewAt: (prevQ.srsNextReviewAt ?? null) === (q.srsNextReviewAt ?? null),
+                        retention: prevQ.retention === q.retention,
+                    };
+                    const allPass = Object.values(checks).every(Boolean);
+                    if (allPass) {
                         return prev;
                     }
+                } else {
+                    // New question
                 }
                 return {
                     id: String(q.id),
@@ -181,6 +277,7 @@ export function useKQFlowHeadless(nodeId: number, questions: KQuestion[], showDe
                     selected: newSelected,
                 };
             }) as Node<KQFlowNodeData>[];
+            return optimisticNodes.length > 0 ? [...result, ...optimisticNodes] : result;
         });
 
         // Only clear pendingSelectIds once ALL requested IDs are present in the

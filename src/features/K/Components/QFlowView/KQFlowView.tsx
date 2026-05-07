@@ -59,7 +59,9 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
         const res = nodeId === null
             ? await KQuizService._getOrphanQuestions()
             : await KQuizService._getNodeQuestions(nodeId);
-        if (res.success && res.object) setQuestions(res.object.questions);
+        if (res.success && res.object) {
+            setQuestions(res.object.questions);
+        }
     }, [nodeId]);
 
     const loadQuestions = useCallback(async () => {
@@ -67,9 +69,29 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
         try { await fetchQuestions(); } finally { setLoading(false); }
     }, [fetchQuestions]);
 
+    // Initial load: show spinner while fetching questions
     useEffect(() => { loadQuestions(); }, [loadQuestions]);
 
-    // Silent refresh when a question operation fires — no spinner so the canvas doesn't flash
+    // EVENT-DRIVEN SILENT FETCH:
+    // When a question operation completes (create, update, delete, restore),
+    // the handler fires an event from the operation's context (usually in a
+    // helper or dialog). This view listens for that event and silently
+    // re-fetches the question list.
+    //
+    // WHY "SILENT" (no spinner):
+    // - User already sees the change in the canvas (optimistic update)
+    // - Spinner would appear to "undo" what user just did
+    // - Backend fetch is just to sync state, not show new data
+    // - The smart rebuild in useKQFlow.headless reuses node references
+    //   if nothing visible changed, so no flicker
+    //
+    // HOW IT WORKS:
+    // 1. Create/update/delete operation calls dispatchKFlowQuestionsChanged(nodeId)
+    // 2. This listener catches that event for the current nodeId
+    // 3. Calls fetchQuestions() WITHOUT setting loading=true
+    // 4. setQuestions triggers a rebuild in useKQFlow.headless
+    // 5. Smart rebuild compares new data with existing nodes
+    // 6. Nodes are reused (no flash) unless actual values changed
     useEffect(() => {
         const handler = (e: CustomEvent<KFlowQuestionsChangedDetail>) => {
             if (e.detail.nodeId === nodeId) fetchQuestions();
@@ -245,11 +267,6 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                     showDeleted={showDeleted}
                     loading={loading}
                 />
-                {loading && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <Loader2 className="w-4 h-4 animate-spin text-zinc-600" />
-                    </div>
-                )}
             </div>
 
             {/* Review session overlay */}

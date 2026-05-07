@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useRef } from "react";
+import { Loader2 } from "lucide-react";
 import { ReactFlow, ReactFlowProvider, Background, Controls, MiniMap, BackgroundVariant, ConnectionMode, SelectionMode, useReactFlow, useStoreApi } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useKQFlowStore } from "@/features/K/store/useKQFlow.store";
@@ -180,12 +181,16 @@ function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: Canvas
                 on opacity-100) so viewport teleports are never visible; fades out
                 smoothly once the canvas is fully ready */}
             <div
-                className={`absolute inset-0 z-50 bg-zinc-950 ${
+                className={`absolute inset-0 z-50 bg-zinc-950 flex items-center justify-center ${
                     isCanvasReady
                         ? "opacity-0 pointer-events-none transition-opacity duration-150"
                         : "opacity-100"
                 }`}
-            />
+            >
+                {!isCanvasReady && (
+                    <Loader2 className="w-5 h-5 animate-spin text-zinc-600" />
+                )}
+            </div>
             <ReactFlow
                 nodes={flowNodes}
                 edges={flowEdges}

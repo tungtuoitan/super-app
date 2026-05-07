@@ -71,7 +71,8 @@ export const useKLoader = () => {
             const res = await KQuizService._getGlobalDailyQueue();
             if (res.success && res.object) {
                 const dueCount = res.object.reduce((sum, q) => sum + q.dueCount, 0);
-                setDailyReviewDueCount(dueCount);
+                const newCount = res.object.reduce((sum, q) => sum + q.newCount, 0);
+                setDailyReviewDueCount(dueCount + newCount);
             }
         } catch { /* silent */ }
     };
