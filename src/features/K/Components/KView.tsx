@@ -3,22 +3,22 @@
  * Extracted from VSSideBar for better separation of concerns
  */
 
-import { useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
-import { CalendarClock, Loader2 } from "lucide-react";
+import { CalendarClock, Loader2, RotateCw } from "lucide-react";
 import { useAuthStore } from "@/shared";
 import { useKStore } from "../store/useK.store";
 import { useKTabHelper } from "../hooks/useKTab.helper";
 import { KTree } from "./KExplorer/KTree";
 import { KDialog } from "./KDialog";
 import { useMenuContextHelper } from "@/shared";
-import { constants } from "@/shared";
 import {useKLoader} from "../hooks/kTree/useK.loader";
 
 /**
  * Workspace View - KTree for folder navigation with workspace selection
  */
 export function KView() {
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const { $user } = useAuthStore();
     const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId, dailyReviewDueCount } = useKStore();
     const { loadAllK, loadTree, softDeleteKnowledge, loadDailyReviewCount } = useKLoader();
@@ -57,7 +57,7 @@ export function KView() {
     };
 
     // Right-click context menu on the selector area
-    const handleContextMenu = 
+    const handleContextMenu =
         (e: React.MouseEvent) => {
             e.preventDefault();
             e.stopPropagation();
@@ -73,33 +73,58 @@ export function KView() {
                 },
             });
         }
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        try {
+            await Promise.all([loadAllK(), loadDailyReviewCount()]);
+            if (selectedKId !== null) {
+                await loadTree();
+            }
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
         
 
     return (
         <div className="h-full overflow-auto flex flex-col">
         {/* Workspace Selector */}
-            <div className="px-3 py-2" onContextMenu={handleContextMenu}>
-                <GenericAutoComplete
-                    allOptions={workspaceOptions.sort((a, b) => {
-                        const aActive = a.active ? 1 : 0;
-                        const bActive = b.active ? 1 : 0;
+            <div className="px-3 py-2 flex items-end gap-2" onContextMenu={handleContextMenu}>
+                <div className="flex-1">
+                    <GenericAutoComplete
+                        allOptions={workspaceOptions.sort((a, b) => {
+                            const aActive = a.active ? 1 : 0;
+                            const bActive = b.active ? 1 : 0;
 
-                        if (aActive !== bActive) {
-                            return bActive - aActive;
-                        }
+                            if (aActive !== bActive) {
+                                return bActive - aActive;
+                            }
 
-                        return (a?.desc ?? "").localeCompare(b?.desc ?? "");
-                    })}
-                    value={workspaceOptions.find((option) => option.id === selectedKId?.toString()) || null}
-                    onChange={handleWorkspaceChange}
-                    inputProps={{
-                        name: "workspace",
-                        label: "",
-                        required: false,
-                    }}
-                    disabled={isLoadingK || workspaceOptions.length === 0}
-                    size="small"
-                />
+                            return (a?.desc ?? "").localeCompare(b?.desc ?? "");
+                        })}
+                        value={workspaceOptions.find((option) => option.id === selectedKId?.toString()) || null}
+                        onChange={handleWorkspaceChange}
+                        inputProps={{
+                            name: "workspace",
+                            label: "",
+                            required: false,
+                        }}
+                        disabled={isLoadingK || workspaceOptions.length === 0}
+                        size="small"
+                    />
+                </div>
+                <div className="flex items-center gap-2 h-full">
+                    <button
+                        onClick={handleRefresh}
+                        disabled={isRefreshing || isLoadingK}
+                        className="pl-1 rounded-md hover:opacity-100 opacity-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                        title="Refresh knowledge list"
+                    >
+                        <RotateCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    </button>
+
+                </div>
             </div>
 
             {/* Daily Review shortcut */}
