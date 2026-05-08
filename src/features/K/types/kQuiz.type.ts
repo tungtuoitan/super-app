@@ -158,10 +158,10 @@ export interface KQuestionStatusTimelinePoint {
     learning: number;
     draft: number;
     deleted: number;
-    /** Independent DB count — should equal sum of the 4 buckets; mismatch indicates a bug. */
-    total: number;
 }
 
 export interface KQuestionStatusTimeline {
     days: KQuestionStatusTimelinePoint[];
+    /** Direct COUNT(*) from k.question for today — compare with today's sum(4) to detect classification bugs. */
+    dbTotalToday: number;
 }

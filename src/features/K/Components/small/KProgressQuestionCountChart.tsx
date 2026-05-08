@@ -152,21 +152,6 @@ export function KProgressQuestionCountChart({ data, height = 160 }: KProgressQue
                             </span>
                         </div>
                     ))}
-                    {(() => {
-                        const sum = SERIES.reduce((s, x) => s + pointValue(days[hovered], x.key), 0);
-                        const total = days[hovered].total;
-                        const mismatch = sum !== total;
-                        return (
-                            <div className="flex items-center gap-1.5 leading-5 mt-1 pt-1 border-t border-foreground/10">
-                                <span className="text-foreground/70">Total:</span>
-                                <span className="font-semibold ml-auto pl-2"
-                                      style={{ color: mismatch ? "#ff453a" : undefined }}
-                                      title={mismatch ? `Sum of buckets = ${sum} (mismatch)` : undefined}>
-                                    {total}{mismatch && ` ≠ ${sum}`}
-                                </span>
-                            </div>
-                        );
-                    })()}
                 </div>
             )}
         </div>

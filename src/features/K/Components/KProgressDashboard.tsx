@@ -215,12 +215,12 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
     ];
 
     return (
-        <div className="p-6 space-y-3 overflow-auto h-full" style={{ maxWidth: 940, margin: "0 auto" }}>
+        <div className="p-3 sm:p-6 space-y-3 overflow-auto h-full" style={{ maxWidth: 940, margin: "0 auto" }}>
 
             {/* Stat grid */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {STATS.map(s => (
-                    <div key={s.lbl} className={`${CARD} p-5 flex flex-col gap-3`}>
+                    <div key={s.lbl} className={`${CARD} p-3 sm:p-5 flex flex-col gap-3`}>
                         <div className="flex justify-between items-start">
                             <div className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0"
                                 style={{ background: s.iconBg, color: s.stroke }}>
@@ -262,7 +262,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
             </div>
 
             {/* Charts row */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className={`${CARD} p-5`}>
                     <div className="flex items-center mb-4">
                         <span className={CARD_LBL}>Avg retention</span>
@@ -308,12 +308,13 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                     {statusTimeline && statusTimeline.days.length > 0 && (() => {
                         const last = statusTimeline.days[statusTimeline.days.length - 1];
                         const sum = last.master + last.learning + last.draft + last.deleted;
-                        const mismatch = sum !== last.total;
+                        const dbTotal = statusTimeline.dbTotalToday;
+                        const mismatch = sum !== dbTotal;
                         return (
                             <span className="ml-2 text-[11px]"
                                   style={{ color: mismatch ? "#ff453a" : undefined }}
-                                  title={mismatch ? `Sum of buckets = ${sum} ≠ DB total ${last.total}` : undefined}>
-                                · total {last.total}{mismatch && ` (sum ${sum})`}
+                                  title={mismatch ? `Sum of buckets = ${sum} ≠ DB total ${dbTotal}` : undefined}>
+                                · total {dbTotal}{mismatch && ` (sum ${sum})`}
                             </span>
                         );
                     })()}
@@ -344,7 +345,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
             {/* Retention per node */}
             <div className={`${CARD} p-6`}>
                 <div className={`${CARD_LBL} mb-4`}>Retention per node</div>
-                <div className="grid gap-6 items-start" style={{ gridTemplateColumns: "160px 1fr" }}>
+                <div className="flex flex-col gap-6 sm:grid sm:items-start sm:[grid-template-columns:160px_1fr]">
                     <div>
                         {/* Donut: retention level breakdown (High/Medium/Low) */}
                         <NodeRetentionDonut high={highNodes} mid={mediumNodes} low={lowNodes} />
