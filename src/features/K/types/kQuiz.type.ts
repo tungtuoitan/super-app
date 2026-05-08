@@ -148,3 +148,20 @@ export interface KRetentionGraphDay {
     average: number;
     retentions: number[];
 }
+
+// ── Question Status Timeline (Progress dashboard) ──────────────────────────
+
+export interface KQuestionStatusTimelinePoint {
+    /** "yyyy-MM-dd" */
+    date: string;
+    master: number;
+    learning: number;
+    draft: number;
+    deleted: number;
+    /** Independent DB count — should equal sum of the 4 buckets; mismatch indicates a bug. */
+    total: number;
+}
+
+export interface KQuestionStatusTimeline {
+    days: KQuestionStatusTimelinePoint[];
+}

@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Brain, BookOpen, CalendarClock, TrendingUp } from "lucide-react";
 import { KQuizService } from "../service/kQuiz.service";
 import { KService } from "../service/k.service";
-import type { KRetentionSummary, KRetentionGraph, KDailyQueueItem, KQuestion } from "../types/kQuiz.type";
+import type { KRetentionSummary, KRetentionGraph, KDailyQueueItem, KQuestion, KQuestionStatusTimeline } from "../types/kQuiz.type";
 import type { KItemV2 } from "../types/kV2.type";
 import { KProgressRetentionChart } from "./small/KProgressRetentionChart";
 import { KProgressMasteryChart } from "./small/KProgressMasteryChart";
+import { KProgressQuestionCountChart } from "./small/KProgressQuestionCountChart";
 
 const C = { high: "#30d158", mid: "#ff9f0a", low: "#8e8e93", blue: "#0071e3", orange: "#ff6b35" };
 
@@ -75,6 +76,7 @@ interface DashboardData {
     retention: KRetentionSummary | null;
     retentionGraph: KRetentionGraph | null;
     dailyQueue: KDailyQueueItem[];
+    statusTimeline: KQuestionStatusTimeline | null;
 }
 
 const CARD = "bg-card rounded-[18px] shadow-[0_2px_20px_rgba(0,0,0,0.06),0_1px_4px_rgba(0,0,0,0.04)] overflow-hidden";
@@ -94,7 +96,8 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
             KQuizService._getRetentionGraph(knowledgeId, 14),
             KQuizService._getDailyQueue(knowledgeId),
             KService._getWorkspaceTreeV2("", knowledgeId),
-        ]).then(([qRes, retRes, graphRes, queueRes, treeRes]) => {
+            KQuizService._getQuestionStatusTimeline(knowledgeId),
+        ]).then(([qRes, retRes, graphRes, queueRes, treeRes, timelineRes]) => {
             const rawQs = qRes.status === "fulfilled" && qRes.value.success
                 ? (qRes.value.object?.questions ?? []) : [];
             const nodes = treeRes.status === "fulfilled" && treeRes.value.success
@@ -106,6 +109,8 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                 retentionGraph: graphRes.status === "fulfilled" ? graphRes.value : null,
                 dailyQueue: queueRes.status === "fulfilled" && queueRes.value.success
                     ? (queueRes.value.object ?? []) : [],
+                statusTimeline: timelineRes.status === "fulfilled" && timelineRes.value.success
+                    ? (timelineRes.value.object ?? null) : null,
             });
             setLoading(false);
         });
@@ -115,7 +120,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
         return <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">Loading…</div>;
     }
 
-    const { questions, nodes, retention, retentionGraph, dailyQueue } = data;
+    const { questions, nodes, retention, retentionGraph, dailyQueue, statusTimeline } = data;
 
     // Active node ids — nodes that are not deleted and not draft
     const activeNodeIds = new Set(nodes.map(n => n.id));
@@ -294,6 +299,46 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                           </div>
                     }
                 </div>
+            </div>
+
+            {/* Question states over time */}
+            <div className={`${CARD} p-5`}>
+                <div className="flex items-center mb-4">
+                    <span className={CARD_LBL}>Question states over time</span>
+                    {statusTimeline && statusTimeline.days.length > 0 && (() => {
+                        const last = statusTimeline.days[statusTimeline.days.length - 1];
+                        const sum = last.master + last.learning + last.draft + last.deleted;
+                        const mismatch = sum !== last.total;
+                        return (
+                            <span className="ml-2 text-[11px]"
+                                  style={{ color: mismatch ? "#ff453a" : undefined }}
+                                  title={mismatch ? `Sum of buckets = ${sum} ≠ DB total ${last.total}` : undefined}>
+                                · total {last.total}{mismatch && ` (sum ${sum})`}
+                            </span>
+                        );
+                    })()}
+                    <div className="ml-auto flex items-center gap-[14px]">
+                        {[
+                            { c: "#30d158", l: "Master" },
+                            { c: "#0071e3", l: "Learning" },
+                            { c: "#8e8e93", l: "Draft" },
+                            { c: "#ff453a", l: "Deleted" },
+                        ].map(({ c, l }) => (
+                            <div key={l} className="flex items-center gap-1.5">
+                                <span className="w-[7px] h-[7px] rounded-[2px]" style={{ background: c }} />
+                                <span className="text-[11px] text-muted-foreground">{l}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                {statusTimeline && statusTimeline.days.length > 0
+                    ? <div className="overflow-x-auto">
+                        <KProgressQuestionCountChart data={statusTimeline} height={160} />
+                      </div>
+                    : <div className="flex items-center justify-center h-[160px] text-[11px] text-muted-foreground text-center px-4">
+                        No question history available yet.
+                      </div>
+                }
             </div>
 
             {/* Retention per node */}

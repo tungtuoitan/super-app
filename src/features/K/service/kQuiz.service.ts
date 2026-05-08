@@ -11,6 +11,7 @@ import type {
     KDailySubmitRequest,
     KRetentionSummary,
     KRetentionGraph,
+    KQuestionStatusTimeline,
 } from "../types/kQuiz.type";
 import { apiFetch } from "@/shared";
 import { ResultOptions } from "@/shared";
@@ -156,6 +157,14 @@ const _getRetentionGraph = async (nodeId: number, days = 14): Promise<KRetention
     return Promise.reject(res);
 };
 
+const _getQuestionStatusTimeline = async (
+    knowledgeId: number,
+): Promise<ResultOptions<KQuestionStatusTimeline>> => {
+    const res = await apiFetch(`${base(knowledgeId)}/question-status-timeline`, { method: "GET" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
 // ── Audio (unchanged) ──────────────────────────────────────────────────────
 
 const _transcribeAudio = async (audioBlob: Blob): Promise<string> => {
@@ -190,5 +199,6 @@ export const KQuizService = {
     _submitDailyAnswers,
     _getRetention,
     _getRetentionGraph,
+    _getQuestionStatusTimeline,
     _transcribeAudio,
 };
