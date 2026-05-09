@@ -8,10 +8,12 @@ import { useMemo } from "react";
 import { useProjectStore } from "@/features/project";
 import type { TabType } from "../types/multiProjectDetail.type";
 import { useEditorTabBarHelper } from "@/shell";
+import { useMpTaskStore } from "../store/useMpTask.store";
 
 export const useMultiProjectDetailSelector = () => {
     const { getActiveTab } = useEditorTabBarHelper();
     const { projects } = useProjectStore();
+    const { taskSearchQuery } = useMpTaskStore();
 
     // Current editor tab
     const currentTab = getActiveTab();
@@ -54,5 +56,6 @@ export const useMultiProjectDetailSelector = () => {
         selectedProjectIds,
         filteredProjects,
         filteredProjectIds,
+        taskSearchQuery,
     };
 };

@@ -7,10 +7,12 @@
 import { useEditorTabBarHelper } from "@/shell";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import type { TabType } from "../../types/multiProjectDetail.type";
+import { useMpTaskStore } from "../../store/useMpTask.store";
 
 export const useMultiProjectDetailHelper = () => {
     const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { availableProjects } = useMultiProjectDetailSelector();
+    const { setTaskSearchQuery } = useMpTaskStore();
 
     // Update inner tab in editor tab metadata
     const setActiveTab = (newTab: TabType) => {
@@ -59,5 +61,6 @@ export const useMultiProjectDetailHelper = () => {
         handleSelectAllActive,
         handleSelectAll,
         handleClearAll,
+        setTaskSearchQuery,
     };
 };

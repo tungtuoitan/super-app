@@ -10,21 +10,28 @@ import { Input } from "@/shared";
 import { Button } from "@/shared";
 import { usePTaskStore } from "@/features/project";
 
-export function TaskSearchInput() {
+interface TaskSearchInputProps {
+    value?: string;
+    onSearch?: (q: string) => void;
+}
+
+export function TaskSearchInput({ value, onSearch }: TaskSearchInputProps = {}) {
     const { taskSearchQuery, setTaskSearchQuery } = usePTaskStore();
-    const [inputValue, setInputValue] = useState(taskSearchQuery);
+    const resolvedQuery = value !== undefined ? value : taskSearchQuery;
+    const commitSearch = onSearch ?? setTaskSearchQuery;
+    const [inputValue, setInputValue] = useState(resolvedQuery);
 
     useEffect(() => {
-        setInputValue(taskSearchQuery);
-    }, [taskSearchQuery]);
+        setInputValue(resolvedQuery);
+    }, [resolvedQuery]);
 
     const handleSearch = () => {
-        setTaskSearchQuery(inputValue);
+        commitSearch(inputValue);
     };
 
     const handleClear = () => {
         setInputValue("");
-        setTaskSearchQuery("");
+        commitSearch("");
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

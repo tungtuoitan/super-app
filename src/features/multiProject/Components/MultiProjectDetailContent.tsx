@@ -34,10 +34,10 @@ const TABS: TabConfig[] = [
  */
 export function MultiProjectDetailContent() {
     // ── Computed values (from selector) ──────────────────
-    const { activeTab, availableProjects, selectedProjectIds, filteredProjectIds } = useMultiProjectDetailSelector();
+    const { activeTab, availableProjects, selectedProjectIds, filteredProjectIds, taskSearchQuery } = useMultiProjectDetailSelector();
 
     // ── Handlers (from helper) ───────────────────────────
-    const { setActiveTab, handleToggleProject, handleSelectAllActive, handleSelectAll, handleClearAll } = useMultiProjectDetailHelper();
+    const { setActiveTab, handleToggleProject, handleSelectAllActive, handleSelectAll, handleClearAll, setTaskSearchQuery } = useMultiProjectDetailHelper();
 
     // ── Side-effects (headless) ──────────────────────────
     useMultiProjectDetailHeadless();
@@ -94,7 +94,7 @@ export function MultiProjectDetailContent() {
                 </div>
                 <div className="flex items-center gap-1 px-2">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mr-1">{filteredProjectIds.length} / {availableProjects.length} Projects</span>
-                    {activeTab === "taskList" && <TaskSearchInput />}
+                    {activeTab === "taskList" && <TaskSearchInput value={taskSearchQuery} onSearch={setTaskSearchQuery} />}
                     {(activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline" || activeTab === "taskFlow") && <TaskFilterPopup />}
                 </div>
             </div>

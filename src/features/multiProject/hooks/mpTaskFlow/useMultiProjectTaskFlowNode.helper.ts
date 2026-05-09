@@ -25,7 +25,7 @@ import { useDebugLog } from "@/shared";
 export const useMultiProjectTaskFlowNodeHelper = () => {
     const { setFlowNodes, setEditingNodeId, taskFlowTasks, setTaskFlowTasks, savedEdges, setSavedEdges, setFlowEdges } = useMultiTaskFlowStore();
     const { handleToggleProcess } = useMultiProjectTaskFlowProcessHelper();
-    const { filteredTasks, flowNodes: currentFlowNodes, projectNameMap, filteredProjectIds } = useMultiProjectTaskFlowSelector();
+    const { filteredTasks, flowNodes: currentFlowNodes, projectNameMap, filteredProjectIds, allProjects } = useMultiProjectTaskFlowSelector();
     const { tasks, setTasks } = useMpTaskStore();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
@@ -209,6 +209,9 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
             } else if (filteredProjectIds.length > 0) {
                 projectId = filteredProjectIds[0];
                 projectName = projectNameMap.get(projectId) ?? "";
+            } else if (allProjects.length > 0) {
+                projectId = allProjects[0].id;
+                projectName = allProjects[0].name;
             }
 
             if (!projectId) {
