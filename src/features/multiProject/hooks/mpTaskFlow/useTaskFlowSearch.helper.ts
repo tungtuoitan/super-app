@@ -1,6 +1,7 @@
 import { useReactFlow } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import type { TaskFlowNodeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
+import { removeDiacritics } from "@/shared";
 
 export const useTaskFlowSearchHelper = () => {
     const {
@@ -31,11 +32,11 @@ export const useTaskFlowSearchHelper = () => {
             setSearchActiveIndex(0);
             return;
         }
-        const q = query.toLowerCase();
+        const q = removeDiacritics(query).toLowerCase();
         const matchIds = flowNodes
             .filter((n) => {
                 const data = n.data as TaskFlowNodeData;
-                return data.task?.title?.toLowerCase().includes(q);
+                return removeDiacritics(data.task?.title ?? "").toLowerCase().includes(q);
             })
             .map((n) => n.id);
         setSearchMatchIds(matchIds);

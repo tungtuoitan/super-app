@@ -140,9 +140,10 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
             }
 
             const taskId = parseInt(nodeId, 10);
-            const task = tasks.find((t) => t.id === taskId);
+            const task = taskFlowTasks.find((t) => t.id === taskId);
             if (!task || task.title === trimmed) return;
 
+            setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, title: trimmed } : t)));
             setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, title: trimmed } : t)));
             setFlowNodes((prev) =>
                 prev.map((n) =>
@@ -168,6 +169,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 if (!result.success) throw new Error(result.message);
                 _console.success("Task renamed");
             } catch {
+                setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, title: task.title } : t)));
                 setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, title: task.title } : t)));
                 setFlowNodes((prev) =>
                     prev.map((n) =>

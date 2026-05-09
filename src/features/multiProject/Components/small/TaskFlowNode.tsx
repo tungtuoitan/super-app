@@ -20,7 +20,7 @@ import { useTaskTabHelper } from "@/features/taskDetail";
 import { getStatusBorderColor, getStatusNodeBackground } from "@/features/multiProject/utils/multiProjectTaskFlow.utils";
 import { ExternalLink, ChevronDown, Circle } from "lucide-react";
 import type { TaskFlowNodeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
-import { useGetStandardRegistry, HighlightText } from "@/shared";
+import { useGetStandardRegistry, HighlightText, useGlobalShortcut } from "@/shared";
 import type { StandardRegistry } from "@/shared";
 import { TaskFlowProcessPopup } from "./TaskFlowProcessPopup";
 
@@ -51,6 +51,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const multiSelected = flowNodes.filter((n) => n.selected).length > 1;
     const inputRef = useRef<HTMLInputElement>(null);
     const nodeRef = useRef<HTMLDivElement>(null);
+    const renameCommittedRef = useRef(false);
     const pickerRef = useRef<HTMLDivElement>(null);
 
     const borderColor = getStatusBorderColor(data.task.status);
@@ -63,6 +64,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     // Focus input when entering edit mode (retry until mounted)
     useEffect(() => {
         if (!isEditing) return;
+        renameCommittedRef.current = false;
         setEditValue(data.task.title);
         let attempts = 0;
         const tryFocus = () => {
@@ -76,6 +78,11 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
         };
         setTimeout(tryFocus, 50);
     }, [isEditing, data.task.title]);
+
+    useGlobalShortcut("ctrl+s", { id: "taskflow-node-rename", priority: 100, enabled: isEditing }, () => {
+        renameCommittedRef.current = true;
+        handleRenameConfirm(id, editValue);
+    });
 
     // Close project picker on click outside
     useEffect(() => {
@@ -96,8 +103,12 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter" || (e.key.toLowerCase() === "s" && e.ctrlKey)) handleRenameConfirm(id, editValue);
+        if (e.key === "Enter") {
+            renameCommittedRef.current = true;
+            handleRenameConfirm(id, editValue);
+        }
         if (e.key === "Escape") {
+            renameCommittedRef.current = true;
             if (isTempNode) {
                 handleRenameConfirm(id, "");
             } else {
@@ -107,6 +118,10 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     };
 
     const handleBlur = () => {
+        if (renameCommittedRef.current) {
+            renameCommittedRef.current = false;
+            return;
+        }
         if (isTempNode) {
             handleRenameConfirm(id, "");
         } else {
