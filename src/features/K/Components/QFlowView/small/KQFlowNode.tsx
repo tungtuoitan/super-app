@@ -8,7 +8,7 @@ import { useKQFlowStore } from "@/features/K/store/useKQFlow.store";
 import { useKQFlowHelper } from "@/features/K/hooks/qFlow/useKQFlow.helper";
 import { useKQFlowCanvasHelper } from "@/features/K/hooks/qFlow/useKQFlowCanvas.helper";
 import { useKStore } from "@/features/K/store/useK.store";
-import { useGlobalShortcut, useDeviceStore } from "@/shared";
+import { useGlobalShortcut, useDeviceStore, HighlightText } from "@/shared";
 import type { KQFlowNodeData } from "@/features/K/types/kQFlow.type";
 
 const HANDLES = [Position.Top, Position.Right, Position.Bottom, Position.Left];
@@ -22,7 +22,7 @@ const Q_TEXT = "w-full text-xs font-semibold text-zinc-100 leading-relaxed";
 const A_TEXT = "w-full text-[11px] text-zinc-400 leading-relaxed";
 
 export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData>>) {
-    const { editingNodeId, connectingSourceId, flowNodes, flowEdges, nodeId } = useKQFlowStore();
+    const { editingNodeId, connectingSourceId, flowNodes, flowEdges, nodeId, searchMatchIds, searchActiveIndex, searchQuery } = useKQFlowStore();
 
     // Collect all selected non-deleted question IDs; always includes questionId
     const getMovableIds = (questionId: number): number[] => {
@@ -158,6 +158,8 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
     });
 
     const isDraft = !isDeleted && question.statusCode === "draft";
+    const isSearchMatch = searchMatchIds.includes(id);
+    const isActiveMatch = isSearchMatch && searchMatchIds[searchActiveIndex] === id;
 
     return (
         <div
@@ -174,7 +176,8 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                     : selected
                     ? "border-blue-500/50 bg-zinc-900/80 ring-1 ring-blue-500/40 shadow-lg shadow-blue-500/10"
                     : "border-zinc-700/60 bg-zinc-900/80"
-            } ${isFlashing ? "ring-2 ring-amber-400/20 scale-[1.02] brightness-125 transition-all duration-150" : ""}`}
+            } ${isFlashing ? "ring-2 ring-amber-400/20 scale-[1.02] brightness-125 transition-all duration-150" : ""
+            } ${isActiveMatch ? "ring-2 ring-amber-400 shadow-[0_0_10px_2px] shadow-amber-400/30" : isSearchMatch ? "ring-2 ring-amber-400/50" : ""}`}
             style={{ width: 280 }}
             onDoubleClick={isMobile ? undefined : (e) => {
                 if (!isDeleted && editingNodeId === null) {
@@ -261,7 +264,9 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                     />
                 ) : (
                     <div className={`absolute inset-0 px-3 pt-3 pb-1 ${Q_TEXT} whitespace-pre-wrap break-words select-none`}>
-                        {question.question || <span className="text-zinc-600">—</span>}
+                        {question.question
+                            ? <HighlightText text={question.question} highlight={searchQuery} />
+                            : <span className="text-zinc-600">—</span>}
                     </div>
                 )}
             </div>
@@ -284,7 +289,9 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                     />
                 ) : (
                     <div className={`absolute inset-0 px-3 pt-1.5 pb-2 ${A_TEXT} whitespace-pre-wrap break-words select-none`}>
-                        {question.answer || <span className="text-zinc-700 italic">no answer</span>}
+                        {question.answer
+                            ? <HighlightText text={question.answer} highlight={searchQuery} />
+                            : <span className="text-zinc-700 italic">no answer</span>}
                     </div>
                 )}
             </div>

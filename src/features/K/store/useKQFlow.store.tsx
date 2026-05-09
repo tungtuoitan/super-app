@@ -26,6 +26,14 @@ export interface KQFlowContextData {
     /** Node IDs to auto-select after the next rebuild (cleared once applied) */
     pendingSelectIds: number[];
     setPendingSelectIds: Dispatch<SetStateAction<number[]>>;
+    isSearchOpen: boolean;
+    setIsSearchOpen: Dispatch<SetStateAction<boolean>>;
+    searchQuery: string;
+    setSearchQuery: Dispatch<SetStateAction<string>>;
+    searchMatchIds: string[];
+    setSearchMatchIds: Dispatch<SetStateAction<string[]>>;
+    searchActiveIndex: number;
+    setSearchActiveIndex: Dispatch<SetStateAction<number>>;
 }
 
 const defaultValue: KQFlowContextData = {
@@ -39,6 +47,10 @@ const defaultValue: KQFlowContextData = {
     connectingSourceId: null, setConnectingSourceId: () => {},
     nodeId: 0, setNodeId: () => {},
     pendingSelectIds: [], setPendingSelectIds: () => {},
+    isSearchOpen: false, setIsSearchOpen: () => {},
+    searchQuery: "", setSearchQuery: () => {},
+    searchMatchIds: [], setSearchMatchIds: () => {},
+    searchActiveIndex: 0, setSearchActiveIndex: () => {},
 };
 
 const KQFlowStore = createContext<KQFlowContextData>(defaultValue);
@@ -56,6 +68,10 @@ export const KQFlowProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
     const [connectingSourceId, setConnectingSourceId] = useState<string | null>(null);
     const [nodeId, setNodeId] = useState(0);
     const [pendingSelectIds, setPendingSelectIds] = useState<number[]>([]);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchMatchIds, setSearchMatchIds] = useState<string[]>([]);
+    const [searchActiveIndex, setSearchActiveIndex] = useState(0);
 
     return (
         <KQFlowStore.Provider value={{
@@ -69,6 +85,10 @@ export const KQFlowProvider: React.FC<React.PropsWithChildren<unknown>> = ({ chi
             connectingSourceId, setConnectingSourceId,
             nodeId, setNodeId,
             pendingSelectIds, setPendingSelectIds,
+            isSearchOpen, setIsSearchOpen,
+            searchQuery, setSearchQuery,
+            searchMatchIds, setSearchMatchIds,
+            searchActiveIndex, setSearchActiveIndex,
         }}>
             {children}
         </KQFlowStore.Provider>

@@ -10,9 +10,11 @@ import { useKQFlowHeadless } from "@/features/K/hooks/qFlow/useKQFlow.headless";
 import { useKQFlowCanvasReveal } from "@/features/K/hooks/qFlow/useKQFlowCanvasReveal.helper";
 import { useKQFlowWheelZoom } from "@/features/K/hooks/qFlow/useKQFlowWheelZoom.helper";
 import { useKQFlowShortcuts } from "@/features/K/hooks/qFlow/useKQFlowShortcuts.helper";
-import { useMenuContextHelper, useDeviceStore } from "@/shared";
+import { useMenuContextHelper, useDeviceStore, useGlobalShortcut } from "@/shared";
 import { KQFlowNode } from "./small/KQFlowNode";
 import { KQFlowEdge } from "./small/KQFlowEdge";
+import { KQFlowSearchBar } from "./small/KQFlowSearchBar";
+import { useKQFlowSearchHelper } from "@/features/K/hooks/qFlow/useKQFlowSearch.helper";
 import type { KQuestion } from "@/features/K/types/kQuiz.type";
 import type { KQFlowNodeData } from "@/features/K/types/kQFlow.type";
 import type { Edge, Node } from "@xyflow/react";
@@ -67,6 +69,9 @@ function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: Canvas
         useKQFlowDragHelper(selectionLockRef, lockSelection);
     const { handleDeleteQuestion, handlePasteQuestions } = useKQFlowHelper();
     const { showContextMenu } = useMenuContextHelper();
+    const { handleOpen: openSearch } = useKQFlowSearchHelper();
+
+    useGlobalShortcut("ctrl+k", { id: "kqflow-search-open", priority: 50, enabled: editingNodeId === null }, openSearch);
 
     // ── Keyboard shortcuts (delete / cut / paste / escape / ctrl+o) ──────────
     // Shortcuts are disabled on mobile (read-only) — passing empty arrays turns off all enabled flags
@@ -236,6 +241,7 @@ function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: Canvas
                 panOnDrag={isMobile ? [0] : [1]}
             >
                 <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgba(113,113,122,0.2)" />
+                <KQFlowSearchBar />
                 <Controls showInteractive={false} />
                 <MiniMap
                     nodeColor={() => "rgba(99,102,241,0.4)"}
