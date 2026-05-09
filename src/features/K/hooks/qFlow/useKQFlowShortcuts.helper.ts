@@ -18,6 +18,7 @@ interface UseKFlowShortcutsArgs {
         targetNodeId: number | null,
         cursorPos: { x: number; y: number },
     ) => void;
+    editingNodeId: string | null;
 }
 
 export function useKQFlowShortcuts({
@@ -30,6 +31,7 @@ export function useKQFlowShortcuts({
     lockSelection,
     targetNodeId,
     handlePasteQuestions,
+    editingNodeId,
 }: UseKFlowShortcutsArgs) {
     const rfInstance = useReactFlow();
     const { kFlowClipboard, setKFlowClipboard } = useKStore();
@@ -43,25 +45,25 @@ export function useKQFlowShortcuts({
     }, []);
 
     // Delete selected edges (higher priority so edge-only selections don't trigger node delete)
-    useGlobalShortcut("delete", { id: "kflow-delete-edge", priority: 65, enabled: selectedEdgeIds.length > 0 }, () => {
+    useGlobalShortcut("delete", { id: "kflow-delete-edge", priority: 65, enabled: selectedEdgeIds.length > 0 && !editingNodeId }, () => {
         selectedEdgeIds.forEach((id) => handleEdgeDelete(id));
     });
 
     // Delete selected nodes — only fires when no edges are selected
-    useGlobalShortcut("delete", { id: "kflow-delete-nodes", priority: 60, enabled: selectedNodeIds.length > 0 && selectedEdgeIds.length === 0 }, () => {
+    useGlobalShortcut("delete", { id: "kflow-delete-nodes", priority: 60, enabled: selectedNodeIds.length > 0 && selectedEdgeIds.length === 0 && !editingNodeId }, () => {
         selectedNodeIds.forEach((id) => handleDeleteQuestion(id));
     });
 
     // Ctrl+X — cut selected questions into the clipboard
     // lockSelection prevents ReactFlow from clearing the selection when the
     // keyboard event shifts DOM focus away from the canvas.
-    useGlobalShortcut("ctrl+x", { id: "kflow-cut", priority: 60, enabled: selectedNodeIds.length > 0 }, () => {
+    useGlobalShortcut("ctrl+x", { id: "kflow-cut", priority: 60, enabled: selectedNodeIds.length > 0 && !editingNodeId }, () => {
         setKFlowClipboard({ questionIds: selectedNodeIds, sourceNodeId: targetNodeId });
         lockSelection(selectedNodeIds.map(String));
     });
 
     // Ctrl+V — paste clipboard questions at the current cursor position
-    useGlobalShortcut("ctrl+v", { id: "kflow-paste", priority: 60, enabled: !!kFlowClipboard }, () => {
+    useGlobalShortcut("ctrl+v", { id: "kflow-paste", priority: 60, enabled: !!kFlowClipboard && !editingNodeId }, () => {
         if (!kFlowClipboard) return;
         const cursorFlowPos = rfInstance.screenToFlowPosition(mousePosRef.current);
         handlePasteQuestions(kFlowClipboard, targetNodeId, cursorFlowPos);
@@ -74,7 +76,7 @@ export function useKQFlowShortcuts({
     });
 
     // Ctrl+O — organize selected nodes
-    useGlobalShortcut("ctrl+o", { id: "kflow-organize", priority: 60, enabled: selectedStringIds.length >= 2 }, () => {
+    useGlobalShortcut("ctrl+o", { id: "kflow-organize", priority: 60, enabled: selectedStringIds.length >= 2 && !editingNodeId }, () => {
         handleOrganize(selectedStringIds);
     });
 }

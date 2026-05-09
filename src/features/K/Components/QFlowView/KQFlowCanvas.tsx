@@ -33,7 +33,7 @@ interface CanvasContentProps {
 
 function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: CanvasContentProps) {
     useKQFlowHeadless(nodeId, questions, showDeleted);
-    const { setNodeId, setFlowNodes, setEditingNodeId, positionsLoaded, flowNodes, flowEdges } = useKQFlowStore();
+    const { setNodeId, setFlowNodes, setEditingNodeId, editingNodeId, positionsLoaded, flowNodes, flowEdges } = useKQFlowStore();
     const storeNodes = flowNodes;
     const rfInstance = useReactFlow();
     const storeApi = useStoreApi();
@@ -89,6 +89,7 @@ function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: Canvas
         lockSelection,
         targetNodeId,
         handlePasteQuestions,
+        editingNodeId,
     });
 
     const isDragSelecting = useRef(false);
