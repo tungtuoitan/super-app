@@ -32,6 +32,8 @@ import { storageService, STORAGE_KEYS } from "@/shared";
 import { TASK_FLOW_CSS, MIN_ZOOM, MAX_ZOOM, PAN_SPEED, ZOOM_FACTOR_OUT, ZOOM_FACTOR_IN } from "../../utils/multiProjectTaskFlow.constants";
 import { TaskFlowNode } from "./TaskFlowNode";
 import { FlowEdgeWithNote } from "./FlowEdgeWithNote";
+import { TaskFlowSearchBar } from "./TaskFlowSearchBar";
+import { useTaskFlowSearchHelper } from "../../hooks/mpTaskFlow/useTaskFlowSearch.helper";
 import { cn } from "@/lib/utils";
 
 const nodeTypes = { taskFlowNode: TaskFlowNode };
@@ -56,6 +58,7 @@ export function TaskFlowCanvas() {
 
     const { viewMode, showMiniMap, setShowMiniMap, dynMinZoomRef, handleF1Toggle, handleBackToCenter } = useTaskFlowViewControlsHelper(containerRef);
     const { isMobile } = useDeviceStore();
+    const { handleOpen: openSearch } = useTaskFlowSearchHelper();
 
     // Drag-select only nodes — deselect edges caught in the selection box
     const handleSelectionChange = ({ nodes: selectedNodes, edges: selectedEdges }: { nodes: { id: string }[]; edges: { id: string }[] }) => {
@@ -123,6 +126,20 @@ export function TaskFlowCanvas() {
         document.addEventListener("wheel", onWheel, { passive: false, capture: true });
         return () => document.removeEventListener("wheel", onWheel, { capture: true } as EventListenerOptions);
     }, [rfInstance]);
+
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+                const active = document.activeElement;
+                const isTyping = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || (active as HTMLElement)?.isContentEditable;
+                if (isTyping) return;
+                e.preventDefault();
+                openSearch();
+            }
+        };
+        document.addEventListener("keydown", onKeyDown);
+        return () => document.removeEventListener("keydown", onKeyDown);
+    }, [openSearch]);
 
     const onDeleteNodes = async (ids: string[]) => {
         await handleDeleteNodes(ids);
@@ -230,6 +247,7 @@ export function TaskFlowCanvas() {
                 proOptions={{ hideAttribution: true }}
             >
                 <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color="currentColor" className="text-muted-foreground/15" />
+                <TaskFlowSearchBar />
 
                 {showMiniMap && (
                     <MiniMap

@@ -48,6 +48,18 @@ export interface MultiTaskFlowContextData {
     /** When true, completed/cancelled nodes + their edges are locked (non-draggable, non-editable) */
     lockOldNodes: boolean;
     setLockOldNodes: Dispatch<SetStateAction<boolean>>;
+    /** Whether the Ctrl+F search bar is open */
+    isSearchOpen: boolean;
+    setIsSearchOpen: Dispatch<SetStateAction<boolean>>;
+    /** Current search query text */
+    searchQuery: string;
+    setSearchQuery: Dispatch<SetStateAction<string>>;
+    /** Node IDs that match the current search query */
+    searchMatchIds: string[];
+    setSearchMatchIds: Dispatch<SetStateAction<string[]>>;
+    /** Index into searchMatchIds of the currently highlighted match */
+    searchActiveIndex: number;
+    setSearchActiveIndex: Dispatch<SetStateAction<number>>;
 }
 
 const defaultValue: MultiTaskFlowContextData = {
@@ -77,6 +89,14 @@ const defaultValue: MultiTaskFlowContextData = {
     setIsTaskFlowLoading: () => {},
     lockOldNodes: true,
     setLockOldNodes: () => {},
+    isSearchOpen: false,
+    setIsSearchOpen: () => {},
+    searchQuery: "",
+    setSearchQuery: () => {},
+    searchMatchIds: [],
+    setSearchMatchIds: () => {},
+    searchActiveIndex: 0,
+    setSearchActiveIndex: () => {},
 };
 
 const MultiTaskFlowStore = createContext<MultiTaskFlowContextData>(defaultValue);
@@ -97,6 +117,10 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
     const [taskFlowTasks, setTaskFlowTasks] = useState<Task[]>([]);
     const [isTaskFlowLoading, setIsTaskFlowLoading] = useState(true);
     const [lockOldNodes, setLockOldNodes] = useState(true);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchMatchIds, setSearchMatchIds] = useState<string[]>([]);
+    const [searchActiveIndex, setSearchActiveIndex] = useState(0);
 
     return (
         <MultiTaskFlowStore.Provider
@@ -114,6 +138,10 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
                 taskFlowTasks, setTaskFlowTasks,
                 isTaskFlowLoading, setIsTaskFlowLoading,
                 lockOldNodes, setLockOldNodes,
+                isSearchOpen, setIsSearchOpen,
+                searchQuery, setSearchQuery,
+                searchMatchIds, setSearchMatchIds,
+                searchActiveIndex, setSearchActiveIndex,
             }}
         >
             {children}

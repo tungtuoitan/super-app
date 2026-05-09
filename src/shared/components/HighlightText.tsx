@@ -1,10 +1,10 @@
 /**
- * KHighlightText — highlights matching text, diacritic-insensitive.
- * "bat" matches "Bát", "khoan" matches "khoăn", "duong" matches "đường", etc.
+ * HighlightText — highlights matching substring, diacritic-insensitive.
+ * "bat" matches "Bát", "duong" matches "đường", etc.
  */
 
-import {removeDiacritics} from "@/shared";
 import React from "react";
+import { removeDiacritics } from "@/shared";
 
 interface HighlightTextProps {
     text: string;
@@ -12,13 +12,11 @@ interface HighlightTextProps {
     className?: string;
 }
 
-export function KHighlightText({ text, highlight, className = "" }: HighlightTextProps) {
+export function HighlightText({ text, highlight, className = "" }: HighlightTextProps) {
     if (!highlight || !highlight.trim()) {
         return <span className={className}>{text}</span>;
     }
 
-    // Work with NFC (composed) form — each visible char is one code-point.
-    // removeDiacritics preserves NFC length, so positions map 1-to-1.
     const nfcText         = text.normalize("NFC");
     const normalizedText  = removeDiacritics(nfcText).toLowerCase();
     const normalizedQuery = removeDiacritics(highlight.trim()).toLowerCase();

@@ -20,14 +20,14 @@ import { useTaskTabHelper } from "@/features/taskDetail";
 import { getStatusBorderColor, getStatusNodeBackground } from "@/features/multiProject/utils/multiProjectTaskFlow.utils";
 import { ExternalLink, ChevronDown, Circle } from "lucide-react";
 import type { TaskFlowNodeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
-import { useGetStandardRegistry } from "@/shared";
+import { useGetStandardRegistry, HighlightText } from "@/shared";
 import type { StandardRegistry } from "@/shared";
 import { TaskFlowProcessPopup } from "./TaskFlowProcessPopup";
 
 const HANDLE_BASE = "!rounded-full !border-[1.5px] !border-primary !bg-primary/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150";
 
 export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNodeData>>) {
-    const { editingNodeId, draggingNodeId, flowNodes, flowEdges, connectingSourceId } = useMultiTaskFlowStore();
+    const { editingNodeId, draggingNodeId, flowNodes, flowEdges, connectingSourceId, searchMatchIds, searchActiveIndex, searchQuery } = useMultiTaskFlowStore();
     const { handleRenameStart, handleRenameConfirm, handleRenameCancel, handleChangeProject, handleChangeStatus, isNodeLocked } = useMultiProjectTaskFlowNodeHelper();
     const { allProjects } = useMultiProjectTaskFlowSelector();
     const { openTaskTab } = useTaskTabHelper();
@@ -35,6 +35,8 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
     const statusOptions = useGetStandardRegistry("task_status");
 
     const isEditing = editingNodeId === id;
+    const isSearchMatch = searchMatchIds.includes(id);
+    const isActiveMatch = isSearchMatch && searchMatchIds[searchActiveIndex] === id;
     const isTempNode = id.startsWith("temp-node-");
     const nodeLocked = isNodeLocked(id);
     const isHighPriority = data.task.priority === "high" || data.task.priority === "urgent";
@@ -137,6 +139,8 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                     "relative rounded-xl border shadow-sm transition-shadow duration-150 select-none",
                     selected ? "shadow-lg ring-1 ring-blue-500/50" : "hover:shadow-md",
                     isEditing && "ring-2 ring-blue-500",
+                    isActiveMatch && "ring-2 ring-amber-400 shadow-[0_0_10px_2px] shadow-amber-400/40",
+                    isSearchMatch && !isActiveMatch && "ring-2 ring-amber-400/50",
                     isInProgress && !selected && "taskflow-inprogress",
                     isBgProgress && !selected && "taskflow-bgprogress",
                 )}
@@ -183,7 +187,10 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                             )}
                             title={data.task.title}
                         >
-                            {data.task.title || <span className="italic text-muted-foreground font-normal">Untitled</span>}
+                            {data.task.title
+                                ? <HighlightText text={data.task.title} highlight={searchQuery} />
+                                : <span className="italic text-muted-foreground font-normal">Untitled</span>
+                            }
                         </p>
                     )}
 

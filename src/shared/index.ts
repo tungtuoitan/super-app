@@ -4,6 +4,7 @@
  * Internal imports within shared should use relative paths.
  */
 
+
 // ── constants ─────────────────────────────────────────────────────────────
 // NOTE: must remain FIRST — other shared files import constants via @/shared barrel
 export { constants } from "./constants";
@@ -35,6 +36,7 @@ export { DialogContainer, type IDialogContainerProps, type IDialogContentProps }
 export { GridContainer, type GridContainerProps } from "./components/ui/GridContainer";
 export { Tooltip2 } from "./components/ui/Tooltip2";
 export { CloseNotiBtn } from "./components/ui/CloseNotiBtn";
+export { HighlightText } from "./components/HighlightText";
 export { IconPicker, IconDisplay, IconWithLabel, type IconPickerProps, type IconDisplayProps, type IconWithLabelProps } from "./components/ui/IconPicker";
 export { FolderIconWithBadge, FolderFilled, FolderOpenFilled, type FolderIconWithBadgeProps } from "./components/ui/FolderIconWithBadge";
 export { StatusAutoComplete, type StatusAutoCompleteProps, type IStatusOption } from "./components/ui/StatusAutoComplete";

@@ -8,10 +8,9 @@ import { useKStore } from "../../store/useK.store";
 import { DND_TYPE, CARD_HEIGHT } from "../../utils/kNodeEditor.constants";
 import { isAncestorNode } from "../../hooks/kNodeEditor.miniHelper";
 import { KAutoResizeTextarea } from "./KAutoResizeTextarea";
-import { ICON_MAP, IconKey, useMenuContextHelper } from "@/shared";
+import { ICON_MAP, IconKey, useMenuContextHelper, HighlightText } from "@/shared";
 import { useKNodeTabHelper } from "../../hooks/useKNodeTab.helper";
 import { storageService, STORAGE_KEYS } from "@/shared";
-import { KHighlightText } from "../KExplorer/KHighlightText";
 import { useSideBarHelper } from "@/shell";
 import {useGlobalShortcut} from "@/shared";
 import type { FC } from "react";
@@ -319,7 +318,7 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
                         <span className="cursor-text underline-offset-2 decoration-zinc-600 transition-colors hover:opacity-80"
                         title={`Drill into ${node.name}`}
                         >
-                            <KHighlightText text={node.name} highlight={searchQuery} />
+                            <HighlightText text={node.name} highlight={searchQuery} />
                         </span>
                     </button>
                  }
@@ -350,7 +349,7 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
                             style={{ cursor: !isKnowledge && !isDeleted ? "text" : undefined, height: "100%" }}
                         >
                             <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap break-words">
-                                <KHighlightText text={node.description ?? ''} highlight={searchQuery} />
+                                <HighlightText text={node.description ?? ''} highlight={searchQuery} />
                             </p>
                         </div>
                     )}

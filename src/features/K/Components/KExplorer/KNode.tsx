@@ -2,8 +2,7 @@
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { useKTreeSelectionHelper } from "../../hooks/kTree/useKTreeSelection.helper";
-import { ICON_MAP, IconKey, useMenuContextHelper } from "@/shared";
-import { KHighlightText } from "./KHighlightText";
+import { ICON_MAP, IconKey, useMenuContextHelper, HighlightText } from "@/shared";
 import { useKStore } from "../../store/useK.store";
 import { useKTreeStatusHelper } from "../../hooks/kTree/useKTreeStatus.helper";
 import { storageService, STORAGE_KEYS } from "@/shared";
@@ -286,7 +285,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 {/* Folder Info */}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                     <div className="w-full min-w-0 flex items-center gap-2">
-                        <KHighlightText
+                        <HighlightText
                             text={`${nodeName}`}
                             highlight={treeType === "workspaceTree" ? searchQuery : ""}
                             className={`

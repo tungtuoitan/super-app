@@ -57,3 +57,4 @@ export { RootErrorFallback, EditorAreaErrorFallback, TabPanelErrorFallback } fro
 
 // ── Misc Components ───────────────────────────────────────────────────────
 export { HighlightedText } from "./HighlightedText";
+export { HighlightText } from "./HighlightText";
