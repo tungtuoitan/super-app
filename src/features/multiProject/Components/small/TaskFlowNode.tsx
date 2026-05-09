@@ -5,7 +5,7 @@
  * - 4 handles (top, bottom, left, right) — hidden until hover or selected
  * - Double-click to rename inline
  * - FigJam-style minibar below node when selected (status pills + project picker)
- * - Delete key → set status to cancelled
+ * - Delete key → handled at canvas level (soft-delete task)
  */
 
 import React, { useState, useEffect, useRef } from "react";
@@ -74,19 +74,6 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
         };
         setTimeout(tryFocus, 50);
     }, [isEditing, data.task.title]);
-
-    // Delete key → set status to cancelled (only when selected, not editing, not temp, not locked)
-    useEffect(() => {
-        if (!selected || isEditing || isTempNode || nodeLocked) return;
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Delete" || e.key === "Backspace") {
-                e.preventDefault();
-                handleChangeStatus(id, "cancelled");
-            }
-        };
-        document.addEventListener("keydown", onKeyDown);
-        return () => document.removeEventListener("keydown", onKeyDown);
-    }, [selected, isEditing, isTempNode, nodeLocked, id]);
 
     // Close project picker on click outside
     useEffect(() => {

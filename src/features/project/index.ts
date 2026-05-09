@@ -68,6 +68,7 @@ export { PTaskProvider } from "./store/usePTask.store";
 // Context menus
 export { TaskGridMenu } from "./task/contexts/menus/TaskGridMenu";
 export { TaskFlowMenu } from "./task/contexts/menus/TaskFlowMenu";
+export { TaskFlowNodeMenu } from "./task/contexts/menus/TaskFlowNodeMenu";
 
 export { projectConstants } from "./project.constants";
 export { registerProjectFilters } from "./shell/project.filterConfig";

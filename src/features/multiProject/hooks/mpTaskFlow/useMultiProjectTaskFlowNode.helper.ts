@@ -15,7 +15,7 @@ import type { TaskDTO } from "@/features/taskDetail";
 import { flowService } from "@/shared";
 import { toLocalISOString } from "@/shared";
 import { useMultiProjectTaskFlowProcessHelper } from "./useMultiProjectTaskFlowProcess.helper";
-import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
+import type { TaskFlowNodeData, FlowEdgeData } from "../../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/taskDetail";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
 import { useTaskFolderHelper } from "@/features/taskDetail";
@@ -23,7 +23,7 @@ import { useProjectWorkspaceResolver } from "@/features/project";
 import { useDebugLog } from "@/shared";
 
 export const useMultiProjectTaskFlowNodeHelper = () => {
-    const { setFlowNodes, setEditingNodeId } = useMultiTaskFlowStore();
+    const { setFlowNodes, setEditingNodeId, taskFlowTasks, setTaskFlowTasks, savedEdges, setSavedEdges, setFlowEdges } = useMultiTaskFlowStore();
     const { handleToggleProcess } = useMultiProjectTaskFlowProcessHelper();
     const { filteredTasks, flowNodes: currentFlowNodes, projectNameMap, filteredProjectIds } = useMultiProjectTaskFlowSelector();
     const { tasks, setTasks } = useMpTaskStore();
@@ -355,6 +355,64 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 _console.error("Failed to change status");
             }
         }
+    // ── Delete nodes ─────────────────────────────────────────────────────────
+
+    const handleDeleteNodes =
+        async (nodeIds: string[]) => {
+            const unlocked = nodeIds.filter((id) => !id.startsWith("temp-node-") && !isNodeLocked(id));
+            if (unlocked.length === 0) return;
+
+            const taskIds = unlocked.map((id) => parseInt(id, 10));
+            const tasksToDelete = taskFlowTasks.filter((t) => taskIds.includes(t.id));
+            const gridTasksToDelete = tasks.filter((t) => taskIds.includes(t.id));
+            const nodesToRestore = currentFlowNodes.filter((n) => unlocked.includes(n.id));
+
+            const connectedEdgeIds = new Set(
+                savedEdges
+                    .filter((e) => unlocked.includes(e.source) || unlocked.includes(e.target))
+                    .map((e) => e.id),
+            );
+            const connectedEdges = savedEdges.filter((e) => connectedEdgeIds.has(e.id));
+
+            setFlowNodes((prev) => prev.filter((n) => !unlocked.includes(n.id)));
+            setTaskFlowTasks((prev) => prev.filter((t) => !taskIds.includes(t.id)));
+            setTasks((prev) => prev.filter((t) => !taskIds.includes(t.id)));
+            setFlowEdges((prev) => prev.filter((e) => !connectedEdgeIds.has(e.id)));
+            setSavedEdges((prev) => prev.filter((e) => !connectedEdgeIds.has(e.id)));
+
+            try {
+                debugLog.log("task-upsert", "flow-hard-delete-nodes", {
+                    taskIds,
+                    source: "useMultiProjectTaskFlowNode.deleteNodes",
+                });
+                const result = await taskService._deleteTaskBatch($user.userToken, taskIds);
+                if (!result.success) throw new Error(result.message);
+
+                const edgesToDelete = connectedEdges.filter((e) => (e.data as FlowEdgeData)?.edgeId);
+                if (edgesToDelete.length > 0) {
+                    flowService._upsertEdges(
+                        $user.userToken,
+                        edgesToDelete.map((e) => ({
+                            id: (e.data as FlowEdgeData).edgeId,
+                            sourceId: parseInt(e.source, 10),
+                            targetId: parseInt(e.target, 10),
+                            sourceHandle: e.sourceHandle ?? "bottom",
+                            targetHandle: e.targetHandle ?? "top",
+                            deletedAt: new Date().toISOString(),
+                        })),
+                    ).catch(() => {});
+                }
+
+                _console.success(`Deleted ${tasksToDelete.length} task(s)`);
+            } catch {
+                setFlowNodes((prev) => [...nodesToRestore, ...prev]);
+                setTaskFlowTasks((prev) => [...tasksToDelete, ...prev]);
+                setTasks((prev) => [...gridTasksToDelete, ...prev]);
+                setSavedEdges((prev) => [...connectedEdges, ...prev]);
+                _console.error("Failed to delete tasks");
+            }
+        }
+
     return {
         handleRenameStart,
         handleRenameCancel,
@@ -362,6 +420,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
         handleAddTaskAtPosition,
         handleChangeProject,
         handleChangeStatus,
+        handleDeleteNodes,
         handleToggleProcess,
         isNodeLocked,
     };

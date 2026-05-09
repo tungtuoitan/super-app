@@ -2,7 +2,8 @@ CREATE TABLE [pro].[project] (
     [id]           INT            IDENTITY (1, 1) NOT NULL,
     [name]         NVARCHAR (255) NOT NULL,
     [description]  NVARCHAR (MAX) NULL,
-    [status]       NVARCHAR (50)  CONSTRAINT [df_project_status] DEFAULT ('open') NOT NULL,
+    [status]       NVARCHAR (50)  ALTER TABLE [pro].[project]
+    ADD CONSTRAINT [df_project_status] DEFAULT ('open') FOR [status_code]; NOT NULL,
     [created_at]   DATETIME2 (3)  CONSTRAINT [df_project_created_at] DEFAULT (sysdatetime()) NOT NULL,
     [updated_at]   DATETIME2 (3)  CONSTRAINT [df_project_updated_at] DEFAULT (sysdatetime()) NOT NULL,
     [deleted_at]   DATETIME2 (3)  NULL,

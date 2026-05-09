@@ -137,6 +137,19 @@ const _patchTask = async (
     return Promise.reject(res);
 };
 
+const _deleteTaskBatch = async (
+    _token: string,
+    taskIds: number[],
+): Promise<ResultOptions<void>> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/task`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: taskIds }),
+    });
+    if (res.ok) return (await res.json()) as ResultOptions<void>;
+    return Promise.reject(res);
+};
+
 const _getProjects = async (
     _token: string,
     params?: { deletedAt?: string; status?: string; searchText?: string }
@@ -157,5 +170,6 @@ export const taskService = {
     _getTaskById,
     _upsertTaskBatch,
     _patchTask,
+    _deleteTaskBatch,
     _getProjects,
 };

@@ -25,8 +25,9 @@ import { useMultiProjectTaskFlowHelper } from "../../hooks/mpTaskFlow/useMultiPr
 import { useMultiProjectTaskFlowDragHelper } from "../../hooks/mpTaskFlow/useMultiProjectTaskFlowDrag.helper";
 import { useMultiProjectTaskFlowEdgeHelper } from "../../hooks/mpTaskFlow/useMultiProjectTaskFlowEdge.helper";
 import { useMultiProjectTaskFlowNodeHelper } from "../../hooks/mpTaskFlow/useMultiProjectTaskFlowNode.helper";
+import { useMultiProjectTaskGridHelper } from "../../hooks/mpTaskList/useMultiProjectTaskGrid.helper";
 import { useTaskFlowViewControlsHelper } from "../../hooks/mpTaskFlow/useTaskFlowViewControls.helper";
-import { useMenuContextHelper, useDeviceStore } from "@/shared";
+import { useMenuContextHelper, useDeviceStore, useKeywordHelper } from "@/shared";
 import { storageService, STORAGE_KEYS } from "@/shared";
 import { TASK_FLOW_CSS, MIN_ZOOM, MAX_ZOOM, PAN_SPEED, ZOOM_FACTOR_OUT, ZOOM_FACTOR_IN } from "../../utils/multiProjectTaskFlow.constants";
 import { TaskFlowNode } from "./TaskFlowNode";
@@ -39,17 +40,19 @@ const edgeTypes = { flowEdgeWithNote: FlowEdgeWithNote };
 export function TaskFlowCanvas() {
     useMultiProjectTaskFlowHeadless();
 
-    const { flowNodes, flowEdges } = useMultiProjectTaskFlowSelector();
+    const { flowNodes, flowEdges, filteredProjectIds } = useMultiProjectTaskFlowSelector();
     const { isTaskFlowLoading, lockOldNodes, setLockOldNodes } = useMultiTaskFlowStore();
     const { handleEdgesChange, handleAutoLayout, loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
+    const { loadTasksForProjects } = useMultiProjectTaskGridHelper();
     const { handleNodesChange, handleNodeDragStart, handleNodeDrag, handleNodeDragStop } = useMultiProjectTaskFlowDragHelper();
     const { handleConnect, handleConnectStart, handleConnectEnd, handleReconnectStart, handleReconnectEnd, handleReconnect } = useMultiProjectTaskFlowEdgeHelper();
-    const { handleAddTaskAtPosition } = useMultiProjectTaskFlowNodeHelper();
+    const { handleAddTaskAtPosition, handleDeleteNodes } = useMultiProjectTaskFlowNodeHelper();
     const { showContextMenu } = useMenuContextHelper();
     const rfInstance = useReactFlow();
     const containerRef = useRef<HTMLDivElement>(null);
     const isDragSelecting = useRef(false);
     const storeApi = useStoreApi();
+    const { loadKeywords } = useKeywordHelper();
 
     const { viewMode, showMiniMap, setShowMiniMap, dynMinZoomRef, handleF1Toggle, handleBackToCenter } = useTaskFlowViewControlsHelper(containerRef);
     const { isMobile } = useDeviceStore();
@@ -121,6 +124,43 @@ export function TaskFlowCanvas() {
         return () => document.removeEventListener("wheel", onWheel, { capture: true } as EventListenerOptions);
     }, [rfInstance]);
 
+    const onDeleteNodes = async (ids: string[]) => {
+        await handleDeleteNodes(ids);
+        loadTaskFlowTasks();
+        if (filteredProjectIds.length > 0) loadTasksForProjects(filteredProjectIds);
+        loadKeywords()
+    };
+
+    const handleNodeContextMenu = (e: React.MouseEvent, node: { id: string }) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const selectedIds = flowNodes
+            .filter((n) => n.selected && !n.id.startsWith("temp-node-"))
+            .map((n) => n.id);
+        showContextMenu(e, "task-flow-node", {
+            nodeId: node.id,
+            selectedNodeIds: selectedIds,
+            onDeleteNodes,
+            isLocked: lockOldNodes,
+        });
+    };
+
+    const handleSelectionContextMenu = (e: React.MouseEvent, nodes: { id: string }[]) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (nodes.length === 0) return;
+        const selectedIds = nodes
+            .filter((n) => !n.id.startsWith("temp-node-"))
+            .map((n) => n.id);
+        if (selectedIds.length === 0) return;
+        showContextMenu(e, "task-flow-node", {
+            nodeId: selectedIds[0],
+            selectedNodeIds: selectedIds,
+            onDeleteNodes,
+            isLocked: lockOldNodes,
+        });
+    };
+
     const isEmpty = flowNodes.length === 0 && !isTaskFlowLoading;
 
     const relockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -160,6 +200,8 @@ export function TaskFlowCanvas() {
                 onReconnectEnd={isMobile ? undefined : handleReconnectEnd}
                 onReconnect={isMobile ? undefined : handleReconnect}
                 onPaneContextMenu={isMobile ? undefined : handlePaneContextMenu}
+                onNodeContextMenu={isMobile ? undefined : handleNodeContextMenu}
+                onSelectionContextMenu={isMobile ? undefined : handleSelectionContextMenu}
                 onMoveEnd={handleMoveEnd}
                 onNodeClick={handleNodeClick}
                 onSelectionChange={handleSelectionChange}

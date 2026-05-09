@@ -14,4 +14,5 @@ export { MpTaskProvider } from "./store/useMpTask.store";
 
 // Hooks
 export { useTaskFlowMenuHelper } from "./hooks/mpTaskFlow/useTaskFlowMenu.helper";
+export { useTaskFlowNodeMenuHelper } from "./hooks/mpTaskFlow/useTaskFlowNodeMenu.helper";
 
