@@ -96,6 +96,21 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
         return () => document.removeEventListener("mousedown", onClick);
     }, [projectPickerOpen]);
 
+    // Block canvas scroll while project picker is open — only allow native scroll inside the dropdown
+    useEffect(() => {
+        if (!projectPickerOpen) return;
+        const onWheel = (e: WheelEvent) => {
+            if (pickerRef.current && pickerRef.current.contains(e.target as globalThis.Node)) {
+                e.stopPropagation();
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        };
+        window.addEventListener("wheel", onWheel, { passive: false, capture: true });
+        return () => window.removeEventListener("wheel", onWheel, { capture: true } as unknown as EventListenerOptions);
+    }, [projectPickerOpen]);
+
     const handleDoubleClick = (e: React.MouseEvent) => {
         if (nodeLocked) return;
         e.stopPropagation();
@@ -272,26 +287,33 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                         </button>
 
                         {projectPickerOpen && (
-                            <div className="absolute bottom-full left-0 mb-1 w-44 max-h-52 overflow-y-auto bg-card border border-border rounded-lg shadow-lg py-1 z-50">
+                            <div
+                                className="absolute bottom-full left-0 mb-1 w-44 max-h-52 overflow-y-auto bg-card border border-border rounded-lg shadow-lg py-1 z-50 nowheel"
+                                onWheel={(e) => e.stopPropagation()}
+                            >
                                 {allProjects.map((p) => {
                                     const isActive = p.status === "active";
+                                    const isDeleted = !!p.deletedAt;
                                     const isCurrent = p.id === data.task.projectId;
                                     return (
                                         <button
                                             key={p.id}
                                             type="button"
+                                            disabled={isDeleted}
                                             onClick={() => onProjectChange(p.id)}
                                             className={cn(
                                                 "w-full flex items-center gap-2 px-2.5 py-1.5 text-left text-[10px] transition-colors",
-                                                isCurrent
-                                                    ? "bg-primary/10 text-foreground font-semibold"
-                                                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                                                isDeleted
+                                                    ? "opacity-40 cursor-not-allowed text-muted-foreground"
+                                                    : isCurrent
+                                                        ? "bg-primary/10 text-foreground font-semibold"
+                                                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
                                             )}
                                         >
                                             <Circle
                                                 className={cn(
                                                     "w-2 h-2 shrink-0",
-                                                    isActive ? "fill-emerald-500 text-emerald-500" : "fill-muted-foreground/30 text-muted-foreground/30",
+                                                    isActive && !isDeleted ? "fill-emerald-500 text-emerald-500" : "fill-muted-foreground/30 text-muted-foreground/30",
                                                 )}
                                             />
                                             <span className="truncate">{p.name}</span>

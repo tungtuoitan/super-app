@@ -10,7 +10,7 @@ import { useMultiProjectDetailSelector } from "./useMultiProjectDetail.selector"
 
 export const useMultiProjectTaskFlowSelector = () => {
     const { projects } = useProjectStore();
-    const { flowNodes, flowEdges, editingNodeId, editingEdgeId, savedEdges, positionsLoaded, taskFlowTasks } = useMultiTaskFlowStore();
+    const { flowNodes, flowEdges, editingNodeId, editingEdgeId, savedEdges, positionsLoaded, taskFlowTasks, allProjectsForPicker } = useMultiTaskFlowStore();
     const { filteredProjectIds } = useMultiProjectDetailSelector();
 
     const projectNameMap = useMemo(
@@ -35,17 +35,14 @@ export const useMultiProjectTaskFlowSelector = () => {
         [projects, filteredProjectIds],
     );
 
-    /** All non-deleted projects, sorted: active first */
+    /** All projects including deleted, sorted: active → inactive → deleted */
     const allProjects = useMemo(
-        () => {
-            const all = projects.filter((p) => !p.deletedAt);
-            return all.sort((a, b) => {
-                const aActive = a.status === "active" ? 0 : 1;
-                const bActive = b.status === "active" ? 0 : 1;
-                return aActive - bActive || a.name.localeCompare(b.name);
-            });
-        },
-        [projects],
+        () => [...allProjectsForPicker].sort((a, b) => {
+            const aScore = a.deletedAt ? 2 : a.status === "active" ? 0 : 1;
+            const bScore = b.deletedAt ? 2 : b.status === "active" ? 0 : 1;
+            return aScore - bScore || a.name.localeCompare(b.name);
+        }),
+        [allProjectsForPicker],
     );
 
     return {

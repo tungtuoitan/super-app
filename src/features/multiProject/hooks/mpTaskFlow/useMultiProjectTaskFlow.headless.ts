@@ -24,14 +24,15 @@ import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 export function useMultiProjectTaskFlowHeadless() {
     const { setFlowNodes, setFlowEdges, setSavedEdges, savedEdges, setSavedPositions, savedPositions, positionsLoaded, setPositionsLoaded, isTaskFlowLoading, lockOldNodes } = useMultiTaskFlowStore();
     const { filteredTasks, projectNameMap, taskIdKey } = useMultiProjectTaskFlowSelector();
-    const { loadTaskFlowTasks } = useMultiProjectTaskFlowHelper();
+    const { loadTaskFlowTasks, loadAllProjects } = useMultiProjectTaskFlowHelper();
     const { filteredProjectIds } = useMultiProjectDetailSelector();
     const { $user } = useAuthStore();
     const debugLog = useDebugLog();
 
-    // ── Load all tasks (no filter) — only once per token ───────────────────
+    // ── Load all tasks (no filter) + all projects for picker — once per token
     useEffect(() => {
         loadTaskFlowTasks();
+        loadAllProjects();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [$user.userToken]);
 

@@ -187,33 +187,43 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
 
     const handleAddTaskAtPosition =
         (posX: number, posY: number) => {
-            // Determine project: prefer nearest existing task node; fall back to first filtered project
+            // Determine project: prefer nearest existing task node; fall back to first filtered project.
+            // Always skip deleted projects.
+            const nonDeletedProjectIds = new Set(allProjects.filter((p) => !p.deletedAt).map((p) => p.id));
             let projectId: number | null = null;
             let projectName = "";
 
-            if (filteredTasks.length > 0) {
-                let nearestTask = filteredTasks[0];
+            const tasksOnNonDeletedProjects = filteredTasks.filter((t) => nonDeletedProjectIds.has(t.projectId));
+            if (tasksOnNonDeletedProjects.length > 0) {
+                let nearestTask = tasksOnNonDeletedProjects[0];
                 if (currentFlowNodes.length > 0) {
                     let minDist = Infinity;
                     for (const n of currentFlowNodes) {
+                        const t = (n.data as TaskFlowNodeData).task;
+                        if (!t || !nonDeletedProjectIds.has(t.projectId)) continue;
                         const dx = n.position.x - posX;
                         const dy = n.position.y - posY;
                         const dist = dx * dx + dy * dy;
                         if (dist < minDist) {
                             minDist = dist;
-                            const t = (n.data as TaskFlowNodeData).task;
-                            if (t) nearestTask = t;
+                            nearestTask = t;
                         }
                     }
                 }
                 projectId = nearestTask.projectId;
                 projectName = projectNameMap.get(nearestTask.projectId) ?? "";
-            } else if (filteredProjectIds.length > 0) {
-                projectId = filteredProjectIds[0];
-                projectName = projectNameMap.get(projectId) ?? "";
-            } else if (allProjects.length > 0) {
-                projectId = allProjects[0].id;
-                projectName = allProjects[0].name;
+            } else {
+                const firstFilteredNonDeleted = filteredProjectIds.find((id) => nonDeletedProjectIds.has(id));
+                if (firstFilteredNonDeleted) {
+                    projectId = firstFilteredNonDeleted;
+                    projectName = projectNameMap.get(projectId) ?? "";
+                } else {
+                    const firstNonDeleted = allProjects.find((p) => !p.deletedAt);
+                    if (firstNonDeleted) {
+                        projectId = firstNonDeleted.id;
+                        projectName = firstNonDeleted.name;
+                    }
+                }
             }
 
             if (!projectId) {
@@ -261,19 +271,22 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
 
     // ── Change project of a task node ──────────────────────────────────────
 
-    const handleChangeProject = 
+    const handleChangeProject =
         async (nodeId: string, newProjectId: number) => {
             if (isNodeLocked(nodeId)) {
                 debugLog.log("taskflow", "locked-node-blocked", { action: "changeProject", nodeId });
                 return;
             }
             const taskId = parseInt(nodeId, 10);
-            const task = tasks.find((t) => t.id === taskId);
+            // Look up in taskFlowTasks first — contains ALL tasks regardless of selected-project filter,
+            // so tasks on deleted/unselected projects (shown as "unknown") are still found.
+            const task = taskFlowTasks.find((t) => t.id === taskId) ?? tasks.find((t) => t.id === taskId);
             if (!task || task.projectId === newProjectId) return;
 
             const newProjectName = projectNameMap.get(newProjectId) ?? "";
 
             setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, projectId: newProjectId } : t)));
+            setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, projectId: newProjectId } : t)));
             setFlowNodes((prev) =>
                 prev.map((n) =>
                     n.id === nodeId
@@ -299,6 +312,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 if (!result.success) throw new Error(result.message);
             } catch {
                 setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, projectId: task.projectId } : t)));
+                setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, projectId: task.projectId } : t)));
                 setFlowNodes((prev) =>
                     prev.map((n) =>
                         n.id === nodeId

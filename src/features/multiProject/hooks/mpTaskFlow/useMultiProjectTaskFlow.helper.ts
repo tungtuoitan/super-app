@@ -11,16 +11,16 @@ import { applyEdgeChanges } from "@xyflow/react";
 import type { EdgeChange } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
-import { useAuthStore } from "@/shared";
-import { useConsoleHelper } from "@/shared";
-import { flowService } from "@/shared";
+import { useAuthStore, useConsoleHelper, flowService, parseAsLocalDate } from "@/shared";
 import { taskService, transformTaskData } from "@/features/taskDetail";
 import type { TaskDTO } from "@/features/taskDetail";
+import { projectService } from "@/features/project";
+import type { ProjectDTO } from "@/features/project";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import { smartWand, NODE_WIDTH } from "../../utils/multiProjectTaskFlow.utils";
 
 export const useMultiProjectTaskFlowHelper = () => {
-    const { setFlowNodes, setFlowEdges, setSavedPositions, flowNodes, flowEdges, lockOldNodes, setTaskFlowTasks, setIsTaskFlowLoading } = useMultiTaskFlowStore();
+    const { setFlowNodes, setFlowEdges, setSavedPositions, flowNodes, flowEdges, lockOldNodes, setTaskFlowTasks, setIsTaskFlowLoading, setAllProjectsForPicker } = useMultiTaskFlowStore();
     const { savedEdges } = useMultiProjectTaskFlowSelector();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
@@ -96,10 +96,38 @@ export const useMultiProjectTaskFlowHelper = () => {
         }
     }
 
+    // ── Load all projects (no filter) — for MiniToolbar project picker ─────
+    const loadAllProjects = async () => {
+        if (!$user.userToken) return;
+        try {
+            const result = await projectService.getProjects($user.userToken);
+            if (result.success && result.data) {
+                setAllProjectsForPicker(
+                    (result.data as ProjectDTO[]).map((dto) => ({
+                        id: dto.id,
+                        name: dto.name,
+                        description: dto.description,
+                        status: dto.status,
+                        startDate: parseAsLocalDate(dto.startDate),
+                        endDate: parseAsLocalDate(dto.endDate),
+                        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
+                        updatedAt: parseAsLocalDate(dto.updatedAt),
+                        deletedAt: parseAsLocalDate(dto.deletedAt),
+                        workspaceId: dto.workspaceId,
+                        image: dto.image,
+                    }))
+                );
+            }
+        } catch {
+            _console.error("Failed to load all projects for picker");
+        }
+    }
+
     return {
         handleEdgesChange,
         handleAutoLayout,
         loadTaskFlowTasks,
+        loadAllProjects,
         isNodeLocked,
         isEdgeLocked,
     };

@@ -8,6 +8,7 @@ import React, { createContext, useContext, useState, Dispatch, SetStateAction } 
 import type { Node, Edge } from "@xyflow/react";
 import type { TaskFlowNodeData, FlowEdgeData } from "@/features/multiProject/types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/taskDetail";
+import type { Project } from "@/features/project";
 
 export interface MultiTaskFlowContextData {
     /** Parent-child + user-created edges (rendered by React Flow) */
@@ -60,6 +61,9 @@ export interface MultiTaskFlowContextData {
     /** Index into searchMatchIds of the currently highlighted match */
     searchActiveIndex: number;
     setSearchActiveIndex: Dispatch<SetStateAction<number>>;
+    /** All projects including deleted — used by the project picker in MiniToolbar */
+    allProjectsForPicker: Project[];
+    setAllProjectsForPicker: Dispatch<SetStateAction<Project[]>>;
 }
 
 const defaultValue: MultiTaskFlowContextData = {
@@ -97,6 +101,8 @@ const defaultValue: MultiTaskFlowContextData = {
     setSearchMatchIds: () => {},
     searchActiveIndex: 0,
     setSearchActiveIndex: () => {},
+    allProjectsForPicker: [],
+    setAllProjectsForPicker: () => {},
 };
 
 const MultiTaskFlowStore = createContext<MultiTaskFlowContextData>(defaultValue);
@@ -121,6 +127,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
     const [searchQuery, setSearchQuery] = useState("");
     const [searchMatchIds, setSearchMatchIds] = useState<string[]>([]);
     const [searchActiveIndex, setSearchActiveIndex] = useState(0);
+    const [allProjectsForPicker, setAllProjectsForPicker] = useState<Project[]>([]);
 
     return (
         <MultiTaskFlowStore.Provider
@@ -142,6 +149,7 @@ export const MultiTaskFlowProvider: React.FC<React.PropsWithChildren<unknown>> =
                 searchQuery, setSearchQuery,
                 searchMatchIds, setSearchMatchIds,
                 searchActiveIndex, setSearchActiveIndex,
+                allProjectsForPicker, setAllProjectsForPicker,
             }}
         >
             {children}
