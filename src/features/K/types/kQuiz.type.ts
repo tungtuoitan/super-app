@@ -103,6 +103,8 @@ export interface KDailyQueueItem {
     newCount: number;
     /** Total active questions */
     activeCount: number;
+    /** Questions with statusCode = 'draft' */
+    draftCount: number;
 }
 
 export interface KDailySessionQuestion {

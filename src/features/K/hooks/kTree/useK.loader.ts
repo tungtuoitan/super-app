@@ -26,7 +26,7 @@ import {KService} from "../../service/k.service";
 export const useKLoader = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree, setNodeScoreMap, setDailyReviewDueCount } = useKStore();
+    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree, setNodeScoreMap, setDailyReviewDueCount, setKDailyQueueMap } = useKStore();
     const { setTargetWorkspaceId } = useKMovingTreeStore();
 
     /**
@@ -65,7 +65,7 @@ export const useKLoader = () => {
         }
     };
 
-    /** Load global daily review due count (for ActivityBar badge) */
+    /** Load global daily review due count (for ActivityBar badge) and per-knowledge queue map */
     const loadDailyReviewCount = async () => {
         try {
             const res = await KQuizService._getGlobalDailyQueue();
@@ -73,6 +73,8 @@ export const useKLoader = () => {
                 const dueCount = res.object.reduce((sum, q) => sum + q.dueCount, 0);
                 const newCount = res.object.reduce((sum, q) => sum + q.newCount, 0);
                 setDailyReviewDueCount(dueCount + newCount);
+                const map = Object.fromEntries(res.object.map(q => [q.knowledgeId, q]));
+                setKDailyQueueMap(map);
             }
         } catch { /* silent */ }
     };

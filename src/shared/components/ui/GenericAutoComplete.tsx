@@ -48,6 +48,8 @@ export interface IAutoCompleteOptions {
     level?: number;
     /** Optional image URL / base64 data URL to show as thumbnail */
     imageUrl?: string;
+    /** Colored pill badges shown on the right of the option label */
+    badges?: Array<{ text: string | number; className: string }>;
 }
 /**
  * Props interface for the GenericAutoComplete component.
@@ -252,7 +254,14 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                                         )}
                                         <div className="flex items-center justify-between w-full min-w-0">
                                             <span className="truncate">{label}</span>
-                                            {option.longDesc && <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">{option.longDesc}</span>}
+                                            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                                                {option.longDesc && <span className="text-xs text-muted-foreground">{option.longDesc}</span>}
+                                                {option.badges?.map((badge, i) => (
+                                                    <span key={i} className={`w-6 h-6 text-[10px] font-medium rounded-full flex items-center justify-center flex-shrink-0 ${badge.className}`}>
+                                                        {badge.text}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
                                     </CommandItem>
                                 );

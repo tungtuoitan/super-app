@@ -20,7 +20,7 @@ import {useKLoader} from "../hooks/kTree/useK.loader";
 export function KView() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const { $user } = useAuthStore();
-    const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId, dailyReviewDueCount } = useKStore();
+    const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId, dailyReviewDueCount, kDailyQueueMap } = useKStore();
     const { loadAllK, loadTree, softDeleteKnowledge, loadDailyReviewCount } = useKLoader();
     const { openNewKnowledgeTab, openKnowledgeTab, openGlobalDailyReviewTab } = useKTabHelper();
     const { showContextMenu } = useMenuContextHelper();
@@ -37,15 +37,26 @@ export function KView() {
         loadTree();
     }, [$user.userId, $user.userToken, $user.filters, selectedKId]);
 
-    // Convert workspaces to autocomplete options (include imageUrl)
-    const workspaceOptions: IAutoCompleteOptions[] = allK.map((ws) => ({
-                id: ws.id.toString(),
-                label: ws.name,
-                desc: ws.description || ws.name,
-                active: !ws.deletedAt,
-                longDesc: ws.deletedAt ? "(deleted)" : undefined,
-                imageUrl: ws.imageBase64 || undefined,
-            }))
+    // Convert workspaces to autocomplete options (include imageUrl and per-knowledge badges)
+    const workspaceOptions: IAutoCompleteOptions[] = allK.map((ws) => {
+        const queueItem = kDailyQueueMap[ws.id];
+        const reviewCount = queueItem ? queueItem.dueCount + queueItem.newCount : 0;
+        const draftCount = queueItem ? (queueItem.draftCount ?? 0) : 0;
+
+        const badges: IAutoCompleteOptions['badges'] = [];
+        if (reviewCount > 0) badges.push({ text: reviewCount, className: 'bg-blue-500/20 text-blue-400' });
+        if (draftCount > 0) badges.push({ text: draftCount, className: 'bg-yellow-500/20 text-yellow-500' });
+
+        return {
+            id: ws.id.toString(),
+            label: ws.name,
+            desc: ws.description || ws.name,
+            active: !ws.deletedAt,
+            longDesc: ws.deletedAt ? "(deleted)" : undefined,
+            imageUrl: ws.imageBase64 || undefined,
+            badges: badges.length > 0 ? badges : undefined,
+        };
+    })
 
     // Handle workspace selection change
     const handleWorkspaceChange = async (_event: React.SyntheticEvent, newValue: IAutoCompleteOptions | null) => {
