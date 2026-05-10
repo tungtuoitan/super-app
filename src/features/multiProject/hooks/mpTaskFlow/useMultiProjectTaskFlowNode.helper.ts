@@ -326,19 +326,20 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
 
     // ── Change status of a task node ─────────────────────────────────────
 
-    const handleChangeStatus = 
+    const handleChangeStatus =
         async (nodeId: string, newStatus: string) => {
             if (isNodeLocked(nodeId)) {
                 debugLog.log("taskflow", "locked-node-blocked", { action: "changeStatus", nodeId, newStatus });
                 return;
             }
             const taskId = parseInt(nodeId, 10);
-            const task = tasks.find((t) => t.id === taskId);
+            const task = taskFlowTasks.find((t) => t.id === taskId) ?? tasks.find((t) => t.id === taskId);
             if (!task || task.status === newStatus) return;
 
             const oldStatus = task.status;
 
             setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)));
+            setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)));
             setFlowNodes((prev) =>
                 prev.map((n) =>
                     n.id === nodeId
@@ -364,6 +365,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 if (!result.success) throw new Error(result.message);
             } catch {
                 setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: oldStatus } : t)));
+                setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: oldStatus } : t)));
                 setFlowNodes((prev) =>
                     prev.map((n) =>
                         n.id === nodeId
