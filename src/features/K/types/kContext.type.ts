@@ -2,7 +2,6 @@
 import type { KWsResponse } from "./k.type";
 import type { KDTO } from "./kDto.type";
 import {KTreeNode} from "./kV2.type";
-import type { KDailyQueueItem } from "./kQuiz.type";
 
 /** Question cut/paste clipboard — persists across node navigation */
 export interface KFlowClipboard {
@@ -95,10 +94,6 @@ export interface KContextData {
     /** Global daily review: number of tests with due questions (for ActivityBar badge) */
     dailyReviewDueCount: number;
     setDailyReviewDueCount: Dispatch<SetStateAction<number>>;
-
-    /** Per-knowledge daily queue data, keyed by knowledgeId */
-    kDailyQueueMap: Record<number, KDailyQueueItem>;
-    setKDailyQueueMap: Dispatch<SetStateAction<Record<number, KDailyQueueItem>>>;
 
     /** Cut/paste clipboard for question nodes — persists across node navigation */
     kFlowClipboard: KFlowClipboard | null;

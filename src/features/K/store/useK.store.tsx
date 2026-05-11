@@ -8,7 +8,6 @@ import type { KFlowClipboard, KContextData } from "../types/kContext.type";
 import type { KWsResponse } from "../types/k.type";
 import type { KDTO } from "../types/kDto.type";
 import {KTreeNode} from "../types/kV2.type";
-import type { KDailyQueueItem } from "../types/kQuiz.type";
 
 const kContextDefaultValue: KContextData = {
     allK: [],
@@ -69,8 +68,6 @@ const kContextDefaultValue: KContextData = {
     setQuizDropNodeIds: () => {},
     dailyReviewDueCount: 0,
     setDailyReviewDueCount: () => {},
-    kDailyQueueMap: {},
-    setKDailyQueueMap: () => {},
 
     kFlowClipboard: null,
     setKFlowClipboard: () => {},
@@ -119,7 +116,6 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
     const [showQuestionNodes, setShowQuestionNodes] = useState<boolean>(false);
     const [quizDropNodeIds, setQuizDropNodeIds]     = useState<number[]>([]);
     const [dailyReviewDueCount, setDailyReviewDueCount] = useState<number>(0);
-    const [kDailyQueueMap, setKDailyQueueMap] = useState<Record<number, KDailyQueueItem>>({});
     const [kFlowClipboard, setKFlowClipboard] = useState<KFlowClipboard | null>(null);
     const [kFlowViewportMap, setKFlowViewportMap] = useState<Record<number, { x: number; y: number; zoom: number }>>({});
 
@@ -184,8 +180,6 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
                 setQuizDropNodeIds,
                 dailyReviewDueCount,
                 setDailyReviewDueCount,
-                kDailyQueueMap,
-                setKDailyQueueMap,
 
                 kFlowClipboard,
                 setKFlowClipboard,

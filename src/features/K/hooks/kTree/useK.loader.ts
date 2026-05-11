@@ -26,7 +26,7 @@ import {KService} from "../../service/k.service";
 export const useKLoader = () => {
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
-    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree, setNodeScoreMap, setDailyReviewDueCount, setKDailyQueueMap } = useKStore();
+    const { allK, setAllK, currentK, setSelectedKId, selectedKId, setCurrentK, isLoadingK, setIsLoadingK, isLoadingTree, setIsLoadingTree, setNodeScoreMap, setDailyReviewDueCount } = useKStore();
     const { setTargetWorkspaceId } = useKMovingTreeStore();
 
     /**
@@ -41,6 +41,10 @@ export const useKLoader = () => {
             const data = await KService._getAllUserWorkspaces(token);
 
             setAllK(data);
+
+            // Update badge from the returned data (reviewCount already includes due + new)
+            const totalReview = data.reduce((sum, k) => sum + (k.reviewCount ?? 0), 0);
+            setDailyReviewDueCount(totalReview);
 
             // Set default to first non-deleted workspace if available and no tree loaded
             if (data.length > 0 && !currentK) {
@@ -65,19 +69,17 @@ export const useKLoader = () => {
         }
     };
 
-    /** Load global daily review due count (for ActivityBar badge) and per-knowledge queue map */
-    const loadDailyReviewCount = async () => {
-        try {
-            const res = await KQuizService._getGlobalDailyQueue();
-            if (res.success && res.object) {
-                const dueCount = res.object.reduce((sum, q) => sum + q.dueCount, 0);
-                const newCount = res.object.reduce((sum, q) => sum + q.newCount, 0);
-                setDailyReviewDueCount(dueCount + newCount);
-                const map = Object.fromEntries(res.object.map(q => [q.knowledgeId, q]));
-                setKDailyQueueMap(map);
-            }
-        } catch { /* silent */ }
-    };
+    /** Refresh global daily review due count (for ActivityBar badge) */
+    // const loadDailyReviewCount = async () => {
+    //     try {
+    //         const res = await KQuizService._getGlobalDailyQueue();
+    //         if (res.success && res.object) {
+    //             const dueCount = res.object.reduce((sum, q) => sum + q.dueCount, 0);
+    //             const newCount = res.object.reduce((sum, q) => sum + q.newCount, 0);
+    //             setDailyReviewDueCount(dueCount + newCount);
+    //         }
+    //     } catch { /* silent */ }
+    // };
 
     /**
      * Load tree data for a specific workspace
@@ -216,7 +218,7 @@ export const useKLoader = () => {
         createKnowledge,
         updateKnowledge,
         softDeleteKnowledge,
-        loadDailyReviewCount,
+        // loadDailyReviewCount,
         // loadNodeScores,
     };
 };

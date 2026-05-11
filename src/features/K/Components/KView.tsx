@@ -20,8 +20,8 @@ import {useKLoader} from "../hooks/kTree/useK.loader";
 export function KView() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const { $user } = useAuthStore();
-    const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId, dailyReviewDueCount, kDailyQueueMap } = useKStore();
-    const { loadAllK, loadTree, softDeleteKnowledge, loadDailyReviewCount } = useKLoader();
+    const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId, dailyReviewDueCount } = useKStore();
+    const { loadAllK, loadTree, softDeleteKnowledge } = useKLoader();
     const { openNewKnowledgeTab, openKnowledgeTab, openGlobalDailyReviewTab } = useKTabHelper();
     const { showContextMenu } = useMenuContextHelper();
 
@@ -29,7 +29,6 @@ export function KView() {
     useEffect(() => {
         if (!$user.userId) return;
         loadAllK();
-        loadDailyReviewCount();
     }, [$user.userId, $user.userToken]);
 
     useEffect(() => {
@@ -39,13 +38,12 @@ export function KView() {
 
     // Convert workspaces to autocomplete options (include imageUrl and per-knowledge badges)
     const workspaceOptions: IAutoCompleteOptions[] = allK.map((ws) => {
-        const queueItem = kDailyQueueMap[ws.id];
-        const reviewCount = queueItem ? queueItem.dueCount + queueItem.newCount : 0;
-        const draftCount = queueItem ? (queueItem.draftCount ?? 0) : 0;
+        const reviewCount = ws.reviewCount ?? 0;
+        const draftCount  = ws.draftCount  ?? 0;
 
         const badges: IAutoCompleteOptions['badges'] = [];
         if (reviewCount > 0) badges.push({ text: reviewCount, className: 'bg-blue-500/20 text-blue-400' });
-        if (draftCount > 0) badges.push({ text: draftCount, className: 'bg-yellow-500/20 text-yellow-500' });
+        if (draftCount  > 0) badges.push({ text: draftCount,  className: 'bg-yellow-500/20 text-yellow-500' });
 
         return {
             id: ws.id.toString(),
@@ -88,7 +86,7 @@ export function KView() {
     const handleRefresh = async () => {
         setIsRefreshing(true);
         try {
-            await Promise.all([loadAllK(), loadDailyReviewCount()]);
+            await loadAllK();
             if (selectedKId !== null) {
                 await loadTree();
             }

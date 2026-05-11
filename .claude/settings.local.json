@@ -11,7 +11,15 @@
       "PowerShell(sqlcmd -S \"157.66.101.51,1433\" -U sa -P \"***REDACTED-ROTATED-PASSWORD***\" -d \"master\" -Q \"BACKUP DATABASE [SuperApp-pro] TO DISK = N'C:\\\\Backup\\\\SuperApp-pro-$\\(Get-Date -Format 'yyyyMMdd-HHmmss'\\).bak' WITH FORMAT, INIT, COMPRESSION, STATS=10;\" -b 2>&1)",
       "mcp__Claude_Preview__preview_start",
       "mcp__Claude_in_Chrome__tabs_context_mcp",
-      "PowerShell(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue)"
+      "PowerShell(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue)",
+      "PowerShell(gh --version)",
+      "mcp__mcp-registry__list_connectors",
+      "mcp__mcp-registry__search_mcp_registry",
+      "mcp__github__search_repositories",
+      "mcp__github__get_issue",
+      "mcp__github__search_issues",
+      "mcp__github__get_me",
+      "mcp__github__issue_read"
     ],
     "defaultMode": "bypassPermissions"
   }

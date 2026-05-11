@@ -106,11 +106,11 @@ const _getDailyQueue = async (nodeId: number): Promise<ResultOptions<KDailyQueue
     return Promise.reject(res);
 };
 
-const _getGlobalDailyQueue = async (): Promise<ResultOptions<KDailyQueueItem[]>> => {
-    const res = await apiFetch(`${config.api.baseURL}/api/k/global-daily-queue`, { method: "GET" });
-    if (res.ok) return res.json();
-    return Promise.reject(res);
-};
+// const _getGlobalDailyQueue = async (): Promise<ResultOptions<KDailyQueueItem[]>> => {
+//     const res = await apiFetch(`${config.api.baseURL}/api/k/global-daily-queue`, { method: "GET" });
+//     if (res.ok) return res.json();
+//     return Promise.reject(res);
+// };
 
 const _getDailySession = async (
     nodeId: number,
@@ -193,7 +193,7 @@ export const KQuizService = {
     _submitAnswers,
     _getQuestionScores,
     _getDailyQueue,
-    _getGlobalDailyQueue,
+    // _getGlobalDailyQueue,
     _getDailySession,
     _getKnowledgeDailySession,
     _submitDailyAnswers,

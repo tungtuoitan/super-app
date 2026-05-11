@@ -115,6 +115,10 @@ export interface KWsResponse {
     createdAt: string;
     updatedAt?: string;
     deletedAt?: string | null;
+    /** Due + new questions for this knowledge (for badge and dropdown) */
+    reviewCount?: number;
+    /** Questions with statusCode = 'draft' */
+    draftCount?: number;
 }
 
 /** K knowledge domain model with Date objects */
