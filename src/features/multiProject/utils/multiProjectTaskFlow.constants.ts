@@ -4,6 +4,10 @@
  */
 
 export const TASK_FLOW_CSS = `
+/* Canvas background — matches Q Flow (dark zinc) */
+.react-flow { background-color: #09090b !important; }
+.react-flow__pane { background-color: transparent !important; }
+
 .react-flow__connection-line { stroke: hsl(var(--primary)); stroke-width: 1.5; }
 
 /* Reconnect anchor handles — only shown when edge is selected */

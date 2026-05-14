@@ -196,10 +196,11 @@ export function TaskFlowCanvas() {
     const handleMoveEnd = (_: unknown, viewport: Viewport) => { storageService.set(STORAGE_KEYS.TASK_FLOW_VIEWPORT, viewport); };
 
     return (
-        <div ref={containerRef} className="h-full w-full relative">
+        <div ref={containerRef} className="h-full w-full relative bg-zinc-950">
             <style>{TASK_FLOW_CSS}</style>
 
             <ReactFlow
+                style={{ backgroundColor: "#09090b" }}
                 nodes={flowNodes}
                 edges={flowEdges}
                 onNodesChange={handleNodesChange}
@@ -246,7 +247,7 @@ export function TaskFlowCanvas() {
                 panOnScroll={false}
                 proOptions={{ hideAttribution: true }}
             >
-                <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color="currentColor" className="text-muted-foreground/15" />
+                <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgba(113,113,122,0.2)" />
                 <TaskFlowSearchBar />
 
                 {showMiniMap && (
@@ -254,15 +255,19 @@ export function TaskFlowCanvas() {
                         position="bottom-right"
                         pannable
                         zoomable
-                        maskColor="transparent"
-                        className="!bg-card !border !border-border !rounded-lg !shadow-lg minimap-yellow-frame"
-                        style={{ width: isMobile ? 110 : 180, height: isMobile ? 70 : 120 }}
+                        maskColor="rgba(0,0,0,0.6)"
+                        className="!rounded-lg !shadow-lg minimap-yellow-frame"
+                        style={{
+                            background: "rgba(24,24,27,0.9)",
+                            width: isMobile ? 110 : 180,
+                            height: isMobile ? 70 : 120,
+                        }}
                         nodeColor={(node) => {
                             const status = (node.data as { task?: { status: string } })?.task?.status;
                             if (status === "in_progress") return "hsl(var(--primary))";
                             if (status === "background_progress") return "#38bdf8";
-                            if (status === "completed" || status === "cancelled" || status === "failed") return "hsl(var(--muted-foreground) / 0.3)";
-                            return "hsl(var(--muted-foreground) / 0.6)";
+                            if (status === "completed" || status === "cancelled" || status === "failed") return "rgba(113,113,122,0.4)";
+                            return "rgba(99,102,241,0.4)";
                         }}
                     />
                 )}
