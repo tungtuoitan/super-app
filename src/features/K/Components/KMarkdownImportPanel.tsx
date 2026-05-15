@@ -44,12 +44,12 @@ function parseMarkdown(markdown: string): KMdParsed {
 
 function validate(parsed: KMdParsed, selectedNodeName: string | null): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
-    if (!parsed.keyword) {
-        issues.push({ type: "error", message: 'Missing # heading. First line must be "# <node name>".' });
-        return issues;
+    if (selectedNodeName) {
+        if (!parsed.keyword)
+            issues.push({ type: "error", message: 'Missing # heading. First line must be "# <node name>".' });
+        else if (parsed.keyword !== selectedNodeName)
+            issues.push({ type: "error", message: `# "${parsed.keyword}" does not match selected node "${selectedNodeName}".` });
     }
-    if (selectedNodeName && parsed.keyword !== selectedNodeName)
-        issues.push({ type: "error", message: `# "${parsed.keyword}" does not match selected node "${selectedNodeName}".` });
     const totalQuestions = parsed.tests.reduce((n, t) => n + t.questions.length, 0) + parsed.orphanQuestions.length;
     if (totalQuestions === 0)
         issues.push({ type: "error", message: "No questions found. Add questions using ### Question? format." });
@@ -107,11 +107,11 @@ export function KMarkdownImportPanel({ knowledgeId, initialParentNode, onSuccess
     const errors   = issues.filter((i) => i.type === "error");
     const warnings = issues.filter((i) => i.type === "warn");
 
-    const canSubmit = !!parentNode && !!markdown.trim() && errors.length === 0 && !state.isLoading;
+    const canSubmit = !!markdown.trim() && errors.length === 0 && !state.isLoading;
 
     const handleImport = () => {
-        if (!parentNode || !parsed) return;
-        generate(parsed, parentNode.id);
+        if (!parsed) return;
+        generate(parsed, parentNode?.id ?? null);
     };
 
     return (
@@ -123,7 +123,7 @@ export function KMarkdownImportPanel({ knowledgeId, initialParentNode, onSuccess
 
             <GenericAutoComplete
                 size="small" value={selectedOption} allOptions={nodeOptions} onChange={handleNodeChange}
-                inputProps={{ name: "import-node", label: "Node (# must match this name)", required: true }}
+                inputProps={{ name: "import-node", label: "Node (optional — leave empty to import as orphan)" }}
                 style={{ marginBottom: 0 }}
             />
 

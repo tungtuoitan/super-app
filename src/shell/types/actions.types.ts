@@ -10,4 +10,6 @@ export interface SaveActions {
     handles: (tabType: string) => boolean;
     /** Execute the save logic for this tab */
     onSave: (tab: BaseTab) => Promise<void>;
+    /** Discard unsaved changes — implement when the feature manages its own content state */
+    onDiscard?: (tab: BaseTab) => void;
 }

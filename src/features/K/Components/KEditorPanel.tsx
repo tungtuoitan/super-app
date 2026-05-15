@@ -1,27 +1,25 @@
 ﻿import { useEffect, useRef, useState } from "react";
-import { Settings, GitBranch, BarChart2, Play, Loader2 } from "lucide-react";
+import { Settings, GitBranch, BarChart2, Hash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CardContent } from "@/shared";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared";
 import { KGeneral } from "./KGeneral";
-import { KMarkdownImportPanel } from "./KMarkdownImportPanel";
+import { KMarkdownEditorTab } from "./KMarkdownEditorTab";
 import { KQFlowView } from "./QFlowView/KQFlowView";
 import { KProgressDashboard } from "./KProgressDashboard";
 import { KDailyReviewSession } from "./KDailyReviewSession";
 import { useKStore } from "../store/useK.store";
 import type { KWsResponse } from "../types/k.type";
-import type { KItemV2 } from "../types/kV2.type";
 import type { KDailySessionQuestion } from "../types/kQuiz.type";
 import { useEditorTabBarHelper } from "@/shell";
-import { dispatchKFlowQuestionsChanged } from "../utils/kEvents.utils";
 import { KQuizService } from "../service/kQuiz.service";
 
-type KTab = "general" | "qflow" | "progress";
+type KTab = "general" | "qflow" | "progress" | "markdown";
 
 const TABS: { id: KTab; label: string; icon: React.ReactNode }[] = [
-    { id: "general",  label: "GENERAL",  icon: <Settings className="h-4 w-4" /> },
+    { id: "general",  label: "GENERAL",    icon: <Settings className="h-4 w-4" /> },
     { id: "progress", label: "K PROGRESS", icon: <BarChart2 className="h-4 w-4" /> },
-    { id: "qflow",    label: "Q FLOW",   icon: <GitBranch className="h-4 w-4" /> },
+    { id: "qflow",    label: "Q FLOW",     icon: <GitBranch className="h-4 w-4" /> },
+    { id: "markdown", label: "MARKDOWN",   icon: <Hash className="h-4 w-4" /> },
 ];
 
 export function KEditorPanel() {
@@ -29,7 +27,7 @@ export function KEditorPanel() {
     const tab = getActiveTab();
     const knowledge = tab?.data as unknown as KWsResponse;
     const isNew = knowledge.id < 0;
-    const { pendingImportNodeId, setPendingImportNodeId, pendingQuizTabSwitch, setPendingQuizTabSwitch, currentK, selectedItemIds } = useKStore();
+    const { pendingQuizTabSwitch, setPendingQuizTabSwitch, selectedItemIds } = useKStore();
 
     const [activeTab, setActiveTabLocal] = useState<KTab>(() => {
         const saved = tab?.metadata?.activeKTab as KTab | undefined;
@@ -43,8 +41,6 @@ export function KEditorPanel() {
         //    (useKStore() is called above, so this closure captures the initial render value)
         return typeof pendingQuizTabSwitch === "number" ? pendingQuizTabSwitch : null;
     });
-    const [isImportOpen, setIsImportOpen] = useState(false);
-    const [importParentNode, setImportParentNode] = useState<KItemV2 | null>(null);
     const [dailyTotal, setDailyTotal] = useState(0);
     const [sessionLoading, setSessionLoading] = useState(false);
     const [reviewSession, setReviewSession] = useState<KDailySessionQuestion[] | null>(null);
@@ -100,17 +96,6 @@ export function KEditorPanel() {
         if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, selectedNodeId: nodeId } }));
     }, [pendingQuizTabSwitch]);
 
-    // pendingImportNodeId set by tree right-click → open Import dialog
-    useEffect(() => {
-        if (pendingImportNodeId === undefined) return;
-        const node = pendingImportNodeId !== null
-            ? (currentK?.flatData.find((n) => n.id === pendingImportNodeId) ?? null)
-            : null;
-        setImportParentNode(node);
-        setIsImportOpen(true);
-        setPendingImportNodeId(undefined);
-    }, [pendingImportNodeId]);
-
     // Fetch daily queue count for the review button
     useEffect(() => {
         if (isNew) { setDailyTotal(0); return; }
@@ -122,24 +107,6 @@ export function KEditorPanel() {
             })
             .catch(() => {});
     }, [knowledge.id]);
-
-    const handleReview = async () => {
-        if (sessionLoading || isNew) return;
-        console.log("[Review] clicked — knowledgeId:", knowledge.id);
-        setSessionLoading(true);
-        try {
-            const res = await KQuizService._getKnowledgeDailySession(knowledge.id);
-            console.log("[Review] session response:", res);
-            if (res.success && res.object && res.object.length > 0) {
-                console.log("[Review] starting session with", res.object.length, "questions");
-                setReviewSession(res.object);
-            } else {
-                console.warn("[Review] no questions returned — success:", res.success, "count:", res.object?.length ?? 0);
-            }
-        } catch (err) {
-            console.error("[Review] fetch error:", err);
-        } finally { setSessionLoading(false); }
-    };
 
     const refreshDailyTotal = () => {
         if (isNew) return;
@@ -158,11 +125,13 @@ export function KEditorPanel() {
                 return <KGeneral knowledgeId={knowledge.id} tabId={tab?.id ?? ""} />;
             case "qflow":
                 if (isNew) return null;
-                // key changes on every node switch (null = "orphans" view)
                 return <KQFlowView nodeId={selectedNodeId} />;
             case "progress":
                 if (isNew) return null;
                 return <KProgressDashboard knowledgeId={knowledge.id} />;
+            case "markdown":
+                if (isNew) return null;
+                return <KMarkdownEditorTab nodeId={selectedNodeId} />;
             default:
                 return null;
         }
@@ -184,7 +153,7 @@ export function KEditorPanel() {
                                 activeTab === t.id
                                     ? "border-primary text-primary bg-primary/5"
                                     : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                                t.id !== "general" && (isNew || (t.id === "progress" && selectedNodeId === null)) && "opacity-50 cursor-not-allowed"
+                                t.id !== "general" && (isNew || (t.id === "progress" && selectedNodeId === null)) && "opacity-50 cursor-not-allowed",
                             )}
                         >
                             {t.icon}
@@ -192,24 +161,6 @@ export function KEditorPanel() {
                         </button>
                     ))}
                 </div>
-                {/* Review button hidden — kept for re-use if needed
-                {!isNew && dailyTotal > 0 && (
-                    <div className="px-3 flex items-center shrink-0">
-                        <button
-                            onClick={handleReview}
-                            disabled={sessionLoading}
-                            title={`Review ${dailyTotal} question${dailyTotal !== 1 ? "s" : ""} due today`}
-                            className="h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border border-blue-700/60 bg-blue-900/20 text-blue-300 hover:bg-blue-900/40 hover:border-blue-600 transition-colors disabled:opacity-50"
-                        >
-                            {sessionLoading
-                                ? <Loader2 className="w-3 h-3 animate-spin" />
-                                : <Play className="w-3 h-3 fill-current" />
-                            }
-                            {dailyTotal}
-                        </button>
-                    </div>
-                )}
-                */}
             </div>
 
             {/* Content */}
@@ -229,30 +180,6 @@ export function KEditorPanel() {
                     />
                 </div>
             )}
-
-            {/* ── Import popup — triggered by right-click in tree ── */}
-            <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
-                <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 gap-0">
-                    <DialogHeader className="px-6 py-4 border-b border-border shrink-0">
-                        <DialogTitle className="text-sm font-semibold">Import from Markdown</DialogTitle>
-                    </DialogHeader>
-                    <div className="flex-1 min-h-0 overflow-auto">
-                        {!isNew && (
-                            <KMarkdownImportPanel
-                                knowledgeId={knowledge.id}
-                                initialParentNode={importParentNode}
-                                onSuccess={() => {
-                                    setIsImportOpen(false);
-                                    // Reload the flow canvas if it's currently viewing the imported node
-                                    if (importParentNode) {
-                                        dispatchKFlowQuestionsChanged({ nodeId: importParentNode.id });
-                                    }
-                                }}
-                            />
-                        )}
-                    </div>
-                </DialogContent>
-            </Dialog>
         </CardContent>
     );
 }

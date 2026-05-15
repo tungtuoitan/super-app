@@ -71,6 +71,10 @@ export const useEditorToolbarHelper = () => {
     const commonCancel = () => {
         if (!activeTab) return;
 
+        // Let feature handler discard its own content state first (e.g. markdown editor)
+        const handler = handlers.find((h) => h.handles(activeTab.type));
+        handler?.onDiscard?.(activeTab);
+
         if (activeTab.data0) {
             setOpenTabs((prev) =>
                 prev.map((tab) =>

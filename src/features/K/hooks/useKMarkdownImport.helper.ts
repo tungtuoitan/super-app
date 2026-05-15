@@ -24,7 +24,7 @@ export const useKMarkdownImportHelper = () => {
         error: null,
     });
 
-    const generate = async (parsed: KMdParsed, parentNodeId: number) => {
+    const generate = async (parsed: KMdParsed, parentNodeId: number | null) => {
         const knowledgeId = currentK?.id;
         if (!knowledgeId || knowledgeId < 0) {
             _console.error("No knowledge selected");

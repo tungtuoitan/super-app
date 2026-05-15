@@ -20,7 +20,7 @@ export interface KExistingQuizAddition {
 }
 
 export interface KImportQuizMarkdownRequest {
-    parentNodeId: number;
+    parentNodeId: number | null;
     tests: KMdQuiz[];
     orphanQuestions: KMdQuestion[];
     existingTestAdditions: KExistingQuizAddition[];

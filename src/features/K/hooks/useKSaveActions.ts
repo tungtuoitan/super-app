@@ -5,6 +5,7 @@ import { useKLoader } from "./kTree/useK.loader";
 import { useKStore } from "../store/useK.store";
 import { useEditorTabBarHelper } from "@/shell";
 import type { KWsResponse } from "../types/k.type";
+import { kMarkdownActions } from "../utils/kMarkdownActions";
 
 export function useKSaveActions(): SaveActions {
     const { createKnowledge, updateKnowledge } = useKLoader();
@@ -13,8 +14,19 @@ export function useKSaveActions(): SaveActions {
 
     const handles = (tabType: string) => tabType === shellConstants.vscode.tab.tabTypes.kKnowledge;
 
+    const onDiscard = (_tab: BaseTab) => {
+        kMarkdownActions.getCancel()?.();
+    };
+
     const onSave = async (tab: BaseTab) => {
         if (tab.type !== shellConstants.vscode.tab.tabTypes.kKnowledge) return;
+
+        // Delegate to the markdown editor when it is the active sub-tab
+        const mdSave = kMarkdownActions.getSave();
+        if (mdSave) {
+            await mdSave();
+            return;
+        }
 
         const knowledge = tab.data as KWsResponse;
         if (!knowledge) return;
@@ -39,5 +51,5 @@ export function useKSaveActions(): SaveActions {
         }
     };
 
-    return { handles, onSave };
+    return { handles, onSave, onDiscard };
 }

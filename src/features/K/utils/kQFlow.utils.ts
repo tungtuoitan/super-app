@@ -1,5 +1,5 @@
 ﻿import { flowService } from "@/shared";
-import type { FlowEdgeDTO } from "@/shared";
+import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared";
 import { QUESTION_NODE_WIDTH, NODE_HEIGHT, COL_COUNT, H_GAP, V_GAP } from "./kQFlow.constants";
 
 // Constants used by the overlap check (node visual bounds with margin)
@@ -28,12 +28,17 @@ export function buildGridPosition(index: number): { x: number; y: number } {
 }
 
 /**
- * Topological sort (DFS) of questions by their canvas flow edges.
- * Respects arrowDirection: forward = source→target, backward = target→source,
- * both = source→target (one direction chosen to avoid artificial cycles).
+ * Topological sort (Kahn's BFS) of questions by their canvas flow edges.
+ * When multiple nodes are available at the same time, tie-breaks by canvas
+ * position (y first, then x) so grid rows are processed left-to-right, top-to-bottom.
+ * Respects arrowDirection: backward reverses the edge direction.
  * Unconnected questions and cycle members keep their original order at the end.
  */
-export function topoSortByFlow<T extends { id: number }>(questions: T[], edges: FlowEdgeDTO[]): T[] {
+export function topoSortByFlow<T extends { id: number }>(
+    questions: T[],
+    edges: FlowEdgeDTO[],
+    positions?: FlowNodePositionDTO[],
+): T[] {
     const idSet = new Set(questions.map((q) => q.id));
     const relevant = edges.filter(
         (e) =>
@@ -44,58 +49,82 @@ export function topoSortByFlow<T extends { id: number }>(questions: T[], edges: 
             idSet.has(e.targetId),
     );
 
-    if (relevant.length === 0) return questions;
-
-    // Build adjacency list respecting arrowDirection
-    const adj = new Map<number, number[]>();
-    for (const q of questions) adj.set(q.id, []);
-    for (const e of relevant) {
-        if (e.arrowDirection === "backward") {
-            adj.get(e.targetId)?.push(e.sourceId);
-        } else {
-            // forward or both → source→target
-            adj.get(e.sourceId)?.push(e.targetId);
-        }
+    // Position map: prefer top rows (low y), then left columns (low x)
+    const posMap = new Map<number, { x: number; y: number }>();
+    if (positions) {
+        for (const p of positions) posMap.set(p.nodeId, { x: p.x, y: p.y });
     }
-
-    const visited = new Set<number>();
-    const inStack = new Set<number>();
-    const stack: number[] = [];
-
-    const dfs = (id: number) => {
-        if (visited.has(id) || inStack.has(id)) return;
-        inStack.add(id);
-        for (const nextId of (adj.get(id) ?? [])) dfs(nextId);
-        inStack.delete(id);
-        visited.add(id);
-        stack.push(id);
+    const origIndex = new Map<number, number>(questions.map((q, i) => [q.id, i]));
+    const comparePos = (a: number, b: number): number => {
+        const pa = posMap.get(a);
+        const pb = posMap.get(b);
+        if (pa && pb) {
+            if (pa.y !== pb.y) return pa.y - pb.y;
+            if (pa.x !== pb.x) return pa.x - pb.x;
+        }
+        return (origIndex.get(a) ?? 0) - (origIndex.get(b) ?? 0);
     };
 
-    for (const q of questions) dfs(q.id);
+    // No edges — sort purely by canvas position (row by row: top→bottom, left→right)
+    if (relevant.length === 0) {
+        return [...questions].sort((a, b) => comparePos(a.id, b.id));
+    }
 
-    // stack is reverse topo order
+    // Build adjacency list and in-degree (Kahn's algorithm)
+    const adj = new Map<number, number[]>();
+    const inDegree = new Map<number, number>();
+    for (const q of questions) { adj.set(q.id, []); inDegree.set(q.id, 0); }
+    for (const e of relevant) {
+        const src = e.arrowDirection === "backward" ? e.targetId : e.sourceId;
+        const tgt = e.arrowDirection === "backward" ? e.sourceId : e.targetId;
+        adj.get(src)?.push(tgt);
+        inDegree.set(tgt, (inDegree.get(tgt) ?? 0) + 1);
+    }
+
+    // Seed queue with in-degree-0 nodes sorted by position
+    let queue = questions
+        .filter((q) => (inDegree.get(q.id) ?? 0) === 0)
+        .map((q) => q.id)
+        .sort(comparePos);
+
     const byId = new Map(questions.map((q) => [q.id, q]));
     const sorted: T[] = [];
     const sortedIds = new Set<number>();
-    for (let i = stack.length - 1; i >= 0; i--) {
-        const q = byId.get(stack[i]);
-        if (q) { sorted.push(q); sortedIds.add(stack[i]); }
+
+    while (queue.length > 0) {
+        const id = queue.shift()!;
+        const q = byId.get(id);
+        if (q) { sorted.push(q); sortedIds.add(id); }
+
+        const newlyReady: number[] = [];
+        for (const nextId of (adj.get(id) ?? [])) {
+            const deg = (inDegree.get(nextId) ?? 0) - 1;
+            inDegree.set(nextId, deg);
+            if (deg === 0) newlyReady.push(nextId);
+        }
+        if (newlyReady.length > 0) {
+            queue = [...queue, ...newlyReady].sort(comparePos);
+        }
     }
 
-    // append disconnected / cycle members in original order
+    // Append disconnected / cycle members in original order
     for (const q of questions) { if (!sortedIds.has(q.id)) sorted.push(q); }
 
     return sorted;
 }
 
-/** Fetch edges and return topologically sorted questions for a given test. */
+/** Fetch edges + positions and return topologically sorted questions. */
 export async function sortQuestionsByFlowOrder<T extends { id: number }>(
     questions: T[],
 ): Promise<T[]> {
     try {
-        const res = await flowService._getEdges("");
-        const edges: FlowEdgeDTO[] = (res.data as FlowEdgeDTO[]) ?? [];
-        return topoSortByFlow(questions, edges);
+        const [edgeRes, posRes] = await Promise.all([
+            flowService._getEdges(""),
+            flowService._getPositions("", { nodeType: "kQuestion" }),
+        ]);
+        const edges: FlowEdgeDTO[] = (edgeRes.data as FlowEdgeDTO[]) ?? [];
+        const positions: FlowNodePositionDTO[] = (posRes.data as FlowNodePositionDTO[]) ?? [];
+        return topoSortByFlow(questions, edges, positions);
     } catch {
         return questions;
     }
