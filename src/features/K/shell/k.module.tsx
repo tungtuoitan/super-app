@@ -7,6 +7,7 @@ import { KMovingTab } from "../Components/KMovingTree/KMovingTab";
 import { useKStore } from "../store/useK.store";
 import type { ModuleDefinition } from "@/shell";
 import { useKSaveActions } from "../hooks/useKSaveActions";
+import { useKGlobalInit } from "../hooks/kTree/useKGlobalInit.headless";
 
 
 const KMovingTabAdapter = () => <KMovingTab />;
@@ -18,6 +19,7 @@ export const kModule: ModuleDefinition = {
     icon: LibraryBig,
     label: "K",
 
+    useGlobalInit: useKGlobalInit,
     useBadge: () => useKStore().dailyReviewDueCount,
 
     SidebarView: KView,
