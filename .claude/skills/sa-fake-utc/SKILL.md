@@ -144,6 +144,45 @@ const d = parseAsLocalDate(dto.dueDate);
 
 BE không làm gì đặc biệt — nhận string, lưu thẳng vào DB dạng `DATETIME` hoặc `TIMESTAMP` **không có timezone conversion**. Khi trả về cũng trả nguyên string đó. Convention là BE treat tất cả datetime column như "local time của user" chứ không convert sang UTC thật.
 
+### BE (.NET): Dùng `DateTime.Now`
+
+```csharp
+// ✓ Đúng — local server time
+entity.CreatedAt = DateTime.Now;
+entity.UpdatedAt = DateTime.Now;
+
+// ❌ Sai — UTC, lệch 7h so với Vietnam
+DateTime.UtcNow;
+```
+
+### DB: Dùng `datetime2` + `sysdatetime()`
+
+```sql
+[created_at] DATETIME2(3) DEFAULT (sysdatetime()) NOT NULL
+-- sysdatetime()    = local server time ✓
+-- sysutcdatetime() = UTC              ❌
+```
+
+---
+
+### 4. So sánh/tính toán thời gian (ví dụ "5 phút trước")
+
+```ts
+// ✓ Đúng — cả hai đều là local time
+const diff = new Date().getTime() - parseAsLocalDate(dto.createdAt)!.getTime();
+
+// ❌ Sai — trộn local Date() với UTC-parsed date → lệch ±7h
+const diff = new Date().getTime() - new Date(dto.createdAt).getTime();
+```
+
+---
+
+## Lưu ý phạm vi áp dụng
+
+- ✓ App single-timezone (toàn bộ user ở cùng timezone)
+- ✓ "Display time" — user thấy đúng giờ họ nhập
+- ✗ Không phù hợp cho app multi-timezone cần sync cross-timezone
+
 ---
 
 ## Task
