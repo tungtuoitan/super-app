@@ -4,7 +4,7 @@
 
 .DESCRIPTION
   Run once to build the frozen baseline. After this, use restore.ps1 (or
-  loadtest/test-workspace-api with -Restore flag) to reset between tests.
+  test-workspace-api with -Restore flag) to reset between tests.
 
 .EXAMPLES
   .\setup.ps1                  # full build + backup
@@ -12,8 +12,8 @@
   .\setup.ps1 -SkipUsers       # rebuild data only (users already seeded)
 
 .NOTES
-  Reads loadtest\.env for DB credentials and loadtest user config.
-  Reads db-test\.env for TEST_DB_NAME and TEST_DB_BACKUP_PATH (or uses defaults).
+  Reads ..\loadtest\.env for DB credentials and loadtest user config.
+  Reads .\.env for TEST_DB_NAME and TEST_DB_BACKUP_PATH (or uses defaults).
 #>
 
 [CmdletBinding()]

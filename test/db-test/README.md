@@ -25,7 +25,7 @@ Snapshot of `SuperApp-pro` user `hoanhtungle@gmail.com` fanned out across 1000 l
 ### One-time setup (~18 min)
 
 ```powershell
-cd C:\Users\Admin\source\SuperApp\db-test
+cd C:\Users\Admin\source\SuperApp\test\db-test
 .\setup.ps1
 ```
 
@@ -35,23 +35,21 @@ cd C:\Users\Admin\source\SuperApp\db-test
 # 1. Restore baseline (~24s)
 .\restore.ps1
 
-# 2. Restart BE pointed at test DB (in another terminal)
-$env:ConnectionStrings__SuperAppConnection = "Server=157.66.101.51,1433;Database=SuperApp-test;User Id=sa;Password=***REDACTED-ROTATED-PASSWORD***;TrustServerCertificate=True;Encrypt=False"
-$env:ConnectionStrings__UserProfileConnection = $env:ConnectionStrings__SuperAppConnection
-cd C:\Users\Admin\source\Timeline\SuperAppAPI
-dotnet run
+# 2. Restart BE pointed at test DB
+# Cách đơn giản nhất: tạm swap Database=SuperApp-dev -> SuperApp-test trong Timeline\.env
+# (DotNetEnv override mọi env var nên $env:ConnectionStrings__... không hiệu quả)
 
-# 3. Re-prewarm tokens (BE just restarted, JWT signer may have rotated)
-cd C:\Users\Admin\source\SuperApp\loadtest
+# 3. Re-prewarm tokens (BE just restarted)
+cd C:\Users\Admin\source\SuperApp\test\loadtest
 node prewarm-tokens.js
 
-# 4. Run k6 (any scenario from loadtest\ or test-workspace-api\)
+# 4. Run k6 (any scenario from test\loadtest\ or test\test-workspace-api\)
 .\bin\k6.exe run -e VUS=200 -e RAMP_UP=30s -e STEADY=1m -e RAMP_DOWN=15s k6\scenario-noauth.js
 ```
 
 ## Why pure-SQL bulk clone
 
-The original per-user Node loop (`test-workspace-api/clone-data.js`) takes ~18 min for *just* workspace data. With full prod data shape across all user-scoped tables (~3M rows), it would take 5-8 hours.
+The original per-user Node loop (`..\test-workspace-api\clone-data.js`) takes ~18 min for *just* workspace data. With full prod data shape across all user-scoped tables (~3M rows), it would take 5-8 hours.
 
 `scripts/clone-all.js` uses cross-DB `INSERT ... SELECT ... CROSS JOIN target_users` and `MERGE ... OUTPUT INTO` to do all 1000 user fan-outs in a handful of set-based statements. ~18 min total for ~3M rows.
 
