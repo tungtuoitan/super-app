@@ -1,0 +1,10 @@
+{
+  "name": "superapp-db-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build, backup, and restore a frozen test database for SuperApp load testing.",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mssql": "^11.0.1"
+  }
+}

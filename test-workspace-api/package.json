@@ -1,0 +1,14 @@
+{
+  "name": "superapp-test-workspace-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Workspace tree/v2 load test — clones real data from prod, hammers /api/workspace/{id}/tree/v2.",
+  "scripts": {
+    "clone": "node clone-data.js",
+    "cleanup": "node cleanup-data.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mssql": "^11.0.1"
+  }
+}
