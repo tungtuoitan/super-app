@@ -2,6 +2,7 @@
  * seed-users.js
  *
  * Seeds N local-auth users into [urm].[users] for load testing.
+ * 
  * Password hashing uses BCrypt to match Timeline AuthService.LocalLoginAsync,
  * which calls BCrypt.Net.BCrypt.Verify(password, user.Password).
  *
@@ -16,7 +17,7 @@ require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const sql = require("mssql");
 
-const BCRYPT_ROUNDS = 11; // BCrypt.Net default workfactor
+const BCRYPT_ROUNDS = 10; // Lowered from 11 to test BE login throughput. Verify cost ≈ 50ms vs 100ms at rounds=11.
 
 function hashPassword(password) {
     return bcrypt.hashSync(password, BCRYPT_ROUNDS);
