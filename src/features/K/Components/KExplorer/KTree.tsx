@@ -7,7 +7,7 @@ import { useKStore } from "../../store/useK.store";
 import { useSideBarHelper, useEditorTabBarHelper, shellConstants } from "@/shell";
 import { useKTreeHelper } from "../../hooks/kTree/useKTree.helper";
 import type { KWsResponse } from "../../types/k.type";
-import { useMenuContextHelper } from "@/shared";
+import { useMenuContextHelper, useGlobalShortcut } from "@/shared";
 
 import { KCustomDragPreview } from "./KCustomDragPreview";
 import { KNode } from "./KNode";
@@ -22,7 +22,7 @@ import {KTreeNode} from "../../types/kV2.type";
 import {kconstants} from "../../utils/k.constants";
 
 export function KTree() {
-    const { isDragging, currentK, allK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, treeData: _storeTD, setTreeData } = useKStore();
+    const { isDragging, currentK, allK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, treeData: _storeTD, setTreeData, lastSelectedItemId, setRenamingNodeId, setRenamingNodeValue } = useKStore();
     const { openTabs, patchTab, openSingletonTab, updateActiveTab } = useEditorTabBarHelper();
     const { searchQuery } = useSideBarHelper();
     const { handleSelectionChange, handleKeyDown } = useKTreeSelectionHelper();
@@ -118,6 +118,12 @@ export function KTree() {
             document.removeEventListener("keydown", handleKeyDownWrapper);
         };
     }, [allVisibleFolderIds]);
+
+    // F2 — inline rename selected node
+    useGlobalShortcut("f2", { id: "k-tree-rename-f2", enabled: !!lastSelectedItemId }, () => {
+        setRenamingNodeValue(null); // reset so KNode initialises fresh
+        setRenamingNodeId(lastSelectedItemId);
+    });
 
     // Open or focus the singleton K tab — shared by container click and empty-space deselect
     const openOrFocusKTab = () => {

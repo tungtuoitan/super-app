@@ -19,7 +19,8 @@
       "mcp__github__get_issue",
       "mcp__github__search_issues",
       "mcp__github__get_me",
-      "mcp__github__issue_read"
+      "mcp__github__issue_read",
+      "PowerShell(if \\(-not \\(Test-Path \"C:\\\\Users\\\\Admin\\\\source\\\\LockMe\"\\)\\) { New-Item -ItemType Directory -Path \"C:\\\\Users\\\\Admin\\\\source\\\\LockMe\" | Out-Null }; \"Created or exists: $\\(Test-Path 'C:\\\\Users\\\\Admin\\\\source\\\\LockMe'\\)\")"
     ],
     "defaultMode": "bypassPermissions"
   }

@@ -73,6 +73,10 @@ const kContextDefaultValue: KContextData = {
     setKFlowClipboard: () => {},
     kFlowViewportMap: {},
     setKFlowViewportMap: () => {},
+    renamingNodeId: null,
+    setRenamingNodeId: () => {},
+    renamingNodeValue: null,
+    setRenamingNodeValue: () => {},
 };
 
 // @deprecated alias
@@ -118,6 +122,8 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
     const [dailyReviewDueCount, setDailyReviewDueCount] = useState<number>(0);
     const [kFlowClipboard, setKFlowClipboard] = useState<KFlowClipboard | null>(null);
     const [kFlowViewportMap, setKFlowViewportMap] = useState<Record<number, { x: number; y: number; zoom: number }>>({});
+    const [renamingNodeId, setRenamingNodeId] = useState<number | null>(null);
+    const [renamingNodeValue, setRenamingNodeValue] = useState<string | null>(null);
 
     return (
         <KStore.Provider
@@ -185,6 +191,10 @@ export const KProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children
                 setKFlowClipboard,
                 kFlowViewportMap,
                 setKFlowViewportMap,
+                renamingNodeId,
+                setRenamingNodeId,
+                renamingNodeValue,
+                setRenamingNodeValue,
             }}
         >
             {children}

@@ -102,6 +102,14 @@ export interface KContextData {
     /** Last viewport (x, y, zoom) per knowledgeId (0 = orphan) */
     kFlowViewportMap: Record<number, { x: number; y: number; zoom: number }>;
     setKFlowViewportMap: Dispatch<SetStateAction<Record<number, { x: number; y: number; zoom: number }>>>;
+
+    /** Node id that should enter inline rename mode (set by F2, cleared on submit/cancel) */
+    renamingNodeId: number | null;
+    setRenamingNodeId: Dispatch<SetStateAction<number | null>>;
+
+    /** Current rename input value — null = not yet initialized for this session */
+    renamingNodeValue: string | null;
+    setRenamingNodeValue: Dispatch<SetStateAction<string | null>>;
 }
 
 // @deprecated alias

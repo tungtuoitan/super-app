@@ -31,7 +31,7 @@ export function KEditorPanel() {
 
     const [activeTab, setActiveTabLocal] = useState<KTab>(() => {
         const saved = tab?.metadata?.activeKTab as KTab | undefined;
-        return saved ?? (isNew ? "general" : "qflow");
+        return saved ?? (isNew ? "general" : "markdown");
     });
     const [selectedNodeId, setSelectedNodeId] = useState<number | null>(() => {
         // 1. Tab already had a saved node (e.g. page refresh / tab swap back)
@@ -62,7 +62,7 @@ export function KEditorPanel() {
         const prev = prevKnowledgeIdRef.current;
         prevKnowledgeIdRef.current = knowledge.id;
         if (prev === knowledge.id) return; // same knowledge — skip
-        const defaultTab = isNew ? "general" : "qflow";
+        const defaultTab = isNew ? "general" : "markdown";
         setActiveTabLocal(defaultTab);
         setSelectedNodeId(null);
         if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, activeKTab: defaultTab, selectedNodeId: null } }));

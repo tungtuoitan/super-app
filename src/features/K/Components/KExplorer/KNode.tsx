@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React, { useState, useRef } from "react";
 import { NodeApi } from "react-arborist";
 import { ChevronDown, ChevronRight, LibraryBig, Library, Bookmark, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { useKTreeSelectionHelper } from "../../hooks/kTree/useKTreeSelection.helper";
@@ -11,6 +11,7 @@ import { useKNodeSelection } from "../../hooks/kTree/useKNodeSelection.helper";
 import {KTreeNode} from "../../types/kV2.type";
 import { $hasDescendantWithBlueDot, $hasDescendantWithBrownDot } from "../../hooks/kTree/kTree.miniHelper";
 import {kconstants} from "../../utils/k.constants";
+import { useKNodeInlineRename } from "../../hooks/kTree/useKNodeInlineRename.helper";
 
 interface NodeProps {
     node: NodeApi<KTreeNode>;
@@ -78,6 +79,8 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
         _treeRef,
         hoveredNodeId, setHoveredNodeId,
         markedNodeId, setMarkedNodeId,
+        renamingNodeId, setRenamingNodeId,
+        renamingNodeValue, setRenamingNodeValue,
     } = useKStore();
     const { searchQuery } = useSideBarHelper();
     const { showContextMenu } = useMenuContextHelper();
@@ -126,6 +129,26 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
             storageService.remove(`${STORAGE_KEYS.K_TREE_MARK}_${currentK.id}`);
         } else {
             storageService.set(`${STORAGE_KEYS.K_TREE_MARK}_${currentK.id}`, newVal);
+        }
+    };
+
+    // Inline rename (F2)
+    const isEditing = renamingNodeId === nodeId
+        && !isWorkspaceRoot
+        && !itemStatus.hasDeletedAncestor
+        && !itemStatus.isDirectlyDeleted;
+
+    const inputRef = useRef<HTMLInputElement>(null);
+    const { renameNode } = useKNodeInlineRename();
+
+    const stopRenaming = () => { setRenamingNodeId(null); setRenamingNodeValue(null); };
+
+    const submitEdit = async () => {
+        if (!isEditing) return;
+        const newName = (inputRef.current?.value ?? "").trim();
+        stopRenaming();
+        if (newName && newName !== nodeName) {
+            await renameNode(nodeItem, newName);
         }
     };
 
@@ -199,6 +222,12 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
         const _currentNode = currentK?.flatData.find((f) => f.id === nodeId);
         const contextData = { ...nodeItem, parentId: _currentNode?.parentId ?? null };
         showContextMenu(e, kconstants.contextMenu.contextMenuTypes.kNode, contextData);
+    };
+
+    const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        e.stopPropagation();
+        if (e.key === "Enter") { e.preventDefault(); submitEdit(); }
+        if (e.key === "Escape") { e.preventDefault(); stopRenaming(); }
     };
 
     return (
@@ -285,40 +314,50 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 {/* Folder Info */}
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                     <div className="w-full min-w-0 flex items-center gap-2">
-                        <HighlightText
-                            text={`${nodeName}`}
-                            highlight={treeType === "workspaceTree" ? searchQuery : ""}
-                            className={`
-                            text-sm truncate
-                            ${hasChildren ? "font-semibold" : "font-normal"}
-                            ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
-                            ${itemStatus.isDirectlyDeleted ? "line-through" : ""}
-                            ${itemStatus.hasDeletedAncestor || itemStatus.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"}
-                        `}
-                        />
-                        {/* SRS review dot — learning node has questions with srsNextReviewAt <= now */}
-                        {nodeItem.statusCode === "learning" && treeType === "workspaceTree" && (nodeItem.dueSrsCount ?? 0) > 0 && (
+                        {isEditing ? (
+                            <input
+                                ref={inputRef}
+                                defaultValue={nodeName}
+                                autoFocus
+                                onKeyDown={handleEditKeyDown}
+                                onBlur={submitEdit}
+                                onClick={(e) => e.stopPropagation()}
+                                className={`text-sm flex-1 min-w-0 bg-transparent text-editor-fg outline outline-1 outline-white/15 rounded-sm px-0.5 selection:bg-white/20 ${hasChildren ? "font-semibold" : "font-normal"}`}
+                                style={{ border: "none" }}
+                            />
+                        ) : (
+                            <HighlightText
+                                text={`${nodeName}`}
+                                highlight={treeType === "workspaceTree" ? searchQuery : ""}
+                                className={`
+                                text-sm truncate
+                                ${hasChildren ? "font-semibold" : "font-normal"}
+                                ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
+                                ${itemStatus.isDirectlyDeleted ? "line-through" : ""}
+                                ${itemStatus.hasDeletedAncestor || itemStatus.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"}
+                            `}
+                            />
+                        )}
+                        {/* Status dots — hidden while editing */}
+                        {!isEditing && nodeItem.statusCode === "learning" && treeType === "workspaceTree" && (nodeItem.dueSrsCount ?? 0) > 0 && (
                             <span
                                 title={`${nodeItem.dueSrsCount} question${nodeItem.dueSrsCount !== 1 ? "s" : ""} due`}
                                 className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400"
                             />
                         )}
-                        {/* Blue dot bubble-up — collapsed node has hidden descendants with due SRS questions */}
-                        {isCollapsed && treeType === "workspaceTree" && !(nodeItem.statusCode === "learning" && (nodeItem.dueSrsCount ?? 0) > 0) && $hasDescendantWithBlueDot(node.data.children ?? []) && (
+                        {!isEditing && isCollapsed && treeType === "workspaceTree" && !(nodeItem.statusCode === "learning" && (nodeItem.dueSrsCount ?? 0) > 0) && $hasDescendantWithBlueDot(node.data.children ?? []) && (
                             <span
                                 title="Descendants have questions due"
                                 className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400 opacity-60"
                             />
                         )}
-                        {/* Draft question dot — node has draft questions */}
-                        {treeType === "workspaceTree" && (nodeItem.draftQuestionCount ?? 0) > 0 && (
+                        {!isEditing && treeType === "workspaceTree" && (nodeItem.draftQuestionCount ?? 0) > 0 && (
                             <span
                                 title={`${nodeItem.draftQuestionCount} draft question${nodeItem.draftQuestionCount !== 1 ? "s" : ""}`}
                                 className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-800"
                             />
                         )}
-                        {/* Brown dot bubble-up — collapsed node has hidden descendants with draft questions */}
-                        {isCollapsed && treeType === "workspaceTree" && (nodeItem.draftQuestionCount ?? 0) <= 0 && $hasDescendantWithBrownDot(node.data.children ?? []) && (
+                        {!isEditing && isCollapsed && treeType === "workspaceTree" && (nodeItem.draftQuestionCount ?? 0) <= 0 && $hasDescendantWithBrownDot(node.data.children ?? []) && (
                             <span
                                 title="Descendants have draft questions"
                                 className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-800 opacity-60"
@@ -350,7 +389,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 </div>
 
                 {/* Mark button — visible on hover or when this node is marked */}
-                {!isWorkspaceRoot && treeType === "workspaceTree" && (isHovered || isMarked) && (
+                {!isEditing && !isWorkspaceRoot && treeType === "workspaceTree" && (isHovered || isMarked) && (
                     <button
                         onClick={handleToggleMark}
                         title={isMarked ? "Remove mark" : "Mark subtree"}
@@ -361,7 +400,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 )}
 
                 {/* Expand/collapse subtree — 3-state, shown on hover for any node with children */}
-                {hasChildren && isHovered && (
+                {!isEditing && hasChildren && isHovered && (
                     <ExpandCollapseButton
                         phase={!node.isOpen ? 0 : expandPhase === 0 ? 1 : expandPhase}
                         onClick={handleExpandCollapse}
