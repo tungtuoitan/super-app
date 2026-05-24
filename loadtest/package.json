@@ -1,0 +1,15 @@
+{
+  "name": "superapp-loadtest",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Load testing toolkit for SuperApp BE — seed users, run k6, cleanup.",
+  "scripts": {
+    "seed": "node seed-users.js",
+    "cleanup": "node cleanup-users.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "mssql": "^11.0.1"
+  }
+}
