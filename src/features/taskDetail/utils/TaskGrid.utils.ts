@@ -165,7 +165,64 @@ export function validateMakeIndependent(task: Task): DropValidation {
 }
 
 /**
- * Sort tasks hierarchically: parent tasks first (by startDate), then subtasks immediately after their parent.
+ * Validate if a task can be reordered next to another task.
+ * Reorder is only allowed within the same sibling group:
+ *   - both are top-level tasks (parents), OR
+ *   - both are subtasks of the same parent.
+ */
+export function validateReorderTask(dragTask: Task, dropTask: Task): DropValidation {
+    if (dragTask.id === dropTask.id) {
+        return { canDrop: false };
+    }
+    if (dragTask.projectId !== dropTask.projectId) {
+        return { canDrop: false, errorMessage: "Cannot reorder across different projects" };
+    }
+    const dragParent = dragTask.parentTaskId ?? null;
+    const dropParent = dropTask.parentTaskId ?? null;
+    if (dragParent !== dropParent) {
+        return {
+            canDrop: false,
+            errorMessage: "Can only reorder within the same hierarchy level",
+        };
+    }
+    return { canDrop: true };
+}
+
+/**
+ * Compute new orderIndex values after reordering dragTask next to dropTask.
+ * Returns a sparse map: { [taskId]: newOrderIndex } only for tasks whose orderIndex changed.
+ * Position "before" inserts dragTask before dropTask in the sibling list; "after" inserts after.
+ */
+export function computeReorderedTasks(
+    dragTask: Task,
+    dropTask: Task,
+    position: "before" | "after",
+    allTasks: Task[],
+): Map<number, number> {
+    const parentId = dropTask.parentTaskId ?? null;
+    const siblings = allTasks
+        .filter((t) => (t.parentTaskId ?? null) === parentId && t.projectId === dropTask.projectId)
+        .sort((a, b) => {
+            if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        });
+
+    const without = siblings.filter((t) => t.id !== dragTask.id);
+    const dropIdx = without.findIndex((t) => t.id === dropTask.id);
+    if (dropIdx === -1) return new Map();
+
+    const insertAt = position === "before" ? dropIdx : dropIdx + 1;
+    without.splice(insertAt, 0, dragTask);
+
+    const changes = new Map<number, number>();
+    without.forEach((t, idx) => {
+        if (t.orderIndex !== idx) changes.set(t.id, idx);
+    });
+    return changes;
+}
+
+/**
+ * Sort tasks hierarchically: parent tasks first (by orderIndex), then subtasks immediately after their parent.
  * Orphaned subtasks (parent not in list) are appended at the end.
  */
 export function sortTasksHierarchically(tasks: Task[]): Task[] {
@@ -173,31 +230,20 @@ export function sortTasksHierarchically(tasks: Task[]): Task[] {
     const parentTasks = tasks.filter((t) => !t.parentTaskId);
     const subtasks = tasks.filter((t) => t.parentTaskId);
 
-    // Sort parent tasks by startDate (null last), then by createdAt
-    parentTasks.sort((a, b) => {
-        if (a.startDate && b.startDate) {
-            return a.startDate.getTime() - b.startDate.getTime();
-        }
-        if (a.startDate) return -1;
-        if (b.startDate) return 1;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+    const compareByOrder = (a: Task, b: Task) => {
+        if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    };
+
+    parentTasks.sort(compareByOrder);
 
     // Build result with subtasks after their parents
     const result: Task[] = [];
     parentTasks.forEach((parent) => {
         result.push(parent);
-        // Find and add subtasks for this parent, sorted by startDate
         const childTasks = subtasks
             .filter((s) => s.parentTaskId === parent.id)
-            .sort((a, b) => {
-                if (a.startDate && b.startDate) {
-                    return a.startDate.getTime() - b.startDate.getTime();
-                }
-                if (a.startDate) return -1;
-                if (b.startDate) return 1;
-                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-            });
+            .sort(compareByOrder);
         result.push(...childTasks);
     });
 

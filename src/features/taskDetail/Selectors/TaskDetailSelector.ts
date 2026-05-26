@@ -37,7 +37,7 @@ export const useTaskDetailSelector = () => {
     const isDeleted = selectedTask?.deletedAt != null;
 
     const isCompleted =
-        selectedTask?.status === "completed" ||
+        // selectedTask?.status === "completed" ||
         selectedTask?.status === "cancelled" ||
         selectedTask?.status === "on_hold" ||
         selectedTask?.status === "failed";

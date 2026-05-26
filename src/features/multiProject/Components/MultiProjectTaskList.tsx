@@ -45,7 +45,7 @@ export function MultiProjectTaskList() {
     const { openTaskTab } = useTaskTabHelper();
     const { projectIds, projects } = useMultiTimelineStore();
     const { projectNameMap, statusOptions, priorityOptions, filteredTasks, sortedTasks } = useMultiProjectTaskListSelector();
-    const { handleInlineUpdate, handleInlineDateUpdate, handleDropTaskOntoTask, handleMakeIndependent, showDropError } = useMultiProjectTaskListHelper();
+    const { handleInlineUpdate, handleInlineDateUpdate, handleDropTaskOntoTask, handleMakeIndependent, handleReorderTasks, showDropError } = useMultiProjectTaskListHelper();
 
     // ── Side-effects (headless) ──────────────────────────
     useMultiProjectTaskListHeadless();
@@ -225,6 +225,7 @@ export function MultiProjectTaskList() {
                                     allTasks={filteredTasks}
                                     onDrop={handleDropTaskOntoTask}
                                     onMakeIndependent={handleMakeIndependent}
+                                    onReorder={handleReorderTasks}
                                     onRowClick={openTaskTab}
                                     onContextMenu={handleContextMenu}
                                     showError={showDropError}

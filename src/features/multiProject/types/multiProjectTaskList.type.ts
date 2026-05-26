@@ -10,6 +10,7 @@ export interface DraggableRowProps {
     allTasks: Task[];
     onDrop: (dragTask: Task, dropTask: Task, warningMessage?: string) => void;
     onMakeIndependent: (task: Task) => void;
+    onReorder: (dragTask: Task, dropTask: Task, position: "before" | "after") => void;
     onRowClick: (task: Task) => void;
     onContextMenu: (e: React.MouseEvent, row: Row<Task>) => void;
     showError: (message: string) => void;

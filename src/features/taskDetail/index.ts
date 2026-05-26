@@ -31,6 +31,8 @@ export {
     getSubtasksOutsideRange,
     validateDropTaskOntoTask,
     validateMakeIndependent,
+    validateReorderTask,
+    computeReorderedTasks,
     getTaskBarColors,
     isStatusNonDraggable,
     getTaskStatusColorsWithBorder,
@@ -40,6 +42,7 @@ export {
     isToday,
     isFirstDayOfMonth,
 } from "./utils/TaskGrid.utils";
+export { ensureDragModifierListeners, getIsShiftHeld } from "./utils/dragModifier.utils";
 export {
     TIMELINE_ROW_HEIGHT,
     TIMELINE_HEADER_HEIGHT,
