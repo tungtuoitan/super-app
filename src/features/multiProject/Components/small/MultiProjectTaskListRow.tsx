@@ -142,10 +142,12 @@ export function DraggableRow({ row, allTasks, onDrop, onReorder, onRowClick, onC
                 task.deletedAt && "opacity-60",
                 isSubtask && "bg-muted/20",
                 isDragging && "opacity-50 cursor-grabbing",
-                nestActive && "bg-primary/20 ring-2 ring-primary/50",
+                // Nest (Shift): filled emerald bg + dashed outline — "containment"
+                nestActive && "bg-emerald-500/15 outline outline-2 outline-dashed outline-emerald-500 -outline-offset-2",
                 dropInvalid && "bg-destructive/10",
-                showTopIndicator && "shadow-[inset_0_2px_0_0_var(--primary)]",
-                showBottomIndicator && "shadow-[inset_0_-2px_0_0_var(--primary)]",
+                // Reorder: thin sky-blue line on top/bottom edge — "insertion point"
+                showTopIndicator && "shadow-[inset_0_3px_0_0_rgb(14,165,233)]",
+                showBottomIndicator && "shadow-[inset_0_-3px_0_0_rgb(14,165,233)]",
                 !isDragging && !isOver && "hover:bg-muted/50",
             )}
             onClick={() => onRowClick(task)}

@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { useMultiProjectTaskListSelector } from "../Selectors/useMultiProjectTaskList.selector";
 import { useMultiProjectTaskListHeadless } from "../hooks/mpTaskList/useMultiProjectTaskList.headless";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
-import { StatusCell, PriorityCell } from "./small/MultiProjectTaskListCells";
+import { StatusCell, PriorityCell, ProjectCell } from "./small/MultiProjectTaskListCells";
 import { DateRangeCell, DraggableRow } from "./small/MultiProjectTaskListRow";
 import { MakeIndependentDropZone } from "@/features/taskDetail";
 import {useMultiProjectTaskListHelper} from "../hooks/mpTaskList/useMultiProjectTaskList.helper";
@@ -44,8 +44,8 @@ export function MultiProjectTaskList() {
     const { openMultiProjectTaskContextMenu } = useMultiProjectTaskGridHelper();
     const { openTaskTab } = useTaskTabHelper();
     const { projectIds, projects } = useMultiTimelineStore();
-    const { projectNameMap, statusOptions, priorityOptions, filteredTasks, sortedTasks } = useMultiProjectTaskListSelector();
-    const { handleInlineUpdate, handleInlineDateUpdate, handleDropTaskOntoTask, handleMakeIndependent, handleReorderTasks, showDropError } = useMultiProjectTaskListHelper();
+    const { allProjects, statusOptions, priorityOptions, filteredTasks, sortedTasks } = useMultiProjectTaskListSelector();
+    const { handleInlineUpdate, handleInlineDateUpdate, handleDropTaskOntoTask, handleMakeIndependent, handleReorderTasks, handleChangeProject, showDropError } = useMultiProjectTaskListHelper();
 
     // ── Side-effects (headless) ──────────────────────────
     useMultiProjectTaskListHeadless();
@@ -94,16 +94,14 @@ export function MultiProjectTaskList() {
         {
             accessorKey: "projectId",
             header: () => <div className="text-left text-sm">Project</div>,
-            size: 150,
-            cell: ({ getValue }) => {
-                const projectId = getValue() as number;
-                const projectName = projectNameMap[projectId] || `Project ${projectId}`;
-                return (
-                    <div className="text-sm text-muted-foreground text-left px-2 truncate" title={projectName}>
-                        {projectName}
-                    </div>
-                );
-            },
+            size: 180,
+            cell: ({ row }) => (
+                <ProjectCell
+                    task={row.original}
+                    allProjects={allProjects}
+                    onChange={handleChangeProject}
+                />
+            ),
         },
         {
             accessorKey: "title",

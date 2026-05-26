@@ -16,6 +16,7 @@ import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useTaskTabHelper } from "@/features/taskDetail";
+import type { Task } from "@/features/taskDetail";
 import { useConsoleHelper } from "@/shared";
 import { cn } from "@/lib/utils";
 import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/taskDetail";
@@ -23,6 +24,7 @@ import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTim
 import { useMultiTimelineSelector } from "../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "../hooks/mpTimeline/useMultiTimeline.helper";
 import { useMultiTimelineHeadless } from "../hooks/mpTimeline/useMultiTimeline.headless";
+import { useMultiProjectTaskGridHelper } from "../hooks/mpTaskList/useMultiProjectTaskGrid.helper";
 import { TaskBar } from "@/features/multiProject/Components/small/TaskBar";
 
 export function MultiProjectTimelineView() {
@@ -38,18 +40,25 @@ export function MultiProjectTimelineView() {
     useMultiTimelineHeadless();
 
     // ── State (from store) ───────────────────────────────
-    const { projects, hoveredItemId, setHoveredItemId, isTodayVisible, dayWidth, timelineScrollRef } = useMultiTimelineStore();
+    const { projects, projectIds, hoveredItemId, setHoveredItemId, isTodayVisible, dayWidth, timelineScrollRef } = useMultiTimelineStore();
 
     // ── Computed values (from selector) ──────────────────
     const { filteredTasks, timelineStart, dates, todayPosition, monthGroups, timelineWidth, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
 
     // ── Handlers (from helper) ───────────────────────────
     const { handleScroll, scrollToToday, handleZoomIn, handleZoomOut, handleTaskDateChange } = useMultiTimelineHelper();
+    const { openMultiProjectTaskContextMenu } = useMultiProjectTaskGridHelper();
+
+    const handleContextMenu = (event: React.MouseEvent) => {
+        openMultiProjectTaskContextMenu(event, undefined, projectIds, (task: Task) => {
+            openTaskTab(task);
+        });
+    };
 
     const totalHeight = Math.max(filteredTasks.length * TIMELINE_ROW_HEIGHT, 200);
 
     return (
-        <div className="w-full h-full flex flex-col relative">
+        <div className="w-full h-full flex flex-col relative" onContextMenu={handleContextMenu}>
             {taskGridIsLoading && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-20">
                     <Loader2 className="w-8 h-8 text-primary animate-spin" />

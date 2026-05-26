@@ -14,22 +14,25 @@ import { Label } from "@/shared";
 import { Alert, AlertDescription } from "@/shared";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useTaskTabHelper } from "@/features/taskDetail";
+import type { Task } from "@/features/taskDetail";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiProjectKanbanSelector } from "../Selectors/useMultiProjectKanban.selector";
 import { useMultiProjectKanbanHelper } from "../hooks/mpTaskKanban/useMultiProjectKanban.helper";
 import { useMultiProjectKanbanHeadless } from "../hooks/mpTaskKanban/useMultiProjectKanban.headless";
+import { useMultiProjectTaskGridHelper } from "../hooks/mpTaskList/useMultiProjectTaskGrid.helper";
 import { KanbanColumn } from "./small/KanbanColumn";
 
 export function MultiProjectKanbanView() {
     const { taskGridIsLoading, taskGridError } = useMpTaskStore();
     const { openTaskTab } = useTaskTabHelper();
-    const { projects } = useMultiTimelineStore();
+    const { projects, projectIds } = useMultiTimelineStore();
 
     // ── Computed values (from selector) ──────────────────
     const { statusOptions, filteredTasks, tasksByStatus } = useMultiProjectKanbanSelector();
 
     // ── Handlers (from helper) ───────────────────────────
     const { canDropToColumn, handleDropTask } = useMultiProjectKanbanHelper();
+    const { openMultiProjectTaskContextMenu } = useMultiProjectTaskGridHelper();
 
     // ── Side-effects (headless) ──────────────────────────
     // useMultiProjectKanbanHeadless();
@@ -37,8 +40,14 @@ export function MultiProjectKanbanView() {
     // Show subtasks toggle (default: on)
     const [showSubtasks, setShowSubtasks] = useState(true);
 
+    const handleContextMenu = (event: React.MouseEvent) => {
+        openMultiProjectTaskContextMenu(event, undefined, projectIds, (task: Task) => {
+            openTaskTab(task);
+        });
+    };
+
     return (
-        <div className="w-full h-full flex flex-col relative">
+        <div className="w-full h-full flex flex-col relative" onContextMenu={handleContextMenu}>
             {taskGridIsLoading && (
                 <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                     <Loader2 className="w-8 h-8 text-primary animate-spin" />

@@ -278,6 +278,52 @@ export const useMultiProjectTaskListHelper = () => {
         }
     };
 
+    // Handle changing project of a task — optimistic
+    const handleChangeProject = async (task: Task, newProjectId: number) => {
+        if (task.projectId === newProjectId) return;
+
+        const oldProjectId = task.projectId;
+
+        setTasks((prev) =>
+            prev.map((t) => (t.id === task.id ? { ...t, projectId: newProjectId } : t)),
+        );
+
+        try {
+            const upsertData = {
+                id: task.id,
+                projectId: newProjectId,
+                parentTaskId: task.parentTaskId,
+                type: task.type,
+                title: task.title,
+                note: task.note,
+                status: task.status,
+                priority: task.priority,
+                startDate: toLocalISOString(task.startDate),
+                endDate: toLocalISOString(task.endDate),
+                orderIndex: task.orderIndex,
+                folderWorkspaceItemId: task.folderWorkspaceItemId,
+                checklistJson: task.checklistJson,
+                processJson: task.processJson,
+                customTabsJson: task.customTabsJson,
+            };
+
+            const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
+
+            if (!result.success) {
+                setTasks((prev) =>
+                    prev.map((t) => (t.id === task.id ? { ...t, projectId: oldProjectId } : t)),
+                );
+                _console.error("Failed to change project");
+            }
+        } catch (error) {
+            setTasks((prev) =>
+                prev.map((t) => (t.id === task.id ? { ...t, projectId: oldProjectId } : t)),
+            );
+            console.error("Failed to change project:", error);
+            _console.error("Failed to change project");
+        }
+    };
+
     // Show error message
     const showDropError = (message: string) => {
         _console.error(message);
@@ -289,6 +335,7 @@ export const useMultiProjectTaskListHelper = () => {
         handleDropTaskOntoTask,
         handleMakeIndependent,
         handleReorderTasks,
+        handleChangeProject,
         showDropError,
     };
 };

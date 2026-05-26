@@ -166,16 +166,12 @@ export function validateMakeIndependent(task: Task): DropValidation {
 
 /**
  * Validate if a task can be reordered next to another task.
- * Reorder is only allowed within the same sibling group:
- *   - both are top-level tasks (parents), OR
- *   - both are subtasks of the same parent.
+ * Reorder is global — not limited by project. Only requirement: same hierarchy level
+ * (both top-level, or both subtasks of the same parent).
  */
 export function validateReorderTask(dragTask: Task, dropTask: Task): DropValidation {
     if (dragTask.id === dropTask.id) {
         return { canDrop: false };
-    }
-    if (dragTask.projectId !== dropTask.projectId) {
-        return { canDrop: false, errorMessage: "Cannot reorder across different projects" };
     }
     const dragParent = dragTask.parentTaskId ?? null;
     const dropParent = dropTask.parentTaskId ?? null;
@@ -190,9 +186,15 @@ export function validateReorderTask(dragTask: Task, dropTask: Task): DropValidat
 
 /**
  * Compute new orderIndex values after reordering dragTask next to dropTask.
- * Returns a sparse map: { [taskId]: newOrderIndex } only for tasks whose orderIndex changed.
- * Position "before" inserts dragTask before dropTask in the sibling list; "after" inserts after.
+ * Uses sparse insertion: only the moved task gets a new orderIndex (midpoint of its
+ * new neighbors). When neighbors collide / are adjacent, rebalance by shifting following
+ * siblings by STEP. This preserves global order across projects — single-project view
+ * never overwrites indices belonging to other projects.
+ *
+ * Returns sparse map { taskId -> newOrderIndex } only for changed tasks.
  */
+const ORDER_STEP = 1024;
+
 export function computeReorderedTasks(
     dragTask: Task,
     dropTask: Task,
@@ -201,10 +203,10 @@ export function computeReorderedTasks(
 ): Map<number, number> {
     const parentId = dropTask.parentTaskId ?? null;
     const siblings = allTasks
-        .filter((t) => (t.parentTaskId ?? null) === parentId && t.projectId === dropTask.projectId)
+        .filter((t) => (t.parentTaskId ?? null) === parentId)
         .sort((a, b) => {
             if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
-            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            return a.id - b.id;
         });
 
     const without = siblings.filter((t) => t.id !== dragTask.id);
@@ -212,12 +214,30 @@ export function computeReorderedTasks(
     if (dropIdx === -1) return new Map();
 
     const insertAt = position === "before" ? dropIdx : dropIdx + 1;
-    without.splice(insertAt, 0, dragTask);
+    const prev = insertAt > 0 ? without[insertAt - 1] : null;
+    const next = insertAt < without.length ? without[insertAt] : null;
 
     const changes = new Map<number, number>();
-    without.forEach((t, idx) => {
-        if (t.orderIndex !== idx) changes.set(t.id, idx);
-    });
+
+    if (prev && next) {
+        const gap = next.orderIndex - prev.orderIndex;
+        if (gap >= 2) {
+            changes.set(dragTask.id, Math.floor((prev.orderIndex + next.orderIndex) / 2));
+        } else {
+            // No room — shift the moved task to prev+1 and push following siblings by STEP
+            without.slice(insertAt).forEach((t) => {
+                changes.set(t.id, t.orderIndex + ORDER_STEP);
+            });
+            changes.set(dragTask.id, prev.orderIndex + 1);
+        }
+    } else if (prev && !next) {
+        changes.set(dragTask.id, prev.orderIndex + ORDER_STEP);
+    } else if (!prev && next) {
+        changes.set(dragTask.id, next.orderIndex - ORDER_STEP);
+    } else {
+        changes.set(dragTask.id, 0);
+    }
+
     return changes;
 }
 

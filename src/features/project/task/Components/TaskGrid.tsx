@@ -34,7 +34,6 @@ type TaskTableProps = {
   handleContextMenu: (e: React.MouseEvent, row?: any) => void;
   handleDropTaskOntoTask: any;
   handleMakeIndependent: any;
-  handleReorderTasks: (dragTask: Task, dropTask: Task, position: "before" | "after") => void;
   openTaskTab: (task: Task) => void;
   showDropError: (message: string) => void;
 };
@@ -46,7 +45,6 @@ function TaskTable({
   handleContextMenu,
   handleDropTaskOntoTask,
   handleMakeIndependent,
-  handleReorderTasks,
   openTaskTab,
   showDropError,
 }: TaskTableProps) {
@@ -96,7 +94,6 @@ function TaskTable({
                 allTasks={filteredTasks}
                 onDrop={handleDropTaskOntoTask}
                 onMakeIndependent={handleMakeIndependent}
-                onReorder={handleReorderTasks}
                 onRowClick={openTaskTab}
                 onContextMenu={handleContextMenu}
                 showError={showDropError}
@@ -129,7 +126,7 @@ export function TaskGrid() {
     const { openTaskContextMenu } = useTaskGridHelper();
     const { openTaskTab } = useTaskTabHelper();
     const { statusOptions, priorityOptions, filteredTasks, sortedTasks } = useTaskListSelector();
-    const { handleInlineUpdate, handleInlineDateUpdate, handleDropTaskOntoTask, handleMakeIndependent, handleReorderTasks, showDropError } = useTaskGridUpdateHelper();
+    const { handleInlineUpdate, handleInlineDateUpdate, handleDropTaskOntoTask, handleMakeIndependent, showDropError } = useTaskGridUpdateHelper();
 
     // Handle context menu
     const handleContextMenu = (event: React.MouseEvent, row?: any) => {
@@ -258,7 +255,6 @@ export function TaskGrid() {
                 handleContextMenu={handleContextMenu}
                 handleDropTaskOntoTask={handleDropTaskOntoTask}
                 handleMakeIndependent={handleMakeIndependent}
-                handleReorderTasks={handleReorderTasks}
                 openTaskTab={openTaskTab}
                 showDropError={showDropError}
                 />

@@ -7,7 +7,7 @@
 
 import type { Task } from "@/features/taskDetail";
 import { useConsoleHelper } from "@/shared";
-import { taskService, getSubtasksOutsideRange, computeReorderedTasks } from "@/features/taskDetail";
+import { taskService, getSubtasksOutsideRange } from "@/features/taskDetail";
 import { toLocalISOString } from "@/shared";
 import { useTaskGridHelper } from "./useTaskGrid.helper";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
@@ -218,51 +218,6 @@ export const useTaskGridUpdateHelper = () => {
             }
         }
 
-    const handleReorderTasks =
-        async (dragTask: Task, dropTask: Task, position: "before" | "after") => {
-            const changes = computeReorderedTasks(dragTask, dropTask, position, tasks);
-            if (changes.size === 0) return;
-
-            const previousTasks = tasks;
-
-            setTasks((prev) =>
-                prev.map((t) => (changes.has(t.id) ? { ...t, orderIndex: changes.get(t.id)! } : t)),
-            );
-
-            try {
-                const upsertBatch = previousTasks
-                    .filter((t) => changes.has(t.id))
-                    .map((t) => ({
-                        id: t.id,
-                        projectId: t.projectId,
-                        parentTaskId: t.parentTaskId,
-                        type: t.type,
-                        title: t.title,
-                        note: t.note,
-                        status: t.status,
-                        priority: t.priority,
-                        startDate: toLocalISOString(t.startDate),
-                        endDate: toLocalISOString(t.endDate),
-                        orderIndex: changes.get(t.id)!,
-                        folderWorkspaceItemId: t.folderWorkspaceItemId,
-                        checklistJson: t.checklistJson,
-                        processJson: t.processJson,
-                        customTabsJson: t.customTabsJson,
-                    }));
-
-                const result = await taskService._upsertTaskBatch($user.userToken, upsertBatch);
-
-                if (!result.success) {
-                    setTasks(() => previousTasks);
-                    _console.error("Failed to reorder tasks");
-                }
-            } catch (error) {
-                setTasks(() => previousTasks);
-                console.error("Failed to reorder tasks:", error);
-                _console.error("Failed to reorder tasks");
-            }
-        }
-
     const showDropError =
         (message: string) => {
             _console.error(message);
@@ -273,7 +228,6 @@ export const useTaskGridUpdateHelper = () => {
         handleInlineDateUpdate,
         handleDropTaskOntoTask,
         handleMakeIndependent,
-        handleReorderTasks,
         showDropError,
     };
 };
