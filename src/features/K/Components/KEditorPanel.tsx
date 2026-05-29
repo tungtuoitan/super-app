@@ -1,5 +1,5 @@
-﻿import { useEffect, useRef, useState } from "react";
-import { Settings, GitBranch, BarChart2, Hash } from "lucide-react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
+import { Settings, GitBranch, BarChart2, Hash, Play, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CardContent } from "@/shared";
 import { KGeneral } from "./KGeneral";
@@ -9,9 +9,14 @@ import { KProgressDashboard } from "./KProgressDashboard";
 import { KDailyReviewSession } from "./KDailyReviewSession";
 import { useKStore } from "../store/useK.store";
 import type { KWsResponse } from "../types/k.type";
-import type { KDailySessionQuestion } from "../types/kQuiz.type";
+import type { KDailySessionQuestion, KQuestion } from "../types/kQuiz.type";
 import { useEditorTabBarHelper } from "@/shell";
 import { KQuizService } from "../service/kQuiz.service";
+import { useKQFlowStats } from "../hooks/qFlow/useKQFlowStats.helper";
+import { sortQuestionsByFlowOrder } from "../utils/kQFlow.utils";
+import { kEvents } from "../utils/kEvents.utils";
+import type { KFlowQuestionsChangedDetail } from "../utils/kEvents.utils";
+import { useKLoader } from "../hooks/kTree/useK.loader";
 
 type KTab = "general" | "qflow" | "progress" | "markdown";
 
@@ -27,7 +32,8 @@ export function KEditorPanel() {
     const tab = getActiveTab();
     const knowledge = tab?.data as unknown as KWsResponse;
     const isNew = knowledge.id < 0;
-    const { pendingQuizTabSwitch, setPendingQuizTabSwitch, selectedItemIds } = useKStore();
+    const { pendingQuizTabSwitch, setPendingQuizTabSwitch, selectedItemIds, currentK } = useKStore();
+    const { loadTree } = useKLoader();
 
     const [activeTab, setActiveTabLocal] = useState<KTab>(() => {
         const saved = tab?.metadata?.activeKTab as KTab | undefined;
@@ -44,6 +50,11 @@ export function KEditorPanel() {
     const [dailyTotal, setDailyTotal] = useState(0);
     const [sessionLoading, setSessionLoading] = useState(false);
     const [reviewSession, setReviewSession] = useState<KDailySessionQuestion[] | null>(null);
+    const [nodeQuestions, setNodeQuestions] = useState<KQuestion[]>([]);
+
+    const node       = selectedNodeId !== null ? currentK?.flatData.find(n => n.id === selectedNodeId) : null;
+    const isDraft    = node?.statusCode === "draft";
+    const { dueCount, totalReviewable, canReview } = useKQFlowStats(nodeQuestions);
 
     // Track previous knowledge.id — initialized to the CURRENT value so the effect
     // is a no-op on first mount (and on StrictMode double-mount since the ref persists).
@@ -86,12 +97,12 @@ export function KEditorPanel() {
         }
     }, [selectedItemIds]);
 
-    // pendingQuizTabSwitch carries the clicked nodeId → switch to qflow
+    // pendingQuizTabSwitch carries the clicked nodeId → switch to markdown
     useEffect(() => {
         if (pendingQuizTabSwitch === undefined || isNew) return;
         const nodeId = pendingQuizTabSwitch;
         setPendingQuizTabSwitch(undefined);
-        setActiveTab("qflow");
+        setActiveTab("markdown");
         setSelectedNodeId(nodeId);
         if (tab?.id) patchTab(tab.id, (cur) => ({ metadata: { ...cur.metadata, selectedNodeId: nodeId } }));
     }, [pendingQuizTabSwitch]);
@@ -117,6 +128,40 @@ export function KEditorPanel() {
                 }
             })
             .catch(() => {});
+    };
+
+    // Fetch questions for the currently selected node so we can compute the
+    // Review button's badge (totalReviewable) without depending on which tab is active.
+    const fetchNodeQuestions = useCallback(async () => {
+        if (isNew || selectedNodeId === null) { setNodeQuestions([]); return; }
+        try {
+            const res = await KQuizService._getNodeQuestions(selectedNodeId);
+            if (res.success && res.object) setNodeQuestions(res.object.questions);
+        } catch { /* silent */ }
+    }, [isNew, selectedNodeId]);
+
+    useEffect(() => { fetchNodeQuestions(); }, [fetchNodeQuestions]);
+
+    // Re-fetch when flow operations change questions for this node
+    useEffect(() => {
+        const handler = (e: CustomEvent<KFlowQuestionsChangedDetail>) => {
+            if (e.detail.nodeId === selectedNodeId) fetchNodeQuestions();
+        };
+        window.addEventListener(kEvents.flowQuestionsChanged, handler as EventListener);
+        return () => window.removeEventListener(kEvents.flowQuestionsChanged, handler as EventListener);
+    }, [selectedNodeId, fetchNodeQuestions]);
+
+    const handleStartReview = async () => {
+        if (sessionLoading || selectedNodeId === null) return;
+        setSessionLoading(true);
+        try {
+            const res = await KQuizService._getDailySession(selectedNodeId);
+            if (res.success && res.object && res.object.length > 0) {
+                const sorted = await sortQuestionsByFlowOrder(res.object);
+                setReviewSession(sorted);
+            }
+        } catch { /* silent */ }
+        finally { setSessionLoading(false); }
     };
 
     const renderTabContent = () => {
@@ -161,6 +206,22 @@ export function KEditorPanel() {
                         </button>
                     ))}
                 </div>
+
+                {/* Review button — lifted from KQFlowView toolbar */}
+                {!isNew && selectedNodeId !== null && !isDraft && canReview && (
+                    <button
+                        onClick={handleStartReview}
+                        disabled={sessionLoading}
+                        title={`Review ${totalReviewable} question${totalReviewable !== 1 ? "s" : ""}${dueCount > 0 ? ` (${dueCount} due)` : ""}`}
+                        className="mr-3 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border border-blue-700/60 bg-blue-900/20 text-blue-300 hover:bg-blue-900/40 hover:border-blue-600 transition-colors disabled:opacity-50"
+                    >
+                        {sessionLoading
+                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                            : <Play className="w-3 h-3 fill-current" />
+                        }
+                        {totalReviewable}
+                    </button>
+                )}
             </div>
 
             {/* Content */}
@@ -169,13 +230,13 @@ export function KEditorPanel() {
             </div>
 
             {/* Review session overlay */}
-            {reviewSession && !isNew && (
+            {reviewSession && !isNew && selectedNodeId !== null && (
                 <div className="absolute inset-0 z-50 bg-zinc-950 flex flex-col">
                     <KDailyReviewSession
-                        nodeId={knowledge.id}
-                        quizTitle={tab?.title ?? "Daily Review"}
+                        nodeId={selectedNodeId}
+                        quizTitle={node?.name ?? tab?.title ?? "Daily Review"}
                         questions={reviewSession}
-                        onComplete={() => { setReviewSession(null); refreshDailyTotal(); }}
+                        onComplete={() => { setReviewSession(null); fetchNodeQuestions(); loadTree(); refreshDailyTotal(); }}
                         onBack={() => setReviewSession(null)}
                     />
                 </div>

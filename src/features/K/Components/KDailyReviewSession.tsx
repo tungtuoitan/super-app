@@ -64,12 +64,30 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
     const advanceWithScoreRef = useRef<(score: number) => void>(() => {});
     const showResultRef       = useRef(false);
 
+    // Reveal lock — block answer reveal for the first REVEAL_DELAY_MS of each question
+    // so accidental double-clicks on the previous question don't leak through.
+    const REVEAL_DELAY_MS = 3000;
+    const [revealSecondsLeft, setRevealSecondsLeft] = useState(Math.ceil(REVEAL_DELAY_MS / 1000));
+    const canReveal = revealSecondsLeft <= 0;
+
     const totalQuestions  = questions.length;
     const currentQuestion = questions[currentIndex];
     const progress        = totalQuestions > 0 ? Math.round(((currentIndex + 1) / totalQuestions) * 100) : 0;
 
     useEffect(() => { questionStartRef.current = Date.now(); }, [currentIndex]);
     useEffect(() => () => { timersRef.current.forEach(clearTimeout); }, []);
+
+    // Reveal-lock countdown — runs each time we move to a new question
+    useEffect(() => {
+        setRevealSecondsLeft(Math.ceil(REVEAL_DELAY_MS / 1000));
+        const start = Date.now();
+        const tick = setInterval(() => {
+            const left = Math.max(0, Math.ceil((REVEAL_DELAY_MS - (Date.now() - start)) / 1000));
+            setRevealSecondsLeft(left);
+            if (left <= 0) clearInterval(tick);
+        }, 100);
+        return () => clearInterval(tick);
+    }, [currentIndex]);
 
     showResultRef.current = showResult;
 
@@ -320,8 +338,8 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
 
             {/* Content */}
             <div className="flex-1 flex flex-col px-4 pt-6 pb-4 gap-4 max-w-lg mx-auto w-full"
-            onClick={!showResult ? () => setShowResult(true) : undefined}
-                
+            onClick={!showResult && canReveal ? () => setShowResult(true) : undefined}
+
             >
                 {/* Question */}
                 <p className="text-lg font-semibold text-center leading-relaxed text-white shrink-0">
@@ -332,14 +350,15 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
                 <div
                     className={cn(
                         "rounded-lg border border-zinc-700/50 bg-zinc-900/60 p-3 text-sm overflow-y-auto transition-[filter] duration-300 shrink-0",
-                        !showResult && "cursor-pointer"
+                        !showResult && canReveal && "cursor-pointer",
+                        !showResult && !canReveal && "cursor-not-allowed"
                     )}
                     style={{
                         filter: showResult ? "none" : "blur(7px)",
                         userSelect: showResult ? "text" : "none",
                         height: "calc(10 * 1.6rem)",
                     }}
-                    
+
                 >
                     {currentQuestion.answer
                         ? <p className="text-foreground/80 whitespace-pre-wrap leading-relaxed">{currentQuestion.answer}</p>
@@ -370,7 +389,11 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
             {/* Footer hint */}
             <div className="shrink-0 px-3 py-3 border-t border-border text-center">
                 <p className="text-xs text-muted-foreground/30">
-                    {showResult ? "Click button to score" : "Tap to reveal"}
+                    {showResult
+                        ? "Click button to score"
+                        : canReveal
+                            ? "Tap to reveal"
+                            : `Wait ${revealSecondsLeft}s to reveal`}
                 </p>
             </div>
         </div>

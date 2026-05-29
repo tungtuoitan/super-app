@@ -1,12 +1,9 @@
 ﻿import { useCallback, useEffect, useState } from "react";
-import { BookDashed, BookOpen, Eye, EyeOff, Loader2, Play, RotateCcw, Trophy } from "lucide-react";
+import { BookDashed, BookOpen, Eye, EyeOff, Loader2, RotateCcw, Trophy } from "lucide-react";
 import { KQuizService } from "../../service/kQuiz.service";
 import { KService } from "../../service/k.service";
 import { KQFlowProvider } from "../../store/useKQFlow.store";
 import { KQFlowCanvas } from "./KQFlowCanvas";
-import { KDailyReviewSession } from "../KDailyReviewSession";
-import { sortQuestionsByFlowOrder } from "../../utils/kQFlow.utils";
-import type { KDailySessionQuestion } from "../../types/kQuiz.type";
 import { KScoreSparkline } from "../small/KScoreSparkline";
 import { useKStore } from "../../store/useK.store";
 import { useKLoader } from "../../hooks/kTree/useK.loader";
@@ -35,8 +32,6 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
     const [questions, setQuestions]       = useState<KQuestion[]>([]);
     const [loading, setLoading]           = useState(true);
     const [showDeleted, setShowDeleted]   = useState(false);
-    const [reviewSession, setReviewSession] = useState<KDailySessionQuestion[] | null>(null);
-    const [sessionLoading, setSessionLoading] = useState(false);
     const [statusUpdating, setStatusUpdating] = useState(false);
 
     const { currentK, selectedKId } = useKStore();
@@ -51,7 +46,6 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
     useEffect(() => {
         setQuestions([]);
         setShowDeleted(false);
-        setReviewSession(null);
         setLoading(true);
     }, [nodeId]);
 
@@ -193,32 +187,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                         </div>
                     )}
 
-                    {/* Play button — show when any due or new (unreviewed) questions exist */}
-                    {nodeId !== null && !isDraft && canReview && (
-                        <button
-                            onClick={async () => {
-                                if (sessionLoading) return;
-                                setSessionLoading(true);
-                                try {
-                                    const res = await KQuizService._getDailySession(nodeId);
-                                    if (res.success && res.object && res.object.length > 0) {
-                                        const sorted = await sortQuestionsByFlowOrder(res.object);
-                                        setReviewSession(sorted);
-                                    }
-                                } catch { /* silent */ }
-                                finally { setSessionLoading(false); }
-                            }}
-                            disabled={sessionLoading}
-                            title={`Review ${totalReviewable} question${totalReviewable !== 1 ? "s" : ""}${dueCount > 0 ? ` (${dueCount} due)` : ""}`}
-                            className="h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border border-blue-700/60 bg-blue-900/20 text-blue-300 hover:bg-blue-900/40 hover:border-blue-600 transition-colors disabled:opacity-50"
-                        >
-                            {sessionLoading
-                                ? <Loader2 className="w-3 h-3 animate-spin" />
-                                : <Play className="w-3 h-3 fill-current" />
-                            }
-                            {totalReviewable}
-                        </button>
-                    )}
+                    {/* Play button moved to KEditorPanel tab bar */}
 
                     {/* Reset SRS — first click arms confirm, second click executes */}
                     {/* {nodeId !== null && !isDraft && hasReviewHistory && (
@@ -268,19 +237,6 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                     loading={loading}
                 />
             </div>
-
-            {/* Review session overlay */}
-            {reviewSession && nodeId !== null && (
-                <div className="absolute inset-0 z-50 bg-zinc-950 flex flex-col">
-                    <KDailyReviewSession
-                        nodeId={nodeId}
-                        quizTitle={node?.name ?? ""}
-                        questions={reviewSession}
-                        onComplete={() => { setReviewSession(null); loadQuestions(); loadTree(); }}
-                        onBack={() => setReviewSession(null)}
-                    />
-                </div>
-            )}
         </div>
     );
 }
