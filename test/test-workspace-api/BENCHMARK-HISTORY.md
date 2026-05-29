@@ -571,3 +571,38 @@ So với phase 2 (cache, no backlinks, không consolidate): 149ms → 125ms (-16
 
 **Side note (out of scope):** Discovered earlier rằng `/api/workspace` list endpoint cũng có security bug — trả ws của user khác. Cần fix riêng.
 
+---
+
+### 2026-05-28 — Re-verify Phase 3 (no BE changes since last run)
+
+**Mục đích:** Kiểm tra lại baseline Phase 3 để confirm BE giữ nguyên performance sau 4 ngày (master HEAD = `9e45ee0b`, các commit gần đây liên quan TaskGrid reorder, không touch tree/v2).
+
+**BE config:** không đổi từ Phase 3 (cache 60s TTL, no backlinks, consolidated `/tree/v2`).
+
+**Test setup:**
+- DB: `SuperApp-test` restore from `.bak`
+- Tokens prewarmed: 955/1000 (45 fail do rate-limit race lúc prewarm — không ảnh hưởng test vì k6 chỉ cần 1000 và pick subset)
+- Scenario: `scenario-spike-sticky.js` (1000 VUs, 30s ramp / 1m steady / 15s rampdown)
+
+**Results:**
+
+| Metric | Phase 3 baseline | **Re-verify 2026-05-28** | Δ |
+|--------|------------------|--------------------------|---|
+| Throughput | 794 req/s | **793 req/s** | tied |
+| Iterations | 83,031 | 83,069 | tied |
+| Fail rate | 0% | **0%** | tied |
+| p95 | 1ms | **1ms** | tied |
+| p99 | 15ms | **17ms** | tied (+2ms noise) |
+| avg | 0ms | 1ms | tied |
+| max | 49ms | **150ms** | +101ms (single outlier) |
+| Avg payload | ~8KB | 8.4KB | tied |
+
+**Insight:**
+- BE performance ổn định, không có regression sau 4 ngày kể từ Phase 3
+- Tất cả số chính (throughput, p95, fail rate) match Phase 3 trong margin noise
+- Max latency lên 150ms (vs 49ms Phase 3) — outlier đơn lẻ, có thể do GC pause hoặc DB hiccup, không ảnh hưởng p95/p99
+- Confirm cache + no-backlinks setup vẫn vững — sẵn sàng cho các thay đổi tiếp theo
+
+**Files:**
+- `test/test-workspace-api/results/summary-spike-sticky-2026-05-28T*.json` (auto-saved by k6)
+

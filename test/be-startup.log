@@ -1,0 +1,8 @@
+C:\Users\Admin\source\Timeline\SuperAppServices\SuperAppServices.csproj : warning NU1903: Package 'AutoMapper' 12.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-rvv3-g6hj-g44x [C:\Users\Admin\source\Timeline\SuperAppAPI\SuperAppAPI.csproj]
+C:\Users\Admin\source\Timeline\SuperAppServices\SuperAppServices.csproj : warning NU1903: Package 'AutoMapper' 12.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-rvv3-g6hj-g44x
+✓ Loaded .env file from: C:\Users\Admin\source\Timeline\.env
+Logs directory: C:\Users\Admin\source\Timeline\SuperAppAPI\bin\Debug\net8.0\Logs
+[19:29:53 INF] 
+>>  >>  >>  Starting up the SuperApp application...
+[19:29:53 INF] 
+ThreadPool min threads set: worker=200 ioc=200
