@@ -104,6 +104,7 @@ export const useTaskKanbanHelper = () => {
                     checklistJson: task.checklistJson,
                     processJson: task.processJson,
                     customTabsJson: task.customTabsJson,
+                    isMilestone: task.isMilestone,
                 });
 
                 subtaskUpdates.forEach((update) => {
@@ -124,6 +125,7 @@ export const useTaskKanbanHelper = () => {
                         checklistJson: subtask.checklistJson,
                         processJson: subtask.processJson,
                         customTabsJson: subtask.customTabsJson,
+                        isMilestone: subtask.isMilestone,
                     });
                 });
 

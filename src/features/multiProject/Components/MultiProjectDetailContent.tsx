@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { ListTodo, Columns, GanttChartSquare, CalendarRange, GitBranch } from "lucide-react";
+import { ListTodo, Columns, GanttChartSquare, CalendarRange, GitBranch, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea, ScrollBar } from "@/shared";
 import { MultiProjectTaskList } from "./MultiProjectTaskList";
@@ -17,6 +17,7 @@ import { ProjectChip } from "./small/ProjectChip";
 import { useMultiProjectDetailHeadless } from "../hooks/mpDetail/useMultiProjectDetail.headless";
 import { useMultiProjectDetailSelector } from "../Selectors/useMultiProjectDetail.selector";
 import { useMultiProjectDetailHelper } from "../hooks/mpDetail/useMultiProjectDetail.helper";
+import { useMultiProjectTaskGridHelper } from "../hooks/mpTaskList/useMultiProjectTaskGrid.helper";
 import type { TabType, TabConfig } from "../types/multiProjectDetail.type";
 import {TaskFilterPopup, TaskSearchInput} from "@/features/project";
 
@@ -34,13 +35,19 @@ const TABS: TabConfig[] = [
  */
 export function MultiProjectDetailContent() {
     // ── Computed values (from selector) ──────────────────
-    const { activeTab, availableProjects, selectedProjectIds, filteredProjectIds, taskSearchQuery } = useMultiProjectDetailSelector();
+    const { activeTab, availableProjects, selectedProjectIds, filteredProjectIds, taskSearchQuery, taskGridIsLoading } = useMultiProjectDetailSelector();
 
     // ── Handlers (from helper) ───────────────────────────
     const { setActiveTab, handleToggleProject, handleSelectAllActive, handleSelectAll, handleClearAll, setTaskSearchQuery } = useMultiProjectDetailHelper();
+    const { loadTasksForProjects } = useMultiProjectTaskGridHelper();
 
     // ── Side-effects (headless) ──────────────────────────
     useMultiProjectDetailHeadless();
+
+    const handleRefreshTasks = () => {
+        if (filteredProjectIds.length === 0 || taskGridIsLoading) return;
+        loadTasksForProjects(filteredProjectIds);
+    };
 
     const renderTabContent = () => {
         if (filteredProjectIds.length === 0) {
@@ -95,7 +102,17 @@ export function MultiProjectDetailContent() {
                 <div className="flex items-center gap-1 px-2">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mr-1">{filteredProjectIds.length} / {availableProjects.length} Projects</span>
                     {activeTab === "taskList" && <TaskSearchInput value={taskSearchQuery} onSearch={setTaskSearchQuery} />}
-                    {(activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline" || activeTab === "taskFlow") && <TaskFilterPopup />}
+                    {(activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline") && (
+                        <button
+                            onClick={handleRefreshTasks}
+                            disabled={filteredProjectIds.length === 0 || taskGridIsLoading}
+                            className="flex items-center justify-center h-7 w-7 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Refresh tasks"
+                        >
+                            <RefreshCw className={cn("h-3.5 w-3.5", taskGridIsLoading && "animate-spin")} />
+                        </button>
+                    )}
+                    {(activeTab === "taskList" || activeTab === "kanban" || activeTab === "timeline") && <TaskFilterPopup />}
                 </div>
             </div>
 

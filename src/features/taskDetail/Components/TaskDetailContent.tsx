@@ -17,8 +17,8 @@ import {
     GenericAutoComplete,
 } from "@/shared";
 import { CardContent } from "@/shared";
-import { FileText, AlertCircle, Link2, X, Loader2, Plus, FilePlus, FileIcon } from "lucide-react";
-import { Alert, AlertDescription, KeywordStaticIcon } from "@/shared";
+import { FileText, AlertCircle, Link2, X, Loader2, Plus, FilePlus, FileIcon, Diamond } from "lucide-react";
+import { Alert, AlertDescription, KeywordStaticIcon, Checkbox } from "@/shared";
 import { TaskDetailSection } from "./TaskDetailSection";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailKeywordSelector } from "../Selectors/TaskDetailKeywordSelector";
@@ -164,7 +164,6 @@ export function TaskDetailContent() {
                             inputProps={{ name: "status", label: "Status" }}
                             disabled={isDeleted}
                             placeholder="Select status..."
-                            disabledCodes={["completed"]}
                         />
 
                         <StatusAutoComplete
@@ -209,6 +208,16 @@ export function TaskDetailContent() {
                             }}
                             disabled={isDisabled || isLoadingParentTasks || hasSubtasks}
                         />
+
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <Checkbox
+                                checked={!!selectedTask.isMilestone}
+                                onCheckedChange={(v) => handleFieldChange("isMilestone", v === true)}
+                                disabled={isDisabled}
+                            />
+                            <Diamond className="h-4 w-4 text-amber-500" />
+                            <span className="text-sm font-medium">Milestone</span>
+                        </label>
 
                         {/* Inner List */}
                         {selectedTask.id > 0 && selectedTask.folderWorkspaceItemId && (

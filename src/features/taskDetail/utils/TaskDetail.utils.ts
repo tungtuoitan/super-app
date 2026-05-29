@@ -58,6 +58,7 @@ export const transformTaskData = (dtos: TaskDTO[]): Task[] =>
         checklistJson: dto.checklistJson ?? null,
         processJson: dto.processJson ?? null,
         customTabsJson: dto.customTabsJson ?? null,
+        isMilestone: dto.isMilestone ?? false,
         projectStartDate: parseAsLocalDate(dto.projectStartDate),
         projectEndDate: parseAsLocalDate(dto.projectEndDate),
         parentStartDate: parseAsLocalDate(dto.parentStartDate),

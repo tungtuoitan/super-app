@@ -46,6 +46,7 @@ export const useTaskGridUpdateHelper = () => {
                     checklistJson: task.checklistJson,
                     processJson: task.processJson,
                     customTabsJson: task.customTabsJson,
+                    isMilestone: task.isMilestone,
                 };
 
                 const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
@@ -105,6 +106,7 @@ export const useTaskGridUpdateHelper = () => {
                     checklistJson: task.checklistJson,
                     processJson: task.processJson,
                     customTabsJson: task.customTabsJson,
+                    isMilestone: task.isMilestone,
                 };
 
                 const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
@@ -146,6 +148,7 @@ export const useTaskGridUpdateHelper = () => {
                     checklistJson: dragTask.checklistJson,
                     processJson: dragTask.processJson,
                     customTabsJson: dragTask.customTabsJson,
+                    isMilestone: dragTask.isMilestone,
                 };
 
                 const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
@@ -196,6 +199,7 @@ export const useTaskGridUpdateHelper = () => {
                     checklistJson: task.checklistJson,
                     processJson: task.processJson,
                     customTabsJson: task.customTabsJson,
+                    isMilestone: task.isMilestone,
                 };
 
                 const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);

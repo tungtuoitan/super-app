@@ -79,6 +79,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                         checklistJson: null,
                         processJson: null,
                         customTabsJson: null,
+                        isMilestone: false,
                     }]);
 
                     if (!taskResult.success || !taskResult.data?.length) throw new Error(taskResult.message);
@@ -165,6 +166,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                     endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
+                    isMilestone: task.isMilestone,
                 }]);
                 if (!result.success) throw new Error(result.message);
                 _console.success("Task renamed");
@@ -249,6 +251,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                         processJson: null,
                         checklistJson: null,
                         customTabsJson: null,
+                        isMilestone: false,
                         note: null,
                         startDate: null,
                         endDate: null,
@@ -308,6 +311,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                     endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
+                    isMilestone: task.isMilestone,
                 }]);
                 if (!result.success) throw new Error(result.message);
             } catch {
@@ -361,6 +365,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                     endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
+                    isMilestone: task.isMilestone,
                 }]);
                 if (!result.success) throw new Error(result.message);
             } catch {

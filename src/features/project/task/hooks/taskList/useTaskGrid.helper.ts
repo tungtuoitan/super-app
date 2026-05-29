@@ -41,6 +41,7 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         checklistJson: dto.checklistJson ?? null,
         processJson: dto.processJson ?? null,
         customTabsJson: dto.customTabsJson ?? null,
+        isMilestone: dto.isMilestone ?? false,
         // Limit dates for warning display
         projectStartDate: parseAsLocalDate(dto.projectStartDate),
         projectEndDate: parseAsLocalDate(dto.projectEndDate),
@@ -88,6 +89,7 @@ export const useTaskGridHelper = () => {
             createdAt: new Date(),
             updatedAt: new Date(),
             deletedAt: null,
+            isMilestone: false,
         };
 
         // Insert at the beginning of tasks array
@@ -155,6 +157,7 @@ export const useTaskGridHelper = () => {
                         checklistJson: task.checklistJson,
                         processJson: task.processJson,
                         customTabsJson: task.customTabsJson,
+                        isMilestone: task.isMilestone,
                     };
                 });
 
@@ -212,13 +215,14 @@ export const useTaskGridHelper = () => {
         const hoveredTask   = row ? (tasks.find((t) => t.id === parseInt(row.id)) ?? null) : null;
 
         const data: TaskGridMenuData = {
-            selectedTasks,
+            selectedTasks: selectedTasks.map((t) => ({ id: t.id, deletedAt: t.deletedAt, isMilestone: t.isMilestone })),
             selectedIds,
             hoveredTask: hoveredTask
                 ? { id: hoveredTask.id, deletedAt: hoveredTask.deletedAt, parentTaskId: hoveredTask.parentTaskId ?? null }
                 : null,
             projectId,
             onTaskCreated,
+            onToggleMilestone: (newValue: boolean) => toggleMilestoneTasks(selectedIds, newValue, projectId),
         };
         showContextMenu(event, "task-grid", data);
     };
@@ -310,6 +314,7 @@ export const useTaskGridHelper = () => {
                 checklistJson: task.checklistJson,
                 processJson: task.processJson,
                 customTabsJson: task.customTabsJson,
+                isMilestone: task.isMilestone,
             };
 
             const result = await taskService._upsertTaskBatch(token, [request]);
@@ -330,12 +335,67 @@ export const useTaskGridHelper = () => {
         }
     };
 
+    /**
+     * Toggle isMilestone for one or more persisted tasks. Optimistic; reverts on failure.
+     */
+    const toggleMilestoneTasks = async (ids: number[], newValue: boolean, projectId?: number) => {
+        const persistedIds = ids.filter((id) => id > 0);
+        if (persistedIds.length === 0) return;
+
+        const previousTasks = tasks;
+        setTasks((prev) =>
+            prev.map((t) => (persistedIds.includes(t.id) ? { ...t, isMilestone: newValue } : t)),
+        );
+
+        try {
+            const token = $user.userToken;
+            const batchRequests = persistedIds.map((id) => {
+                const task = previousTasks.find((t) => t.id === id);
+                if (!task) throw new Error(`Task ${id} not found`);
+                return {
+                    id: task.id,
+                    projectId: task.projectId,
+                    parentTaskId: task.parentTaskId,
+                    type: task.type,
+                    title: task.title,
+                    note: task.note,
+                    status: task.status,
+                    priority: task.priority,
+                    startDate: toLocalISOString(task.startDate),
+                    endDate: toLocalISOString(task.endDate),
+                    orderIndex: task.orderIndex,
+                    folderWorkspaceItemId: task.folderWorkspaceItemId,
+                    checklistJson: task.checklistJson,
+                    processJson: task.processJson,
+                    customTabsJson: task.customTabsJson,
+                    isMilestone: newValue,
+                };
+            });
+
+            const result = await taskService._upsertTaskBatch(token, batchRequests);
+            if (!result.success) {
+                setTasks(() => previousTasks);
+                _console.error(result.message || "Failed to toggle milestone");
+                return;
+            }
+            _console.success(
+                `${newValue ? "Marked" : "Unmarked"} ${persistedIds.length} task(s) as milestone`,
+            );
+            if (projectId) await loadTasks(projectId);
+        } catch (err) {
+            setTasks(() => previousTasks);
+            const errorMessage = await parseApiError(err);
+            _console.error(`Failed to toggle milestone: ${errorMessage}`);
+        }
+    };
+
     return {
         openTaskContextMenu,
         loadTasks,
         createNewTask,
         createSubTask,
         deleteRestoreTasks,
+        toggleMilestoneTasks,
         saveTask,
     };
 };

@@ -13,14 +13,14 @@ import { useMpTaskStore } from "../store/useMpTask.store";
 export const useMultiProjectDetailSelector = () => {
     const { getActiveTab } = useEditorTabBarHelper();
     const { projects } = useProjectStore();
-    const { taskSearchQuery } = useMpTaskStore();
+    const { taskSearchQuery, taskGridIsLoading } = useMpTaskStore();
 
     // Current editor tab
     const currentTab = getActiveTab();
 
     // Active inner tab
     const activeTab = useMemo(() => {
-        return (currentTab?.metadata?.innerTab as TabType) || "taskFlow";
+        return (currentTab?.metadata?.innerTab as TabType) || "taskList";
     }, [currentTab?.metadata?.innerTab]);
 
     // All available projects (not deleted)
@@ -57,5 +57,6 @@ export const useMultiProjectDetailSelector = () => {
         filteredProjects,
         filteredProjectIds,
         taskSearchQuery,
+        taskGridIsLoading,
     };
 };

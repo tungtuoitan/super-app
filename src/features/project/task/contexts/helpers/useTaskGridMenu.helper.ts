@@ -23,6 +23,7 @@ export const useTaskGridMenuHelper = () => {
     const projectId     = data?.projectId;
     const onTaskCreated = data?.onTaskCreated;
     const onAddTask     = data?.onAddTask;
+    const onToggleMilestone = data?.onToggleMilestone;
 
     const selectedCount       = selectedIds.length;
     const allAreTempTasks     = selectedCount > 0 && selectedIds.every((id) => id < 0);
@@ -30,6 +31,12 @@ export const useTaskGridMenuHelper = () => {
         (t) => t.deletedAt !== null && t.deletedAt !== undefined,
     );
     const canAddSubTask = hoveredTask && hoveredTask.id > 0 && !hoveredTask.deletedAt;
+
+    const persistedSelected = selectedTasks.filter((t) => t.id > 0);
+    const canToggleMilestone = persistedSelected.length > 0 && !anySelectedDeleted && !!onToggleMilestone;
+    // If every selected task is already a milestone, the action will turn it off; else turn on.
+    const allAreMilestone = persistedSelected.length > 0 && persistedSelected.every((t) => t.isMilestone);
+    const nextMilestoneValue = !allAreMilestone;
 
     const addTask = () => {
         setIsMenuContextOpen(false);
@@ -86,14 +93,23 @@ export const useTaskGridMenuHelper = () => {
         deleteRestoreTasks(selectedIds, "restore", projectId);
     };
 
+    const toggleMilestone = () => {
+        setIsMenuContextOpen(false);
+        if (!onToggleMilestone) return;
+        onToggleMilestone(nextMilestoneValue);
+    };
+
     return {
         selectedCount,
         allAreTempTasks,
         anySelectedDeleted,
         canAddSubTask,
+        canToggleMilestone,
+        allAreMilestone,
         addTask,
         addSubTask,
         softDelete,
         restore,
+        toggleMilestone,
     };
 };

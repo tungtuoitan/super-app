@@ -104,6 +104,7 @@ export const useTaskTimelineHelper = () => {
                     checklistJson: task.checklistJson,
                     processJson: task.processJson,
                     customTabsJson: task.customTabsJson,
+                    isMilestone: task.isMilestone,
                 };
 
                 const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);

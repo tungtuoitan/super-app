@@ -9,7 +9,7 @@
 
 import React from "react";
 import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
-import { Loader2, CornerDownRight } from "lucide-react";
+import { Loader2, CornerDownRight, Diamond } from "lucide-react";
 import { Checkbox } from "@/shared";
 import { Alert, AlertDescription } from "@/shared";
 import type { Task } from "@/features/taskDetail";
@@ -179,6 +179,7 @@ export function TaskGrid() {
                 return (
                     <div className={`text-sm text-primary text-left cursor-pointer hover:text-primary/80 px-2 truncate flex items-center gap-1 ${isSubtask ? "pl-6" : ""}`}>
                         {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />}
+                        {task.isMilestone && <Diamond className="h-3 w-3 text-amber-500 fill-amber-500 flex-shrink-0" aria-label="Milestone" />}
                         <span className="truncate">{task.title || "—"}</span>
                     </div>
                 );

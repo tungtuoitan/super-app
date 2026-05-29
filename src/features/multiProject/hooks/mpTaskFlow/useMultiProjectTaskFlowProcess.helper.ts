@@ -71,6 +71,7 @@ export const useMultiProjectTaskFlowProcessHelper = () => {
                     endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: newJsonStr, customTabsJson: task.customTabsJson,
+                    isMilestone: task.isMilestone,
                 }]);
                 if (!result.success) throw new Error();
             } catch {

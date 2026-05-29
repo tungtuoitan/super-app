@@ -20,7 +20,7 @@ export interface ProjectGridMenuData {
 
 export interface TaskGridMenuData {
     selectedIds: number[];
-    selectedTasks: Array<{ id: number; deletedAt?: Date | null }>;
+    selectedTasks: Array<{ id: number; deletedAt?: Date | null; isMilestone?: boolean }>;
     hoveredTask: { id: number; deletedAt?: Date | null; parentTaskId: number | null } | null;
     /** Project ID context for task creation / reload */
     projectId?: number;
@@ -29,6 +29,8 @@ export interface TaskGridMenuData {
     onTaskCreated?: (task: any) => void;
     /** Pre-built add task handler — used by multi-project view to bypass single-project store */
     onAddTask?: () => void;
+    /** Pre-built milestone toggle handler — invoked with the new value (true/false). */
+    onToggleMilestone?: (newValue: boolean) => void;
 }
 
 export interface WsGridMenuData {

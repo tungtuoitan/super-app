@@ -5,7 +5,7 @@
 
 import React, { useRef } from "react";
 import { useDrag, DragSourceMonitor } from "react-dnd";
-import { CornerDownRight } from "lucide-react";
+import { CornerDownRight, Diamond } from "lucide-react";
 import type { Task } from "@/features/taskDetail";
 import { getTaskPriorityColors } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
@@ -47,6 +47,7 @@ export function DraggableTaskCard({ task, onClick, isSubtask = false }: Draggabl
                 {/* Title */}
                 <div className="flex items-center gap-1">
                     {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />}
+                    {task.isMilestone && <Diamond className="h-3 w-3 text-amber-500 fill-amber-500 flex-shrink-0" aria-label="Milestone" />}
                     <p className={cn("font-medium text-left truncate", isSubtask ? "text-xs" : "text-sm")}>
                         {task.title || "Untitled"}
                     </p>

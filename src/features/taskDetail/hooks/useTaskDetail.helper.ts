@@ -141,6 +141,7 @@ export const useTaskDetailHelper = () => {
                         checklistJson: sectionChecklist,
                         processJson: sectionProcess,
                         customTabsJson: sectionCustomTabs,
+                        isMilestone: taskToSave.isMilestone ?? false,
                     },
                 ]);
 
@@ -177,6 +178,7 @@ export const useTaskDetailHelper = () => {
                     checklistJson: savedTask.checklistJson ?? null,
                     processJson: savedTask.processJson ?? null,
                     customTabsJson: savedTask.customTabsJson ?? null,
+                    isMilestone: savedTask.isMilestone ?? false,
                     // Preserve limit dates (not returned by upsert API)
                     projectStartDate: taskToSave.projectStartDate,
                     projectEndDate: taskToSave.projectEndDate,

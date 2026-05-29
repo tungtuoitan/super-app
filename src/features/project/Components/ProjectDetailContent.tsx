@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { ListTodo, Columns, GanttChartSquare, Settings, FolderOpen } from "lucide-react";
+import { ListTodo, Columns, GanttChartSquare, Settings, FolderOpen, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared";
 import { ProjectGeneral } from "./ProjectGeneral";
@@ -14,6 +14,7 @@ import { TaskKanbanView } from "@/features/project/task/Components/TaskKanbanVie
 import { TaskTimelineView } from "@/features/project/task/Components/TaskTimelineView";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import { useProjectDetailHelper } from "../hooks/useProjectDetail.helper";
+import { useTaskGridHelper } from "../task/hooks/taskList/useTaskGrid.helper";
 import type { TabConfig, TabType } from "../types/projectDetail.type";
 import {useProjectDetailHeadless} from "../hooks/useProjectDetail.headless";
 import {TaskFilterPopup} from "../task/Components/TaskFilterPopup";
@@ -40,13 +41,19 @@ const TAB_CONTENT: Record<TabType, React.ComponentType> = {
  */
 export function ProjectDetailContent() {
     // ── Computed values (from selector) ──────────────────
-    const { activeTab, selectedProject, showTaskFilter } = useProjectDetailSelector();
+    const { activeTab, selectedProject, showTaskFilter, taskGridIsLoading, projectId } = useProjectDetailSelector();
 
     // ── Handlers (from helper) ───────────────────────────
     const { setActiveTab, handleOpenWorkspace } = useProjectDetailHelper();
+    const { loadTasks } = useTaskGridHelper();
     useProjectDetailHeadless()
 
     const TabContent = TAB_CONTENT[activeTab] ?? null;
+
+    const handleRefreshTasks = () => {
+        if (taskGridIsLoading) return;
+        loadTasks(projectId);
+    };
 
     return (
         <div className="flex flex-col h-full w-full bg-background">
@@ -75,6 +82,16 @@ export function ProjectDetailContent() {
                     {/* Right side actions */}
                     <div className="flex items-center gap-1 pr-2">
                         {activeTab === "taskList" && <TaskSearchInput />}
+                        {showTaskFilter && (
+                            <button
+                                onClick={handleRefreshTasks}
+                                disabled={taskGridIsLoading}
+                                className="flex items-center justify-center h-7 w-7 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Refresh tasks"
+                            >
+                                <RefreshCw className={cn("h-3.5 w-3.5", taskGridIsLoading && "animate-spin")} />
+                            </button>
+                        )}
                         {showTaskFilter && <TaskFilterPopup />}
                         {selectedProject?.workspaceId && (
                             <Button

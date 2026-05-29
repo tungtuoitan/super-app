@@ -268,6 +268,7 @@ export const projectKeywordPlugin: KeywordPlugin = {
                         checklistJson: dto.checklistJson ?? null,
                         processJson: dto.processJson ?? null,
                         customTabsJson: dto.customTabsJson ?? null,
+                        isMilestone: dto.isMilestone ?? false,
                     };
                     ctx.openTab(task, shellConstants.vscode.tab.tabTypes.task, openedBy);
                 } else {

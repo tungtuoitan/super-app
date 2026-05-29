@@ -65,6 +65,7 @@ const _upsertTaskBatch = async (
         checklistJson?: string | null;
         processJson?: string | null;
         customTabsJson?: string | null;
+        isMilestone?: boolean;
     }>
 ): Promise<ResultOptions<TaskDTO>> => {
     // ── Debug: log every upsert request with folderWorkspaceItemId ──

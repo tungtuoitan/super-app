@@ -31,6 +31,9 @@ export interface Task {
     /** JSON custom tabs stored as string: CustomTabsJSON serialized */
     customTabsJson?: string | null;
 
+    /** True = task is a milestone (key date / diamond marker). Default false. */
+    isMilestone?: boolean;
+
     // Limit dates for warning display (parsed from backend)
     projectStartDate?: Date | null;
     projectEndDate?: Date | null;
@@ -78,6 +81,9 @@ export interface TaskDTO {
 
     /** JSON custom tabs stored as string */
     customTabsJson?: string | null;
+
+    /** True = task is a milestone. Default false. */
+    isMilestone?: boolean;
 }
 
 /**

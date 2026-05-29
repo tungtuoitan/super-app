@@ -105,6 +105,7 @@ export function useTaskFolderHelper() {
                 checklistJson: savedTask.checklistJson,
                 processJson: savedTask.processJson,
                 customTabsJson: savedTask.customTabsJson,
+                isMilestone: savedTask.isMilestone,
             }]);
 
             if (updatedTaskResult.success && updatedTaskResult.data?.[0]) {

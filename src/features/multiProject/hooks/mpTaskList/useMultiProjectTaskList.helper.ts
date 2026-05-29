@@ -47,6 +47,7 @@ export const useMultiProjectTaskListHelper = () => {
                 checklistJson: task.checklistJson,
                 processJson: task.processJson,
                 customTabsJson: task.customTabsJson,
+                isMilestone: task.isMilestone,
             };
 
             const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
@@ -110,6 +111,7 @@ export const useMultiProjectTaskListHelper = () => {
                 checklistJson: task.checklistJson,
                 processJson: task.processJson,
                 customTabsJson: task.customTabsJson,
+                isMilestone: task.isMilestone,
             };
 
             const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
@@ -154,6 +156,7 @@ export const useMultiProjectTaskListHelper = () => {
                 checklistJson: dragTask.checklistJson,
                 processJson: dragTask.processJson,
                 customTabsJson: dragTask.customTabsJson,
+                isMilestone: dragTask.isMilestone,
             };
 
             const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
@@ -208,6 +211,7 @@ export const useMultiProjectTaskListHelper = () => {
                 checklistJson: task.checklistJson,
                 processJson: task.processJson,
                 customTabsJson: task.customTabsJson,
+                isMilestone: task.isMilestone,
             };
 
             const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);
@@ -263,6 +267,7 @@ export const useMultiProjectTaskListHelper = () => {
                     checklistJson: t.checklistJson,
                     processJson: t.processJson,
                     customTabsJson: t.customTabsJson,
+                    isMilestone: t.isMilestone,
                 }));
 
             const result = await taskService._upsertTaskBatch($user.userToken, upsertBatch);
@@ -305,6 +310,7 @@ export const useMultiProjectTaskListHelper = () => {
                 checklistJson: task.checklistJson,
                 processJson: task.processJson,
                 customTabsJson: task.customTabsJson,
+                isMilestone: task.isMilestone,
             };
 
             const result = await taskService._upsertTaskBatch($user.userToken, [upsertData]);

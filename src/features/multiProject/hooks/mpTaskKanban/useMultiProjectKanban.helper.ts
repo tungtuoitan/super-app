@@ -103,6 +103,7 @@ export const useMultiProjectKanbanHelper = () => {
                     checklistJson: task.checklistJson,
                     processJson: task.processJson,
                     customTabsJson: task.customTabsJson,
+                    isMilestone: task.isMilestone,
                 });
 
                 subtaskUpdates.forEach((update) => {
@@ -123,6 +124,7 @@ export const useMultiProjectKanbanHelper = () => {
                         checklistJson: subtask.checklistJson,
                         processJson: subtask.processJson,
                         customTabsJson: subtask.customTabsJson,
+                        isMilestone: subtask.isMilestone,
                     });
                 });
 

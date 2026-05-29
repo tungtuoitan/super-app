@@ -1,10 +1,22 @@
 import React from "react";
 import { MenuItem, MenuDivider } from "@szhsin/react-menu";
-import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, GitBranch as SubTaskIcon } from "lucide-react";
+import { Plus as AddIcon, Trash2 as DeleteIcon, RotateCcw as RestoreIcon, GitBranch as SubTaskIcon, Diamond as MilestoneIcon } from "lucide-react";
 import { useTaskGridMenuHelper } from "../helpers/useTaskGridMenu.helper";
 
 export function TaskGridMenu() {
-    const { selectedCount, allAreTempTasks, anySelectedDeleted, canAddSubTask, addTask, addSubTask, softDelete, restore } = useTaskGridMenuHelper();
+    const {
+        selectedCount,
+        allAreTempTasks,
+        anySelectedDeleted,
+        canAddSubTask,
+        canToggleMilestone,
+        allAreMilestone,
+        addTask,
+        addSubTask,
+        softDelete,
+        restore,
+        toggleMilestone,
+    } = useTaskGridMenuHelper();
 
     return (
         <>
@@ -18,6 +30,16 @@ export function TaskGridMenu() {
                     <SubTaskIcon className="w-4 h-4 mr-2" />
                     Add Subtask
                 </MenuItem>
+            )}
+
+            {canToggleMilestone && (
+                <>
+                    <MenuDivider />
+                    <MenuItem onClick={toggleMilestone}>
+                        <MilestoneIcon className="w-4 h-4 mr-2" />
+                        {allAreMilestone ? "Unmark Milestone" : "Mark as Milestone"}
+                    </MenuItem>
+                </>
             )}
 
             <MenuDivider />

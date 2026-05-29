@@ -8,7 +8,7 @@
 
 import React, { useRef, useState } from "react";
 import { useDrag, useDrop, DragSourceMonitor, DropTargetMonitor } from "react-dnd";
-import { Loader2, CornerDownRight } from "lucide-react";
+import { Loader2, CornerDownRight, Diamond } from "lucide-react";
 import { Checkbox } from "@/shared";
 import { Label } from "@/shared";
 import { Alert, AlertDescription } from "@/shared";
@@ -68,6 +68,7 @@ function DraggableTaskCard({ task, onClick, isSubtask = false }: DraggableTaskCa
                 {/* Title */}
                 <div className="flex items-center gap-1">
                     {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />}
+                    {task.isMilestone && <Diamond className="h-3 w-3 text-amber-500 fill-amber-500 flex-shrink-0" aria-label="Milestone" />}
                     <p className={cn("font-medium text-left truncate", isSubtask ? "text-xs" : "text-sm")}>
                         {task.title || "Untitled"}
                     </p>

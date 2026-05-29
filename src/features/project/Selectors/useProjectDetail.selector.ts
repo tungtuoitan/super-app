@@ -5,6 +5,7 @@
  */
 
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
+import { usePTaskStore } from "../store/usePTask.store";
 import { projectConstants } from "@/features/project/project.constants";
 import { shellConstants } from "@/shell";
 import { constants, useGetStandardRegistry } from "@/shared";
@@ -17,6 +18,7 @@ import {Project} from "../types/project.types";
 export const useProjectDetailSelector = () => {
     const { openTabs, getActiveTab } = useEditorTabBarHelper();
     const { projectId, tabId } = useProjectDetailStore();
+    const { taskGridIsLoading } = usePTaskStore();
 
     // Current editor tab
     const currentTab = getActiveTab(tabId) || null;
@@ -69,5 +71,7 @@ export const useProjectDetailSelector = () => {
         currentStatusValue,
         isDisabled,
         isDeleted,
+        taskGridIsLoading,
+        projectId,
     };
 };
