@@ -1,0 +1,104 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 320px;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 13px;
+    color: #1f2937;
+    background: #ffffff;
+}
+
+.container {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: #fff;
+}
+.btn-primary:hover { background: #1d4ed8; }
+.btn-primary:disabled { background: #93c5fd; cursor: default; }
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #1f2937;
+    border-color: #e5e7eb;
+}
+.btn-secondary:hover { background: #e5e7eb; }
+
+.user-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.user-email {
+    font-size: 12px;
+    color: #1f2937;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+.shortcuts {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 12px;
+    font-size: 12px;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+kbd {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+}
+
+.error {
+    color: #dc2626;
+    font-size: 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 8px;
+    border-radius: 6px;
+    word-break: break-word;
+}
