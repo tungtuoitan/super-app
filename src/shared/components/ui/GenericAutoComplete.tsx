@@ -204,11 +204,26 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                             inputProps.error && "border-destructive focus-visible:ring-destructive",
                         )}
                     >
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
                             {selectedValue?.imageUrl && (
                                 <img src={selectedValue.imageUrl} alt="" className="w-5 h-5 rounded object-cover flex-shrink-0" />
                             )}
                             <span className="truncate">{displayValue || "Select option..."}</span>
+                            {displayValue && selectedValue?.badges && selectedValue.badges.length > 0 && (
+                                <div className="flex items-center gap-1 flex-shrink-0 opacity-50">
+                                    {selectedValue.badges.map((badge, i) => (
+                                        <span
+                                            key={i}
+                                            className={cn(
+                                                "px-1.5 h-4 text-[10px] font-medium rounded-full flex items-center justify-center",
+                                                badge.className,
+                                            )}
+                                        >
+                                            {badge.text}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                         <div className="flex items-center gap-1">
                             {!disableClearable && displayValue && !disabled && (
