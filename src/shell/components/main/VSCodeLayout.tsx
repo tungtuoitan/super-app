@@ -6,7 +6,7 @@ import { VSSideBar } from "./VSSideBar";
 import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
 import { useLocation } from "react-router-dom";
-import { useDeviceStore } from "@/shared";
+import { useDeviceStore, useDebugLog } from "@/shared";
 import { useDetectDevice } from "@/shared";
 import {useSideBarStore} from "@/shell/store/SideBar.store";
 import {RightSideBar} from "./RightSideBar";
@@ -29,6 +29,31 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     useDetectDevice()
 
     const { registerGrid } = useModuleRegisterHelper();
+
+    // ── Drag-lag diagnostic ───────────────────────────────────────────────────
+    const debugLog = useDebugLog();
+    const renderCountRef = useRef(0);
+    const lastLayoutTsRef = useRef(0);
+    const layoutTickCountRef = useRef(0);
+    renderCountRef.current += 1;
+    if (isMobile) {
+        debugLog.log("vscode-layout", "render", {
+            count: renderCountRef.current,
+            moduleName,
+        });
+    }
+
+    const handleMobileLayout = (sizes: number[]) => {
+        const now = performance.now();
+        layoutTickCountRef.current += 1;
+        const dt = lastLayoutTsRef.current ? Math.round(now - lastLayoutTsRef.current) : 0;
+        lastLayoutTsRef.current = now;
+        debugLog.log("vscode-layout", "onLayout", {
+            sizes: sizes.map(s => Math.round(s)),
+            tick: layoutTickCountRef.current,
+            dtMs: dt,
+        });
+    };
 
     useEffect(() => {
         registerGrid();
@@ -56,9 +81,14 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                 >
                     <ActivityBar horizontal />
 
-                    <PanelGroup direction="vertical" autoSaveId="mobile-layout-vertical" className="flex-1">
+                    <PanelGroup
+                        direction="vertical"
+                        autoSaveId="mobile-layout-vertical"
+                        className="flex-1"
+                        onLayout={handleMobileLayout}
+                    >
                         <Panel id="mobile-sidebar" defaultSize={40} minSize={15}>
-                            <div className="h-full overflow-hidden bg-editor-sidebar flex flex-col">
+                            <div className="h-full overflow-hidden bg-editor-sidebar flex flex-col" style={{ contain: "layout style size" }}>
                                 <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                                     <span>{moduleName}</span>
                                     {moduleRegistry.getById(moduleName)?.hideRightSideBarFilter && (
@@ -72,7 +102,9 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                         </Panel>
                         <VSCodeResizeHandle direction="vertical" id="mobile-split-resize" />
                         <Panel id="mobile-editor" ref={mobileEditorRef} defaultSize={60} minSize={15}>
-                            <VSEditorArea />
+                            <div className="h-full w-full" style={{ contain: "layout style size" }}>
+                                <VSEditorArea />
+                            </div>
                         </Panel>
                     </PanelGroup>
                 </div>
