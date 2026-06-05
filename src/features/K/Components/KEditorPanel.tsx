@@ -1,7 +1,7 @@
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
 import { Settings, GitBranch, BarChart2, Hash, Play, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CardContent } from "@/shared";
+import { CardContent, useDeviceStore } from "@/shared";
 import { KGeneral } from "./KGeneral";
 import { KMarkdownEditorTab } from "./KMarkdownEditorTab";
 import { KQFlowView } from "./QFlowView/KQFlowView";
@@ -34,6 +34,9 @@ export function KEditorPanel() {
     const isNew = knowledge.id < 0;
     const { pendingQuizTabSwitch, setPendingQuizTabSwitch, selectedItemIds, currentK } = useKStore();
     const { loadTree } = useKLoader();
+    const { isMobile } = useDeviceStore();
+
+    const visibleTabs = isMobile ? TABS.filter(t => t.id !== "general" && t.id !== "qflow") : TABS;
 
     const [activeTab, setActiveTabLocal] = useState<KTab>(() => {
         const saved = tab?.metadata?.activeKTab as KTab | undefined;
@@ -187,7 +190,7 @@ export function KEditorPanel() {
             {/* Tab bar */}
             <div className="flex items-center border-b-2 border-primary/20 bg-muted/20 shrink-0">
                 <div className="flex flex-1">
-                    {TABS.map((t) => (
+                    {visibleTabs.map((t) => (
                         <button
                             key={t.id}
                             onClick={() => setActiveTab(t.id)}
