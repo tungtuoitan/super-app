@@ -63,14 +63,14 @@ export function useAuthHelper() {
             device,
         });
 
-        if (cached) {
-            set$User({ ...cached });
+        if (!cached) {
+            debugLog.log("auth", "init-from-storage-skip", { reason: "no-cached-profile", device });
+            return false;
         }
 
+        set$User({ ...cached });
+
         try {
-            // Call refresh directly so we get the full user payload (acquireRefreshToken
-            // only returns a token). The cached profile may be missing fields (e.g. when a
-            // local-login happened in an older build that stored userId: null).
             const response = await authApi.refreshToken();
             if (!response.success || !response.user?.token) {
                 throw new Error(response.error || "Refresh failed");
@@ -78,15 +78,15 @@ export function useAuthHelper() {
 
             const parsedFilters = response.user.filters
                 ? JSON.parse(response.user.filters)
-                : cached?.filters;
+                : cached.filters;
 
             const userProfile: User = {
                 userId: response.user.id,
-                userName: response.user.email || cached?.userName || "",
-                email: response.user.email || cached?.email || "",
-                firstName: response.user.firstName ?? cached?.firstName,
-                lastName: response.user.lastName ?? cached?.lastName,
-                picture: response.user.picture ?? cached?.picture,
+                userName: response.user.email || cached.userName || "",
+                email: response.user.email || cached.email || "",
+                firstName: response.user.firstName ?? cached.firstName,
+                lastName: response.user.lastName ?? cached.lastName,
+                picture: response.user.picture ?? cached.picture,
                 authType: response.user.authType,
                 userToken: response.user.token,
                 filters: parsedFilters,
@@ -101,10 +101,11 @@ export function useAuthHelper() {
             debugLog.flush();
             return true;
         } catch {
-            debugLog.log("auth", "init-from-storage-failed", { email: cached?.email, device });
+            debugLog.log("auth", "init-from-storage-failed", { email: cached.email, device });
             debugLog.flush();
             storageService.remove(STORAGE_KEYS.USER_PROFILE);
             set$User(DEFAULT_USER);
+            setIsAuthenticated(false);
             return false;
         }
     };

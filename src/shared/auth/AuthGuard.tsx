@@ -9,7 +9,7 @@
  * - Prevent unauthorized access to the app
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { getDeviceFingerprint } from "../device/deviceFingerprint";
 import { useStandardRegistryHelper } from "../standardRegistry/useStandardRegistry.helper";
 import { configureApiClient, acquireRefreshToken, scheduleProactiveRefresh } from "../fetch/apiClient";
@@ -25,17 +25,33 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { loadKeywords } = useKeywordHelper();
     const { initAuthFromStorageToken, logout } = useAuthHelper();
 
-    // Configure apiFetch singleton with token callbacks from AuthStore
+    // Refs updated every render so closures always read the latest values
+    // without needing to re-run configureApiClient on every token change.
+    const tokenRef = useRef($user.userToken);
+    tokenRef.current = $user.userToken;
+    const logoutRef = useRef(logout);
+    logoutRef.current = logout;
+
+    // Configure apiFetch singleton once — closures read from refs so they
+    // always return the current token/logout even before effects re-run.
     useEffect(() => {
         configureApiClient({
-            getToken: () => $user.userToken,
+            getToken: () => tokenRef.current,
             setToken: (token) => set$User((prev) => ({ ...prev, userToken: token })),
-            onAuthFailed: logout,
+            onAuthFailed: () => logoutRef.current(),
         });
-    }, [$user.userToken]);
+    }, []);
 
-    // On mount: try to restore session from HttpOnly cookie + cached profile
+    // On mount: try to restore session from HttpOnly cookie + cached profile.
+    // Skip on /auth/callback — loginWithGoogleCode handles auth there and
+    // running both concurrently causes a race that clears the fresh token.
+    // hasInitializedRef prevents React Strict Mode's double-invoke from firing
+    // two concurrent refresh calls (rotating tokens would invalidate the second).
+    const hasInitializedRef = useRef(false);
     useEffect(() => {
+        if (window.location.pathname.includes("/auth/callback")) return;
+        if (hasInitializedRef.current) return;
+        hasInitializedRef.current = true;
         const device = getDeviceFingerprint();
         debugLog.log("auth", "authguard-mount", { device, isAuthenticated });
         initAuthFromStorageToken().then((restored) => {
