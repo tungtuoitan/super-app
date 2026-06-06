@@ -5,7 +5,7 @@
 
 import { config } from "config/app.config";
 import { getLocaleLanguage } from "./locale";
-import type { LoginRequest, LoginResponse, AuthResponse, GoogleCodeRequest } from "./auth.types";
+import type { LoginRequest, AuthResponse, GoogleCodeRequest } from "./auth.types";
 import { debugLog } from "../debug/useDebugLog";
 import { getDeviceFingerprint } from "../device/deviceFingerprint";
 
@@ -14,7 +14,7 @@ export const authApi = {
      * Login with username and password
      * POST /api/auth/login
      */
-    async login(credentials: LoginRequest): Promise<LoginResponse> {
+    async login(credentials: LoginRequest): Promise<AuthResponse> {
         const device = getDeviceFingerprint();
         debugLog.log("auth", "local-login-start", { username: credentials.username, device });
 
@@ -35,8 +35,8 @@ export const authApi = {
         debugLog.log("auth", "local-login-response", { status: res.status, ok: res.ok, device });
 
         if (res.ok) {
-            const data = (await res.json()) as LoginResponse;
-            debugLog.log("auth", "local-login-success", { userId: data.userId, device });
+            const data = (await res.json()) as AuthResponse;
+            debugLog.log("auth", "local-login-success", { userId: data.user?.id, device });
             debugLog.flush();
             return data;
         } else {

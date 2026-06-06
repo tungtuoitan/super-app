@@ -50,6 +50,9 @@ export const debugLogStore = {
         if (_entries.length > MAX_ENTRIES) {
             _entries.splice(0, _entries.length - MAX_ENTRIES);
         }
+        // Mirror to console so it shows up in remote DevTools (chrome://inspect)
+        // eslint-disable-next-line no-console
+        console.log(`[${category}] ${event}`, data ?? "");
     },
 
     /** Return all entries without clearing. */

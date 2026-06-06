@@ -18,7 +18,7 @@ import { useAuthCallbackStore } from "./AuthCallback.store";
 import { parseApiError, isUnauthorizedError } from "../fetch/api-error.utils";
 import { debugLog } from "../debug/useDebugLog";
 import { getDeviceFingerprint } from "../device/deviceFingerprint";
-import { acquireRefreshToken, scheduleProactiveRefresh } from "../fetch/apiClient";
+import { scheduleProactiveRefresh } from "../fetch/apiClient";
 import {STORAGE_KEYS} from "../localStorage/storage.config";
 
 const DEFAULT_USER: User = {
@@ -63,23 +63,45 @@ export function useAuthHelper() {
             device,
         });
 
-        if (!cached) {
-            debugLog.log("auth", "init-from-storage-skip", { reason: "no-cached-profile", device });
-            return false;
+        if (cached) {
+            set$User({ ...cached });
         }
 
-        set$User({ ...cached });
-
         try {
-            const newToken = await acquireRefreshToken();
-            set$User({ ...cached, userToken: newToken });
+            // Call refresh directly so we get the full user payload (acquireRefreshToken
+            // only returns a token). The cached profile may be missing fields (e.g. when a
+            // local-login happened in an older build that stored userId: null).
+            const response = await authApi.refreshToken();
+            if (!response.success || !response.user?.token) {
+                throw new Error(response.error || "Refresh failed");
+            }
+
+            const parsedFilters = response.user.filters
+                ? JSON.parse(response.user.filters)
+                : cached?.filters;
+
+            const userProfile: User = {
+                userId: response.user.id,
+                userName: response.user.email || cached?.userName || "",
+                email: response.user.email || cached?.email || "",
+                firstName: response.user.firstName ?? cached?.firstName,
+                lastName: response.user.lastName ?? cached?.lastName,
+                picture: response.user.picture ?? cached?.picture,
+                authType: response.user.authType,
+                userToken: response.user.token,
+                filters: parsedFilters,
+            };
+
+            set$User(userProfile);
+            storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile, userToken: "" });
             setIsAuthenticated(true);
-            scheduleProactiveRefresh(newToken);
-            debugLog.log("auth", "init-from-storage-ok", { email: cached.email, device });
+            scheduleProactiveRefresh(response.user.token);
+
+            debugLog.log("auth", "init-from-storage-ok", { userId: userProfile.userId, email: userProfile.email, device });
             debugLog.flush();
             return true;
         } catch {
-            debugLog.log("auth", "init-from-storage-failed", { email: cached.email, device });
+            debugLog.log("auth", "init-from-storage-failed", { email: cached?.email, device });
             debugLog.flush();
             storageService.remove(STORAGE_KEYS.USER_PROFILE);
             set$User(DEFAULT_USER);
@@ -102,19 +124,25 @@ export function useAuthHelper() {
             const loginRequest: LoginRequest = { username, password };
             const response = await authApi.login(loginRequest);
 
+            if (!response.success || !response.user) {
+                throw new Error(response.error || response.message || "Login failed");
+            }
+
             const userProfile: User = {
-                userId: response.userId || null,
-                userName: response.username || username,
-                email: "",
-                password: "",
-                userToken: response.token,
-                authType: "local",
+                userId: response.user.id,
+                userName: response.user.email || username,
+                email: response.user.email || "",
+                firstName: response.user.firstName,
+                lastName: response.user.lastName,
+                picture: response.user.picture,
+                authType: response.user.authType,
+                userToken: response.user.token,
             };
 
-            storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile });
+            storageService.set(STORAGE_KEYS.USER_PROFILE, { ...userProfile, userToken: "" });
             set$User(userProfile);
             setIsAuthenticated(true);
-            scheduleProactiveRefresh(response.token);
+            scheduleProactiveRefresh(response.user.token);
 
             debugLog.log("auth", "local-login-store-updated", { userId: userProfile.userId, device });
             debugLog.flush();

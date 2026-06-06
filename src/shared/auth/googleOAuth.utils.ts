@@ -9,15 +9,20 @@ import { generateCodeChallenge, generateCodeVerifier, generateState, storePkceVa
 
 /**
  * Get redirect URI based on environment
- * Auto-detects production URL or uses env variable override
+ * Auto-detects current origin (so localhost on PC and LAN IP on mobile both work
+ * against the same FE build) and falls back to env override when explicitly set.
  */
 const getRedirectUri = (): string => {
-if (envConfig.REACT_APP_GOOGLE_REDIRECT_URI) {
-    return envConfig.REACT_APP_GOOGLE_REDIRECT_URI;
-}
+    if (envConfig.REACT_APP_GOOGLE_REDIRECT_URI) {
+        return envConfig.REACT_APP_GOOGLE_REDIRECT_URI;
+    }
 
-// Fallback chỉ cho local dev
-return "http://localhost:3000/auth/callback";
+    if (typeof window !== "undefined" && window.location?.origin) {
+        return `${window.location.origin}/auth/callback`;
+    }
+
+    // Last-resort fallback for non-browser environments
+    return "http://localhost:3000/auth/callback";
 };
 
 
