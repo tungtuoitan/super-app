@@ -20,6 +20,12 @@ export interface SideBarContextData {
     setFilterViewKey: Dispatch<SetStateAction<keyof UserFilters | null>>;
     uiFilters: ViewFilter;
     setUIFilters: Dispatch<SetStateAction<ViewFilter>>;
+    /** Mobile layout: true for one tick when a tab is opened — VSCodeLayout expands the editor panel */
+    mobileTabJustOpened: boolean;
+    setMobileTabJustOpened: Dispatch<SetStateAction<boolean>>;
+    /** Mobile layout: true while a K review session is active — VSCodeLayout expands editor to 100% */
+    mobileReviewActive: boolean;
+    setMobileReviewActive: Dispatch<SetStateAction<boolean>>;
 }
 
 const _store = create<SideBarContextData>((set, get) => ({
@@ -31,6 +37,10 @@ const _store = create<SideBarContextData>((set, get) => ({
     setFilterViewKey: zSetter("filterViewKey", set, get),
     uiFilters: {},
     setUIFilters: zSetter("uiFilters", set, get),
+    mobileTabJustOpened: false,
+    setMobileTabJustOpened: zSetter("mobileTabJustOpened", set, get),
+    mobileReviewActive: false,
+    setMobileReviewActive: zSetter("mobileReviewActive", set, get),
 }));
 
 export const useSideBarStore = () => _store(useShallow((s) => s));

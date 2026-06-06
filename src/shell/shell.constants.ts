@@ -3,13 +3,6 @@
  * Navigation, tab types, module definitions, view types
  */
 
-// ── WindowEventMap augmentation ───────────────────────────────────────────
-declare global {
-    interface WindowEventMap {
-        /** Dispatched by a feature when it opens a tab on mobile */
-        "shell:mobile-tab-opened": CustomEvent<never>;
-    }
-}
 
 export const shellConstants = {
     appName: "SuperApp" as const,
@@ -19,15 +12,6 @@ export const shellConstants = {
         tabPinnedState: "tabPinnedState",
     } as const,
 
-    /** Custom DOM events dispatched between shell and features */
-    events: {
-        /**
-         * Dispatched by a feature when it opens a tab on mobile.
-         * VSCodeLayout listens to expand the editor panel.
-         * Use: window.dispatchEvent(new CustomEvent(shellConstants.events.mobileTabOpened))
-         */
-        mobileTabOpened: "shell:mobile-tab-opened",
-    } as const,
     navigation: {
         path: {
             home: "/",

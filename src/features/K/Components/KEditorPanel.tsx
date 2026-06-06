@@ -10,7 +10,7 @@ import { KDailyReviewSession } from "./KDailyReviewSession";
 import { useKStore } from "../store/useK.store";
 import type { KWsResponse } from "../types/k.type";
 import type { KDailySessionQuestion, KQuestion } from "../types/kQuiz.type";
-import { useEditorTabBarHelper } from "@/shell";
+import { useEditorTabBarHelper, getSideBarState } from "@/shell";
 import { KQuizService } from "../service/kQuiz.service";
 import { useKQFlowStats } from "../hooks/qFlow/useKQFlowStats.helper";
 import { sortQuestionsByFlowOrder } from "../utils/kQFlow.utils";
@@ -161,6 +161,7 @@ export function KEditorPanel() {
             const res = await KQuizService._getDailySession(selectedNodeId);
             if (res.success && res.object && res.object.length > 0) {
                 const sorted = await sortQuestionsByFlowOrder(res.object);
+                if (isMobile) getSideBarState().setMobileReviewActive(true);
                 setReviewSession(sorted);
             }
         } catch { /* silent */ }
@@ -239,8 +240,8 @@ export function KEditorPanel() {
                         nodeId={selectedNodeId}
                         quizTitle={node?.name ?? tab?.title ?? "Daily Review"}
                         questions={reviewSession}
-                        onComplete={() => { setReviewSession(null); fetchNodeQuestions(); loadTree(); refreshDailyTotal(); }}
-                        onBack={() => setReviewSession(null)}
+                        onComplete={() => { setReviewSession(null); fetchNodeQuestions(); loadTree(); refreshDailyTotal(); if (isMobile) getSideBarState().setMobileReviewActive(false); }}
+                        onBack={() => { setReviewSession(null); if (isMobile) getSideBarState().setMobileReviewActive(false); }}
                     />
                 </div>
             )}

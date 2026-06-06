@@ -348,7 +348,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                         {!isEditing && isCollapsed && treeType === "workspaceTree" && !(nodeItem.statusCode === "learning" && (nodeItem.dueSrsCount ?? 0) > 0) && $hasDescendantWithBlueDot(node.data.children ?? []) && (
                             <span
                                 title="Descendants have questions due"
-                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400 opacity-60"
+                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400 opacity-40"
                             />
                         )}
                         {!isEditing && treeType === "workspaceTree" && (nodeItem.draftQuestionCount ?? 0) > 0 && (

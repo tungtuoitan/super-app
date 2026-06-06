@@ -4,8 +4,7 @@
  * Delegates all tab lifecycle to shell — never builds BaseTab directly.
  */
 
-import { shellConstants } from "@/shell";
-import { useEditorTabBarHelper } from "@/shell";
+import { useEditorTabBarHelper, getSideBarState, shellConstants } from "@/shell";
 import type { LifeLogLog, LifeLogTrack } from "../types/lifeLog.types";
 import { useLifeLogStore } from "../store/useLifeLog.store";
 
@@ -13,8 +12,7 @@ const LOG_TYPE   = shellConstants.vscode.tab.tabTypes.lifeLog;
 const TRACK_TYPE = shellConstants.vscode.tab.tabTypes.lifeLogTrack;
 const GRAPH_TYPE = shellConstants.vscode.tab.tabTypes.lifeLogGraph;
 
-const dispatchOpened = () =>
-    window.dispatchEvent(new CustomEvent(shellConstants.events.mobileTabOpened));
+const signalTabOpened = () => getSideBarState().setMobileTabJustOpened(true);
 
 export function useLifeLogTabHelper() {
     const { openTab, openSingletonTab, closeTab, updateTabData } = useEditorTabBarHelper();
@@ -24,7 +22,7 @@ export function useLifeLogTabHelper() {
         openTab(log, LOG_TYPE, {
             title: log.title || log.type || "Log",
         });
-        dispatchOpened();
+        signalTabOpened();
     };
 
     /** Create temp log (negative ID), push to store, open tab — no API call */
@@ -49,14 +47,14 @@ export function useLifeLogTabHelper() {
             title: "New Log",
             hasUnsavedChanges: true,
         });
-        dispatchOpened();
+        signalTabOpened();
     };
 
     const openTrackTab = (track: LifeLogTrack) => {
         openTab(track, TRACK_TYPE, {
             title: track.name || "Track",
         });
-        dispatchOpened();
+        signalTabOpened();
     };
 
     /** Create temp track (negative ID), push to store, open tab — no API call */
@@ -79,13 +77,13 @@ export function useLifeLogTabHelper() {
             title: "New Track",
             hasUnsavedChanges: true,
         });
-        dispatchOpened();
+        signalTabOpened();
     };
 
     /** Singleton graph tab */
     const openGraphTab = () => {
         openSingletonTab(GRAPH_TYPE, { title: "Track Activity" });
-        dispatchOpened();
+        signalTabOpened();
     };
 
     const closeLogTab = (tabId: string) => {

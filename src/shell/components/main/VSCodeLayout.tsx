@@ -14,7 +14,6 @@ import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 import {useModuleRegisterHelper} from "@/shell/hooks/useModuleRegister.helper";
 import { GlobalModuleInit } from "../GlobalModuleInit";
 import {moduleRegistry} from "@/shell/moduleRegistry";
-import { shellConstants } from "@/shell/shell.constants";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -59,17 +58,21 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
         registerGrid();
     }, [moduleName]);
 
-    // Expand editor panel when any lifelog tab opens (mobile)
+    const { mobileTabJustOpened, setMobileTabJustOpened, mobileReviewActive } = useSideBarStore();
+
+    // Expand editor panel when a feature opens a tab on mobile
     useEffect(() => {
-        const handler = () => {
-            if (isMobile) {
-                const panel = mobileEditorRef.current;
-                if (panel && panel.getSize() < 50) panel.resize(75);
-            }
-        };
-        window.addEventListener(shellConstants.events.mobileTabOpened, handler);
-        return () => window.removeEventListener(shellConstants.events.mobileTabOpened, handler);
-    }, [isMobile]);
+        if (!isMobile || !mobileTabJustOpened) return;
+        const panel = mobileEditorRef.current;
+        if (panel && panel.getSize() < 50) panel.resize(75);
+        setMobileTabJustOpened(false);
+    }, [isMobile, mobileTabJustOpened]);
+
+    // Expand/restore editor panel when a K review session starts/ends on mobile
+    useEffect(() => {
+        if (!isMobile) return;
+        mobileEditorRef.current?.resize(mobileReviewActive ? 200 : 22);
+    }, [isMobile, mobileReviewActive]);
 
     if (isMobile) {
         return (
