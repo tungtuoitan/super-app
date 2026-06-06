@@ -61,8 +61,12 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
     const { isAuthenticated } = useAuthStore();
     const { moduleName } = useSideBarStore();
 
-    // Only show modules that have not opted out of the ActivityBar via hideFromActivityBar
-    const visibleModules = moduleRegistry.getAll().filter((m) => !m.hideFromActivityBar);
+    // On mobile (horizontal), only show the K module
+    const visibleModules = moduleRegistry.getAll().filter((m) => {
+        if (m.hideFromActivityBar) return false;
+        if (horizontal && m.id !== "K") return false;
+        return true;
+    });
 
     const accountButton = (
         <TooltipProvider>

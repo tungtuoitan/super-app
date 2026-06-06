@@ -37,6 +37,8 @@ export interface TabPersistence {
     getDataId(tab: BaseTab): number | string | null;
     /** Fetch the entity and reconstruct a full BaseTab. Return null if the data no longer exists. */
     restoreTab(persisted: TabStorage, userToken: string): Promise<BaseTab | null>;
+    /** Tab types that should NOT be restored on mobile. */
+    mobileExcludedTypes?: string[];
 }
 
 // -- ShortcutDefinition --------------------------------------------------------

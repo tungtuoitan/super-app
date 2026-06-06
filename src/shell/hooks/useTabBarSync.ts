@@ -11,7 +11,7 @@
 import { useEffect } from "react";
 import type { BaseTab, OpenTabsStorage, TabStorage } from "@/shell";
 import { moduleRegistry } from "@/shell/moduleRegistry";
-import { useAuthStore } from "@/shared";
+import { useAuthStore, useDeviceStore } from "@/shared";
 import { useEditorTabBarStore } from "../store/EditorTab.store";
 
 // ── Storage key ───────────────────────────────────────────────────────────────
@@ -26,6 +26,7 @@ export const getStorageKey = (userId: number | null | undefined): string | null 
 export const useTabBarSync = () => {
     const { openTabs, setOpenTabs, isLoadingTabs, setIsLoadingTabs, setActiveTabId } = useEditorTabBarStore();
     const { $user } = useAuthStore();
+    const { isMobile } = useDeviceStore();
 
     // ── Restore tabs from localStorage on mount / userId change ───────────────
     // Uses setActiveTabId from the store directly (stable Zustand setter — safe to
@@ -71,6 +72,7 @@ export const useTabBarSync = () => {
                 for (const persisted of sortedTabs) {
                     const persistence = moduleRegistry.getTabPersistence(persisted.type);
                     if (!persistence) continue;
+                    if (isMobile && persistence.mobileExcludedTypes?.includes(persisted.type)) continue;
                     try {
                         const tab = await persistence.restoreTab(persisted, $user.userToken);
                         if (tab) restoredTabs.push(tab);

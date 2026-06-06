@@ -16,8 +16,8 @@ export function AccountsDialog() {
     const { logout, login } = useAuthHelper();
     const { accountsOpen, setAccountsOpen } = useActivityBarStore();
 
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+    const [username, setUsername] = useState("hoanhtungle3@gmail.com");
+    const [password, setPassword] = useState("tung76721119");
 
     const handleSignOut = () => {
         logout();
