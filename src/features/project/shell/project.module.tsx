@@ -19,7 +19,7 @@ import { useProjectSaveActions } from "../hooks/useProjectSaveActions";
 import { useProjectStore } from "../store/useProject.store";
 import { useProjectGridHelper } from "../hooks/useProjectGrid.helper";
 import { useProjectTabHelper } from "../hooks/useProjectTab.helper";
-import { useAuthStore } from "@/shared";
+import { useAuthStore, useDeviceStore } from "@/shared";
 import { useEffect } from "react";
 
 /** Transform a single ProjectDTO to domain model */
@@ -55,6 +55,7 @@ export const projectModule: ModuleDefinition = {
     useSaveActions: useProjectSaveActions,
 
     tabPersistence: {
+        mobileExcludedTypes: [shellConstants.vscode.tab.tabTypes.multiProject],
         getDataId: (tab) => {
             if (tab.type === shellConstants.vscode.tab.tabTypes.project) {
                 const p = tab.data as Project;
@@ -171,10 +172,11 @@ export const projectModule: ModuleDefinition = {
         const { projectGridPagination } = useProjectStore();
         const { loadProjects } = useProjectGridHelper();
         const { openMultiProjectTab } = useProjectTabHelper();
-        
+        const { isMobile } = useDeviceStore();
 
-        // Auto-open pinned MultiProject tab on mount
+        // Auto-open pinned MultiProject tab on mount (desktop only)
         useEffect(() => {
+            if (isMobile) return;
             openMultiProjectTab([]);
             // eslint-disable-next-line react-hooks/exhaustive-deps
         }, []);

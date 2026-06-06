@@ -2,10 +2,15 @@ const path = require("path");
 
 module.exports = {
     devServer: {
-        // Ensure Fast Refresh is enabled
         hot: true,
-        // Live reload as fallback
         liveReload: true,
+        host: "0.0.0.0",
+        allowedHosts: "all",
+        client: {
+            // HMR WebSocket follows the host the page was loaded from,
+            // so opening http://192.168.2.1:3000 on mobile works without changing this.
+            webSocketURL: "auto://0.0.0.0:0/ws",
+        },
     },
     webpack: {
         alias: {
