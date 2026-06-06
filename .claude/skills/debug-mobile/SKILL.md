@@ -1,6 +1,6 @@
 ---
 name: debug-mobile
-description: Setup và debug SuperApp trên mobile (Android + Chrome DevTools USB). Bao gồm cấu hình IP local, firewall, HMR, và các gotcha đã gặp.
+description: Setup và debug SuperApp trên mobile (Android + Chrome DevTools USB/WiFi). Bao gồm cấu hình IP local, firewall, HMR, xem log/network qua ADB WiFi hoặc Eruda, và các gotcha đã gặp.
 ---
 
 # Mobile Debug — SuperApp
@@ -92,6 +92,7 @@ Thêm vào `DevelopmentPolicy`:
 ### Bước 6 — Firewall
 
 Firewall rule `SuperApp BE 5000` đã tồn tại (allow TCP 5000 inbound, All profiles).
+Firewall rule `SuperApp FE 3000` đã tạo (allow TCP 3000 inbound, All profiles).
 
 **Gotcha quan trọng**: WiFi network profile mặc định là **Public**. Trên profile Public, `LocalFirewallRules: N/A (GPO-store only)` — tức là local rules bị ignore, phone không reach được.
 
@@ -110,6 +111,31 @@ Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList
 # Đổi Category: 0=Public, 1=Private
 Set-ItemProperty -Path "HKLM:\...\{GUID}" -Name "Category" -Value 1
 ```
+
+---
+
+## Xem Console / Network trên mobile
+
+### Cách 1 — ADB over WiFi (Android 11+, không cần USB)
+
+1. Trên phone: **Developer Options → Wireless debugging → bật on**
+2. Tap vào "Wireless debugging" → lấy **IP:port** và **pairing code**
+3. Trên laptop (PowerShell):
+```powershell
+adb pair 192.168.2.XX:PAIRING_PORT   # nhập pairing code khi hỏi
+adb connect 192.168.2.XX:DEBUG_PORT
+```
+4. Vào `chrome://inspect/#devices` trên laptop — phone hiện ra như USB
+5. Click **inspect** → có đầy đủ Console, Network, Elements
+
+### Cách 2 — Eruda (inject vào app, không cần ADB)
+
+Thêm tạm vào `public/index.html`:
+```html
+<script src="//cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
+```
+Trên phone xuất hiện nút floating → tap → có Console, Network, Elements ngay trên browser. Nhớ xóa trước khi commit.
 
 ---
 
@@ -136,6 +162,16 @@ Set-ItemProperty -Path "HKLM:\...\{GUID}" -Name "Category" -Value 1
 [ ] CORS đã có origin của mobile chưa?
     → Startup.cs DevelopmentPolicy phải có "http://192.168.2.26:3000"
     → Restart BE sau khi sửa
+
+[ ] Phone và laptop có thực sự cùng subnet không?
+    → ipconfig (laptop) → xem Default Gateway của Wi-Fi
+    → Settings > WiFi > IP trên phone → phải cùng x.x.x.* với laptop
+    → Nếu khác subnet: toggle WiFi off/on trên phone (xả DHCP lease cũ)
+
+[ ] Firewall rule cho port 3000 đã tồn tại chưa?
+    → Get-NetFirewallRule -DisplayName "SuperApp FE 3000"
+    → Nếu chưa: New-NetFirewallRule -DisplayName "SuperApp FE 3000" -Direction Inbound -Protocol TCP -LocalPort 3000 -Action Allow -Profile Any
+    → Cần chạy PowerShell as Administrator
 ```
 
 ---
@@ -164,7 +200,15 @@ client: { webSocketURL: "auto://0.0.0.0:0/ws" }
 `192.168.2.1` là Ethernet static IP, không phải WiFi.
 Luôn dùng `Get-NetIPAddress -InterfaceAlias "Wi-Fi"` để lấy IP đúng.
 
-### 4. Laptop WiFi disconnect (169.254.x.x)
+### 4. Phone và laptop khác subnet (192.168.1.x vs 192.168.2.x)
+
+**Nguyên nhân**: Phone đang giữ DHCP lease cũ từ mạng khác. Khi kết nối lại WiFi, nó dùng luôn lease cũ thay vì xin IP mới từ AP hiện tại.
+
+**Fix**: Toggle WiFi off/on trên phone → buộc DHCP discovery từ đầu → nhận đúng IP `192.168.2.x`.
+
+**Cách confirm**: `ipconfig` trên laptop xem Default Gateway của Wi-Fi — phone phải cùng subnet với gateway đó.
+
+### 5. Laptop WiFi disconnect (169.254.x.x)
 
 `169.254.x.x` = APIPA = WiFi không lấy được DHCP lease.
 → Kiểm tra `netsh wlan show interfaces | Select-String "State"`
