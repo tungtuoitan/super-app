@@ -1,12 +1,12 @@
-﻿import { useEffect, useRef } from "react";
-import { Panel, PanelGroup, type ImperativePanelHandle } from "react-resizable-panels";
+import { useEffect, useRef } from "react";
+import { Panel, PanelGroup, type ImperativePanelHandle, type ImperativePanelGroupHandle } from "react-resizable-panels";
 import { ActivityBar } from "./ActivityBar";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { VSSideBar } from "./VSSideBar";
 import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
 import { useLocation } from "react-router-dom";
-import { useDeviceStore, useDebugLog } from "@/shared";
+import { useDeviceStore } from "@/shared";
 import { useDetectDevice } from "@/shared";
 import {useSideBarStore} from "@/shell/store/SideBar.store";
 import {RightSideBar} from "./RightSideBar";
@@ -25,35 +25,13 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const { isMobile } = useDeviceStore();
     const { setIsPanelVisible } = useActivityBarStore();
     const mobileEditorRef = useRef<ImperativePanelHandle>(null);
+    const mobileGroupRef = useRef<ImperativePanelGroupHandle>(null);
+    const desktopHGroupRef = useRef<ImperativePanelGroupHandle>(null);
+    const desktopVGroupRef = useRef<ImperativePanelGroupHandle>(null);
     const { moduleName } = useSideBarStore();
     useDetectDevice()
 
     const { registerGrid } = useModuleRegisterHelper();
-
-    // ── Drag-lag diagnostic ───────────────────────────────────────────────────
-    const debugLog = useDebugLog();
-    const renderCountRef = useRef(0);
-    const lastLayoutTsRef = useRef(0);
-    const layoutTickCountRef = useRef(0);
-    renderCountRef.current += 1;
-    if (isMobile) {
-        debugLog.log("vscode-layout", "render", {
-            count: renderCountRef.current,
-            moduleName,
-        });
-    }
-
-    const handleMobileLayout = (sizes: number[]) => {
-        const now = performance.now();
-        layoutTickCountRef.current += 1;
-        const dt = lastLayoutTsRef.current ? Math.round(now - lastLayoutTsRef.current) : 0;
-        lastLayoutTsRef.current = now;
-        debugLog.log("vscode-layout", "onLayout", {
-            sizes: sizes.map(s => Math.round(s)),
-            tick: layoutTickCountRef.current,
-            dtMs: dt,
-        });
-    };
 
     useEffect(() => {
         registerGrid();
@@ -82,10 +60,10 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                     <ActivityBar horizontal />
 
                     <PanelGroup
+                        ref={mobileGroupRef}
                         direction="vertical"
                         autoSaveId="mobile-layout-vertical"
                         className="flex-1"
-                        onLayout={handleMobileLayout}
                     >
                         <Panel id="mobile-sidebar" defaultSize={40} minSize={15}>
                             <div className="h-full overflow-hidden bg-editor-sidebar flex flex-col" style={{ contain: "layout style size" }}>
@@ -100,7 +78,12 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                                 </div>
                             </div>
                         </Panel>
-                        <VSCodeResizeHandle direction="vertical" id="mobile-split-resize" />
+                        <VSCodeResizeHandle
+                            direction="vertical"
+                            id="mobile-split-resize"
+                            groupRef={mobileGroupRef}
+                            indices={[0, 1]}
+                        />
                         <Panel id="mobile-editor" ref={mobileEditorRef} defaultSize={60} minSize={15}>
                             <div className="h-full w-full" style={{ contain: "layout style size" }}>
                                 <VSEditorArea />
@@ -122,18 +105,26 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
             <div className="flex-1 flex overflow-hidden">
                 <ActivityBar />
 
-                <PanelGroup direction="horizontal" autoSaveId="notes-layout-horizontal" className="flex-1">
-                    <>
-                        <VSSideBar moduleName={moduleName} />
-                        <VSCodeResizeHandle direction="horizontal" id="sidebar-resize" />
-                    </>
+                <PanelGroup ref={desktopHGroupRef} direction="horizontal" autoSaveId="notes-layout-horizontal" className="flex-1">
+                    <VSSideBar moduleName={moduleName} />
+                    <VSCodeResizeHandle
+                        direction="horizontal"
+                        id="sidebar-resize"
+                        groupRef={desktopHGroupRef}
+                        indices={[0, 1]}
+                    />
 
                     <Panel id="main-content" minSize={50}>
-                        <PanelGroup direction="vertical" autoSaveId="notes-layout-vertical">
+                        <PanelGroup ref={desktopVGroupRef} direction="vertical" autoSaveId="notes-layout-vertical">
                             <Panel id="editor-area" defaultSize={70} minSize={30}>
                                 <VSEditorArea />
                             </Panel>
-                            <VSCodeResizeHandle direction="vertical" id="panel-resize" />
+                            <VSCodeResizeHandle
+                                direction="vertical"
+                                id="panel-resize"
+                                groupRef={desktopVGroupRef}
+                                indices={[0, 1]}
+                            />
                             <VSPanel onClose={() => setIsPanelVisible(false)} />
                         </PanelGroup>
                     </Panel>
@@ -144,7 +135,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     );
 }
 
-/** Mobile sidebar reads SidebarView from registry â€” same as VSSideBar desktop */
+/** Mobile sidebar reads SidebarView from registry — same as VSSideBar desktop */
 function MobileSidebarContent({ moduleName }: { moduleName: string }) {
     const module = moduleRegistry.getById(moduleName);
     const SidebarView = module?.SidebarView;
@@ -154,6 +145,3 @@ function MobileSidebarContent({ moduleName }: { moduleName: string }) {
         </div>
     );
 }
-
-
-

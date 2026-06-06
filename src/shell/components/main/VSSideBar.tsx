@@ -1,4 +1,5 @@
-﻿import { Panel, PanelGroup } from "react-resizable-panels";
+﻿import { useRef } from "react";
+import { Panel, PanelGroup, type ImperativePanelGroupHandle } from "react-resizable-panels";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
 import { useDeviceStore } from "@/shared";
 import { Console } from "@/shared";
@@ -17,6 +18,7 @@ interface VSSideBarProps {
 export function VSSideBar({ moduleName }: VSSideBarProps) {
     const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
     const { isMobile } = useDeviceStore();
+    const innerGroupRef = useRef<ImperativePanelGroupHandle>(null);
 
     const defaultSize = isMobile ? 70 : 20;
     const maxSize = isMobile ? 70 : 40;
@@ -37,7 +39,7 @@ export function VSSideBar({ moduleName }: VSSideBarProps) {
             onExpand={() => setIsSideBarVisible(true)}
         >
             {isSideBarVisible && (
-                <PanelGroup direction="vertical" className="h-full" autoSaveId="sidebar-vertical">
+                <PanelGroup ref={innerGroupRef} direction="vertical" className="h-full" autoSaveId="sidebar-vertical">
                     <Panel defaultSize={70} minSize={20}>
                         <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
                             {/* Header */}
@@ -53,7 +55,12 @@ export function VSSideBar({ moduleName }: VSSideBarProps) {
                         </div>
                     </Panel>
 
-                    <VSCodeResizeHandle direction="vertical" id="panel2-resize" />
+                    <VSCodeResizeHandle
+                        direction="vertical"
+                        id="panel2-resize"
+                        groupRef={innerGroupRef}
+                        indices={[0, 1]}
+                    />
 
                     {!isMobile && <Console />}
                 </PanelGroup>
