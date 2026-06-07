@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import { useEditorTabBarHelper } from "@/shell";
 import { KQuizService } from "../service/kQuiz.service";
-import { flowService, richTextEditorConstants, useConsoleHelper } from "@/shared";
-import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared";
+import { richTextEditorConstants, useConsoleHelper } from "@/shared";
 import type { KQuestion } from "../types/kQuiz.type";
 import { dispatchKFlowQuestionsChanged } from "../utils/kEvents.utils";
 import { kMarkdownActions } from "../utils/kMarkdownActions";
-import { buildMarkdown, parseMarkdown, parseMarkdownGroups, reorganizeGroups } from "../utils/kMarkdownEditor.utils";
+import { buildMarkdown, parseMarkdown, validateMarkdown } from "../utils/kMarkdownEditor.utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -57,7 +56,7 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
     const handleSaveRef = useRef<() => Promise<void>>(async () => {});
     const handleCancelRef = useRef<() => void>(() => {});
     const idDecorationsRef = useRef<string[]>([]);
-    // Track previous hasUnsavedChanges to detect external cancel
+    const draftDecorationsRef = useRef<string[]>([]);
     const isDirtyRef = useRef(false);
 
     // ── Data loading ──────────────────────────────────────────────────────────
@@ -72,30 +71,7 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
             const qs: KQuestion[] = qRes.success && qRes.object ? qRes.object.questions : [];
             setQuestions(qs);
 
-            const activeIds = qs.filter(q => !q.deletedAt).map(q => q.id);
-            const [posRes, edgeRes] = await Promise.all([
-                activeIds.length > 0
-                    ? flowService._getPositions("", { nodeType: "kQuestion", nodeIds: activeIds.join(",") })
-                    : Promise.resolve({ data: [] as FlowNodePositionDTO[] }),
-                flowService._getEdges(""),
-            ]);
-
-            const positions: Record<number, { x: number; y: number }> = {};
-            for (const p of ((posRes.data as FlowNodePositionDTO[]) ?? [])) {
-                positions[p.nodeId] = { x: p.x, y: p.y };
-            }
-
-            const qIdSet = new Set(activeIds.map(String));
-            const edges = ((edgeRes.data as FlowEdgeDTO[]) ?? [])
-                .filter(e =>
-                    e.sourceType === "kQuestion" &&
-                    e.targetType === "kQuestion" &&
-                    qIdSet.has(String(e.sourceId)) &&
-                    qIdSet.has(String(e.targetId))
-                )
-                .map(e => ({ sourceId: Number(e.sourceId), targetId: Number(e.targetId) }));
-
-            const md = buildMarkdown(qs, positions, edges);
+            const md = buildMarkdown(qs);
             setMarkdown(md);
             setOriginalMarkdown(md);
         } catch (err) {
@@ -112,6 +88,13 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
     const handleSave = useCallback(async () => {
         if (saving) return;
         const currentMd = editorRef.current?.getValue() ?? markdown;
+
+        const errors = validateMarkdown(currentMd);
+        if (errors.length > 0) {
+            errors.forEach(e => _console.error(`[KMarkdown] line ${e.line}: ${e.message}`));
+            return;
+        }
+
         setSaving(true);
         try {
             const parsedQuestions = parseMarkdown(currentMd);
@@ -120,27 +103,49 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
                 parsedQuestions.map(p => p.id).filter((id): id is number => id !== null)
             );
 
+            // Questions removed from markdown → delete
             const toDelete = activeQs.filter(q => !parsedIdSet.has(q.id));
             if (toDelete.length > 0) {
                 _console.warning(`[KMarkdown] deleted: ${toDelete.map(q => `[${q.id}] ${q.question}`).join(", ")}`);
             }
 
-            const addQuestions = parsedQuestions
-                .filter(p => p.id === null)
-                .map(p => ({ name: p.question, description: p.answer || null }));
+            const addQuestions: Array<{ name: string; description: string | null; sortOrder: number }> = [];
+            const updateQuestions: Array<{ id: number; name: string; description: string | null; sortOrder: number }> = [];
+            const toggleDraftQuestionIds: number[] = [];
 
-            const updateQuestions = parsedQuestions
-                .filter(p => p.id !== null)
-                .flatMap(p => {
-                    const orig = activeQs.find(q => q.id === p.id);
-                    if (!orig) return [];
-                    if (orig.question === p.question && (orig.answer ?? "") === p.answer) return [];
-                    return [{ id: p.id!, name: p.question, description: p.answer || null }];
-                });
+            parsedQuestions.forEach((p, idx) => {
+                const sortOrder = idx + 1;
+
+                if (p.id === null) {
+                    // New questions can only be active (draft requires saving first to get an id)
+                    if (!p.isDraft) {
+                        addQuestions.push({ name: p.question, description: p.answer || null, sortOrder });
+                    }
+                    return;
+                }
+
+                const orig = activeQs.find(q => q.id === p.id);
+                if (!orig) return;
+
+                // Toggle draft if status changed
+                const origIsDraft = orig.statusCode === "draft";
+                if (origIsDraft !== p.isDraft) {
+                    toggleDraftQuestionIds.push(p.id);
+                }
+
+                // Update content / sortOrder
+                const descToSend = p.answer || null;
+                const nameChanged = orig.question !== p.question;
+                const descChanged = (orig.answer ?? "") !== p.answer;
+                const orderChanged = orig.sortOrder !== sortOrder;
+
+                if (nameChanged || descChanged || orderChanged) {
+                    updateQuestions.push({ id: p.id, name: p.question, description: descToSend, sortOrder });
+                }
+            });
 
             const deleteQuestionIds = toDelete.map(q => q.id);
-
-            const request = { addQuestions, updateQuestions, deleteQuestionIds, restoreQuestionIds: [] };
+            const request = { addQuestions, updateQuestions, deleteQuestionIds, restoreQuestionIds: [], toggleDraftQuestionIds };
 
             if (nodeId === null) {
                 await KQuizService._updateOrphanQuestions(request);
@@ -148,26 +153,26 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
                 await KQuizService._updateQuestions(nodeId, request);
             }
 
-            try {
-                await reorganizeGroups(activeQs, parseMarkdownGroups(currentMd), async () => {
-                    const res = nodeId === null
-                        ? await KQuizService._getOrphanQuestions()
-                        : await KQuizService._getNodeQuestions(nodeId);
-                    return (res.success && res.object ? res.object.questions : [])
-                        .filter((q: KQuestion) => !q.deletedAt);
-                });
-            } catch (e) {
-                console.error("[KMarkdown] reorganize failed", e);
-            }
-
             dispatchKFlowQuestionsChanged({ nodeId });
-            await load(); // resets markdown = originalMarkdown → isDirty = false
+            await load();
         } catch (err) {
             console.error("[KMarkdown] save failed", err);
         } finally {
             setSaving(false);
         }
     }, [saving, markdown, questions, nodeId, load]);
+
+    // ── Validation ────────────────────────────────────────────────────────────
+
+    const validationErrors = useMemo(() => validateMarkdown(markdown), [markdown]);
+
+    const handleValidationClick = useCallback(() => {
+        if (validationErrors.length === 0) {
+            _console.info("[KMarkdown] format OK — no errors");
+            return;
+        }
+        validationErrors.forEach(e => _console.error(`[KMarkdown] line ${e.line}: ${e.message}`));
+    }, [validationErrors, _console]);
 
     // ── Cancel (discard) ──────────────────────────────────────────────────────
 
@@ -182,7 +187,7 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
     useEffect(() => { handleCancelRef.current = handleCancel; }, [handleCancel]);
     useEffect(() => { isDirtyRef.current = markdown !== originalMarkdown; }, [markdown, originalMarkdown]);
 
-    // ── Register with shell EditorToolbar (mount/unmount) ─────────────────────
+    // ── Register with shell EditorToolbar ─────────────────────────────────────
 
     useEffect(() => {
         kMarkdownActions.register(
@@ -201,16 +206,24 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
         patchTab(tabId, { hasUnsavedChanges: isDirty });
     }, [isDirty, tabId]);
 
+    // ── Decorations ───────────────────────────────────────────────────────────
 
-    // ── ID comment decorations ────────────────────────────────────────────────
-
-    const applyIdDecorations = useCallback((editor: Parameters<OnMount>[0]) => {
+    const applyDecorations = useCallback((editor: Parameters<OnMount>[0]) => {
         const model = editor.getModel();
         if (!model) return;
-        const matches = model.findMatches("<!--\\s*id:\\d+\\s*-->", false, true, false, null, false);
+
+        // Dim [id:X] metadata tags
+        const idMatches = model.findMatches("\\[id:\\d+\\]", false, true, false, null, false);
         idDecorationsRef.current = editor.deltaDecorations(
             idDecorationsRef.current,
-            matches.map(m => ({ range: m.range, options: { inlineClassName: "k-md-id-badge" } })),
+            idMatches.map(m => ({ range: m.range, options: { inlineClassName: "k-md-id-badge" } })),
+        );
+
+        // Style draft lines: opening <!--# and closing -->
+        const draftMatches = model.findMatches("^<!--#|^.*-->\\s*$", false, true, false, null, false);
+        draftDecorationsRef.current = editor.deltaDecorations(
+            draftDecorationsRef.current,
+            draftMatches.map(m => ({ range: m.range, options: { inlineClassName: "k-md-draft-line" } })),
         );
     }, []);
 
@@ -227,16 +240,21 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
             monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
             () => handleSaveRef.current(),
         );
+
         if (!document.getElementById("k-md-id-badge-style")) {
             const style = document.createElement("style");
             style.id = "k-md-id-badge-style";
-            style.textContent = `.k-md-id-badge { color: #3f3f46 !important; font-size: 0.78em; }`;
+            style.textContent = [
+                `.k-md-id-badge { color: #3f3f46 !important; font-size: 0.78em; }`,
+                `.k-md-draft-line { color: #52525b !important; font-style: italic; }`,
+            ].join("\n");
             document.head.appendChild(style);
         }
-        applyIdDecorations(editor);
-    }, [applyIdDecorations]);
 
-    // ── Computed diffs (for console logging only) ─────────────────────────────
+        applyDecorations(editor);
+    }, [applyDecorations]);
+
+    // ── Computed diffs (console logging only) ─────────────────────────────────
 
     const parsed = useMemo(() => parseMarkdown(markdown), [markdown]);
     const activeQuestions = useMemo(() => questions.filter(q => !q.deletedAt), [questions]);
@@ -246,7 +264,6 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
     );
     const lastLogRef = useRef({ deletedKey: "", invalidKey: "" });
 
-    // Log syntax errors and pending deletions live as user edits
     useEffect(() => {
         if (markdown === originalMarkdown) return;
 
@@ -282,7 +299,25 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
     }
 
     return (
-        <div className="flex flex-col h-full bg-[#09090B]">
+        <div className="relative flex flex-col h-full bg-[#09090B]">
+            {/* Validation indicator */}
+            <button
+                onClick={handleValidationClick}
+                className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 px-2 py-1 rounded border transition-colors"
+                style={validationErrors.length > 0
+                    ? { borderColor: "#7f1d1d", backgroundColor: "#450a0a", color: "#f87171" }
+                    : { borderColor: "#14532d", backgroundColor: "#052e16", color: "#4ade80" }
+                }
+                title={validationErrors.length > 0
+                    ? `${validationErrors.length} format error(s) — click to log`
+                    : "Format OK"
+                }
+            >
+                {validationErrors.length > 0
+                    ? <><AlertTriangle className="w-3.5 h-3.5" /><span className="text-xs font-mono">{validationErrors.length}</span></>
+                    : <CheckCircle2 className="w-3.5 h-3.5" />
+                }
+            </button>
             <Editor
                 height="100%"
                 defaultLanguage="markdown"
@@ -290,7 +325,7 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
                 value={markdown}
                 onChange={v => {
                     setMarkdown(v ?? "");
-                    if (editorRef.current) applyIdDecorations(editorRef.current);
+                    if (editorRef.current) applyDecorations(editorRef.current);
                 }}
                 onMount={handleEditorMount}
                 options={EDITOR_OPTIONS}

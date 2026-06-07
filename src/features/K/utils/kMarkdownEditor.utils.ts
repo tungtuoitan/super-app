@@ -1,14 +1,4 @@
-import { flowService } from "@/shared";
-import type { FlowEdgeDTO, FlowNodePositionDTO } from "@/shared";
 import type { KQuestion } from "../types/kQuiz.type";
-import { QUESTION_NODE_WIDTH, NODE_HEIGHT } from "./kQFlow.constants";
-
-const GAP_X = 64;
-const GAP_Y = 48;
-const GROUP_GAP_Y = 400;
-// Must be > NODE_HEIGHT + GAP_Y (208) to keep same-group rows together,
-// and < GROUP_GAP_Y (400) to split different groups.
-const CLUSTER_THRESHOLD = NODE_HEIGHT + GAP_Y + 50; // 258
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -16,113 +6,206 @@ export interface ParsedQuestion {
     id: number | null;
     question: string;
     answer: string;
+    isDraft: boolean;
+    /** Raw metadata from the bracket tag — for future extensibility */
+    meta: Record<string, string | number>;
 }
 
-export interface QuestionWithPos {
-    question: KQuestion;
-    x: number;
-    y: number;
-}
+// ── Metadata helpers ───────────────────────────────────────────────────────────
 
-export interface EdgeLink {
-    sourceId: number;
-    targetId: number;
-}
+type Metadata = Record<string, string | number>;
 
-// ── Reading-order comparator (row-first, then left-to-right) ─────────────────
-
-const ROW_TOLERANCE = 100; // px — items within this Y-distance are treated as the same row
-const readingOrder = (a: QuestionWithPos, b: QuestionWithPos): number => {
-    if (Math.abs(a.y - b.y) > ROW_TOLERANCE) return a.y - b.y;
-    return a.x - b.x;
-};
-
-// ── Spatial clustering ─────────────────────────────────────────────────────────
-
-export function clusterByPosition(items: QuestionWithPos[]): QuestionWithPos[][] {
-    if (items.length === 0) return [];
-    const sorted = [...items].sort((a, b) => a.y - b.y || a.x - b.x);
-    const groups: QuestionWithPos[][] = [[sorted[0]]];
-    for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i].y - sorted[i - 1].y > CLUSTER_THRESHOLD) groups.push([sorted[i]]);
-        else groups[groups.length - 1].push(sorted[i]);
+/** Parse `[id:5 foo:bar]` → `{ id: 5, foo: "bar" }` */
+function parseMetadata(bracket: string): Metadata {
+    const meta: Metadata = {};
+    for (const m of bracket.matchAll(/(\w+):(\S+)/g)) {
+        const raw = m[2];
+        meta[m[1]] = isNaN(Number(raw)) ? raw : Number(raw);
     }
-    return groups;
+    return meta;
 }
 
-// ── Edge-chain ordering (Kahn's BFS topological sort) ─────────────────────────
-
-export function orderGroupByEdges(items: QuestionWithPos[], edges: EdgeLink[]): QuestionWithPos[] {
-    const ids = new Set(items.map(i => i.question.id));
-    const relevant = edges.filter(e => ids.has(e.sourceId) && ids.has(e.targetId));
-    if (relevant.length === 0) return [...items].sort(readingOrder);
-
-    const outgoing = new Map<number, number[]>();
-    const inDegree = new Map<number, number>();
-    items.forEach(i => { outgoing.set(i.question.id, []); inDegree.set(i.question.id, 0); });
-    for (const e of relevant) {
-        outgoing.get(e.sourceId)?.push(e.targetId);
-        inDegree.set(e.targetId, (inDegree.get(e.targetId) ?? 0) + 1);
-    }
-
-    const queue: QuestionWithPos[] = items
-        .filter(i => (inDegree.get(i.question.id) ?? 0) === 0)
-        .sort(readingOrder);
-    const visited = new Set<number>();
-    const result: QuestionWithPos[] = [];
-
-    while (queue.length > 0) {
-        const item = queue.shift()!;
-        if (visited.has(item.question.id)) continue;
-        visited.add(item.question.id);
-        result.push(item);
-        (outgoing.get(item.question.id) ?? [])
-            .map(id => items.find(i => i.question.id === id))
-            .filter((i): i is QuestionWithPos => !!i)
-            .sort(readingOrder)
-            .forEach(i => queue.push(i));
-    }
-    items.filter(i => !visited.has(i.question.id)).sort(readingOrder).forEach(i => result.push(i));
-    return result;
+/** Build `{ id: 5, foo: "bar" }` → `[id:5 foo:bar]` */
+function buildMetadata(meta: Metadata): string {
+    const parts = Object.entries(meta).map(([k, v]) => `${k}:${v}`);
+    return parts.length ? `[${parts.join(" ")}]` : "";
 }
 
-// ── Markdown generation ────────────────────────────────────────────────────────
+/** Strip the first `[...]` block from text and return clean text + parsed meta */
+function extractMetadata(text: string): { clean: string; meta: Metadata } {
+    const match = text.match(/\[([^\]]+)\]/);
+    if (!match) return { clean: text.trim(), meta: {} };
+    const meta = parseMetadata(match[1]);
+    const clean = text.replace(/\s*\[[^\]]+\]\s*/g, "").trim();
+    return { clean, meta };
+}
 
-export function buildMarkdown(
-    questions: KQuestion[],
-    positions: Record<number, { x: number; y: number }>,
-    edges: EdgeLink[],
-): string {
-    const active = questions.filter(q => !q.deletedAt);
-    if (active.length === 0) return "# \n";
+// ── Validation ────────────────────────────────────────────────────────────────
 
-    const withPos: QuestionWithPos[] = active.map(q => ({
-        question: q,
-        x: positions[q.id]?.x ?? 0,
-        y: positions[q.id]?.y ?? 0,
-    }));
+export interface MarkdownError {
+    /** 1-based line number */
+    line: number;
+    message: string;
+}
 
-    const groups = clusterByPosition(withPos);
-    const lines: string[] = [];
+/**
+ * Validate markdown format. Returns a list of errors (empty = valid).
+ *
+ * Rules:
+ *  1. Bare `<!--` without `#` on the same line is not allowed — use `<!--#`
+ *  2. Each `<!--# ... -->` block may contain exactly ONE question
+ *  3. Every `<!--#` block must be closed with `-->`
+ */
+export function validateMarkdown(md: string): MarkdownError[] {
+    const errors: MarkdownError[] = [];
+    const lines = md.split("\n");
+    let inDraftBlock = false;
+    let draftBlockStart = -1;
 
-    for (let gi = 0; gi < groups.length; gi++) {
-        if (gi > 0) { lines.push("", ""); }
-        lines.push("# ");
-        for (const item of orderGroupByEdges(groups[gi], edges)) {
-            const q = item.question;
-            lines.push("");
-            lines.push(`## ${q.question} <!-- id:${q.id} -->`);
-            if (q.answer?.trim()) lines.push(q.answer.trim());
+    for (let i = 0; i < lines.length; i++) {
+        const lineNum = i + 1;
+        const line = lines[i].trimEnd();
+
+        // ── Inside a multi-line draft block ───────────────────────────────────
+        if (inDraftBlock) {
+            // A `#` line inside a draft block = second question — not allowed
+            if (/^#\s/.test(line)) {
+                errors.push({ line: lineNum, message: `Each comment block must contain only one question (block started at line ${draftBlockStart})` });
+            }
+            // Closing -->
+            if (/-->\s*$/.test(line)) {
+                inDraftBlock = false;
+                draftBlockStart = -1;
+            }
+            continue; // skip all other checks — answer content is free-form
+        }
+
+        // ── Outside draft blocks ──────────────────────────────────────────────
+
+        // ## or deeper headings — only single # is allowed
+        if (/^#{2,}\s/.test(line)) {
+            errors.push({ line: lineNum, message: "Only single # headings are allowed — remove extra #" });
+            continue;
+        }
+
+        // Opening of a draft block: <!--# Question [id:X]
+        if (/^<!--\s*#\s/.test(line)) {
+            const isSingleLine = /-->\s*$/.test(line);
+            if (!isSingleLine) {
+                inDraftBlock = true;
+                draftBlockStart = lineNum;
+            }
+            continue;
+        }
+
+        // Bare <!-- (not <!--#) — common mistake when user manually types a comment
+        if (/^<!--/.test(line)) {
+            errors.push({ line: lineNum, message: "Bare <!-- not allowed — use <!--# to start a draft question" });
         }
     }
-    return lines.join("\n");
+
+    // Unclosed draft block
+    if (inDraftBlock) {
+        errors.push({ line: draftBlockStart, message: "Unclosed draft block — missing closing -->" });
+    }
+
+    return errors;
 }
 
-// ── Markdown parsers ───────────────────────────────────────────────────────────
+// ── Build markdown from questions ──────────────────────────────────────────────
 
+/**
+ * Render questions to markdown.
+ *
+ * Format:
+ *   Active (no answer)    →  # Question [id:5]
+ *   Active (with answer)  →  # Question [id:5]
+ *                             Answer text here
+ *
+ *   Draft (no answer)     →  <!--# Question [id:5] -->
+ *   Draft (with answer)   →  <!--# Question [id:5]
+ *                             Answer text here -->
+ */
+export function buildMarkdown(questions: KQuestion[]): string {
+    const active = questions.filter(q => !q.deletedAt);
+    if (active.length === 0) return "";
+
+    const sorted = [...active].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    const lines: string[] = [];
+
+    for (const q of sorted) {
+        const tag = buildMetadata({ id: q.id });
+        if (q.statusCode === "draft") {
+            if (q.answer?.trim()) {
+                lines.push(`<!--# ${q.question} ${tag}`);
+                lines.push(`${q.answer.trim()} -->`);
+            } else {
+                lines.push(`<!--# ${q.question} ${tag} -->`);
+            }
+        } else {
+            lines.push(`# ${q.question} ${tag}`);
+            if (q.answer?.trim()) lines.push(q.answer.trim());
+        }
+        lines.push("");
+    }
+
+    return lines.join("\n").trimEnd();
+}
+
+// ── Format (normalize) markdown ───────────────────────────────────────────────
+
+/**
+ * Round-trip the markdown through parse → emit to produce canonical form.
+ * Used by the Format button in the editor to test the parse/build pipeline
+ * before wiring it into the save flow.
+ *
+ * Unlike buildMarkdown (which reads from KQuestion[] in DB state), this works
+ * purely from the current editor text — draft answers are preserved as-is.
+ */
+export function formatMarkdown(md: string): string {
+    const parsed = parseMarkdown(md);
+    if (parsed.length === 0) return "";
+
+    const lines: string[] = [];
+    for (const p of parsed) {
+        // p.meta already contains id (and any extra keys) as parsed from the bracket
+        const tag = buildMetadata(p.meta);
+        const header = tag ? `${p.question} ${tag}` : p.question;
+
+        if (p.isDraft) {
+            if (p.answer) {
+                lines.push(`<!--# ${header}`);
+                lines.push(`${p.answer} -->`);
+            } else {
+                lines.push(`<!--# ${header} -->`);
+            }
+        } else {
+            lines.push(`# ${header}`);
+            if (p.answer) lines.push(p.answer);
+        }
+        lines.push("");
+    }
+    return lines.join("\n").trimEnd();
+}
+
+// ── Parse markdown into question list ─────────────────────────────────────────
+
+/**
+ * Parse markdown back into a flat list of questions preserving order.
+ *
+ * Draft format:
+ *   Single-line:  <!--# Question [id:X] -->
+ *   Multi-line:   <!--# Question [id:X]
+ *                 Answer text here -->
+ *
+ * Rules:
+ *   - Draft blocks must have an id to be tracked (new drafts without id are ignored)
+ *   - Active `# New question` (no id) creates a new question on save
+ */
 export function parseMarkdown(md: string): ParsedQuestion[] {
     const result: ParsedQuestion[] = [];
     let cur: ParsedQuestion | null = null;
+    let inDraftBlock = false;
 
     const flush = () => {
         if (!cur) return;
@@ -133,184 +216,68 @@ export function parseMarkdown(md: string): ParsedQuestion[] {
 
     for (const raw of md.split("\n")) {
         const line = raw.trimEnd();
-        if (line.startsWith("## ")) {
+
+        // ── Start of draft block: <!--# Question [id:X] [-->] ────────────────
+        if (/^<!--\s*#\s/.test(line)) {
             flush();
-            const text = line.slice(3).trim();
-            const idMatch = text.match(/<!--\s*id:(\d+)\s*-->/);
-            cur = { id: idMatch ? parseInt(idMatch[1], 10) : null, question: text.replace(/<!--.*?-->/g, "").trim(), answer: "" };
+            inDraftBlock = false;
+
+            const isSingleLine = /-->\s*$/.test(line);
+            // Strip opening <!--# and optionally closing -->
+            const inner = line
+                .replace(/^<!--\s*#\s+/, "")
+                .replace(/\s*-->\s*$/, "")
+                .trim();
+
+            const { clean: question, meta } = extractMetadata(inner);
+
+            // Require an id — can't create a draft question without saving first
+            if (question && typeof meta.id === "number") {
+                cur = { id: meta.id, question, answer: "", isDraft: true, meta };
+                if (isSingleLine) {
+                    flush();
+                } else {
+                    inDraftBlock = true;
+                }
+            }
             continue;
         }
-        if (/^#(?!#)/.test(line)) { flush(); continue; }
-        if (cur) cur.answer = cur.answer ? cur.answer + "\n" + line : line;
+
+        // ── Inside multi-line draft block ─────────────────────────────────────
+        if (inDraftBlock) {
+            const isClosing = /-->\s*$/.test(line);
+            const content = line.replace(/\s*-->\s*$/, "");
+            if (cur && content) {
+                cur.answer = cur.answer ? cur.answer + "\n" + content : content;
+            }
+            if (isClosing) {
+                flush();
+                inDraftBlock = false;
+            }
+            continue;
+        }
+
+        // ── Active question: # Question [id:X]  or  # New question ───────────
+        if (/^#\s/.test(line)) {
+            flush();
+            const { clean: question, meta } = extractMetadata(line.slice(2).trim());
+            if (question) {
+                cur = {
+                    id: typeof meta.id === "number" ? meta.id : null,
+                    question,
+                    answer: "",
+                    isDraft: false,
+                    meta,
+                };
+            }
+            continue;
+        }
+
+        // ── Answer lines (active questions only) ──────────────────────────────
+        if (cur && !cur.isDraft) {
+            cur.answer = cur.answer ? cur.answer + "\n" + line : line;
+        }
     }
     flush();
     return result;
-}
-
-/** Like parseMarkdown but preserves # section boundaries as groups. */
-export function parseMarkdownGroups(md: string): ParsedQuestion[][] {
-    const groups: ParsedQuestion[][] = [[]];
-    let cur: ParsedQuestion | null = null;
-
-    const flush = () => {
-        if (!cur) return;
-        cur.answer = cur.answer.trim();
-        if (cur.question.trim()) groups[groups.length - 1].push(cur);
-        cur = null;
-    };
-
-    for (const raw of md.split("\n")) {
-        const line = raw.trimEnd();
-        if (line.startsWith("## ")) {
-            flush();
-            const text = line.slice(3).trim();
-            const idMatch = text.match(/<!--\s*id:(\d+)\s*-->/);
-            cur = { id: idMatch ? parseInt(idMatch[1], 10) : null, question: text.replace(/<!--.*?-->/g, "").trim(), answer: "" };
-            continue;
-        }
-        if (/^#(?!#)/.test(line)) {
-            flush();
-            if (groups[groups.length - 1].length > 0) groups.push([]);
-            continue;
-        }
-        if (cur) cur.answer = cur.answer ? cur.answer + "\n" + line : line;
-    }
-    flush();
-    return groups.filter(g => g.length > 0);
-}
-
-// ── Edge-aware ID ordering ─────────────────────────────────────────────────────
-
-/**
- * DFS ordering so edge-connected nodes are placed adjacent in the grid.
- * Roots (in-degree 0) are visited in original order; each root's chain is
- * followed depth-first before moving to the next root.
- */
-function orderIdsByEdges(ids: number[], edges: { sourceId: number; targetId: number }[]): number[] {
-    if (edges.length === 0) return ids;
-
-    const outgoing = new Map<number, number[]>();
-    const inDegree = new Map<number, number>();
-    ids.forEach(id => { outgoing.set(id, []); inDegree.set(id, 0); });
-    for (const e of edges) {
-        outgoing.get(e.sourceId)?.push(e.targetId);
-        inDegree.set(e.targetId, (inDegree.get(e.targetId) ?? 0) + 1);
-    }
-
-    const origOrder = new Map(ids.map((id, i) => [id, i]));
-    const roots = ids
-        .filter(id => (inDegree.get(id) ?? 0) === 0)
-        .sort((a, b) => (origOrder.get(a) ?? 0) - (origOrder.get(b) ?? 0));
-
-    const visited = new Set<number>();
-    const result: number[] = [];
-
-    const visit = (id: number) => {
-        if (visited.has(id)) return;
-        visited.add(id);
-        result.push(id);
-        (outgoing.get(id) ?? [])
-            .sort((a, b) => (origOrder.get(a) ?? 0) - (origOrder.get(b) ?? 0))
-            .forEach(visit);
-    };
-
-    roots.forEach(visit);
-    ids.filter(id => !visited.has(id)).forEach(id => result.push(id));
-    return result;
-}
-
-// ── Reorganize layout after save ───────────────────────────────────────────────
-
-/**
- * After saving, snaps each # group into a tidy grid and deletes cross-group edges.
- * fetchFreshActive re-fetches questions so newly created ones get their IDs.
- */
-export async function reorganizeGroups(
-    preActiveQs: KQuestion[],
-    parsedGroups: ParsedQuestion[][],
-    fetchFreshActive: () => Promise<KQuestion[]>,
-): Promise<void> {
-    if (parsedGroups.length === 0) return;
-
-    const preExistingIds = new Set(preActiveQs.map(q => q.id));
-    const freshActive = await fetchFreshActive();
-    const newlyCreated = freshActive.filter(q => !preExistingIds.has(q.id));
-
-    let newIdx = 0;
-    const resolvedGroups: number[][] = parsedGroups
-        .map(group => group.flatMap(pq => {
-            if (pq.id !== null) return preExistingIds.has(pq.id) ? [pq.id] : [];
-            const nq = newlyCreated[newIdx++];
-            return nq ? [nq.id] : [];
-        }))
-        .filter(g => g.length > 0);
-
-    if (resolvedGroups.length === 0) return;
-
-    const allIds = resolvedGroups.flat();
-    const [posRes, edgeRes] = await Promise.all([
-        flowService._getPositions("", { nodeType: "kQuestion", nodeIds: allIds.join(",") }),
-        flowService._getEdges(""),
-    ]);
-
-    const posMap = new Map<number, { x: number; y: number }>();
-    for (const p of (posRes.data as FlowNodePositionDTO[]) ?? []) posMap.set(p.nodeId, { x: p.x, y: p.y });
-
-    const allIdSet = new Set(allIds);
-    const relevantEdges: FlowEdgeDTO[] = ((edgeRes.data as FlowEdgeDTO[]) ?? []).filter(e =>
-        e.sourceType === "kQuestion" && e.targetType === "kQuestion" && !e.deletedAt &&
-        allIdSet.has(e.sourceId) && allIdSet.has(e.targetId)
-    );
-
-    // Cross-group edges → soft-delete
-    const qGroupIdx = new Map<number, number>();
-    for (let gi = 0; gi < resolvedGroups.length; gi++)
-        for (const id of resolvedGroups[gi]) qGroupIdx.set(id, gi);
-
-    const crossEdges = relevantEdges.filter(e => qGroupIdx.get(e.sourceId) !== qGroupIdx.get(e.targetId));
-
-    // Reorder IDs within each group so edge-connected nodes are adjacent
-    const orderedGroups = resolvedGroups.map(group => {
-        const idSet = new Set(group);
-        const intraEdges = relevantEdges
-            .filter(e => idSet.has(e.sourceId) && idSet.has(e.targetId))
-            .map(e => ({ sourceId: e.sourceId, targetId: e.targetId }));
-        return orderIdsByEdges(group, intraEdges);
-    });
-
-    // Compute grid positions per group
-    const newPositions: { nodeId: number; nodeType: string; x: number; y: number }[] = [];
-    let nextGroupY = 0;
-
-    for (let gi = 0; gi < orderedGroups.length; gi++) {
-        const group = orderedGroups[gi];
-        const n = group.length;
-        const cols = Math.min(n, 5);
-        const rows = Math.ceil(n / cols);
-        const existing = group.filter(id => posMap.has(id)).map(id => posMap.get(id)!);
-        const gx = existing.length > 0 ? Math.min(...existing.map(p => p.x)) : 0;
-        const gy = gi === 0
-            ? (existing.length > 0 ? Math.min(...existing.map(p => p.y)) : 0)
-            : nextGroupY;
-
-        for (let i = 0; i < n; i++) {
-            newPositions.push({
-                nodeId: group[i],
-                nodeType: "kQuestion",
-                x: gx + (i % cols) * (QUESTION_NODE_WIDTH + GAP_X),
-                y: gy + Math.floor(i / cols) * (NODE_HEIGHT + GAP_Y),
-            });
-        }
-        nextGroupY = gy + rows * (NODE_HEIGHT + GAP_Y) + GROUP_GAP_Y;
-    }
-
-    await Promise.all([
-        newPositions.length > 0 ? flowService._upsertPositions("", newPositions) : Promise.resolve(),
-        crossEdges.length > 0
-            ? flowService._upsertEdges("", crossEdges.map(e => ({
-                id: e.id, sourceId: e.sourceId, targetId: e.targetId,
-                deletedAt: new Date().toISOString(),
-            })))
-            : Promise.resolve(),
-    ]);
 }

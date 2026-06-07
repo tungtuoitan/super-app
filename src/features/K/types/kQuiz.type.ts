@@ -35,9 +35,9 @@ export interface KQuestion {
 
 export interface KUpdateQuestionsRequest {
     /** New questions to add to the knowledge */
-    addQuestions: Array<{ name: string; description?: string | null }>;
+    addQuestions: Array<{ name: string; description?: string | null; sortOrder?: number }>;
     /** Existing questions to update name/description */
-    updateQuestions: Array<{ id: number; name: string; description?: string | null }>;
+    updateQuestions: Array<{ id: number; name: string; description?: string | null; sortOrder?: number }>;
     /** k.question IDs to soft-delete */
     deleteQuestionIds: number[];
     /** k.question IDs to restore (clear deletedAt) */
