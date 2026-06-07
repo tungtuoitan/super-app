@@ -134,7 +134,7 @@ export function buildMarkdown(questions: KQuestion[]): string {
     const lines: string[] = [];
 
     for (const q of sorted) {
-        const tag = buildMetadata({ id: q.id });
+        const tag = buildMetadata({ id: q.id, order: q.sortOrder ?? 0 });
         if (q.statusCode === "draft") {
             if (q.answer?.trim()) {
                 lines.push(`<!--# ${q.question} ${tag}`);
@@ -280,4 +280,16 @@ export function parseMarkdown(md: string): ParsedQuestion[] {
     }
     flush();
     return result;
+}
+
+// ── Repo file helpers ─────────────────────────────────────────────────────────
+
+/** Build a repo `.md` file body. Identity comes from the path, not frontmatter. */
+export function buildRepoMarkdown(questions: KQuestion[]): string {
+    return buildMarkdown(questions);
+}
+
+/** Parse a repo `.md` file — no frontmatter, just question list. */
+export function parseRepoMarkdown(md: string): { questions: ParsedQuestion[] } {
+    return { questions: parseMarkdown(md) };
 }

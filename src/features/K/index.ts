@@ -13,3 +13,7 @@ export { KNodePanelBlankMenu } from "./contexts/menu/KNodePanelBlankMenu";
 // export { useKLoader } from "./hooks/kTree/useK.loader";
 export { registerKFilters } from "./shell/k.filterConfig";
 
+// Repo sync (shell/settings access)
+export { useKRepoSyncStore, getKRepoSyncState } from "./store/kRepoSync.store";
+export { KRepoSyncService } from "./service/kRepoSync.service";
+

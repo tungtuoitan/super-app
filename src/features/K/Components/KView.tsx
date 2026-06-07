@@ -3,16 +3,16 @@
  * Extracted from VSSideBar for better separation of concerns
  */
 
-import { useEffect, useMemo, useCallback, useState } from "react";
+import { useEffect, useState } from "react";
 import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
-import { CalendarClock, Loader2, RotateCw } from "lucide-react";
+import { AlertCircle, AlertTriangle, Loader2, RotateCw } from "lucide-react";
 import { useAuthStore } from "@/shared";
 import { useKStore } from "../store/useK.store";
 import { useKTabHelper } from "../hooks/useKTab.helper";
 import { KTree } from "./KExplorer/KTree";
 import { KDialog } from "./KDialog";
 import { useMenuContextHelper } from "@/shared";
-import {useKLoader} from "../hooks/kTree/useK.loader";
+import { useKLoader } from "../hooks/kTree/useK.loader";
 
 /**
  * Workspace View - KTree for folder navigation with workspace selection
@@ -20,9 +20,9 @@ import {useKLoader} from "../hooks/kTree/useK.loader";
 export function KView() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const { $user } = useAuthStore();
-    const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId, dailyReviewDueCount } = useKStore();
+    const { allK, isLoadingK, isLoadingTree, isLoadingTreeByOpeningNode, selectedKId, setSelectedKId } = useKStore();
     const { loadAllK, loadTree, softDeleteKnowledge } = useKLoader();
-    const { openNewKnowledgeTab, openKnowledgeTab, openGlobalDailyReviewTab } = useKTabHelper();
+    const { openNewKnowledgeTab, openKnowledgeTab } = useKTabHelper();
     const { showContextMenu } = useMenuContextHelper();
 
     // Load workspaces + daily review count on mount
@@ -33,6 +33,7 @@ export function KView() {
 
     useEffect(() => {
         if (!$user.userId || !$user.filters || selectedKId === null) return;
+        loadAllK();
         loadTree();
     }, [$user.userId, $user.userToken, $user.filters, selectedKId]);
 

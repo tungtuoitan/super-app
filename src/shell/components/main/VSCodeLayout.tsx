@@ -92,12 +92,12 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                     >
                         <Panel id="mobile-sidebar" defaultSize={40} minSize={15}>
                             <div className="h-full overflow-hidden bg-editor-sidebar flex flex-col" style={{ contain: "layout style size" }}>
-                                <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
+                                {/* <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
                                     <span>{moduleName}</span>
                                     {moduleRegistry.getById(moduleName)?.hideRightSideBarFilter && (
                                         <RightSideBar hideFilter />
                                     )}
-                                </div>
+                                </div> */}
                                 <div className="flex-1 overflow-hidden">
                                     <MobileSidebarContent moduleName={moduleName} />
                                 </div>

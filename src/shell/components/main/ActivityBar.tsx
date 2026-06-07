@@ -18,7 +18,8 @@ function ModuleButton({ module, isActive, horizontal, onClick }: {
     horizontal: boolean;
     onClick: () => void;
 }) {
-    const badge = module.useBadge?.() ?? 0;
+    const badge     = module.useBadge?.() ?? 0;
+    const statusDot = module.useStatusDot?.() ?? null;
     const Icon = module.icon;
 
     return (
@@ -34,11 +35,16 @@ function ModuleButton({ module, isActive, horizontal, onClick }: {
                         }`}
                     >
                         <Icon className="w-6 h-6 mx-auto" />
-                        {badge > 0 && (
+                        {statusDot ? (
+                            <span
+                                className="absolute top-2 right-2 w-2 h-2 rounded-full"
+                                style={{ backgroundColor: statusDot.color }}
+                            />
+                        ) : badge > 0 ? (
                             <span className="absolute top-1.5 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-blue-600 text-white text-[9px] font-bold px-1 leading-none">
                                 {badge > 99 ? "99+" : badge}
                             </span>
-                        )}
+                        ) : null}
                     </button>
                 </TooltipTrigger>
                 <TooltipContent side={horizontal ? "bottom" : "right"}>

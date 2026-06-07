@@ -1,20 +1,14 @@
 ﻿import { useCallback, useEffect, useState } from "react";
-import { BookDashed, BookOpen, Eye, EyeOff, Loader2, RotateCcw, Trophy } from "lucide-react";
+import { Eye, EyeOff, Loader2, RotateCcw } from "lucide-react";
 import { KQuizService } from "../../service/kQuiz.service";
-import { KService } from "../../service/k.service";
 import { KQFlowProvider } from "../../store/useKQFlow.store";
 import { KQFlowCanvas } from "./KQFlowCanvas";
 import { KScoreSparkline } from "../small/KScoreSparkline";
-import { useKStore } from "../../store/useK.store";
-import { useKLoader } from "../../hooks/kTree/useK.loader";
-import { useAuthStore } from "@/shared";
-import { KItemAction } from "../../types/k.type";
 import type { KQuestion } from "../../types/kQuiz.type";
 import { kEvents } from "../../utils/kEvents.utils";
 import type { KFlowQuestionsChangedDetail } from "../../utils/kEvents.utils";
 import { useKQFlowStats } from "../../hooks/qFlow/useKQFlowStats.helper";
 import { useKQFlowSrsReset } from "../../hooks/qFlow/useKQFlowSrsReset.helper";
-import { useDeviceStore } from "@/shared";
 
 interface KQFlowViewProps {
     nodeId: number | null; // null = show orphan questions (node_id IS NULL)
@@ -32,16 +26,6 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
     const [questions, setQuestions]       = useState<KQuestion[]>([]);
     const [loading, setLoading]           = useState(true);
     const [showDeleted, setShowDeleted]   = useState(false);
-    const [statusUpdating, setStatusUpdating] = useState(false);
-
-    const { currentK, selectedKId } = useKStore();
-    const { loadTree }              = useKLoader();
-    const { $user }                 = useAuthStore();
-    const { isMobile }              = useDeviceStore();
-
-    const node       = nodeId !== null ? currentK?.flatData.find(n => n.id === nodeId) : null;
-    const nodeStatus = node?.statusCode ?? null;
-    const isDraft    = nodeStatus === "draft";
 
     useEffect(() => {
         setQuestions([]);
@@ -98,37 +82,13 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
     const {
         activeQuestions, reviewableQuestions,
         dueCount, newCount, draftCount,
-        totalReviewable, canReview,
-        isMaster, sparkScores,
+        sparkScores,
     } = useKQFlowStats(questions);
 
     // ── SRS reset ─────────────────────────────────────────────────────────────
     const { resetConfirm, resetLoading, handleResetClick } = useKQFlowSrsReset(
         nodeId, activeQuestions, loadQuestions,
     );
-
-    // ── Status toggle ─────────────────────────────────────────────────────────
-
-    const handleToggleStatus = async () => {
-        if (!node || !selectedKId) return;
-        setStatusUpdating(true);
-        try {
-            const newStatus = isDraft ? "learning" : "draft";
-            await KService._upsertWorkspaceItems($user.userToken, selectedKId, [{
-                action: KItemAction.Update,
-                id: node.id,
-                nodeData: {
-                    name:        node.name,
-                    description: node.description ?? null,
-                    color:       node.color       ?? null,
-                    icon:        node.icon        ?? null,
-                    statusCode:  newStatus,
-                },
-            }]);
-            await loadTree();
-        } catch { /* silent */ }
-        finally { setStatusUpdating(false); }
-    };
 
     const deletedCount = questions.filter(q => !!q.deletedAt).length;
     const canvasNodeId = nodeId ?? 0;
@@ -142,33 +102,6 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
 
                 {nodeId === null && (
                     <span className="text-xs text-zinc-500 italic">Orphaned questions</span>
-                )}
-
-                {/* Status badge + toggle — hidden on mobile (read-only) */}
-                {nodeId !== null && node && !isMobile && (
-                    <button
-                        onClick={handleToggleStatus}
-                        disabled={statusUpdating}
-                        title={isDraft ? "Set to Learning" : "Set to Draft"}
-                        className={[
-                            "h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50",
-                            isDraft
-                                ? "text-zinc-500 border-zinc-700/60 hover:text-zinc-300 hover:border-zinc-500"
-                                : isMaster
-                                    ? "text-amber-400 border-amber-800/50 bg-amber-900/10 hover:bg-amber-900/25"
-                                    : "text-indigo-400 border-indigo-800/50 bg-indigo-900/10 hover:bg-indigo-900/25",
-                        ].join(" ")}
-                    >
-                        {statusUpdating
-                            ? <Loader2 className="w-3 h-3 animate-spin" />
-                            : isDraft
-                                ? <BookDashed className="w-3 h-3" />
-                                : isMaster
-                                    ? <Trophy className="w-3 h-3" />
-                                    : <BookOpen className="w-3 h-3" />
-                        }
-                        {isDraft ? "Draft" : isMaster ? "Master" : "Learning"}
-                    </button>
                 )}
 
                 <div className="ml-auto flex items-center gap-2">
@@ -187,7 +120,7 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                         </div>
                     )}
 
-                    {/* Play button moved to KEditorPanel tab bar */}
+                    {/* Status toggle + Play button moved to KEditorPanel tab bar */}
 
                     {/* Reset SRS — first click arms confirm, second click executes */}
                     {/* {nodeId !== null && !isDraft && hasReviewHistory && (

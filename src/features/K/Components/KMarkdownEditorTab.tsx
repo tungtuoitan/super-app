@@ -212,8 +212,8 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
         const model = editor.getModel();
         if (!model) return;
 
-        // Dim [id:X] metadata tags
-        const idMatches = model.findMatches("\\[id:\\d+\\]", false, true, false, null, false);
+        // Dim [id:X order:Y ...] metadata tags
+        const idMatches = model.findMatches("\\[\\w+:[^\\]]+\\]", false, true, false, null, false);
         idDecorationsRef.current = editor.deltaDecorations(
             idDecorationsRef.current,
             idMatches.map(m => ({ range: m.range, options: { inlineClassName: "k-md-id-badge" } })),

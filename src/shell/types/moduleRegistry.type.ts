@@ -210,6 +210,13 @@ export interface ModuleDefinition {
      */
     useBadge?: () => number;
 
+    /**
+     * Optional hook that returns a status dot descriptor, or null.
+     * When non-null, shown instead of the numeric badge.
+     * Use for sync status, error states, etc.
+     */
+    useStatusDot?: () => { color: string } | null;
+
     // ── VSSideBar ────────────────────────────────────────────────────────────
     /** Component rendered inside the sidebar when this module is active */
     SidebarView: ComponentType;

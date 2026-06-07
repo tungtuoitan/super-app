@@ -1,7 +1,7 @@
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
-import { Settings, GitBranch, BarChart2, Hash, Play, Loader2 } from "lucide-react";
+import { Settings, GitBranch, BarChart2, Hash, Play, Loader2, BookDashed, BookOpen, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CardContent, useDeviceStore } from "@/shared";
+import { CardContent, useDeviceStore, useAuthStore } from "@/shared";
 import { KGeneral } from "./KGeneral";
 import { KMarkdownEditorTab } from "./KMarkdownEditorTab";
 import { KQFlowView } from "./QFlowView/KQFlowView";
@@ -9,9 +9,11 @@ import { KProgressDashboard } from "./KProgressDashboard";
 import { KDailyReviewSession } from "./KDailyReviewSession";
 import { useKStore } from "../store/useK.store";
 import type { KWsResponse } from "../types/k.type";
+import { KItemAction } from "../types/k.type";
 import type { KDailySessionQuestion, KQuestion } from "../types/kQuiz.type";
 import { useEditorTabBarHelper, getSideBarState } from "@/shell";
 import { KQuizService } from "../service/kQuiz.service";
+import { KService } from "../service/k.service";
 import { useKQFlowStats } from "../hooks/qFlow/useKQFlowStats.helper";
 import { sortQuestionsByFlowOrder } from "../utils/kQFlow.utils";
 import { kEvents } from "../utils/kEvents.utils";
@@ -32,9 +34,10 @@ export function KEditorPanel() {
     const tab = getActiveTab();
     const knowledge = tab?.data as unknown as KWsResponse;
     const isNew = knowledge.id < 0;
-    const { pendingQuizTabSwitch, setPendingQuizTabSwitch, selectedItemIds, currentK } = useKStore();
+    const { pendingQuizTabSwitch, setPendingQuizTabSwitch, selectedItemIds, currentK, selectedKId } = useKStore();
     const { loadTree } = useKLoader();
     const { isMobile } = useDeviceStore();
+    const { $user } = useAuthStore();
 
     const visibleTabs = isMobile ? TABS.filter(t => t.id !== "general" && t.id !== "qflow") : TABS;
 
@@ -54,10 +57,11 @@ export function KEditorPanel() {
     const [sessionLoading, setSessionLoading] = useState(false);
     const [reviewSession, setReviewSession] = useState<KDailySessionQuestion[] | null>(null);
     const [nodeQuestions, setNodeQuestions] = useState<KQuestion[]>([]);
+    const [statusUpdating, setStatusUpdating] = useState(false);
 
     const node       = selectedNodeId !== null ? currentK?.flatData.find(n => n.id === selectedNodeId) : null;
     const isDraft    = node?.statusCode === "draft";
-    const { dueCount, totalReviewable, canReview } = useKQFlowStats(nodeQuestions);
+    const { dueCount, totalReviewable, canReview, isMaster } = useKQFlowStats(nodeQuestions);
 
     // Track previous knowledge.id — initialized to the CURRENT value so the effect
     // is a no-op on first mount (and on StrictMode double-mount since the ref persists).
@@ -168,6 +172,27 @@ export function KEditorPanel() {
         finally { setSessionLoading(false); }
     };
 
+    const handleToggleStatus = async () => {
+        if (!node || !selectedKId || statusUpdating) return;
+        setStatusUpdating(true);
+        try {
+            const newStatus = isDraft ? "learning" : "draft";
+            await KService._upsertWorkspaceItems($user.userToken, selectedKId, [{
+                action: KItemAction.Update,
+                id: node.id,
+                nodeData: {
+                    name:        node.name,
+                    description: node.description ?? null,
+                    color:       node.color       ?? null,
+                    icon:        node.icon        ?? null,
+                    statusCode:  newStatus,
+                },
+            }]);
+            await loadTree();
+        } catch { /* silent */ }
+        finally { setStatusUpdating(false); }
+    };
+
     const renderTabContent = () => {
         switch (activeTab) {
             case "general":
@@ -217,13 +242,40 @@ export function KEditorPanel() {
                         onClick={handleStartReview}
                         disabled={sessionLoading}
                         title={`Review ${totalReviewable} question${totalReviewable !== 1 ? "s" : ""}${dueCount > 0 ? ` (${dueCount} due)` : ""}`}
-                        className="mr-3 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border border-blue-700/60 bg-blue-900/20 text-blue-300 hover:bg-blue-900/40 hover:border-blue-600 transition-colors disabled:opacity-50"
+                        className="mr-2 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border border-blue-700/60 bg-blue-900/20 text-blue-300 hover:bg-blue-900/40 hover:border-blue-600 transition-colors disabled:opacity-50"
                     >
                         {sessionLoading
                             ? <Loader2 className="w-3 h-3 animate-spin" />
                             : <Play className="w-3 h-3 fill-current" />
                         }
                         {totalReviewable}
+                    </button>
+                )}
+
+                {/* Draft/Learning toggle — lifted from KQFlowView toolbar */}
+                {!isNew && selectedNodeId !== null && node && !isMobile && (
+                    <button
+                        onClick={handleToggleStatus}
+                        disabled={statusUpdating}
+                        title={isDraft ? "Set to Learning" : "Set to Draft"}
+                        className={cn(
+                            "mr-3 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50",
+                            isDraft
+                                ? "text-zinc-500 border-zinc-700/60 hover:text-zinc-300 hover:border-zinc-500"
+                                : isMaster
+                                    ? "text-amber-400 border-amber-800/50 bg-amber-900/10 hover:bg-amber-900/25"
+                                    : "text-indigo-400 border-indigo-800/50 bg-indigo-900/10 hover:bg-indigo-900/25",
+                        )}
+                    >
+                        {statusUpdating
+                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                            : isDraft
+                                ? <BookDashed className="w-3 h-3" />
+                                : isMaster
+                                    ? <Trophy className="w-3 h-3" />
+                                    : <BookOpen className="w-3 h-3" />
+                        }
+                        {isDraft ? "Draft" : isMaster ? "Master" : "Learning"}
                     </button>
                 )}
             </div>
