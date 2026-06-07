@@ -49,6 +49,14 @@ const _retry = async (token: string): Promise<void> => {
     if (!res.ok) return Promise.reject(res);
 };
 
+const _forceUpdate = async (token: string): Promise<void> => {
+    const res = await apiFetch(`${BASE}/force-update`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return Promise.reject(res);
+};
+
 const _getDiff = async (token: string): Promise<KRepoSyncDiff> => {
     const res = await apiFetch(`${BASE}/diff`, {
         method: "GET",
@@ -64,5 +72,6 @@ export const KRepoSyncService = {
     _push,
     _pull,
     _retry,
+    _forceUpdate,
     _getDiff,
 };

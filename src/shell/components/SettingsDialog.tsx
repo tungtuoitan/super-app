@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared";
 import { Label } from "@/shared";
-import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle, AlertTriangle, GitBranch, Upload, Download } from "lucide-react";
+import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle, AlertTriangle, GitBranch, Upload, Download, RotateCcw } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ScrollArea } from "@/shared";
 import { keywordService, useKeywordHelper } from "@/shared";
@@ -58,13 +58,14 @@ export function SettingsDialog() {
     // K Repo Sync
     const { syncStatus, statusMessage, syncDirection, repoUrl, lastPushAt, setRepoUrl } = useKRepoSyncStore();
     const [repoUrlInput, setRepoUrlInput]   = useState("");
-    const [branchInput, setBranchInput]     = useState("K");
+    const [branchInput, setBranchInput]     = useState("main");
     const [patInput, setPatInput]           = useState("");
     const [isSavingConfig, setIsSavingConfig] = useState(false);
     const [configError, setConfigError]     = useState<string | null>(null);
     const [configSaved, setConfigSaved]     = useState(false);
     const [isPushing, setIsPushing]         = useState(false);
     const [isPulling, setIsPulling]         = useState(false);
+    const [isForcing, setIsForcing]         = useState(false);
     const [repoActionError, setRepoActionError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -79,7 +80,7 @@ export function SettingsDialog() {
         KRepoSyncService._getStatus($user.userToken)
             .then((cfg) => {
                 setRepoUrlInput(cfg.repoUrl ?? "");
-                setBranchInput(cfg.branch ?? "K");
+                setBranchInput(cfg.branch ?? "main");
                 setRepoUrl(cfg.repoUrl ?? "");
             })
             .catch(() => {/* ignore */});
@@ -150,6 +151,18 @@ export function SettingsDialog() {
             await KRepoSyncService._retry($user.userToken);
         } catch {
             setRepoActionError("Retry failed.");
+        }
+    };
+
+    const handleForceUpdate = async () => {
+        setIsForcing(true);
+        setRepoActionError(null);
+        try {
+            await KRepoSyncService._forceUpdate($user.userToken);
+        } catch {
+            setRepoActionError("Force update failed.");
+        } finally {
+            setIsForcing(false);
         }
     };
 
@@ -361,24 +374,35 @@ export function SettingsDialog() {
                             )}
 
                             {repoUrl && (
-                                <div className="flex gap-2">
+                                <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={handlePush}
+                                            disabled={isPushing || isForcing || syncStatus === "pushing" || syncStatus === "pulling" || syncStatus === "conflict"}
+                                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                                            title="Push DB → repo"
+                                        >
+                                            {isPushing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                                            Push to R
+                                        </button>
+                                        <button
+                                            onClick={handlePull}
+                                            disabled={isPulling || isForcing || syncStatus === "pushing" || syncStatus === "pulling" || syncStatus === "conflict"}
+                                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                                            title="Sync repo → DB"
+                                        >
+                                            {isPulling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                                            Push to DB
+                                        </button>
+                                    </div>
                                     <button
-                                        onClick={handlePush}
-                                        disabled={isPushing || syncStatus === "pushing" || syncStatus === "pulling" || syncStatus === "conflict"}
-                                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-                                        title="Push DB → repo"
+                                        onClick={handleForceUpdate}
+                                        disabled={isForcing || isPushing || isPulling || syncStatus === "pushing" || syncStatus === "pulling"}
+                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-400 hover:bg-amber-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs w-full"
+                                        title="Force overwrite remote with DB content (ignores conflicts)"
                                     >
-                                        {isPushing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                                        Push to R
-                                    </button>
-                                    <button
-                                        onClick={handlePull}
-                                        disabled={isPulling || syncStatus === "pushing" || syncStatus === "pulling" || syncStatus === "conflict"}
-                                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-                                        title="Sync repo → DB"
-                                    >
-                                        {isPulling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-                                        Push to DB
+                                        {isForcing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                                        Force Update Remote
                                     </button>
                                 </div>
                             )}
