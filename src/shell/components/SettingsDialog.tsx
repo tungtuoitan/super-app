@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared";
 import { Label } from "@/shared";
-import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle, AlertTriangle, GitBranch, Upload, Download, RotateCcw } from "lucide-react";
+import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle, AlertTriangle, GitBranch, Upload, Download, RotateCcw, GitCompare } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ScrollArea } from "@/shared";
 import { keywordService, useKeywordHelper } from "@/shared";
 import type { KeywordSyncReport } from "@/shared";
 import { useAuthStore } from "@/shared";
 import { useActivityBarStore } from "../store/ActivityBar.store";
-import { useKRepoSyncStore, KRepoSyncService } from "@/features/K";
-import type { KSyncStatus } from "@/features/K/types/kRepoSync.type";
+import { useKRepoSyncStore, KRepoSyncService, KRepoDiffPanel } from "@/features/K";
+import type { KSyncStatus, KRepoCompareDiff } from "@/features/K/types/kRepoSync.type";
 
 const TYPE_ORDER = ["workspace", "folder", "note", "file", "project", "task", "log", "track", "external"];
 /** Fallback sort index for types not in TYPE_ORDER — sorts them after all known types. */
@@ -66,7 +66,39 @@ export function SettingsDialog() {
     const [isPushing, setIsPushing]         = useState(false);
     const [isPulling, setIsPulling]         = useState(false);
     const [isForcing, setIsForcing]         = useState(false);
+    const [isComparing, setIsComparing]     = useState(false);
+    const [compareDiff, setCompareDiff]     = useState<KRepoCompareDiff | null>(null);
     const [repoActionError, setRepoActionError] = useState<string | null>(null);
+    const isMountedRef = useRef(false);
+    const isFetchingRef = useRef(false);
+    const actionInProgress = isPushing || isPulling || isForcing;
+
+    // Smart-button derived state from current diff
+    const hasRepoOnly = (compareDiff?.repoOnlyCount ?? 0) > 0;
+    const hasDbOnly   = (compareDiff?.dbOnlyCount   ?? 0) > 0;
+    const hasModified = (compareDiff?.modifiedCount ?? 0) > 0;
+    const hasAnyDiff  = hasRepoOnly || hasDbOnly || hasModified;
+    const canPushToDb = hasRepoOnly && !hasDbOnly && !hasModified;
+    const canPushToR  = hasDbOnly   && !hasRepoOnly && !hasModified;
+    const canSyncBoth = hasRepoOnly && hasDbOnly && !hasModified;
+    const canForce    = hasModified;
+
+    // Background fetch — silent (no spinner), skips while another action is running
+    const fetchCompareSilent = async () => {
+        if (isFetchingRef.current || actionInProgress) return;
+        if (!repoUrl) return;
+        isFetchingRef.current = true;
+        try {
+            const diff = await KRepoSyncService._getCompare($user.userToken);
+            if (isMountedRef.current) setCompareDiff(diff);
+        } catch {/* ignore polling errors */}
+        finally { isFetchingRef.current = false; }
+    };
+
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => { isMountedRef.current = false; };
+    }, []);
 
     useEffect(() => {
         if (!settingsOpen) {
@@ -74,6 +106,7 @@ export function SettingsDialog() {
             setConfigError(null);
             setConfigSaved(false);
             setRepoActionError(null);
+            setCompareDiff(null);
             return;
         }
         // Load current status on open
@@ -85,6 +118,15 @@ export function SettingsDialog() {
             })
             .catch(() => {/* ignore */});
     }, [settingsOpen]);
+
+    // Auto-poll diff every 10s while dialog is open and a repo is configured
+    useEffect(() => {
+        if (!settingsOpen || !repoUrl) return;
+        fetchCompareSilent();
+        const id = setInterval(fetchCompareSilent, 10_000);
+        return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [settingsOpen, repoUrl]);
 
     const handleSync = async () => {
         setIsSyncing(true);
@@ -126,6 +168,7 @@ export function SettingsDialog() {
         setRepoActionError(null);
         try {
             await KRepoSyncService._push($user.userToken);
+            await fetchCompareSilent();
         } catch {
             setRepoActionError("Push failed. Check sync status for details.");
         } finally {
@@ -138,6 +181,7 @@ export function SettingsDialog() {
         setRepoActionError(null);
         try {
             await KRepoSyncService._pull($user.userToken);
+            await fetchCompareSilent();
         } catch {
             setRepoActionError("Sync from remote failed. Check status for details.");
         } finally {
@@ -149,6 +193,7 @@ export function SettingsDialog() {
         setRepoActionError(null);
         try {
             await KRepoSyncService._retry($user.userToken);
+            await fetchCompareSilent();
         } catch {
             setRepoActionError("Retry failed.");
         }
@@ -159,10 +204,42 @@ export function SettingsDialog() {
         setRepoActionError(null);
         try {
             await KRepoSyncService._forceUpdate($user.userToken);
+            await fetchCompareSilent();
         } catch {
             setRepoActionError("Force update failed.");
         } finally {
             setIsForcing(false);
+        }
+    };
+
+    // Sync Both: push DB → repo first, then pull repo → DB
+    // Used when both sides have additions but no conflicting modifications.
+    const handleSyncBoth = async () => {
+        setIsPushing(true);
+        setIsPulling(true);
+        setRepoActionError(null);
+        try {
+            await KRepoSyncService._push($user.userToken);
+            await KRepoSyncService._pull($user.userToken);
+            await fetchCompareSilent();
+        } catch {
+            setRepoActionError("Sync both failed. Check status for details.");
+        } finally {
+            setIsPushing(false);
+            setIsPulling(false);
+        }
+    };
+
+    const handleViewDiff = async () => {
+        setIsComparing(true);
+        setRepoActionError(null);
+        try {
+            const diff = await KRepoSyncService._getCompare($user.userToken);
+            setCompareDiff(diff);
+        } catch {
+            setRepoActionError("Failed to load diff.");
+        } finally {
+            setIsComparing(false);
         }
     };
 
@@ -176,12 +253,13 @@ export function SettingsDialog() {
 
     return (
         <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-            <DialogContent className="max-w-4xl w-full">
-                <DialogHeader>
+            <DialogContent className="max-w-5xl w-full max-h-[88vh] flex flex-col">
+                <DialogHeader className="shrink-0">
                     <DialogTitle>Settings</DialogTitle>
                     <DialogDescription>Configure your application preferences</DialogDescription>
                 </DialogHeader>
 
+                <div className="overflow-y-auto flex-1 min-h-0 pr-1">
                 <div className="space-y-6 py-2">
                     {/* Top row: two equal columns */}
                     <div className="grid grid-cols-2 gap-6">
@@ -375,35 +453,77 @@ export function SettingsDialog() {
 
                             {repoUrl && (
                                 <div className="space-y-2">
+                                    {/* Status hint based on diff */}
+                                    {compareDiff && !hasAnyDiff && (
+                                        <div className="flex items-center gap-1.5 text-xs text-green-500 py-0.5">
+                                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                            Repo and DB are in sync
+                                        </div>
+                                    )}
+                                    {hasModified && (
+                                        <div className="flex items-center gap-1.5 text-xs text-red-400 py-0.5">
+                                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                                            Conflict detected — same entity differs on both sides
+                                        </div>
+                                    )}
+
                                     <div className="flex gap-2">
                                         <button
                                             onClick={handlePush}
-                                            disabled={isPushing || isForcing || syncStatus === "pushing" || syncStatus === "pulling" || syncStatus === "conflict"}
+                                            disabled={!canPushToR || actionInProgress || syncStatus === "pushing" || syncStatus === "pulling" || syncStatus === "conflict"}
                                             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-                                            title="Push DB → repo"
+                                            title={canPushToR ? "Push DB → repo" : "Enabled when only DB has changes"}
                                         >
                                             {isPushing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                                             Push to R
                                         </button>
                                         <button
                                             onClick={handlePull}
-                                            disabled={isPulling || isForcing || syncStatus === "pushing" || syncStatus === "pulling" || syncStatus === "conflict"}
+                                            disabled={!canPushToDb || actionInProgress || syncStatus === "pushing" || syncStatus === "pulling" || syncStatus === "conflict"}
                                             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-                                            title="Sync repo → DB"
+                                            title={canPushToDb ? "Sync repo → DB" : "Enabled when only repo has changes"}
                                         >
                                             {isPulling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                                             Push to DB
                                         </button>
                                     </div>
+
+                                    <button
+                                        onClick={handleSyncBoth}
+                                        disabled={!canSyncBoth || actionInProgress || syncStatus === "pushing" || syncStatus === "pulling" || syncStatus === "conflict"}
+                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-500/40 text-blue-400 hover:bg-blue-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs w-full"
+                                        title={canSyncBoth ? "Push DB→repo, then pull repo→DB" : "Enabled when both sides have non-conflicting additions"}
+                                    >
+                                        {(isPushing && isPulling) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                                        Sync Both
+                                    </button>
+
                                     <button
                                         onClick={handleForceUpdate}
-                                        disabled={isForcing || isPushing || isPulling || syncStatus === "pushing" || syncStatus === "pulling"}
+                                        disabled={!canForce || actionInProgress || syncStatus === "pushing" || syncStatus === "pulling"}
                                         className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-400 hover:bg-amber-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs w-full"
-                                        title="Force overwrite remote with DB content (ignores conflicts)"
+                                        title={canForce ? "Force overwrite remote with DB content (resolves conflict)" : "Enabled when there is a conflict (modified on both sides)"}
                                     >
                                         {isForcing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
                                         Force Update Remote
                                     </button>
+
+                                    <button
+                                        onClick={handleViewDiff}
+                                        disabled={isComparing || actionInProgress}
+                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-border hover:bg-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs w-full"
+                                        title="Refresh diff now (auto-refreshes every 10s)"
+                                    >
+                                        {isComparing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <GitCompare className="w-3.5 h-3.5" />}
+                                        {isComparing ? "Refreshing..." : "Refresh Diff Now"}
+                                    </button>
+
+                                    {/* Diff panel */}
+                                    {compareDiff && (
+                                        <div className="border border-border/50 rounded-lg p-3 bg-muted/5">
+                                            <KRepoDiffPanel diff={compareDiff} />
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -502,6 +622,7 @@ export function SettingsDialog() {
                         </div>
                     )}
                 </div>
+                </div>{/* end scroll wrapper */}
             </DialogContent>
         </Dialog>
     );

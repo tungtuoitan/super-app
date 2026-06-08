@@ -20,7 +20,12 @@
       "mcp__github__search_issues",
       "mcp__github__get_me",
       "mcp__github__issue_read",
-      "PowerShell(if \\(-not \\(Test-Path \"C:\\\\Users\\\\Admin\\\\source\\\\LockMe\"\\)\\) { New-Item -ItemType Directory -Path \"C:\\\\Users\\\\Admin\\\\source\\\\LockMe\" | Out-Null }; \"Created or exists: $\\(Test-Path 'C:\\\\Users\\\\Admin\\\\source\\\\LockMe'\\)\")"
+      "PowerShell(if \\(-not \\(Test-Path \"C:\\\\Users\\\\Admin\\\\source\\\\LockMe\"\\)\\) { New-Item -ItemType Directory -Path \"C:\\\\Users\\\\Admin\\\\source\\\\LockMe\" | Out-Null }; \"Created or exists: $\\(Test-Path 'C:\\\\Users\\\\Admin\\\\source\\\\LockMe'\\)\")",
+      "PowerShell(dotnet build \"C:\\\\Users\\\\Admin\\\\source\\\\Timeline\\\\SuperAppServices\\\\SuperAppServices.csproj\" -nologo -clp:ErrorsOnly 2>&1)",
+      "Bash(rm -f \"C:/Users/Admin/source/Timeline/SuperAppServices.Tests/UnitTest1.cs\" && echo deleted)",
+      "PowerShell(powershell -NoProfile -Command \"Write-Output 'child-ok'; exit 7\"; Write-Host \"exit=$LASTEXITCODE\")",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;$env:Path\"; Set-Location \"C:\\\\Users\\\\Admin\\\\source\\\\SuperApp\"; npx tsc --noEmit --pretty 2>&1 | Select-Object -Last 10)",
+      "PowerShell($paths = @\\(\"C:\\\\Users\\\\Admin\\\\source\\\\Timeline\\\\SuperAppAPI\\\\bin\\\\Debug\\\\net8.0\\\\k-repos\\\\1033\", \"C:\\\\Users\\\\Admin\\\\source\\\\Timeline\\\\k-repos\\\\1033\", \"C:\\\\k-repos\\\\1033\"\\); foreach \\($p in $paths\\) { if \\(Test-Path \"$p\\\\.git\"\\) { Write-Output \"FOUND: $p\"; break } else { Write-Output \"NOT: $p\" } })"
     ],
     "defaultMode": "bypassPermissions"
   }

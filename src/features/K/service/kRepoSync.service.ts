@@ -1,6 +1,6 @@
 import { config } from "config/app.config";
 import { apiFetch } from "@/shared";
-import type { KRepoSyncConfig, KRepoSyncDiff } from "../types/kRepoSync.type";
+import type { KRepoSyncConfig, KRepoSyncDiff, KRepoCompareDiff } from "../types/kRepoSync.type";
 
 const BASE = `${config.api.baseURL}/api/k/repo-sync`;
 
@@ -57,6 +57,15 @@ const _forceUpdate = async (token: string): Promise<void> => {
     if (!res.ok) return Promise.reject(res);
 };
 
+const _getCompare = async (token: string): Promise<KRepoCompareDiff> => {
+    const res = await apiFetch(`${BASE}/compare`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
 const _getDiff = async (token: string): Promise<KRepoSyncDiff> => {
     const res = await apiFetch(`${BASE}/diff`, {
         method: "GET",
@@ -74,4 +83,5 @@ export const KRepoSyncService = {
     _retry,
     _forceUpdate,
     _getDiff,
+    _getCompare,
 };

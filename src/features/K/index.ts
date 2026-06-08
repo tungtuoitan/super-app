@@ -16,4 +16,5 @@ export { registerKFilters } from "./shell/k.filterConfig";
 // Repo sync (shell/settings access)
 export { useKRepoSyncStore, getKRepoSyncState } from "./store/kRepoSync.store";
 export { KRepoSyncService } from "./service/kRepoSync.service";
+export { KRepoDiffPanel } from "./Components/small/KRepoDiffPanel";
 

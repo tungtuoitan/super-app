@@ -37,3 +37,27 @@ export interface KSyncStatusMessage {
     message: string | null;
     direction: "push" | "pull" | "";
 }
+
+export interface KRepoCompareEntry {
+    /** "knowledge" | "node" | "question" */
+    entityType: "knowledge" | "node" | "question";
+    /** "repo_only" | "db_only" | "modified" */
+    changeType: "repo_only" | "db_only" | "modified";
+    dbId: number | null;
+    name: string;
+    knowledgeName: string | null;
+    nodeName: string | null;
+    repoPath: string | null;
+    /** DB text / old name */
+    oldText: string | null;
+    /** Repo text / new name */
+    newText: string | null;
+}
+
+export interface KRepoCompareDiff {
+    entries: KRepoCompareEntry[];
+    repoOnlyCount: number;
+    dbOnlyCount: number;
+    modifiedCount: number;
+    error: string | null;
+}
