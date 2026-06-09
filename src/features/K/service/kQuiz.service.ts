@@ -130,6 +130,14 @@ const _getKnowledgeDailySession = async (
     return Promise.reject(res);
 };
 
+const _getKnowledgeReviewAllSession = async (
+    knowledgeId: number,
+): Promise<ResultOptions<KDailySessionQuestion[]>> => {
+    const res = await apiFetch(`${base(knowledgeId)}/knowledge-review-all-session`, { method: "GET" });
+    if (res.ok) return res.json();
+    return Promise.reject(res);
+};
+
 const _submitDailyAnswers = async (
     nodeId: number,
     request: KDailySubmitRequest,
@@ -196,6 +204,7 @@ export const KQuizService = {
     // _getGlobalDailyQueue,
     _getDailySession,
     _getKnowledgeDailySession,
+    _getKnowledgeReviewAllSession,
     _submitDailyAnswers,
     _getRetention,
     _getRetentionGraph,

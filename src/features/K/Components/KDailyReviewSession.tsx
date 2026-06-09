@@ -91,16 +91,17 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
 
     showResultRef.current = showResult;
 
-    const submitInBackground = (scoresSnap: Record<number, number>, timingsSnap: Record<number, number>): Promise<void> => {
-        const dailyAnswers: KDailyAnswerItem[] = questions
-            .filter(q => !draftedIdsRef.current.has(q.id))
-            .map(q => ({
-                questionId: q.id,
-                answerText: null,
-                responseTimeMs: timingsSnap[q.id] ?? null,
-                selfScore: scoresSnap[q.id] ?? null,
-            }));
-        return KQuizService._submitDailyAnswers(nodeId, { answers: dailyAnswers })
+    // Submit a single answer immediately so progress is persisted per-question.
+    // If the user bails mid-session, every already-scored question is already saved on the server.
+    const submitSingleAnswer = (qId: number, score: number, responseTimeMs: number): Promise<void> => {
+        if (isQuickQuiz) return Promise.resolve();
+        const answers: KDailyAnswerItem[] = [{
+            questionId: qId,
+            answerText: null,
+            responseTimeMs,
+            selfScore: score,
+        }];
+        return KQuizService._submitDailyAnswers(nodeId, { answers })
             .then(() => {})
             .catch(() => { /* silent */ });
     };
@@ -112,12 +113,18 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
         const newTimings = qId !== undefined ? { ...timings, [qId]: (timings[qId] ?? 0) + elapsed } : timings;
         const newScores  = qId !== undefined ? { ...selfScores, [qId]: score } : selfScores;
         if (qId !== undefined) { setTimings(newTimings); setSelfScores(newScores); }
-        if (currentIndex >= totalQuestions - 1) {
-            // Last question — await submit so loadQuestions() sees the updated SRS state
-            setIsSubmitted(true);
-            if (!isQuickQuiz) await submitInBackground(newScores, newTimings);
-            onComplete();
-            return;
+        const isLast = currentIndex >= totalQuestions - 1;
+        if (qId !== undefined) {
+            const totalElapsed = newTimings[qId];
+            if (isLast) {
+                // Last question — await submit so loadQuestions() sees the updated SRS state
+                setIsSubmitted(true);
+                await submitSingleAnswer(qId, score, totalElapsed);
+                onComplete();
+                return;
+            }
+            // Fire-and-forget for non-last questions
+            submitSingleAnswer(qId, score, totalElapsed);
         }
         setShowResult(false);
         setCurrentIndex(i => i + 1);
@@ -131,10 +138,10 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
         if (qId === undefined) return;
         draftedIdsRef.current = new Set(draftedIdsRef.current).add(qId);
         if (currentIndex >= totalQuestions - 1) {
-            // Last question — await both calls so loadQuestions() sees the updated state
+            // Last question — await markDraft so loadQuestions() sees the updated state.
+            // Previously-scored answers are already persisted by per-question submit.
             setIsSubmitted(true);
             await KQuizService._markQuestionDraft(nodeId, qId).catch(() => {});
-            if (!isQuickQuiz) await submitInBackground(selfScores, timings);
             onComplete();
             return;
         }
@@ -341,6 +348,13 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
             onClick={!showResult && canReveal ? () => setShowResult(true) : undefined}
 
             >
+                {/* Owning node — only present in knowledge-wide sessions (e.g. Review All) */}
+                {currentQuestion.nodeName && (
+                    <p className="text-xs font-medium text-purple-300/80 text-center -mb-2 shrink-0 truncate">
+                        {currentQuestion.nodeName}
+                    </p>
+                )}
+
                 {/* Question */}
                 <p className="text-lg font-semibold text-center leading-relaxed text-white shrink-0">
                     {currentQuestion.question}

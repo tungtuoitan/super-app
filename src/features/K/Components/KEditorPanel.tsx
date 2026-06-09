@@ -19,6 +19,7 @@ import { sortQuestionsByFlowOrder } from "../utils/kQFlow.utils";
 import { kEvents } from "../utils/kEvents.utils";
 import type { KFlowQuestionsChangedDetail } from "../utils/kEvents.utils";
 import { useKLoader } from "../hooks/kTree/useK.loader";
+import { workspaceConstants } from "@/features/workspace/workspace.constants";
 
 type KTab = "general" | "qflow" | "progress" | "markdown";
 
@@ -56,10 +57,13 @@ export function KEditorPanel() {
     const [dailyTotal, setDailyTotal] = useState(0);
     const [sessionLoading, setSessionLoading] = useState(false);
     const [reviewSession, setReviewSession] = useState<KDailySessionQuestion[] | null>(null);
+    const [reviewNodeId, setReviewNodeId] = useState<number | null>(null);
+    const [reviewTitle, setReviewTitle]   = useState<string>("");
     const [nodeQuestions, setNodeQuestions] = useState<KQuestion[]>([]);
     const [statusUpdating, setStatusUpdating] = useState(false);
 
     const node       = selectedNodeId !== null ? currentK?.flatData.find(n => n.id === selectedNodeId) : null;
+    const isRootView = selectedNodeId === null || selectedNodeId === workspaceConstants.root.workspaceItemId || (selectedNodeId !== null && !node);
     const isDraft    = node?.statusCode === "draft";
     const { dueCount, totalReviewable, canReview, isMaster } = useKQFlowStats(nodeQuestions);
 
@@ -166,7 +170,24 @@ export function KEditorPanel() {
             if (res.success && res.object && res.object.length > 0) {
                 const sorted = await sortQuestionsByFlowOrder(res.object);
                 if (isMobile) getSideBarState().setMobileReviewActive(true);
+                setReviewNodeId(selectedNodeId);
+                setReviewTitle(node?.name ?? tab?.title ?? "Daily Review");
                 setReviewSession(sorted);
+            }
+        } catch { /* silent */ }
+        finally { setSessionLoading(false); }
+    };
+
+    const handleStartReviewAll = async () => {
+        if (sessionLoading || isNew) return;
+        setSessionLoading(true);
+        try {
+            const res = await KQuizService._getKnowledgeReviewAllSession(knowledge.id);
+            if (res.success && res.object && res.object.length > 0) {
+                if (isMobile) getSideBarState().setMobileReviewActive(true);
+                setReviewNodeId(knowledge.id);
+                setReviewTitle(`${tab?.title ?? "Knowledge"} — Review All`);
+                setReviewSession(res.object);
             }
         } catch { /* silent */ }
         finally { setSessionLoading(false); }
@@ -237,7 +258,7 @@ export function KEditorPanel() {
                 </div>
 
                 {/* Review button — lifted from KQFlowView toolbar */}
-                {!isNew && selectedNodeId !== null && !isDraft && canReview && (
+                {!isNew && !isRootView && selectedNodeId !== null && !isDraft && canReview && (
                     <button
                         onClick={handleStartReview}
                         disabled={sessionLoading}
@@ -252,8 +273,24 @@ export function KEditorPanel() {
                     </button>
                 )}
 
+                {/* Review All — root-level entry point (shown when no node is selected) */}
+                {!isNew && isRootView && (
+                    <button
+                        onClick={handleStartReviewAll}
+                        disabled={sessionLoading}
+                        title="Review every learning question across this knowledge"
+                        className="mr-2 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border border-purple-700/60 bg-purple-900/20 text-purple-300 hover:bg-purple-900/40 hover:border-purple-600 transition-colors disabled:opacity-50"
+                    >
+                        {sessionLoading
+                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                            : <Play className="w-3 h-3 fill-current" />
+                        }
+                        Review All
+                    </button>
+                )}
+
                 {/* Draft/Learning toggle — lifted from KQFlowView toolbar */}
-                {!isNew && selectedNodeId !== null && node && !isMobile && (
+                {!isNew && !isRootView && selectedNodeId !== null && node && !isMobile && (
                     <button
                         onClick={handleToggleStatus}
                         disabled={statusUpdating}
@@ -286,14 +323,14 @@ export function KEditorPanel() {
             </div>
 
             {/* Review session overlay */}
-            {reviewSession && !isNew && selectedNodeId !== null && (
+            {reviewSession && !isNew && reviewNodeId !== null && (
                 <div className="absolute inset-0 z-50 bg-zinc-950 flex flex-col">
                     <KDailyReviewSession
-                        nodeId={selectedNodeId}
-                        quizTitle={node?.name ?? tab?.title ?? "Daily Review"}
+                        nodeId={reviewNodeId}
+                        quizTitle={reviewTitle}
                         questions={reviewSession}
-                        onComplete={() => { setReviewSession(null); fetchNodeQuestions(); loadTree(); refreshDailyTotal(); if (isMobile) getSideBarState().setMobileReviewActive(false); }}
-                        onBack={() => { setReviewSession(null); if (isMobile) getSideBarState().setMobileReviewActive(false); }}
+                        onComplete={() => { setReviewSession(null); setReviewNodeId(null); fetchNodeQuestions(); loadTree(); refreshDailyTotal(); if (isMobile) getSideBarState().setMobileReviewActive(false); }}
+                        onBack={() => { setReviewSession(null); setReviewNodeId(null); if (isMobile) getSideBarState().setMobileReviewActive(false); }}
                     />
                 </div>
             )}

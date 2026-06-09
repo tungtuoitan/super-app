@@ -61,3 +61,10 @@ export interface KRepoCompareDiff {
     modifiedCount: number;
     error: string | null;
 }
+
+export interface KRepoResolveConflictItem {
+    entityType: "knowledge" | "node" | "question";
+    dbId: number;
+    /** "keep_db" — DB wins (no DB change). "keep_repo" — overwrite DB with repo. */
+    action: "keep_db" | "keep_repo";
+}

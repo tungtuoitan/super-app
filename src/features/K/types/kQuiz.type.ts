@@ -111,6 +111,8 @@ export interface KDailySessionQuestion {
     id: number;
     question: string;
     answer: string | null;
+    /** Owning node name — populated by knowledge-wide review screens (e.g. Review All). */
+    nodeName?: string | null;
     /** Seconds from now until next review for each score 1–5 */
     previewIntervalSeconds: Record<number, number>;
 }

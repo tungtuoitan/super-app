@@ -1,6 +1,6 @@
 import { config } from "config/app.config";
 import { apiFetch } from "@/shared";
-import type { KRepoSyncConfig, KRepoSyncDiff, KRepoCompareDiff } from "../types/kRepoSync.type";
+import type { KRepoSyncConfig, KRepoSyncDiff, KRepoCompareDiff, KRepoResolveConflictItem } from "../types/kRepoSync.type";
 
 const BASE = `${config.api.baseURL}/api/k/repo-sync`;
 
@@ -66,6 +66,15 @@ const _getCompare = async (token: string): Promise<KRepoCompareDiff> => {
     return Promise.reject(res);
 };
 
+const _resolveConflicts = async (token: string, items: KRepoResolveConflictItem[]): Promise<void> => {
+    const res = await apiFetch(`${BASE}/resolve-conflicts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ items }),
+    });
+    if (!res.ok) return Promise.reject(res);
+};
+
 const _getDiff = async (token: string): Promise<KRepoSyncDiff> => {
     const res = await apiFetch(`${BASE}/diff`, {
         method: "GET",
@@ -84,4 +93,5 @@ export const KRepoSyncService = {
     _forceUpdate,
     _getDiff,
     _getCompare,
+    _resolveConflicts,
 };
