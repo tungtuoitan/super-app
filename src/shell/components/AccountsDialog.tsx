@@ -10,14 +10,16 @@ import { Button } from "@/shared";
 import { useAuthStore, useAuthHelper, initiateGoogleLogin } from "@/shared";
 import { Chrome, LogOut, User } from "lucide-react";
 import {useActivityBarStore} from "../store/ActivityBar.store";
+import {envConfig} from "config/env.config";
 
 export function AccountsDialog() {
     const { isAuthenticated, $user, loginLoading, loginError } = useAuthStore();
     const { logout, login } = useAuthHelper();
     const { accountsOpen, setAccountsOpen } = useActivityBarStore();
 
-    const [username, setUsername] = useState("hoanhtungle3@gmail.com");
-    const [password, setPassword] = useState("tung76721119");
+    const isDev = envConfig.NODE_ENV === "development";
+    const [username, setUsername] = useState(isDev ? "hoanhtungle3@gmail.com" : "");
+    const [password, setPassword] = useState(isDev ? "tung76721119" : "");
 
     const handleSignOut = () => {
         logout();
