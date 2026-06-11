@@ -61,31 +61,33 @@ export function AccountsDialog() {
                                 <span className="text-xs text-muted-foreground">or</span>
                                 <div className="flex-1 h-px bg-border" />
                             </div>
-
-                            <form onSubmit={handlePasswordLogin} className="space-y-3">
-                                <input
-                                    type="text"
-                                    autoComplete="username"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="Username"
-                                    className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                                />
-                                <input
-                                    type="password"
-                                    autoComplete="current-password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Password"
-                                    className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                                />
-                                {loginError && (
-                                    <p className="text-xs text-red-500">{loginError}</p>
-                                )}
-                                <Button type="submit" disabled={loginLoading || !username || !password} className="w-full">
-                                    {loginLoading ? "Signing in..." : "Sign in"}
-                                </Button>
-                            </form>
+                            {
+                                isDev &&
+                                <form onSubmit={handlePasswordLogin} className="space-y-3">
+                                    <input
+                                        type="text"
+                                        autoComplete="username"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        placeholder="Username"
+                                        className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                    <input
+                                        type="password"
+                                        autoComplete="current-password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Password"
+                                        className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                    {loginError && (
+                                        <p className="text-xs text-red-500">{loginError}</p>
+                                    )}
+                                    <Button type="submit" disabled={loginLoading || !username || !password} className="w-full">
+                                        {loginLoading ? "Signing in..." : "Sign in"}
+                                    </Button>
+                                </form>
+                            }
 
                             <p className="text-xs text-muted-foreground text-center">By signing in, you agree to our Terms and Privacy Policy</p>
                         </div>
