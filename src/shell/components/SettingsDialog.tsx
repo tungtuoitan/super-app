@@ -8,7 +8,7 @@ import { keywordService, useKeywordHelper } from "@/shared";
 import type { KeywordSyncReport } from "@/shared";
 import { useAuthStore } from "@/shared";
 import { useActivityBarStore } from "../store/ActivityBar.store";
-import { useKRepoSyncStore, KRepoSyncService, KRepoDiffPanel, KRepoConflictDialog } from "@/features/K";
+import { useKRepoSyncStore, KRepoSyncService, KRepoDiffPanel, KRepoConflictDialog, notifyViewing } from "@/features/K";
 import type { KSyncStatus, KRepoCompareDiff, KRepoResolveConflictItem } from "@/features/K/types/kRepoSync.type";
 
 const TYPE_ORDER = ["workspace", "folder", "note", "file", "project", "task", "log", "track", "external"];
@@ -79,9 +79,12 @@ export function SettingsDialog() {
                      + (compareDiff?.dbOnlyCount   ?? 0)
                      + (compareDiff?.modifiedCount ?? 0) > 0;
 
-    // Background fetch — silent, skips when resolve action is in flight
+    // Background fetch — silent, skips when:
+    //   • a fetch is already in flight,
+    //   • user is applying changes (isResolving),
+    //   • Review Changes dialog is open (entries must stay stable while user inspects them).
     const fetchCompareSilent = async () => {
-        if (isFetchingRef.current || isResolving) return;
+        if (isFetchingRef.current || isResolving || reviewOpen) return;
         if (!repoUrl) return;
         isFetchingRef.current = true;
         if (isMountedRef.current) setIsComparing(true);
@@ -102,6 +105,15 @@ export function SettingsDialog() {
         isMountedRef.current = true;
         return () => { isMountedRef.current = false; };
     }, []);
+
+    // Tell BE the user is viewing the diff popup so the daemon won't push DB → remote
+    // mid-review and invalidate what they're looking at. Best-effort: SignalR may be
+    // disconnected; daemon will just behave as before in that case.
+    useEffect(() => {
+        if (!reviewOpen) return;
+        notifyViewing("start");
+        return () => { notifyViewing("stop"); };
+    }, [reviewOpen]);
 
     useEffect(() => {
         if (!settingsOpen) {
@@ -177,12 +189,14 @@ export function SettingsDialog() {
         setRepoActionError(null);
         try {
             await KRepoSyncService._resolveConflicts($user.userToken, items);
-            await fetchCompareSilent();
         } catch {
             setRepoActionError("Apply changes failed.");
         } finally {
             setIsResolving(false);
         }
+        // Refresh compare AFTER isResolving becomes false — fetchCompareSilent
+        // skips while resolving, so an in-try fetch would no-op.
+        await fetchCompareSilent();
     };
 
     const sortedTypes = syncReport

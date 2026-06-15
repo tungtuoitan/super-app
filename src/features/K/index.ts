@@ -18,4 +18,5 @@ export { useKRepoSyncStore, getKRepoSyncState } from "./store/kRepoSync.store";
 export { KRepoSyncService } from "./service/kRepoSync.service";
 export { KRepoDiffPanel } from "./Components/small/KRepoDiffPanel";
 export { KRepoConflictDialog } from "./Components/small/KRepoConflictDialog";
+export { notifyViewing } from "./hooks/useKRepoSyncRealtime.headless";
 

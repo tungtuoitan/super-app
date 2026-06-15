@@ -177,8 +177,14 @@ export function KRepoConflictDialog({
     const repoOnly = useMemo(() => entries.filter(e => e.changeType === "repo_only"), [entries]);
     const dbOnly   = useMemo(() => entries.filter(e => e.changeType === "db_only"),   [entries]);
 
-    // Apply All: every modified entry takes the repo value; the reconcile creates
-    // repo_only items in DB; db_only stays. Items list only carries modifieds.
+    // Items chỉ chứa các entry "modified" (cùng tồn tại 2 bên, nội dung khác nhau) —
+    // đây là những xung đột thực sự cần FE chỉ định bên nào thắng. Cụ thể:
+    //   • modified → push thành item với action "keep_repo" → DB sẽ nhận giá trị từ repo.
+    //   • repo_only → KHÔNG gửi item (chưa có dbId). BE reconcile sẽ tự tạo entity mới trong DB.
+    //   • db_only   → KHÔNG gửi item. Entity giữ nguyên trong DB; daemon sẽ push lên remote.
+    //
+    // Nên nếu diff chỉ toàn repo_only/db_only thì items = [] (rỗng) — vẫn hợp lệ:
+    // BE skip phần override per-entity rồi chạy reconcile bình thường để đồng bộ 2 bên.
     const items = useMemo<KRepoResolveConflictItem[]>(
         () => modified
             .filter(e => e.dbId != null)
@@ -216,7 +222,7 @@ export function KRepoConflictDialog({
                         {repoOnly.map((e, i) => <InfoRow key={`r-${i}`} entry={e} side="repo" />)}
                     </Section>
 
-                    <Section title="In DB only — stays in DB (remote will catch up)" count={dbOnly.length}>
+                    <Section title="In DB only — will be soft-deleted from DB" count={dbOnly.length}>
                         {dbOnly.map((e, i) => <InfoRow key={`d-${i}`} entry={e} side="db" />)}
                     </Section>
                 </div>
