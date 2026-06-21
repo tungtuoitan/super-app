@@ -1,7 +1,7 @@
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
 import { Settings, GitBranch, BarChart2, Hash, Play, Loader2, BookDashed, BookOpen, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CardContent, useDeviceStore, useAuthStore } from "@/shared";
+import { CardContent, useDeviceStore, useAuthStore, useDebugLog } from "@/shared";
 import { KGeneral } from "./KGeneral";
 import { KMarkdownEditorTab } from "./KMarkdownEditorTab";
 import { KQFlowView } from "./QFlowView/KQFlowView";
@@ -39,6 +39,7 @@ export function KEditorPanel() {
     const { loadTree } = useKLoader();
     const { isMobile } = useDeviceStore();
     const { $user } = useAuthStore();
+    const debugLog = useDebugLog();
 
     const visibleTabs = isMobile ? TABS.filter(t => t.id !== "general" && t.id !== "qflow") : TABS;
 
@@ -144,14 +145,45 @@ export function KEditorPanel() {
     // Fetch questions for the currently selected node so we can compute the
     // Review button's badge (totalReviewable) without depending on which tab is active.
     const fetchNodeQuestions = useCallback(async () => {
+        debugLog.log("KEditorPanel", "fetchNodeQuestions", { selectedNodeId: selectedNodeId ?? undefined, isNew });
         if (isNew || selectedNodeId === null) { setNodeQuestions([]); return; }
         try {
             const res = await KQuizService._getNodeQuestions(selectedNodeId);
+            debugLog.log("KEditorPanel", "fetchNodeQuestions-result", { selectedNodeId: selectedNodeId ?? undefined, success: res.success, count: res.object?.questions?.length ?? 0 });
             if (res.success && res.object) setNodeQuestions(res.object.questions);
         } catch { /* silent */ }
     }, [isNew, selectedNodeId]);
 
     useEffect(() => { fetchNodeQuestions(); }, [fetchNodeQuestions]);
+
+    // Cleanup: reset mobileReviewActive if component unmounts while a review session is active
+    // (e.g. user navigates away mid-review without pressing Back/Complete)
+    useEffect(() => {
+        return () => {
+            if (getSideBarState().mobileReviewActive) {
+                debugLog.log("KEditorPanel", "unmount-cleanup:warn", { mobileReviewActive: true, note: "resetting stuck mobileReviewActive" });
+                getSideBarState().setMobileReviewActive(false);
+            }
+        };
+    }, []);
+
+    // Track review button visibility conditions
+    useEffect(() => {
+        debugLog.log("KEditorPanel", "review-btn-state", {
+            selectedNodeId,
+            isNew,
+            isRootView,
+            isDraft,
+            canReview,
+            totalReviewable,
+            dueCount,
+            nodeFound: !!node,
+            nodeStatus: node?.statusCode ?? null,
+            isMobile,
+            showNodeReviewBtn: !isNew && !isRootView && selectedNodeId !== null && !isDraft && canReview,
+            showReviewAllBtn: !isNew && isRootView,
+        });
+    }, [selectedNodeId, isRootView, isDraft, canReview, totalReviewable, isNew]);
 
     // Re-fetch when flow operations change questions for this node
     useEffect(() => {

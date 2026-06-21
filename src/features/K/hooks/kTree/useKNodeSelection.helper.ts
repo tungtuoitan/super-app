@@ -2,6 +2,7 @@
 import type { NodeApi } from "react-arborist";
 import { useKStore } from "@/features/K/store/useK.store";
 import { useEditorTabBarHelper, shellConstants } from "@/shell";
+import { useDebugLog } from "@/shared";
 import { useKTreeSelectionHelper } from "./useKTreeSelection.helper";
 import type { KWsResponse } from "@/features/K/types/k.type";
 import {KTreeNode} from "../../types/kV2.type";
@@ -27,6 +28,7 @@ export function useKNodeSelection({
     } = useKStore();
     const { openTabs, patchTab, openSingletonTab, updateActiveTab } = useEditorTabBarHelper();
     const { getVisibleNodeIds } = useKTreeSelectionHelper();
+    const debugLog = useDebugLog();
 
     const handleMainClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -95,6 +97,8 @@ export function useKNodeSelection({
             setLastSelectedItemId(nodeId);
             node.select();
 
+            debugLog.log("KNodeSelection", "regular-click", { nodeId, isRoot: nodeId < 0 });
+
             // Find or reuse the singleton k-knowledge editor tab
             const kTab = openTabs.find(
                 (t) => t.type === shellConstants.vscode.tab.tabTypes.kKnowledge,
@@ -120,6 +124,7 @@ export function useKNodeSelection({
             }
 
             // Signal KEditorPanel to switch to Quiz tab
+            debugLog.log("KNodeSelection", "setPendingQuizTabSwitch", { nodeId, kTabFound: !!kTab, currentKId: currentK?.id });
             setPendingQuizTabSwitch(nodeId);
         }
     };

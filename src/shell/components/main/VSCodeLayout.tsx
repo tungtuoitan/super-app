@@ -64,6 +64,8 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     useEffect(() => {
         if (!isMobile || !mobileTabJustOpened) return;
         const panel = mobileEditorRef.current;
+        const sizeBefore = panel?.getSize() ?? null;
+        debugLog.log("VSCodeLayout", "mobileTabJustOpened-resize", { sizeBefore: sizeBefore ?? undefined, willResize: !!panel && (panel.getSize() < 50), refReady: !!panel });
         if (panel && panel.getSize() < 50) panel.resize(75);
         setMobileTabJustOpened(false);
     }, [isMobile, mobileTabJustOpened]);
@@ -71,7 +73,11 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     // Expand/restore editor panel when a K review session starts/ends on mobile
     useEffect(() => {
         if (!isMobile) return;
-        mobileEditorRef.current?.resize(mobileReviewActive ? 200 : 22);
+        const panel = mobileEditorRef.current;
+        const sizeBefore = panel?.getSize() ?? null;
+        const targetSize = mobileReviewActive ? 200 : 22;
+        debugLog.log("VSCodeLayout", "mobileReviewActive-resize", { mobileReviewActive, targetSize, sizeBefore: sizeBefore ?? undefined, refReady: !!panel });
+        panel?.resize(targetSize);
     }, [isMobile, mobileReviewActive]);
 
     if (isMobile) {
