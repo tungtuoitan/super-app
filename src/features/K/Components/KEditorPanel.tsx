@@ -6,7 +6,6 @@ import { KGeneral } from "./KGeneral";
 import { KMarkdownEditorTab } from "./KMarkdownEditorTab";
 import { KQFlowView } from "./QFlowView/KQFlowView";
 import { KProgressDashboard } from "./KProgressDashboard";
-import { KDailyReviewSession } from "./KDailyReviewSession";
 import { useKStore } from "../store/useK.store";
 import type { KWsResponse } from "../types/k.type";
 import { KItemAction } from "../types/k.type";
@@ -20,6 +19,7 @@ import { kEvents } from "../utils/kEvents.utils";
 import type { KFlowQuestionsChangedDetail } from "../utils/kEvents.utils";
 import { useKLoader } from "../hooks/kTree/useK.loader";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
+import {KDailyReviewSession} from "./KDailyReviewSession/KDailyReviewSession";
 
 type KTab = "general" | "qflow" | "progress" | "markdown";
 

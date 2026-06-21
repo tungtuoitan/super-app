@@ -1,4 +1,4 @@
-import { useConfirmationPopoverHelper } from "@/shared";
+import { useConfirmationPopoverHelper, useDeviceStore } from "@/shared";
 import { getGenericConfirmMessage } from "../confirmPopover/confirmMessage.utils";
 import {MenuContextType, useMenuContextStore} from "./MenuContext.store";
 
@@ -20,6 +20,7 @@ interface ExecuteDirectlyParams {
 export const useMenuContextHelper = () => {
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { setIsMenuContextOpen, setAnchorPoint, setContextType, setContextData } = useMenuContextStore();
+    const { isMobile } = useDeviceStore();
 
     const openConfirmDialog = ({ type, entityType, count, allAreTempItems, onConfirm, event }: OpenConfirmDialogParams) => {
         setIsMenuContextOpen(false);
@@ -56,6 +57,7 @@ export const useMenuContextHelper = () => {
     const showContextMenu = (event: React.MouseEvent, type: MenuContextType = "default", data?: unknown) => {
         event.preventDefault();
         event.stopPropagation();
+        if (isMobile) return;
         setAnchorPoint({ x: event.clientX, y: event.clientY });
         setContextType(type);
         setContextData(data || null);
