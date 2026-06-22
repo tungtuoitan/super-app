@@ -66,6 +66,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
         const panel = mobileEditorRef.current;
         const sizeBefore = panel?.getSize() ?? null;
         debugLog.log("VSCodeLayout", "mobileTabJustOpened-resize", { sizeBefore: sizeBefore ?? undefined, willResize: !!panel && (panel.getSize() < 50), refReady: !!panel });
+        debugLog.flush();
         if (panel && panel.getSize() < 50) panel.resize(75);
         setMobileTabJustOpened(false);
     }, [isMobile, mobileTabJustOpened]);
@@ -77,6 +78,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
         const sizeBefore = panel?.getSize() ?? null;
         const targetSize = mobileReviewActive ? 200 : 22;
         debugLog.log("VSCodeLayout", "mobileReviewActive-resize", { mobileReviewActive, targetSize, sizeBefore: sizeBefore ?? undefined, refReady: !!panel });
+        debugLog.flush();
         panel?.resize(targetSize);
     }, [isMobile, mobileReviewActive]);
 

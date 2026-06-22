@@ -146,10 +146,12 @@ export function KEditorPanel() {
     // Review button's badge (totalReviewable) without depending on which tab is active.
     const fetchNodeQuestions = useCallback(async () => {
         debugLog.log("KEditorPanel", "fetchNodeQuestions", { selectedNodeId: selectedNodeId ?? undefined, isNew });
+        debugLog.flush();
         if (isNew || selectedNodeId === null) { setNodeQuestions([]); return; }
         try {
             const res = await KQuizService._getNodeQuestions(selectedNodeId);
             debugLog.log("KEditorPanel", "fetchNodeQuestions-result", { selectedNodeId: selectedNodeId ?? undefined, success: res.success, count: res.object?.questions?.length ?? 0 });
+            debugLog.flush();
             if (res.success && res.object) setNodeQuestions(res.object.questions);
         } catch { /* silent */ }
     }, [isNew, selectedNodeId]);
@@ -162,6 +164,7 @@ export function KEditorPanel() {
         return () => {
             if (getSideBarState().mobileReviewActive) {
                 debugLog.log("KEditorPanel", "unmount-cleanup:warn", { mobileReviewActive: true, note: "resetting stuck mobileReviewActive" });
+                debugLog.flush();
                 getSideBarState().setMobileReviewActive(false);
             }
         };
@@ -183,6 +186,7 @@ export function KEditorPanel() {
             showNodeReviewBtn: !isNew && !isRootView && selectedNodeId !== null && !isDraft && canReview,
             showReviewAllBtn: !isNew && isRootView,
         });
+        debugLog.flush();
     }, [selectedNodeId, isRootView, isDraft, canReview, totalReviewable, isNew]);
 
     // Re-fetch when flow operations change questions for this node
@@ -305,7 +309,7 @@ export function KEditorPanel() {
                     </button>
                 )}
 
-                {/* Review All — root-level entry point (shown when no node is selected) */}
+                {/* xxx Review All — root-level entry point (shown when no node is selected) */}
                 {!isNew && isRootView && (
                     <button
                         onClick={handleStartReviewAll}

@@ -98,7 +98,7 @@ export function useKNodeSelection({
             node.select();
 
             debugLog.log("KNodeSelection", "regular-click", { nodeId, isRoot: nodeId < 0 });
-
+            debugLog.flush();
             // Find or reuse the singleton k-knowledge editor tab
             const kTab = openTabs.find(
                 (t) => t.type === shellConstants.vscode.tab.tabTypes.kKnowledge,
@@ -125,6 +125,7 @@ export function useKNodeSelection({
 
             // Signal KEditorPanel to switch to Quiz tab
             debugLog.log("KNodeSelection", "setPendingQuizTabSwitch", { nodeId, kTabFound: !!kTab, currentKId: currentK?.id });
+            debugLog.flush();
             setPendingQuizTabSwitch(nodeId);
         }
     };
