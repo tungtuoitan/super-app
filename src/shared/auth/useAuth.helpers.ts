@@ -167,7 +167,19 @@ export function useAuthHelper() {
         const device = getDeviceFingerprint();
         const userId = $user.userId;
         const email  = $user.email;
-        debugLog.log("auth", "logout-start", { userId, email, device });
+        // Capture call site so we can tell WHO triggered logout
+        // (user click vs 401 event vs init-from-storage failure)
+        const callerStack = new Error("logout-caller").stack ?? "";
+        debugLog.log("auth", "logout-start", {
+            userId,
+            email,
+            device,
+            pathname: window.location.pathname,
+            visibility: document.visibilityState,
+            online: navigator.onLine,
+            stack: callerStack.split("\n").slice(0, 8).join(" | "),
+        });
+        debugLog.flush();
 
         try { await authApi.logout(); } catch {}
 

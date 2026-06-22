@@ -65,20 +65,47 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         const handleVisibility = () => {
             if (document.visibilityState !== "visible") return;
             const token = $user.userToken;
-            if (!token) return;
+            if (!token) {
+                debugLog.log("auth", "visibility-refresh-skip", { reason: "no-token", device: getDeviceFingerprint() });
+                debugLog.flush();
+                return;
+            }
             // If less than 5 minutes left, refresh now instead of waiting for 401
             try {
                 const payload = JSON.parse(atob(token.split(".")[1]));
                 const expiryMs: number = payload.exp * 1000;
-                if (expiryMs - Date.now() < 5 * 60_000) {
+                const msLeft = expiryMs - Date.now();
+                debugLog.log("auth", "visibility-refresh-check", {
+                    msLeft,
+                    expiryIso: new Date(expiryMs).toISOString(),
+                    willRefresh: msLeft < 5 * 60_000,
+                    device: getDeviceFingerprint(),
+                });
+                if (msLeft < 5 * 60_000) {
                     acquireRefreshToken()
                         .then((newToken) => {
                             set$User((prev) => ({ ...prev, userToken: newToken }));
                             scheduleProactiveRefresh(newToken);
+                            debugLog.log("auth", "visibility-refresh-ok", { device: getDeviceFingerprint() });
+                            debugLog.flush();
                         })
-                        .catch(() => {/* 401 interceptor handles full logout */});
+                        .catch((err) => {
+                            debugLog.log("auth", "visibility-refresh-failed", {
+                                error: String(err),
+                                device: getDeviceFingerprint(),
+                            });
+                            debugLog.flush();
+                            /* 401 interceptor handles full logout */
+                        });
+                } else {
+                    debugLog.flush();
                 }
-            } catch {
+            } catch (err) {
+                debugLog.log("auth", "visibility-refresh-bad-token", {
+                    error: String(err),
+                    device: getDeviceFingerprint(),
+                });
+                debugLog.flush();
                 // malformed token — let 401 handle it
             }
         };

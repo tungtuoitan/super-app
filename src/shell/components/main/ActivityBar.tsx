@@ -1,8 +1,9 @@
 import { Settings, UserCircle } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { SettingsDialog } from "../SettingsDialog";
 import { AccountsDialog } from "../AccountsDialog";
-import { useAuthStore } from "@/shared";
+import { useAuthStore, debugLog, getDeviceFingerprint } from "@/shared";
 import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 import {useActivityBarHelper} from "@/shell/hooks/useActivityBar.helper";
 import {ModuleDefinition} from "@/shell/types/moduleRegistry.type";
@@ -64,8 +65,30 @@ interface ActivityBarProps {
 export function ActivityBar({ horizontal }: ActivityBarProps) {
     const { setAccountsOpen, setSettingsOpen } = useActivityBarStore();
     const { handleActivityClick } = useActivityBarHelper();
-    const { isAuthenticated } = useAuthStore();
+    const { isAuthenticated, $user } = useAuthStore();
     const { moduleName } = useSideBarStore();
+
+    // Track every change of isAuthenticated so we can see WHEN the Accounts btn turns red.
+    // Compare against previous value via ref so we only log real transitions.
+    const prevAuthRef = useRef<boolean | null>(null);
+    useEffect(() => {
+        const prev = prevAuthRef.current;
+        prevAuthRef.current = isAuthenticated;
+        const device = getDeviceFingerprint();
+        debugLog.log("ActivityBar", "isAuthenticated-change", {
+            prev,
+            next: isAuthenticated,
+            userId: $user.userId,
+            email: $user.email,
+            hasToken: !!$user.userToken,
+            tokenLen: $user.userToken?.length ?? 0,
+            pathname: window.location.pathname,
+            visibility: document.visibilityState,
+            online: navigator.onLine,
+            device,
+        });
+        debugLog.flush();
+    }, [isAuthenticated]);
 
     // On mobile (horizontal), only show the K module
     const visibleModules = moduleRegistry.getAll().filter((m) => {

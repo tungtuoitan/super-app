@@ -47,12 +47,21 @@ export function scheduleProactiveRefresh(token: string): void {
     if (delay <= 0) return; // already expired or too close — let 401 handle it
 
     proactiveTimer = setTimeout(async () => {
+        const device = getDeviceFingerprint();
+        debugLog.log("apiClient", "proactive-refresh-fire", {
+            visibility: document.visibilityState,
+            online: navigator.onLine,
+            device,
+        });
         try {
             const newToken = await acquireRefreshToken();
             _config?.setToken(newToken);
             scheduleProactiveRefresh(newToken); // chain to next expiry
-            debugLog.log("apiClient", "proactive-refresh-done", {});
-        } catch {
+            debugLog.log("apiClient", "proactive-refresh-done", { device });
+            debugLog.flush();
+        } catch (err) {
+            debugLog.log("apiClient", "proactive-refresh-failed", { error: String(err), device });
+            debugLog.flush();
             // refresh token exhausted — 401 interceptor will handle the next request
         }
     }, delay);
