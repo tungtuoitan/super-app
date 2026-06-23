@@ -29,3 +29,18 @@ export function getDeviceFingerprint(): string {
     const tz       = getTimezone();
     return `${platform}/${browser}/${screen}/${lang}/${tz}`;
 }
+
+const DEVICE_ID_KEY = "deviceId";
+
+/** Returns a stable UUID for this browser. Created once and persisted to localStorage. */
+export function getOrCreateDeviceId(): string {
+    const existing = localStorage.getItem(DEVICE_ID_KEY);
+    if (existing) return existing;
+
+    const id = typeof crypto?.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+
+    localStorage.setItem(DEVICE_ID_KEY, id);
+    return id;
+}

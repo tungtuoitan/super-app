@@ -25,6 +25,7 @@ Tài liệu hệ thống auth của SuperApp FE. Tất cả file dưới đây n
 | `pkce.utils.ts` | RFC 7636 — generate verifier/challenge/state, lưu vào `sessionStorage`, validate state. Có fallback SHA-256 thuần JS cho insecure context (LAN IP qua HTTP). |
 | `../fetch/apiClient.ts` | `apiFetch` wrapper + 401 interceptor + `acquireRefreshToken` (single-flight lock) + `scheduleProactiveRefresh` (timer 60s trước expiry). |
 | `../localStorage/storage.config.ts` | `STORAGE_KEYS.USER_PROFILE = "userProfile"` — chỉ lưu profile, **không** lưu token. |
+| `../device/deviceFingerprint.ts` | `getDeviceFingerprint()` (human-readable string) + `getOrCreateDeviceId()` (UUID stable, lưu `localStorage["deviceId"]`). |
 
 ---
 
@@ -32,6 +33,7 @@ Tài liệu hệ thống auth của SuperApp FE. Tất cả file dưới đây n
 
 - **Access token (JWT)**: trả về trong response body, lưu trong React state (`$user.userToken`). **Không** persist xuống localStorage. Gắn vào header `Authorization: Bearer ...` qua `apiFetch`. TTL dev: 15 phút, prod: 60 phút.
 - **Refresh token**: BE set vào **HttpOnly cookie** (`credentials: "include"` ở mọi auth request). FE không đọc được — chỉ cần gọi `POST /api/auth/refresh` là BE rotate và trả access token mới.
+- **Device ID**: UUID stable lưu `localStorage["deviceId"]`, tạo 1 lần bởi `getOrCreateDeviceId()`. Gửi kèm header `X-Device-Id` trong mọi request `/api/auth/refresh` và `/api/auth/logout`. BE dùng để scope token chain theo device — reuse-attack chỉ revoke chain của device đó thay vì RevokeAll.
 - **User profile cache**: localStorage `userProfile` — lưu mọi field của `User` *trừ* `userToken` (luôn set `userToken: ""` khi ghi). Dùng để hiện UI ngay lúc mount trước khi refresh xong.
 
 ---
@@ -164,6 +166,7 @@ Mọi step quan trọng đều `debugLog.log("auth" | "apiClient", "<event>", { 
 5. **Proactive timer khi token đã hết hạn**: `delay <= 0` thì không setTimeout — để 401 reactive xử lý.
 6. **`isRefreshing` reset trong `.finally`**: nếu quên reset, lần refresh tiếp theo sẽ chờ promise cũ đã settle → treo. Hiện tại reset cả ở `.finally` của `buildRefreshPromise` và ở catch của `apiFetch` 401 branch.
 7. **Email blocklist trong `loginWithGoogleCode`**: chặn cứng `hoanhtungle@gmail.com` ở dev và `hoanhtungle2@gmail.com` ở prod để tránh nhầm môi trường. Nếu thay đổi email test, sửa luôn ở đây.
+8. **Per-device token chain (2026-06-23)**: BE có `device_id` column trong `auth.refresh_tokens`. Khi detect reuse-attack, BE chỉ revoke chain của device đó (qua `X-Device-Id` header) thay vì RevokeAll. Token cũ không có `DeviceId` (null) vẫn fallback RevokeAll. Root cause của incident: sleeping tab với stale token từ IP khác wake up → BE tưởng là attack → RevokeAll → mọi session bị kick.
 
 ---
 

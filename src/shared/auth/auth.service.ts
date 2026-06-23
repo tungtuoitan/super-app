@@ -7,7 +7,7 @@ import { config } from "config/app.config";
 import { getLocaleLanguage } from "./locale";
 import type { LoginRequest, AuthResponse, GoogleCodeRequest } from "./auth.types";
 import { debugLog } from "../debug/useDebugLog";
-import { getDeviceFingerprint } from "../device/deviceFingerprint";
+import { getDeviceFingerprint, getOrCreateDeviceId } from "../device/deviceFingerprint";
 
 export const authApi = {
     /**
@@ -95,6 +95,7 @@ export const authApi = {
         const res = await window.fetch(`${config.api.baseURL}/api/auth/refresh`, {
             method: "POST",
             credentials: "include",
+            headers: { "X-Device-Id": getOrCreateDeviceId() },
         });
 
         debugLog.log("auth", "refresh-response", { status: res.status, ok: res.ok, device });
@@ -129,6 +130,7 @@ export const authApi = {
         const res = await window.fetch(`${config.api.baseURL}/api/auth/logout`, {
             method: "POST",
             credentials: "include",
+            headers: { "X-Device-Id": getOrCreateDeviceId() },
         });
 
         debugLog.log("auth", "logout-response", { status: res.status, ok: res.ok, device });
