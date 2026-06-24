@@ -119,6 +119,8 @@ export interface KDailySessionQuestion {
     nodeName?: string | null;
     /** Seconds from now until next review for each score 1–5 */
     previewIntervalSeconds: Record<number, number>;
+    /** Code attachments linked to this question */
+    attachments?: KAttachment[];
 }
 
 export interface KDailyAnswerItem {

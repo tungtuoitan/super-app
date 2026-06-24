@@ -135,7 +135,7 @@ function LinkPicker({ questionId, linkedIds, onLinked }: {
 function QuestionRow({ question, onAttachmentsChanged, onView }: {
     question: KQuestion;
     onAttachmentsChanged: (questionId: number, attachments: KAttachment[]) => void;
-    onView: (att: KAttachment) => void;
+    onView: (att: KAttachment, atts: KAttachment[]) => void;
 }) {
     const [expanded, setExpanded] = useState(false);
     const atts = question.attachments ?? [];
@@ -188,7 +188,7 @@ function QuestionRow({ question, onAttachmentsChanged, onView }: {
                             key={att.id}
                             att={att}
                             onUnlink={() => handleUnlink(att)}
-                            onView={onView}
+                            onView={a => onView(a, atts)}
                         />
                     ))}
                     {!isDeleted && (
@@ -208,6 +208,7 @@ export function KQList({ nodeId }: Props) {
     const [questions, setQuestions] = useState<KQuestion[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewingAtt, setViewingAtt] = useState<KAttachment | null>(null);
+    const [viewingAtts, setViewingAtts] = useState<KAttachment[]>([]);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -250,11 +251,11 @@ export function KQList({ nodeId }: Props) {
                         key={q.id}
                         question={q}
                         onAttachmentsChanged={handleAttachmentsChanged}
-                        onView={setViewingAtt}
+                        onView={(a, as) => { setViewingAtt(a); setViewingAtts(as); }}
                     />
                 ))}
             </div>
-            <KAttachmentViewerDialog att={viewingAtt} onClose={() => setViewingAtt(null)} />
+            <KAttachmentViewerDialog atts={viewingAtts} att={viewingAtt} onClose={() => setViewingAtt(null)} />
         </>
     );
 }

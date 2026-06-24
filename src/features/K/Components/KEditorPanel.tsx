@@ -221,6 +221,7 @@ export function KEditorPanel() {
         setSessionLoading(true);
         try {
             const res = await KQuizService._getKnowledgeReviewAllSession(knowledge.id);
+            console.log("[ReviewAll] questions:", res.object?.map(q => ({ id: q.id, atts: q.attachments?.length ?? 0 })));
             if (res.success && res.object && res.object.length > 0) {
                 if (isMobile) getSideBarState().setMobileReviewActive(true);
                 setReviewNodeId(knowledge.id);

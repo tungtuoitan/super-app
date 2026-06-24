@@ -1,7 +1,10 @@
-import { ArrowLeft, PenLine, Move, LayoutGrid } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, PenLine, Move, LayoutGrid, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SCORE_DELAY_MS, BALL_BG, RING_COLOR, NEUTRAL_RING, SCORE_BUTTONS, SCORE_CONFIG } from "./kDailyReviewSession.constants";
 import { useKDailyReviewSession, type KDailyReviewSessionProps } from "./useKDailyReviewSession.helper";
+import { KAttachmentViewerDialog } from "../small/KAttachmentViewerDialog";
+import type { KAttachment } from "../../types/kAttachment.type";
 
 export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, onBack, isQuickQuiz }: KDailyReviewSessionProps) {
     const {
@@ -26,6 +29,8 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
         handleMarkDraft,
         handleSwipeStart,
     } = useKDailyReviewSession({ nodeId, questions, onComplete, isQuickQuiz });
+
+    const [selectedAtt, setSelectedAtt] = useState<KAttachment | null>(null);
 
     // ── Summary screen (disabled — session auto-completes on last answer) ────
     // Uncomment the block below to re-enable the summary + Done button flow.
@@ -153,6 +158,22 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
                 <p className="text-lg font-semibold text-center leading-relaxed text-white shrink-0">
                     {currentQuestion.question}
                 </p>
+
+                {/* Attachment pills — shown when question has code attachments */}
+                {currentQuestion.attachments && currentQuestion.attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 shrink-0 -mt-2">
+                        {currentQuestion.attachments.map(att => (
+                            <button
+                                key={att.id}
+                                onClick={(e) => { e.stopPropagation(); setSelectedAtt(att); }}
+                                className="flex items-center gap-1 px-2 py-0.5 rounded text-xs text-zinc-400 bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-200 transition-colors font-mono"
+                            >
+                                <Code2 className="w-3 h-3 shrink-0" />
+                                {att.title}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 {/* Answer box — always visible, blurred until tapped */}
                 <div className="relative shrink-0" style={{ height: "calc(10 * 1.6rem)" }}>
@@ -291,6 +312,8 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
                     {!showResult && canReveal ? "Tap to reveal" : ""}
                 </p>
             </div>
+
+            <KAttachmentViewerDialog atts={currentQuestion.attachments ?? []} att={selectedAtt} onClose={() => setSelectedAtt(null)} />
         </div>
     );
 }

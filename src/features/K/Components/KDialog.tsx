@@ -410,7 +410,7 @@ export function KDialog() {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-        <KAttachmentViewerDialog att={viewingAtt} onClose={() => setViewingAtt(null)} />
+        <KAttachmentViewerDialog atts={viewingAtt ? [viewingAtt] : []} att={viewingAtt} onClose={() => setViewingAtt(null)} />
         </>
     );
 }
