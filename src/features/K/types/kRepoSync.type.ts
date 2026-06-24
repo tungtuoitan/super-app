@@ -39,8 +39,8 @@ export interface KSyncStatusMessage {
 }
 
 export interface KRepoCompareEntry {
-    /** "knowledge" | "node" | "question" */
-    entityType: "knowledge" | "node" | "question";
+    /** "knowledge" | "node" | "question" | "attachment" */
+    entityType: "knowledge" | "node" | "question" | "attachment";
     /** "repo_only" | "db_only" | "modified" */
     changeType: "repo_only" | "db_only" | "modified";
     dbId: number | null;

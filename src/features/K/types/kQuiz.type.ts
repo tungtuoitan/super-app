@@ -1,3 +1,5 @@
+import type { KAttachment } from "./kAttachment.type";
+
 // ── Questions list for a knowledge ───────────────────────────────────────────
 
 export interface KQuestionsListResponse {
@@ -27,6 +29,8 @@ export interface KQuestion {
     srsNextReviewAt?: string | null;
     /** Current retention 0–100% (forgetting curve) */
     retention: number;
+    /** Attachments linked to this question (code files from Example/ folder) */
+    attachments?: KAttachment[];
     /** Non-null when question has been soft-deleted */
     deletedAt?: string | null;
 }

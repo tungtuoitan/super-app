@@ -1,14 +1,15 @@
 import { useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared";
-import { GitMerge, Database, GitBranch, Loader2, BookOpen, FolderOpen, MessageSquare, Plus, Minus } from "lucide-react";
+import { GitMerge, Database, GitBranch, Loader2, BookOpen, FolderOpen, MessageSquare, Plus, Minus, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { KRepoCompareEntry, KRepoResolveConflictItem } from "../../types/kRepoSync.type";
 import { computeCharDiff, type CharSegment } from "../../utils/charDiff.util";
 
 const ENTITY_ICON = {
-    knowledge: BookOpen,
-    node:      FolderOpen,
-    question:  MessageSquare,
+    knowledge:  BookOpen,
+    node:       FolderOpen,
+    question:   MessageSquare,
+    attachment: Code2,
 } as const;
 
 /** Render one side of a char-level diff. side="old" hides "add" segments; side="new" hides "remove". */
@@ -187,8 +188,8 @@ export function KRepoConflictDialog({
     // BE skip phần override per-entity rồi chạy reconcile bình thường để đồng bộ 2 bên.
     const items = useMemo<KRepoResolveConflictItem[]>(
         () => modified
-            .filter(e => e.dbId != null)
-            .map(e => ({ entityType: e.entityType, dbId: e.dbId!, action: "keep_repo" })),
+            .filter(e => e.dbId != null && e.entityType !== "attachment")
+            .map(e => ({ entityType: e.entityType as "knowledge" | "node" | "question", dbId: e.dbId!, action: "keep_repo" })),
         [modified],
     );
 

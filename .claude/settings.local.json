@@ -4,7 +4,6 @@
       "Bash(*)",
       "Edit(*)",
       "Write(*)",
-      "mcp__*",
       "WebFetch(*)",
       "WebSearch(*)",
       "PowerShell(sqlcmd -S \"157.66.101.51,1433\" -U sa -P \"***REDACTED-ROTATED-PASSWORD***\" -d \"SuperApp-dev\" -i \"C:\\\\Users\\\\Admin\\\\source\\\\Timeline\\\\standardize_column_naming.sql\" -b 2>&1)",
@@ -25,7 +24,11 @@
       "Bash(rm -f \"C:/Users/Admin/source/Timeline/SuperAppServices.Tests/UnitTest1.cs\" && echo deleted)",
       "PowerShell(powershell -NoProfile -Command \"Write-Output 'child-ok'; exit 7\"; Write-Host \"exit=$LASTEXITCODE\")",
       "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;$env:Path\"; Set-Location \"C:\\\\Users\\\\Admin\\\\source\\\\SuperApp\"; npx tsc --noEmit --pretty 2>&1 | Select-Object -Last 10)",
-      "PowerShell($paths = @\\(\"C:\\\\Users\\\\Admin\\\\source\\\\Timeline\\\\SuperAppAPI\\\\bin\\\\Debug\\\\net8.0\\\\k-repos\\\\1033\", \"C:\\\\Users\\\\Admin\\\\source\\\\Timeline\\\\k-repos\\\\1033\", \"C:\\\\k-repos\\\\1033\"\\); foreach \\($p in $paths\\) { if \\(Test-Path \"$p\\\\.git\"\\) { Write-Output \"FOUND: $p\"; break } else { Write-Output \"NOT: $p\" } })"
+      "PowerShell($paths = @\\(\"C:\\\\Users\\\\Admin\\\\source\\\\Timeline\\\\SuperAppAPI\\\\bin\\\\Debug\\\\net8.0\\\\k-repos\\\\1033\", \"C:\\\\Users\\\\Admin\\\\source\\\\Timeline\\\\k-repos\\\\1033\", \"C:\\\\k-repos\\\\1033\"\\); foreach \\($p in $paths\\) { if \\(Test-Path \"$p\\\\.git\"\\) { Write-Output \"FOUND: $p\"; break } else { Write-Output \"NOT: $p\" } })",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\Admin\\\\source\\\\SuperApp\\\\src\\\\features\\\\K\\\\Components\\\\kDailyReviewSession.constants.ts\" | Measure-Object -Line\\).Lines; \\(Get-Content \"C:\\\\Users\\\\Admin\\\\source\\\\SuperApp\\\\src\\\\features\\\\K\\\\Components\\\\kDailyReviewSession.utils.ts\" | Measure-Object -Line\\).Lines; \\(Get-Content \"C:\\\\Users\\\\Admin\\\\source\\\\SuperApp\\\\src\\\\features\\\\K\\\\Components\\\\useKDailyReviewSession.helper.ts\" | Measure-Object -Line\\).Lines; \\(Get-Content \"C:\\\\Users\\\\Admin\\\\source\\\\SuperApp\\\\src\\\\features\\\\K\\\\Components\\\\KDailyReviewSession.tsx\" | Measure-Object -Line\\).Lines)",
+      "Bash(mkdir -p \"C:/Users/Admin/.claude/skills/rate-answer-with-ball\")"
     ],
     "defaultMode": "bypassPermissions"
   }

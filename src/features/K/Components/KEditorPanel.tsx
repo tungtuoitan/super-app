@@ -1,11 +1,12 @@
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
-import { Settings, GitBranch, BarChart2, Hash, Play, Loader2, BookDashed, BookOpen, Trophy } from "lucide-react";
+import { Settings, GitBranch, BarChart2, Hash, Play, Loader2, BookDashed, BookOpen, Trophy, List } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CardContent, useDeviceStore, useAuthStore, useDebugLog } from "@/shared";
 import { KGeneral } from "./KGeneral";
 import { KMarkdownEditorTab } from "./KMarkdownEditorTab";
 import { KQFlowView } from "./QFlowView/KQFlowView";
 import { KProgressDashboard } from "./KProgressDashboard";
+import { KQList } from "./KQList";
 import { useKStore } from "../store/useK.store";
 import type { KWsResponse } from "../types/k.type";
 import { KItemAction } from "../types/k.type";
@@ -21,13 +22,14 @@ import { useKLoader } from "../hooks/kTree/useK.loader";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
 import {KDailyReviewSession} from "./KDailyReviewSession/KDailyReviewSession";
 
-type KTab = "general" | "qflow" | "progress" | "markdown";
+type KTab = "general" | "qflow" | "progress" | "markdown" | "qlist";
 
 const TABS: { id: KTab; label: string; icon: React.ReactNode }[] = [
     { id: "general",  label: "GENERAL",    icon: <Settings className="h-4 w-4" /> },
     { id: "progress", label: "K PROGRESS", icon: <BarChart2 className="h-4 w-4" /> },
     { id: "qflow",    label: "Q FLOW",     icon: <GitBranch className="h-4 w-4" /> },
     { id: "markdown", label: "MARKDOWN",   icon: <Hash className="h-4 w-4" /> },
+    { id: "qlist",    label: "Q LIST",     icon: <List className="h-4 w-4" /> },
 ];
 
 export function KEditorPanel() {
@@ -263,6 +265,9 @@ export function KEditorPanel() {
             case "markdown":
                 if (isNew) return null;
                 return <KMarkdownEditorTab nodeId={selectedNodeId} />;
+            case "qlist":
+                if (isNew) return null;
+                return <KQList nodeId={selectedNodeId} />;
             default:
                 return null;
         }

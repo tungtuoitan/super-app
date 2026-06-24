@@ -1,6 +1,6 @@
 ---
 name: sa-k-sync-remote
-description: Architecture và flow của K repo sync trong SuperApp — đồng bộ 2 chiều giữa DB (source of truth) và git remote repo qua KRepoSyncService, KRepoSyncDaemon, KRepoSyncBackgroundService và IKViewerTracker. TRIGGER khi user làm việc với feature K repo sync, sửa KRepoSyncService.cs, KRepoSyncDaemon, SettingsDialog phần "K Repo Sync", popup Review Changes (KRepoConflictDialog), hoặc hỏi về sync DB ↔ remote, force-push, conflict resolution, soft-delete khi Apply, viewer tracker. Đọc skill này TRƯỚC KHI sửa bất kỳ phần nào liên quan để hiểu cả 2 path (daemon vs Apply) và các invariant.
+description: Architecture và flow của K repo sync trong SuperApp — đồng bộ 2 chiều giữa DB (source of truth) và git remote repo qua KRepoSyncService, KRepoSyncDaemon, KRepoSyncBackgroundService và IKViewerTracker. Bao gồm cả attachments (Example/ folder, k.attachment + k.attachment_link, atts: tag). TRIGGER khi user làm việc với feature K repo sync, sửa KRepoSyncService.cs, KRepoSyncDaemon, KAttachmentService, SettingsDialog phần "K Repo Sync", popup Review Changes (KRepoConflictDialog), KAttachmentViewerDialog, hoặc hỏi về sync DB ↔ remote, force-push, conflict resolution, soft-delete khi Apply, viewer tracker, attachments (link/unlink, atts: tag, Example/ folder, filename↔id resolve). Đọc skill này TRƯỚC KHI sửa bất kỳ phần nào liên quan để hiểu cả 2 path (daemon vs Apply) và các invariant.
 ---
 
 # sa-k-sync-remote
@@ -10,22 +10,28 @@ K module sync DB ↔ git remote 2 chiều. **DB là source of truth**, remote l�
 ## Files chính
 
 **BE (`C:\Users\Admin\source\Timeline`):**
-- `SuperAppServices/Services/K/KRepoSyncService.cs` — service chính (~1700 dòng)
+- `SuperAppServices/Services/K/KRepoSyncService.cs` — service chính (~2200 dòng)
 - `SuperAppServices/Services/K/KRepoSyncPlanner.cs` — pure planner: so repo files vs DB → ReconcilePlan
+- `SuperAppServices/Services/K/KAttachmentService.cs` — CRUD + link/unlink attachments
 - `SuperAppAPI/BackgroundServices/KRepoSyncDaemon.cs` — event-driven, debounce 5s
 - `SuperAppAPI/BackgroundServices/KRepoSyncBackgroundService.cs` — periodic 10min check / 1h push
 - `SuperAppAPI/Hubs/KSyncHub.cs` — SignalR hub + `SignalRKSyncNotifier`
 - `SuperAppAPI/Hubs/KViewerTracker.cs` — singleton, dict per-user → set connection ids
 - `SuperAppAPI/Controllers/K/KRepoSyncController.cs` — REST endpoints
+- `SuperAppAPI/Controllers/K/KAttachmentController.cs` — attachment endpoints
 - `SuperAppServices/Interfaces/K/IKSyncNotifier.cs`, `IKViewerTracker.cs`, `IKRepoSyncService.cs`
 
 **FE (`C:\Users\Admin\source\SuperApp\src\features\K`):**
 - `service/kRepoSync.service.ts` — fetch wrappers
+- `service/kAttachment.service.ts` — attachment CRUD + link/unlink
 - `hooks/useKRepoSyncRealtime.headless.ts` — SignalR connect + `notifyViewing("start"|"stop")`
 - `Components/small/KRepoConflictDialog.tsx` — popup Review Changes
 - `Components/small/KRepoDiffPanel.tsx` — diff panel cũ (per-question)
+- `Components/small/KAttachmentViewerDialog.tsx` — Monaco read-only popup khi click attachment
+- `Components/KQList.tsx` — question list với attachment chip + link picker
+- `Components/KDialog.tsx` — node dialog với attachment section ở edit mode
 - `store/kRepoSync.store.ts` — zustand store
-- `types/kRepoSync.type.ts`
+- `types/kRepoSync.type.ts`, `types/kAttachment.type.ts`
 - Shell: `src/shell/components/SettingsDialog.tsx` (UI K Repo Sync section)
 
 ## Layout repo
@@ -38,9 +44,19 @@ Knowledge/
     <NonLeaf>/         ← node có con
       <NonLeaf>.md     ← self file (tên TRÙNG folder)
       <Child>.md
+Example/               ← attachments (1 file = 1 row k.attachment)
+  <title>              ← e.g. case1.cs, snippet.py — flat, no subfolders
+  ...
 ```
 
-Mỗi `.md` có front-matter `id` + `name` (id link tới DB entity). Body: heading `# <Q> [id:N order:M]` + answer. Draft block: `<!--# <Q> [id:N order:M] ... -->`.
+Mỗi `.md` có front-matter `id` + `name` (id link tới DB entity). Body: heading `# <Q> [id:N order:M atts:1,2,3]` + answer. Draft block: `<!--# <Q> [id:N order:M] ... -->`.
+
+Mỗi file trong `Example/` có dòng đầu là metadata comment kiểu language-aware:
+- `// att-id:5 title:"case1.cs"` (cs/js/ts/...)
+- `# att-id:5 title:"case1.py"` (py/rb/sh)
+- `<!-- att-id:5 title:"case1.html" -->` (html/xml/md)
+
+Body từ dòng 2 trở đi là code thật. Khi push từ DB, BE tự thêm dòng meta. Khi user tạo file mới (chưa có id), BE assign id ở Apply rồi DoPush rewrite file với meta comment.
 
 ## Hai đường push DB → remote (cả 2 phải skip khi viewing)
 
@@ -86,11 +102,48 @@ Nếu SignalR down → `notifyViewing` swallow error, daemon hoạt động như
 So sánh remote (latest fetched) vs DB hiện tại, không write. Trả `KRepoCompareEntry[]` với `changeType`:
 - `repo_only` — chỉ có ở remote (sẽ tạo trong DB khi Apply)
 - `db_only` — chỉ có ở DB (Apply: soft-delete; Daemon: keep + push back)
-- `modified` — ở 2 bên nhưng khác. Cho **node**: name / knowledge / parent thay đổi. Cho **question**: name/desc/draft / NodeId thay đổi (move giữa nodes). Resolve qua `folderToKnowledgeIdCmp` / `folderToNodeIdCmp` để chỉ flag khi target id resolve được trong DB (tránh false positive).
+- `modified` — ở 2 bên nhưng khác. Cho **node**: name / knowledge / parent thay đổi. Cho **question**: name/desc/draft / NodeId thay đổi (move giữa nodes) / **att-links thay đổi** (so bằng `SetEquals` của resolved att ids — bắt cả 2 chiều). Cho **attachment**: title hoặc content thay đổi. Resolve qua `folderToKnowledgeIdCmp` / `folderToNodeIdCmp` / `titleToAttIdCmp` để chỉ flag khi target id resolve được trong DB (tránh false positive).
+
+`entityType` của entry: `"knowledge" | "node" | "question" | "attachment"`.
 
 OldText/NewText format:
 - Node modified: `<name>\nin: <Knowledge / Parent>` (cả 2 bên cùng shape)
-- Question modified: `[active|draft] <body>`, nếu cross-node move append `\nin: <nodeName>`
+- Question modified: `[active|draft] <body>`, nếu cross-node move append `\nin: <nodeName>`, nếu atts thay đổi append `\natts: [<refs>]` (repo show as-written, kể cả filename refs)
+- Attachment modified: full content (DB trước, repo sau)
+
+**LibGit2Sharp gotcha**: `Tree` object không thread-safe sau `await`. Phải gọi `WalkMdFiles` + `WalkAllFiles` (cho `Example/`) **trước first await** trong `GetCompareDiffAsync` rồi cache vào dictionary, không gọi lại sau khi đã `await` thứ gì đó.
+
+## Attachments (Example/ folder)
+
+**Schema (`k.attachment` + `k.attachment_link`)**:
+- `k.attachment(id, user_id, title, type, language, content nvarchar(max), sort_order, created_at, updated_at, deleted_at)` — `content` là `nvarchar(max)` (KHÔNG dùng `text` vì non-Unicode → mất tiếng Việt)
+- `k.attachment_link(attachment_id, entity_type, entity_id, created_at)` — link N-N giữa attachment ↔ question/node. `entity_type` ∈ `{question, node}`.
+
+**Tag `atts:` trong heading**: `# Q [id:5 order:1 atts:1,2,case3.cs]`. Mỗi ref là **string raw**:
+- Numeric → att id trực tiếp
+- Filename → resolve qua `titleToAttachmentId` (full title `case1.cs` HOẶC basename `case1` đều match)
+
+`ExtractMeta` regex: `(\w+):([^\s\]]+)` — KHÔNG dùng `\S+` vì sẽ ăn cả `]` cuối bracket khi `atts:` là key cuối.
+
+**Round-trip filename → id**:
+1. User tạo file `Example/case1.cs` (chưa có id) + sửa heading thêm `atts:case1` (hoặc `atts:case1.cs`)
+2. Apply step 1b: walk `Example/`, upsert mỗi file → assign id, register cả full title + basename vào `titleToAttachmentId`
+3. Apply step 7: walk `plan.Questions`, với mỗi `attRef`:
+   - `int.TryParse(ref)` → numeric id
+   - else `titleToAttachmentId.TryGetValue(ref)` → resolved id
+   - Skip nếu không resolve được hoặc att không tồn tại
+   - Insert `k.attachment_link` nếu chưa có
+4. Cuối Apply: `DoPushAsync(force: true)` → `BuildRepoMarkdown` rewrite heading thành `atts:1` (numeric, từ DB). Tag filename biến thành tag id ở next pull.
+
+**Apply behavior với attachments**:
+- File mới (chưa có meta) → tạo row mới, `RegisterAttTitle` thêm vào claimed set
+- File có `att-id:N` ở dòng đầu → update existing row (`Title`, `Content`, `Language`, `UpdatedAt`)
+- File rename trên remote → khi user sửa filename, dòng `att-id:N` vẫn giữ → BE update `Title` theo filename mới
+- File xoá / xoá folder `Example/` → att không nằm trong `claimedAttIds` → khi `softDeleteUnclaimed=true`: soft-delete; khi false: keep + DoPush sẽ ghi lại file
+
+**`DoPushAsync` build `Example/`**: load `KAttachmentLinks` per question + `BuildRepoMarkdown(active, attsByQ)` để emit `atts:` tag. Nếu pass `null` → tag bị mất → next compare diff sẽ thấy att-link change. Lỗi này từng xảy ra ở `DoForceUpdateRemoteAsync` — đã fix.
+
+**`KAttachmentService` (FE)** endpoints: `GET /api/k/attachments`, `GET /api/k/attachments/node/{nodeId}`, `POST/DELETE /api/k/attachments/question/{qid}/{aid}`, `POST/DELETE /api/k/attachments/node/{nid}/{aid}`. Link/unlink chỉ ghi `k.attachment_link` row, không touch markdown — markdown rebuild ở next push.
 
 ## Apply flow trong popup (`KRepoConflictDialog`)
 
@@ -129,6 +182,12 @@ Daemon path (web edit → save) đi qua `DoForceUpdateRemoteAsync`, không qua r
 - **`KKnowledgeRepository.GetKnowledgeTreeAsync`** load tất cả nodes của 1 knowledge (dùng trong `DoPushAsync` để build fileMap). Không dùng `dbNodes` snapshot vì cần `KNode.Description` etc.
 - **Folder/file naming**: clean (không có id), id ở front-matter. Sibling unique qua `MakeUnique` (suffix ` (2)`, ` (3)`...). `Sanitize` strip `\ / : * ? " < > |`.
 - **Knowledge self file**: `Knowledge/<K>/_.md` (literal `_`). Non-leaf node self file: `Folder/<Folder>.md` (cùng tên).
+- **LibGit2Sharp tree không thread-safe sau `await`** — đọc tree (WalkMdFiles, WalkAllFiles) phải xảy ra trước first await trong cùng method, cache vào dict rồi dùng.
+- **`k.attachment.content` phải là `nvarchar(max)` không phải `text`** — `text` non-Unicode → tiếng Việt thành `?????`. Configuration ở `KAttachmentConfiguration.cs`.
+- **`atts:` regex bug**: dùng `\S+` ăn cả `]` cuối bracket khi atts là key cuối → val `"2]"` → parse fail → att bị drop. Fix: `[^\s\]]+`.
+- **Filename ref resolve cả full title và basename** — register `case1.cs` + `case1` cùng map về 1 id (`RegisterAttTitle` helper). Edge case: 2 file cùng basename khác extension → basename chỉ map về file đầu tiên.
+- **`BuildRepoMarkdown` MUST nhận `attsByQ`**: cả `DoPushAsync` và `DoForceUpdateRemoteAsync` phải load `KAttachmentLinks` rồi pass vào, không thì `atts:` tag bị drop khi push.
+- **`atts:` chỉ accept `atts` không accept `att`** (singular là typo) — quyết định tránh drift.
 
 ## Endpoints
 
@@ -148,4 +207,9 @@ Daemon path (web edit → save) đi qua `DoForceUpdateRemoteAsync`, không qua r
 2. Tracker skip ở 3 chỗ: `KRepoSyncDaemon.RunSyncAsync` (×2 trước/sau semaphore), `CheckAllUsersAsync`, `PushAllUsersAsync`
 3. Force-push ở cuối reconcile, không bỏ
 4. FE `notifyViewing` start/stop khớp với `reviewOpen` lifecycle
-5. Compare diff resolve qua `folderToKnowledgeIdCmp` / `folderToNodeIdCmp` trước khi flag `modified` (move detection)
+5. Compare diff resolve qua `folderToKnowledgeIdCmp` / `folderToNodeIdCmp` / `titleToAttIdCmp` trước khi flag `modified` (move detection + att-link detection)
+6. **Đọc tree (WalkMdFiles, WalkAllFiles) trước first await** trong cùng method — LibGit2Sharp tree không thread-safe sau await
+7. **`BuildRepoMarkdown` luôn pass `attsByQ`** — cả `DoPushAsync` và `DoForceUpdateRemoteAsync`
+8. Att-ref resolve hỗ trợ cả full title và basename (`RegisterAttTitle` helper)
+9. Chỉ check key `atts` (plural) — KHÔNG accept `att`
+10. Có test cover ở `SuperAppServices.Tests/KRepoAttachmentRoundTripTests.cs` — chạy `dotnet test` sau khi sửa parser/builder

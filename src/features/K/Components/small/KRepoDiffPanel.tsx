@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GitCompare, ChevronDown, ChevronRight, BookOpen, FolderOpen, MessageSquare } from "lucide-react";
+import { GitCompare, ChevronDown, ChevronRight, BookOpen, FolderOpen, MessageSquare, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/shared";
 import type { KRepoCompareDiff, KRepoCompareEntry } from "../../types/kRepoSync.type";
@@ -7,9 +7,10 @@ import type { KRepoCompareDiff, KRepoCompareEntry } from "../../types/kRepoSync.
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 const ENTITY_ICON = {
-    knowledge: BookOpen,
-    node:      FolderOpen,
-    question:  MessageSquare,
+    knowledge:  BookOpen,
+    node:       FolderOpen,
+    question:   MessageSquare,
+    attachment: Code2,
 } as const;
 
 const ENTITY_LABEL = {

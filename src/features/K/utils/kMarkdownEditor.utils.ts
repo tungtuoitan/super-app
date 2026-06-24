@@ -134,7 +134,10 @@ export function buildMarkdown(questions: KQuestion[]): string {
     const lines: string[] = [];
 
     for (const q of sorted) {
-        const tag = buildMetadata({ id: q.id, order: q.sortOrder ?? 0 });
+        const meta: Metadata = { id: q.id, order: q.sortOrder ?? 0 };
+        const attIds = q.attachments?.map(a => a.id) ?? [];
+        if (attIds.length > 0) meta.atts = attIds.join(",");
+        const tag = buildMetadata(meta);
         if (q.statusCode === "draft") {
             if (q.answer?.trim()) {
                 lines.push(`<!--# ${q.question} ${tag}`);
