@@ -6,6 +6,8 @@ export interface ParsedQuestion {
     id: number | null;
     question: string;
     answer: string;
+    context: string | null;
+    contextQuestionId: number | null;
     isDraft: boolean;
     /** Raw metadata from the bracket tag — for future extensibility */
     meta: Record<string, string | number>;
@@ -18,7 +20,9 @@ type Metadata = Record<string, string | number>;
 /** Parse `[id:5 foo:bar]` → `{ id: 5, foo: "bar" }` */
 function parseMetadata(bracket: string): Metadata {
     const meta: Metadata = {};
-    for (const m of bracket.matchAll(/(\w+):(\S+)/g)) {
+    // Match `key:val` where val excludes whitespace AND the closing `]` so that
+    // `atts:2]` doesn't capture the bracket as part of the value.
+    for (const m of bracket.matchAll(/(\w+):([^\s\]]+)/g)) {
         const raw = m[2];
         meta[m[1]] = isNaN(Number(raw)) ? raw : Number(raw);
     }
@@ -61,10 +65,18 @@ export function validateMarkdown(md: string): MarkdownError[] {
     const lines = md.split("\n");
     let inDraftBlock = false;
     let draftBlockStart = -1;
+    let inCodeBlock = false;
 
     for (let i = 0; i < lines.length; i++) {
         const lineNum = i + 1;
         const line = lines[i].trimEnd();
+
+        // Track fenced code blocks so `#` inside code is not validated as a heading
+        if (line.startsWith("```") || line.startsWith("~~~")) {
+            inCodeBlock = !inCodeBlock;
+            continue;
+        }
+        if (inCodeBlock) continue;
 
         // ── Inside a multi-line draft block ───────────────────────────────────
         if (inDraftBlock) {
@@ -135,6 +147,9 @@ export function buildMarkdown(questions: KQuestion[]): string {
 
     for (const q of sorted) {
         const meta: Metadata = { id: q.id, order: q.sortOrder ?? 0 };
+        const hasOwnedContext = !!q.context && q.context.trim().length > 0;
+        const ctxQId = (q as KQuestion & { contextQuestionId?: number | null }).contextQuestionId;
+        if (ctxQId != null && !hasOwnedContext) meta.getctx = ctxQId;
         const attIds = q.attachments?.map(a => a.id) ?? [];
         if (attIds.length > 0) meta.atts = attIds.join(",");
         const tag = buildMetadata(meta);
@@ -147,6 +162,10 @@ export function buildMarkdown(questions: KQuestion[]): string {
             }
         } else {
             lines.push(`# ${q.question} ${tag}`);
+            if (hasOwnedContext) {
+                lines.push(q.context!.trim());
+                lines.push("");
+            }
             if (q.answer?.trim()) lines.push(q.answer.trim());
         }
         lines.push("");
@@ -184,6 +203,10 @@ export function formatMarkdown(md: string): string {
             }
         } else {
             lines.push(`# ${header}`);
+            if (p.context) {
+                lines.push(p.context);
+                lines.push("");
+            }
             if (p.answer) lines.push(p.answer);
         }
         lines.push("");
@@ -209,16 +232,45 @@ export function parseMarkdown(md: string): ParsedQuestion[] {
     const result: ParsedQuestion[] = [];
     let cur: ParsedQuestion | null = null;
     let inDraftBlock = false;
+    let inContext = false;
+    let inCodeBlock = false;
 
     const flush = () => {
         if (!cur) return;
         cur.answer = cur.answer.trim();
+        if (cur.context !== null) cur.context = cur.context.trim();
         if (cur.question.trim()) result.push(cur);
         cur = null;
+        inContext = false;
+        inCodeBlock = false;
     };
 
     for (const raw of md.split("\n")) {
         const line = raw.trimEnd();
+        const isFence = line.startsWith("```") || line.startsWith("~~~");
+
+        // Context mode: capture leading code block (before answer text).
+        if (inContext) {
+            cur!.context = cur!.context === null ? line : cur!.context + "\n" + line;
+            if (isFence) inContext = false; // closing fence — context done
+            continue;
+        }
+
+        // Detect start of context: opening fence when answer is still blank.
+        if (cur && !cur.isDraft && !inCodeBlock && isFence && !cur.answer.trim() && cur.context === null) {
+            inContext = true;
+            cur.context = line; // include opening fence
+            continue;
+        }
+
+        // Track fenced code blocks in answer so `#` / `-->` inside code aren't misinterpreted.
+        if (isFence) inCodeBlock = !inCodeBlock;
+        if (inCodeBlock) {
+            if (cur && !cur.isDraft) {
+                cur.answer = cur.answer ? cur.answer + "\n" + line : line;
+            }
+            continue;
+        }
 
         // ── Start of draft block: <!--# Question [id:X] [-->] ────────────────
         if (/^<!--\s*#\s/.test(line)) {
@@ -236,7 +288,15 @@ export function parseMarkdown(md: string): ParsedQuestion[] {
 
             // Require an id — can't create a draft question without saving first
             if (question && typeof meta.id === "number") {
-                cur = { id: meta.id, question, answer: "", isDraft: true, meta };
+                cur = {
+                    id: meta.id,
+                    question,
+                    answer: "",
+                    context: null,
+                    contextQuestionId: typeof meta.getctx === "number" ? meta.getctx : null,
+                    isDraft: true,
+                    meta,
+                };
                 if (isSingleLine) {
                     flush();
                 } else {
@@ -269,6 +329,8 @@ export function parseMarkdown(md: string): ParsedQuestion[] {
                     id: typeof meta.id === "number" ? meta.id : null,
                     question,
                     answer: "",
+                    context: null,
+                    contextQuestionId: typeof meta.getctx === "number" ? meta.getctx : null,
                     isDraft: false,
                     meta,
                 };

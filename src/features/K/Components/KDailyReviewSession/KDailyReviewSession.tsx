@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, PenLine, Move, LayoutGrid, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SCORE_DELAY_MS, BALL_BG, RING_COLOR, NEUTRAL_RING, SCORE_BUTTONS, SCORE_CONFIG } from "./kDailyReviewSession.constants";
 import { useKDailyReviewSession, type KDailyReviewSessionProps } from "./useKDailyReviewSession.helper";
 import { KAttachmentViewerDialog } from "../small/KAttachmentViewerDialog";
 import type { KAttachment } from "../../types/kAttachment.type";
+import { getShikiHighlighter, SHIKI_THEME } from "../../utils/shikiHighlighter";
 
 export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, onBack, isQuickQuiz }: KDailyReviewSessionProps) {
     const {
@@ -31,6 +32,26 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
     } = useKDailyReviewSession({ nodeId, questions, onComplete, isQuickQuiz });
 
     const [selectedAtt, setSelectedAtt] = useState<KAttachment | null>(null);
+    const [contextHtml, setContextHtml] = useState<string>("");
+
+    useEffect(() => {
+        const raw = currentQuestion?.context;
+        if (!raw) { setContextHtml(""); return; }
+        // Extract language from opening fence line e.g. ```python
+        const langMatch = raw.match(/^```(\w*)/);
+        const lang = langMatch?.[1] || "text";
+        // Strip fence lines to get the raw code
+        const code = raw.replace(/^```\w*\n?/, "").replace(/\n?```$/, "");
+        let cancelled = false;
+        getShikiHighlighter()
+            .then(hl => {
+                if (cancelled) return;
+                const html = hl.codeToHtml(code, { lang, theme: SHIKI_THEME });
+                setContextHtml(html);
+            })
+            .catch(() => { if (!cancelled) setContextHtml(""); });
+        return () => { cancelled = true; };
+    }, [currentQuestion?.id]);
 
     // ── Summary screen (disabled — session auto-completes on last answer) ────
     // Uncomment the block below to re-enable the summary + Done button flow.
@@ -113,15 +134,17 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
                         Cancel
                     </button>
                     <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => setScoreMode(scoreMode === "throw" ? "click" : "throw")}
-                            title={scoreMode === "throw" ? "Switch to button mode" : "Switch to throw mode"}
-                            className="flex items-center gap-1.5 text-xs transition-colors"
-                        >
-                            <Move className={cn("w-3.5 h-3.5 transition-colors", scoreMode === "throw" ? "text-zinc-300" : "text-zinc-600")} />
-                            <span className="text-zinc-700 text-[10px]">/</span>
-                            <LayoutGrid className={cn("w-3.5 h-3.5 transition-colors", scoreMode === "click" ? "text-zinc-300" : "text-zinc-600")} />
-                        </button>
+                        {!isMobile && (
+                            <button
+                                onClick={() => setScoreMode(scoreMode === "throw" ? "click" : "throw")}
+                                title={scoreMode === "throw" ? "Switch to button mode" : "Switch to throw mode"}
+                                className="flex items-center gap-1.5 text-xs transition-colors"
+                            >
+                                <Move className={cn("w-3.5 h-3.5 transition-colors", scoreMode === "throw" ? "text-zinc-300" : "text-zinc-600")} />
+                                <span className="text-zinc-700 text-[10px]">/</span>
+                                <LayoutGrid className={cn("w-3.5 h-3.5 transition-colors", scoreMode === "click" ? "text-zinc-300" : "text-zinc-600")} />
+                            </button>
+                        )}
                         <button
                             onClick={(e) => { e.stopPropagation(); handleMarkDraft(); }}
                             title="Mark as draft and skip"
@@ -175,6 +198,16 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
                     </div>
                 )}
 
+                {/* Context code block — always visible, including after reveal */}
+                {contextHtml && (
+                    <div className="shrink-0 rounded-lg border border-zinc-700/50 overflow-hidden text-left">
+                        <div
+                            className="shiki-host text-[12px] leading-[1.55] font-mono max-h-48 overflow-auto text-left [&_pre]:px-4 [&_pre]:py-3 [&_pre]:m-0 [&_pre]:min-w-max [&_pre]:text-left [&_code]:text-left"
+                            dangerouslySetInnerHTML={{ __html: contextHtml }}
+                        />
+                    </div>
+                )}
+
                 {/* Answer box — always visible, blurred until tapped */}
                 <div className="relative shrink-0" style={{ height: "calc(10 * 1.6rem)" }}>
                     <div
@@ -208,8 +241,8 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
                 </div>
 
 
-                {/* Score buttons — desktop always, mobile when in click mode */}
-                {(!isMobile || scoreMode === "click") && (
+                {/* Score buttons — desktop only; mobile always uses ball gesture */}
+                {!isMobile && (
                     <div className={cn(
                         "flex items-center gap-1.5 shrink-0 transition-opacity duration-300",
                         !showResult && "opacity-0 pointer-events-none",

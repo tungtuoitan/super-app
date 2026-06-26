@@ -19,6 +19,10 @@ export interface KQuestion {
     question: string;
     /** k.question.description — expected answer */
     answer: string | null;
+    /** Resolved context code snippet (owned or borrowed from another question) */
+    context?: string | null;
+    /** ID of another question to borrow context from (server-side resolved into `context`) */
+    contextQuestionId?: number | null;
     /** "learning" = active in review; "draft" = excluded from review sessions */
     statusCode: string;
     /** Display/sort order within the knowledge */
@@ -39,9 +43,9 @@ export interface KQuestion {
 
 export interface KUpdateQuestionsRequest {
     /** New questions to add to the knowledge */
-    addQuestions: Array<{ name: string; description?: string | null; sortOrder?: number }>;
+    addQuestions: Array<{ name: string; description?: string | null; context?: string | null; contextQuestionId?: number | null; sortOrder?: number }>;
     /** Existing questions to update name/description */
-    updateQuestions: Array<{ id: number; name: string; description?: string | null; sortOrder?: number }>;
+    updateQuestions: Array<{ id: number; name: string; description?: string | null; context?: string | null; contextQuestionId?: number | null; sortOrder?: number }>;
     /** k.question IDs to soft-delete */
     deleteQuestionIds: number[];
     /** k.question IDs to restore (clear deletedAt) */
@@ -115,6 +119,8 @@ export interface KDailySessionQuestion {
     id: number;
     question: string;
     answer: string | null;
+    /** Resolved context code snippet (owned or borrowed from another question) */
+    context?: string | null;
     /** Owning node name — populated by knowledge-wide review screens (e.g. Review All). */
     nodeName?: string | null;
     /** Seconds from now until next review for each score 1–5 */

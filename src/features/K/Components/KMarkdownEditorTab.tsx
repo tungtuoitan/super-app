@@ -109,17 +109,19 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
                 _console.warning(`[KMarkdown] deleted: ${toDelete.map(q => `[${q.id}] ${q.question}`).join(", ")}`);
             }
 
-            const addQuestions: Array<{ name: string; description: string | null; sortOrder: number }> = [];
-            const updateQuestions: Array<{ id: number; name: string; description: string | null; sortOrder: number }> = [];
+            const addQuestions: Array<{ name: string; description: string | null; context: string | null; contextQuestionId: number | null; sortOrder: number }> = [];
+            const updateQuestions: Array<{ id: number; name: string; description: string | null; context: string | null; contextQuestionId: number | null; sortOrder: number }> = [];
             const toggleDraftQuestionIds: number[] = [];
 
             parsedQuestions.forEach((p, idx) => {
                 const sortOrder = idx + 1;
+                const ctx = p.context?.trim() || null;
+                const getctx = p.contextQuestionId ?? null;
 
                 if (p.id === null) {
                     // New questions can only be active (draft requires saving first to get an id)
                     if (!p.isDraft) {
-                        addQuestions.push({ name: p.question, description: p.answer || null, sortOrder });
+                        addQuestions.push({ name: p.question, description: p.answer || null, context: ctx, contextQuestionId: getctx, sortOrder });
                     }
                     return;
                 }
@@ -133,14 +135,16 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
                     toggleDraftQuestionIds.push(p.id);
                 }
 
-                // Update content / sortOrder
+                // Update content / sortOrder / context
                 const descToSend = p.answer || null;
                 const nameChanged = orig.question !== p.question;
                 const descChanged = (orig.answer ?? "") !== p.answer;
                 const orderChanged = orig.sortOrder !== sortOrder;
+                const ctxChanged = (orig.context ?? "") !== (ctx ?? "");
+                const getctxChanged = (orig.contextQuestionId ?? null) !== getctx;
 
-                if (nameChanged || descChanged || orderChanged) {
-                    updateQuestions.push({ id: p.id, name: p.question, description: descToSend, sortOrder });
+                if (nameChanged || descChanged || orderChanged || ctxChanged || getctxChanged) {
+                    updateQuestions.push({ id: p.id, name: p.question, description: descToSend, context: ctx, contextQuestionId: getctx, sortOrder });
                 }
             });
 
