@@ -43,10 +43,12 @@ export function KEditorPanel() {
     const { $user } = useAuthStore();
     const debugLog = useDebugLog();
 
-    const visibleTabs = isMobile ? TABS.filter(t => t.id !== "general" && t.id !== "qflow") : TABS;
+    const visibleTabs = isMobile ? TABS.filter(t => t.id !== "general" && t.id !== "qflow" && t.id !== "qlist") : TABS;
 
     const [activeTab, setActiveTabLocal] = useState<KTab>(() => {
         const saved = tab?.metadata?.activeKTab as KTab | undefined;
+        const hiddenOnMobile = new Set<KTab>(["general", "qflow", "qlist"]);
+        if (saved && isMobile && hiddenOnMobile.has(saved)) return "markdown";
         return saved ?? (isNew ? "general" : "markdown");
     });
     const [selectedNodeId, setSelectedNodeId] = useState<number | null>(() => {

@@ -194,8 +194,8 @@ export function KRepoConflictDialog({
     );
 
     const handleApply = async () => {
-        await onResolve(items);
         onOpenChange(false);
+        await onResolve(items);
     };
 
     return (
