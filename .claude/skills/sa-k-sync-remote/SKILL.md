@@ -28,10 +28,14 @@ K module sync DB ↔ git remote 2 chiều. **DB là source of truth**, remote l�
 - `Components/small/KRepoConflictDialog.tsx` — popup Review Changes
 - `Components/small/KRepoDiffPanel.tsx` — diff panel cũ (per-question)
 - `Components/small/KAttachmentViewerDialog.tsx` — Monaco read-only popup khi click attachment
+- `Components/KMarkdownEditorTab.tsx` — markdown tab editor, save flow gửi context + directives
+- `Components/KDailyReviewSession/KDailyReviewSession.tsx` — review UI hiển thị context với Shiki
 - `Components/KQList.tsx` — question list với attachment chip + link picker
 - `Components/KDialog.tsx` — node dialog với attachment section ở edit mode
 - `store/kRepoSync.store.ts` — zustand store
-- `types/kRepoSync.type.ts`, `types/kAttachment.type.ts`
+- `types/kRepoSync.type.ts`, `types/kAttachment.type.ts`, `types/kQuiz.type.ts` (KQuestion + KDailySessionQuestion có `context`)
+- `utils/kMarkdownEditor.utils.ts` — parseMarkdown / buildMarkdown / formatMarkdown / validateMarkdown
+- `utils/shikiHighlighter.ts` — getShikiHighlighter / SHIKI_THEME / resolveLang
 - Shell: `src/shell/components/SettingsDialog.tsx` (UI K Repo Sync section)
 
 ## Layout repo
@@ -49,7 +53,33 @@ Example/               ← attachments (1 file = 1 row k.attachment)
   ...
 ```
 
-Mỗi `.md` có front-matter `id` + `name` (id link tới DB entity). Body: heading `# <Q> [id:N order:M atts:1,2,3]` + answer. Draft block: `<!--# <Q> [id:N order:M] ... -->`.
+Mỗi `.md` có front-matter `id` + `name` (id link tới DB entity). Body: heading `# <Q> [id:N order:M atts:1,2,3 open-context]` + (optional context code block) + answer. Draft block: `<!--# <Q> [id:N order:M] ... -->`.
+
+**Format `.md` cho question có context**:
+```markdown
+# Question A [id:5 order:1 open-context]
+```python
+# code context — hiển thị cùng câu hỏi khi review
+def foo():
+    return 1
+```
+
+Answer text here
+
+# Question B [id:6 order:2]
+Answer B — kế thừa context của A do cùng scope
+
+# Question C [id:7 order:3 close-context]
+Answer C — kế thừa và đóng scope (inclusive)
+
+# Question D [id:8 order:4]
+Answer D — KHÔNG kế thừa
+```
+
+- **Owned context**: code block ngay sau heading (trước answer). Parser detect leading fence → context, không phải answer.
+- **Scope inheritance**: `open-context` trên question có owned context mở scope. Tất cả question tiếp theo (không có context riêng) cho đến question có `close-context` (inclusive) kế thừa context string (denormalized — copy trực tiếp vào `q.context` khi parse, không FK).
+- **Directives**: flag-only tokens trong bracket tag (không có `:`) — e.g. `open-context`, `close-context`. Lưu DB dạng JSON array `["open-context"]` trong `k.question.directives nvarchar(max)`.
+- Code blocks bên trong answer (không phải leading) vẫn được track qua `inCodeBlock` state để `# comment` / `-->` bên trong không bị parse nhầm thành heading/draft-close.
 
 Mỗi file trong `Example/` có dòng đầu là metadata comment kiểu language-aware:
 - `// att-id:5 title:"case1.cs"` (cs/js/ts/...)
@@ -113,7 +143,49 @@ OldText/NewText format:
 
 **LibGit2Sharp gotcha**: `Tree` object không thread-safe sau `await`. Phải gọi `WalkMdFiles` + `WalkAllFiles` (cho `Example/`) **trước first await** trong `GetCompareDiffAsync` rồi cache vào dictionary, không gọi lại sau khi đã `await` thứ gì đó.
 
-## Attachments (Example/ folder)
+## Context field (`k.question.context` + directives scope)
+
+**Schema** (updated 2026-06-27, migration `add_context_to_k_question.sql`):
+- `k.question.context nvarchar(max) NULL` — owned context code snippet (denormalized — scope children get a copy)
+- `k.question.directives nvarchar(max) NULL` — JSON array of directive strings e.g. `["open-context"]`, `["close-context"]`
+
+**Directives**: flag-only tokens in bracket tag (no colon). Currently supported:
+- `open-context` — marks a question as context scope opener; its `context` block is the scope source
+- `close-context` — last question in scope (inclusive); questions after this do NOT inherit
+
+**Scope resolution** (happens at parse time, both BE and FE):
+After `Flush()` collects all questions from a file, a second pass walks the list:
+1. Find question with `open-context` + non-empty context → set `scopeContext`, enter scope
+2. For each following question with no owned context: copy `scopeContext` into `q.Context`
+3. On question with `close-context`: copy context then exit scope
+4. If no `close-context` found → scope extends to EOF
+
+**Storage**: context is **denormalized** — inherited questions get the full context string copied into their own `context` column. No FK at query time. If opener's code is edited, re-sync copies the new value to all children.
+
+**Markdown parser/builder** (`KRepoSyncService.cs` lines ~1724-1870):
+- `ParseQuestions` state: `bool inContext`, `string? context`, `IReadOnlyList<string> directives`. Context detection PHẢI check trước `inCodeBlock` toggle.
+- Scope resolution pass runs after main parse loop.
+- `ExtractMeta`: flag tokens (no colon) → `directives` list. Key:val tokens → `id`/`order`/`atts` as before. `getctx` removed.
+- `BuildRepoMarkdown`: emits directives as space-separated flag tokens inside bracket: `[id:5 order:1 open-context atts:1,2]`. `DeserializeDirectives(q.Directives)` reads from DB.
+- `QuestionsEqual`: compares context strings (not directives — directives change only causes a rebuild, not a conflict flag).
+
+**FE markdown editor** (`kMarkdownEditor.utils.ts`):
+- `ParsedQuestion` interface has `context: string | null`, `directives: string[]` (not `contextQuestionId`).
+- `parseMetadata` returns both `meta` (key:val) and `directives` (flag tokens). Regex: `(?<!\w)([a-z][a-z-]+[a-z])(?!\s*:)(?=[\s\]])`.
+- `buildMarkdown` emits directives after `order:N` in tag, before `atts:`.
+- `parseMarkdown` runs same scope resolution pass as BE.
+- `KMarkdownEditorTab.tsx` save flow sends `directives` (not `contextQuestionId`). Dirty-check includes `JSON.stringify(directives)` comparison.
+
+**List endpoints**: trả raw `q.Context` + `q.Directives` — markdown editor cần round-trip đúng.
+**Daily-session endpoints**: chạy `BuildScopeContextMap` tại query time (group by NodeId → scope resolution per node) để scope children nhận context kể cả khi Apply chưa denormalize (e.g. opener là draft → `q.Context` null trong DB). Fallback cho draft opener: nếu `q.Context` null dùng `q.Description` (code block đã leak vào đó).
+
+**Compare diff** (`GetCompareDiffAsync`): append `\ndirectives: open-context, close-context` nếu có — user thấy đầy đủ bối cảnh.
+
+**FE Daily Review UI** (`KDailyReviewSession.tsx`):
+- Shiki highlight context (reuse `getShikiHighlighter`, `SHIKI_THEME` từ `KAttachmentViewerDialog`). Detect language từ opening fence `\`\`\`<lang>`.
+- Context block hiển thị giữa attachment pills và answer box. Hiển thị LUÔN (không fade khi reveal answer — user xem cả context lẫn answer cùng lúc).
+- `overflow-auto` (cả ngang lẫn dọc) + `[&_pre]:min-w-max [&_pre]:m-0` để Shiki bg phủ toàn bộ vùng scrollable khi code dài.
+- Trên mobile: score buttons + scoreMode toggle ẨN — chỉ dùng ball gesture để có không gian cho context + answer.
 
 **Schema (`k.attachment` + `k.attachment_link`)**:
 - `k.attachment(id, user_id, title, type, language, content nvarchar(max), sort_order, created_at, updated_at, deleted_at)` — `content` là `nvarchar(max)` (KHÔNG dùng `text` vì non-Unicode → mất tiếng Việt)
@@ -188,6 +260,15 @@ Daemon path (web edit → save) đi qua `DoForceUpdateRemoteAsync`, không qua r
 - **Filename ref resolve cả full title và basename** — register `case1.cs` + `case1` cùng map về 1 id (`RegisterAttTitle` helper). Edge case: 2 file cùng basename khác extension → basename chỉ map về file đầu tiên.
 - **`BuildRepoMarkdown` MUST nhận `attsByQ`**: cả `DoPushAsync` và `DoForceUpdateRemoteAsync` phải load `KAttachmentLinks` rồi pass vào, không thì `atts:` tag bị drop khi push.
 - **`atts:` chỉ accept `atts` không accept `att`** (singular là typo) — quyết định tránh drift.
+- **Draft opener context not preserved on Apply**: draft parser never extracts context (code block goes into `answer`), so `pq.Context == null`. Apply flow uses `effectiveContext = pq.IsDraft ? q.Context : pq.Context` to preserve existing DB context. `QuestionsEqual` also skips context comparison for drafts (`|| repoDraft`) to avoid false "modified" entries. Compare diff display uses `repoDisplayContext = dbQ.Context` fallback for draft openers.
+- **Daily session scope resolution**: `BuildScopeContextMap` runs at query time (per node, ordered by SortOrder) — do NOT rely solely on denormalized `q.Context` at session time. Draft opener fallback: `q.Context ?? q.Description` (draft parser leaks context into Description).
+- **`getctx:` chỉ accept numeric ID** (int question id). Filename ref không hỗ trợ — chỉ dùng cho question→question reference.
+- **Context detection PHẢI check trước `inCodeBlock` toggle** trong `ParseQuestions`: nếu line là opening fence và đây là leading block (`answer` còn trống) → vào `inContext` mode. Nếu xử lý `inCodeBlock = !inCodeBlock` trước thì code block bị hút vào answer, context luôn null.
+- **Scope resolution pass** chạy SAU main parse loop — không làm trong-loop vì cần biết toàn bộ danh sách trước.
+- **Directives là flag tokens** (không có `:`) trong bracket. `ExtractMeta` regex `(\w[\w-]*):([^\s\]]+)` cho key:val; regex riêng `(?<!\w)([a-z][a-z-]+[a-z])(?!\s*:)(?=[\s\]])` cho directives. FE và BE phải đồng bộ cùng regex.
+- **Context denormalized**: children nhận bản copy của opener's context string. Không có FK runtime. Nếu opener thay đổi context → phải re-sync để update children.
+- **List endpoints trả raw `Context` + `Directives`** — không resolve, vì markdown editor cần biết owned vs scope. Daily-session endpoints trả `q.Context` trực tiếp (đã denormalized tại Apply).
+- **Daily review hiển thị context LUÔN** (không fade khi reveal answer) — user xem context lẫn answer cùng lúc. Mobile ẩn score buttons + scoreMode toggle, chỉ dùng ball gesture.
 
 ## Endpoints
 
@@ -212,4 +293,8 @@ Daemon path (web edit → save) đi qua `DoForceUpdateRemoteAsync`, không qua r
 7. **`BuildRepoMarkdown` luôn pass `attsByQ`** — cả `DoPushAsync` và `DoForceUpdateRemoteAsync`
 8. Att-ref resolve hỗ trợ cả full title và basename (`RegisterAttTitle` helper)
 9. Chỉ check key `atts` (plural) — KHÔNG accept `att`
-10. Có test cover ở `SuperAppServices.Tests/KRepoAttachmentRoundTripTests.cs` — chạy `dotnet test` sau khi sửa parser/builder
+10. Context detection ở `ParseQuestions` PHẢI nằm trước `inCodeBlock` toggle
+11. Scope resolution pass chạy SAU main parse loop (không trong-loop)
+12. Cả BE (`KRepoSyncService.cs`) và FE (`kMarkdownEditor.utils.ts`) parser/builder/scope phải đồng bộ — round-trip qua cả 2 phải bằng nhau
+13. List endpoints trả raw `Context` + `Directives`; daily endpoints trả `Context` trực tiếp (denormalized)
+14. Có test cover ở `SuperAppServices.Tests/KRepoMarkdownRoundTripTests.cs` — chạy `dotnet test` sau khi sửa parser/builder

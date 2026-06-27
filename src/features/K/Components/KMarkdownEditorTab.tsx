@@ -109,19 +109,18 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
                 _console.warning(`[KMarkdown] deleted: ${toDelete.map(q => `[${q.id}] ${q.question}`).join(", ")}`);
             }
 
-            const addQuestions: Array<{ name: string; description: string | null; context: string | null; contextQuestionId: number | null; sortOrder: number }> = [];
-            const updateQuestions: Array<{ id: number; name: string; description: string | null; context: string | null; contextQuestionId: number | null; sortOrder: number }> = [];
+            const addQuestions: Array<{ name: string; description: string | null; context: string | null; directives: string[] | null; sortOrder: number }> = [];
+            const updateQuestions: Array<{ id: number; name: string; description: string | null; context: string | null; directives: string[] | null; sortOrder: number }> = [];
             const toggleDraftQuestionIds: number[] = [];
 
             parsedQuestions.forEach((p, idx) => {
                 const sortOrder = idx + 1;
-                const ctx = p.context?.trim() || null;
-                const getctx = p.contextQuestionId ?? null;
+                const ctx  = p.context?.trim() || null;
+                const dirs = p.directives.length > 0 ? p.directives : null;
 
                 if (p.id === null) {
-                    // New questions can only be active (draft requires saving first to get an id)
                     if (!p.isDraft) {
-                        addQuestions.push({ name: p.question, description: p.answer || null, context: ctx, contextQuestionId: getctx, sortOrder });
+                        addQuestions.push({ name: p.question, description: p.answer || null, context: ctx, directives: dirs, sortOrder });
                     }
                     return;
                 }
@@ -129,22 +128,25 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
                 const orig = activeQs.find(q => q.id === p.id);
                 if (!orig) return;
 
-                // Toggle draft if status changed
+                // Draft parser never extracts context, so preserve existing DB context for drafts.
+                const effectiveCtx = p.isDraft ? (orig.context ?? null) : ctx;
+
                 const origIsDraft = orig.statusCode === "draft";
                 if (origIsDraft !== p.isDraft) {
                     toggleDraftQuestionIds.push(p.id);
                 }
 
-                // Update content / sortOrder / context
                 const descToSend = p.answer || null;
-                const nameChanged = orig.question !== p.question;
-                const descChanged = (orig.answer ?? "") !== p.answer;
+                const nameChanged  = orig.question !== p.question;
+                const descChanged  = (orig.answer ?? "") !== p.answer;
                 const orderChanged = orig.sortOrder !== sortOrder;
-                const ctxChanged = (orig.context ?? "") !== (ctx ?? "");
-                const getctxChanged = (orig.contextQuestionId ?? null) !== getctx;
+                // Draft parser never extracts context (goes into answer body), so skip
+                // context diff for draft questions to avoid wiping the existing context.
+                const ctxChanged   = !p.isDraft && (orig.context ?? "") !== (ctx ?? "");
+                const dirsChanged  = JSON.stringify(orig.directives ?? []) !== JSON.stringify(p.directives);
 
-                if (nameChanged || descChanged || orderChanged || ctxChanged || getctxChanged) {
-                    updateQuestions.push({ id: p.id, name: p.question, description: descToSend, context: ctx, contextQuestionId: getctx, sortOrder });
+                if (nameChanged || descChanged || orderChanged || ctxChanged || dirsChanged) {
+                    updateQuestions.push({ id: p.id, name: p.question, description: descToSend, context: effectiveCtx, directives: dirs, sortOrder });
                 }
             });
 

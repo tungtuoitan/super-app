@@ -7,7 +7,7 @@ export interface ParsedQuestion {
     question: string;
     answer: string;
     context: string | null;
-    contextQuestionId: number | null;
+    directives: string[];
     isDraft: boolean;
     /** Raw metadata from the bracket tag — for future extensibility */
     meta: Record<string, string | number>;
@@ -17,16 +17,20 @@ export interface ParsedQuestion {
 
 type Metadata = Record<string, string | number>;
 
-/** Parse `[id:5 foo:bar]` → `{ id: 5, foo: "bar" }` */
-function parseMetadata(bracket: string): Metadata {
+/** Parse `[id:5 foo:bar open-context]` → `{ id: 5, foo: "bar" }` and directives `["open-context"]` */
+function parseMetadata(bracket: string): { meta: Metadata; directives: string[] } {
     const meta: Metadata = {};
-    // Match `key:val` where val excludes whitespace AND the closing `]` so that
-    // `atts:2]` doesn't capture the bracket as part of the value.
+    const directives: string[] = [];
+    // key:val pairs
     for (const m of bracket.matchAll(/(\w+):([^\s\]]+)/g)) {
         const raw = m[2];
         meta[m[1]] = isNaN(Number(raw)) ? raw : Number(raw);
     }
-    return meta;
+    // flag-only tokens (no colon) — e.g. open-context, close-context
+    for (const m of bracket.matchAll(/(?<!\w)([a-z][a-z-]+[a-z])(?!\s*:)(?=[\s\]])/g)) {
+        directives.push(m[1]);
+    }
+    return { meta, directives };
 }
 
 /** Build `{ id: 5, foo: "bar" }` → `[id:5 foo:bar]` */
@@ -35,13 +39,13 @@ function buildMetadata(meta: Metadata): string {
     return parts.length ? `[${parts.join(" ")}]` : "";
 }
 
-/** Strip the first `[...]` block from text and return clean text + parsed meta */
-function extractMetadata(text: string): { clean: string; meta: Metadata } {
+/** Strip the first `[...]` block from text and return clean text + parsed meta + directives */
+function extractMetadata(text: string): { clean: string; meta: Metadata; directives: string[] } {
     const match = text.match(/\[([^\]]+)\]/);
-    if (!match) return { clean: text.trim(), meta: {} };
-    const meta = parseMetadata(match[1]);
+    if (!match) return { clean: text.trim(), meta: {}, directives: [] };
+    const { meta, directives } = parseMetadata(match[1]);
     const clean = text.replace(/\s*\[[^\]]+\]\s*/g, "").trim();
-    return { clean, meta };
+    return { clean, meta, directives };
 }
 
 // ── Validation ────────────────────────────────────────────────────────────────
@@ -147,12 +151,15 @@ export function buildMarkdown(questions: KQuestion[]): string {
 
     for (const q of sorted) {
         const meta: Metadata = { id: q.id, order: q.sortOrder ?? 0 };
-        const hasOwnedContext = !!q.context && q.context.trim().length > 0;
-        const ctxQId = (q as KQuestion & { contextQuestionId?: number | null }).contextQuestionId;
-        if (ctxQId != null && !hasOwnedContext) meta.getctx = ctxQId;
+        const dirs = q.directives ?? [];
         const attIds = q.attachments?.map(a => a.id) ?? [];
         if (attIds.length > 0) meta.atts = attIds.join(",");
-        const tag = buildMetadata(meta);
+        // Build tag: [id:X order:Y open-context atts:1,2]
+        const metaParts = Object.entries(meta).map(([k, v]) => `${k}:${v}`);
+        const dirParts = dirs.filter(d => d.length > 0);
+        const tagInner = [...metaParts, ...dirParts].join(" ");
+        const tag = tagInner ? `[${tagInner}]` : "";
+        const hasOwnedContext = !!q.context && q.context.trim().length > 0 && dirs.includes("open-context");
         if (q.statusCode === "draft") {
             if (q.answer?.trim()) {
                 lines.push(`<!--# ${q.question} ${tag}`);
@@ -190,8 +197,10 @@ export function formatMarkdown(md: string): string {
 
     const lines: string[] = [];
     for (const p of parsed) {
-        // p.meta already contains id (and any extra keys) as parsed from the bracket
-        const tag = buildMetadata(p.meta);
+        const metaParts = Object.entries(p.meta).map(([k, v]) => `${k}:${v}`);
+        const dirParts = p.directives.filter(d => d.length > 0);
+        const tagInner = [...metaParts, ...dirParts].join(" ");
+        const tag = tagInner ? `[${tagInner}]` : "";
         const header = tag ? `${p.question} ${tag}` : p.question;
 
         if (p.isDraft) {
@@ -249,21 +258,18 @@ export function parseMarkdown(md: string): ParsedQuestion[] {
         const line = raw.trimEnd();
         const isFence = line.startsWith("```") || line.startsWith("~~~");
 
-        // Context mode: capture leading code block (before answer text).
         if (inContext) {
             cur!.context = cur!.context === null ? line : cur!.context + "\n" + line;
-            if (isFence) inContext = false; // closing fence — context done
+            if (isFence) inContext = false;
             continue;
         }
 
-        // Detect start of context: opening fence when answer is still blank.
         if (cur && !cur.isDraft && !inCodeBlock && isFence && !cur.answer.trim() && cur.context === null) {
             inContext = true;
-            cur.context = line; // include opening fence
+            cur.context = line;
             continue;
         }
 
-        // Track fenced code blocks in answer so `#` / `-->` inside code aren't misinterpreted.
         if (isFence) inCodeBlock = !inCodeBlock;
         if (inCodeBlock) {
             if (cur && !cur.isDraft) {
@@ -272,65 +278,45 @@ export function parseMarkdown(md: string): ParsedQuestion[] {
             continue;
         }
 
-        // ── Start of draft block: <!--# Question [id:X] [-->] ────────────────
         if (/^<!--\s*#\s/.test(line)) {
             flush();
             inDraftBlock = false;
 
             const isSingleLine = /-->\s*$/.test(line);
-            // Strip opening <!--# and optionally closing -->
             const inner = line
                 .replace(/^<!--\s*#\s+/, "")
                 .replace(/\s*-->\s*$/, "")
                 .trim();
 
-            const { clean: question, meta } = extractMetadata(inner);
+            const { clean: question, meta, directives } = extractMetadata(inner);
 
-            // Require an id — can't create a draft question without saving first
             if (question && typeof meta.id === "number") {
-                cur = {
-                    id: meta.id,
-                    question,
-                    answer: "",
-                    context: null,
-                    contextQuestionId: typeof meta.getctx === "number" ? meta.getctx : null,
-                    isDraft: true,
-                    meta,
-                };
-                if (isSingleLine) {
-                    flush();
-                } else {
-                    inDraftBlock = true;
-                }
+                cur = { id: meta.id, question, answer: "", context: null, directives, isDraft: true, meta };
+                if (isSingleLine) { flush(); } else { inDraftBlock = true; }
             }
             continue;
         }
 
-        // ── Inside multi-line draft block ─────────────────────────────────────
         if (inDraftBlock) {
             const isClosing = /-->\s*$/.test(line);
             const content = line.replace(/\s*-->\s*$/, "");
             if (cur && content) {
                 cur.answer = cur.answer ? cur.answer + "\n" + content : content;
             }
-            if (isClosing) {
-                flush();
-                inDraftBlock = false;
-            }
+            if (isClosing) { flush(); inDraftBlock = false; }
             continue;
         }
 
-        // ── Active question: # Question [id:X]  or  # New question ───────────
         if (/^#\s/.test(line)) {
             flush();
-            const { clean: question, meta } = extractMetadata(line.slice(2).trim());
+            const { clean: question, meta, directives } = extractMetadata(line.slice(2).trim());
             if (question) {
                 cur = {
                     id: typeof meta.id === "number" ? meta.id : null,
                     question,
                     answer: "",
                     context: null,
-                    contextQuestionId: typeof meta.getctx === "number" ? meta.getctx : null,
+                    directives,
                     isDraft: false,
                     meta,
                 };
@@ -338,12 +324,33 @@ export function parseMarkdown(md: string): ParsedQuestion[] {
             continue;
         }
 
-        // ── Answer lines (active questions only) ──────────────────────────────
         if (cur && !cur.isDraft) {
             cur.answer = cur.answer ? cur.answer + "\n" + line : line;
         }
     }
     flush();
+
+    // Scope resolution: inherit context from open-context question to all questions
+    // up to and including the close-context question.
+    let scopeContext: string | null = null;
+    let inScope = false;
+    for (let i = 0; i < result.length; i++) {
+        const pq = result[i];
+        const hasOpen  = pq.directives.includes("open-context");
+        const hasClose = pq.directives.includes("close-context");
+
+        if (hasOpen && pq.context) {
+            scopeContext = pq.context;
+            inScope = true;
+            continue;
+        }
+
+        if (inScope) {
+            if (!pq.context) result[i] = { ...pq, context: scopeContext };
+            if (hasClose) { inScope = false; scopeContext = null; }
+        }
+    }
+
     return result;
 }
 
