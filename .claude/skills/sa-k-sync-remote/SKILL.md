@@ -77,7 +77,11 @@ Answer D — KHÔNG kế thừa
 ```
 
 - **Owned context**: code block ngay sau heading (trước answer). Parser detect leading fence → context, không phải answer.
-- **Scope inheritance**: `open-context` trên question có owned context mở scope. Tất cả question tiếp theo (không có context riêng) cho đến question có `close-context` (inclusive) kế thừa context string (denormalized — copy trực tiếp vào `q.context` khi parse, không FK).
+- **Scope inheritance**: `open-context` + `close-context` PHẢI đi theo cặp. `open-context` đơn lẻ (không có `close-context` bên dưới) = vô nghĩa — context chỉ thuộc về chính câu đó. Khi đủ cặp: tất cả question giữa opener và closer (inclusive) kế thừa context string (denormalized — copy vào `q.context`, không FK). Rules validity:
+  1. Phải có `close-context` bên dưới trong cùng file/node
+  2. Không có question nào bên trong mang context riêng (sẽ invalidate scope)
+  3. Không có `open-context`/`close-context` lồng nhau bên trong scope
+  Implemented bởi `FindValidScopeOpenerIndices<T>` (generic helper, dùng cả BE lẫn FE).
 - **Directives**: flag-only tokens trong bracket tag (không có `:`) — e.g. `open-context`, `close-context`. Lưu DB dạng JSON array `["open-context"]` trong `k.question.directives nvarchar(max)`.
 - Code blocks bên trong answer (không phải leading) vẫn được track qua `inCodeBlock` state để `# comment` / `-->` bên trong không bị parse nhầm thành heading/draft-close.
 
@@ -136,9 +140,9 @@ So sánh remote (latest fetched) vs DB hiện tại, không write. Trả `KRepoC
 
 `entityType` của entry: `"knowledge" | "node" | "question" | "attachment"`.
 
-OldText/NewText format:
-- Node modified: `<name>\nin: <Knowledge / Parent>` (cả 2 bên cùng shape)
-- Question modified: `[active|draft] <body>`, nếu cross-node move append `\nin: <nodeName>`, nếu atts thay đổi append `\natts: [<refs>]` (repo show as-written, kể cả filename refs)
+OldText/NewText format — **thứ tự: question > directives > context > answer**:
+- `repo_only` / `db_only`: `<question>\ndirectives: ...\ncontext:\n...\n<answer>`; scope children thay context bằng `[inherits context]`
+- `modified`: `[active|draft] <question>\ndirectives: ...\ncontext:\n...\n<answer>`; cross-node move append `\nin: <nodeName>`; att changes append `\natts: [...]`
 - Attachment modified: full content (DB trước, repo sau)
 
 **LibGit2Sharp gotcha**: `Tree` object không thread-safe sau `await`. Phải gọi `WalkMdFiles` + `WalkAllFiles` (cho `Example/`) **trước first await** trong `GetCompareDiffAsync` rồi cache vào dictionary, không gọi lại sau khi đã `await` thứ gì đó.
@@ -155,10 +159,11 @@ OldText/NewText format:
 
 **Scope resolution** (happens at parse time, both BE and FE):
 After `Flush()` collects all questions from a file, a second pass walks the list:
-1. Find question with `open-context` + non-empty context → set `scopeContext`, enter scope
-2. For each following question with no owned context: copy `scopeContext` into `q.Context`
-3. On question with `close-context`: copy context then exit scope
-4. If no `close-context` found → scope extends to EOF
+1. `FindValidScopeOpenerIndices` pre-computes which openers form a valid pair (no closer = invalid, inner question with own context = invalid, nested directives = invalid)
+2. For each valid opener with non-empty context → set `scopeContext`, enter scope
+3. For each following question with no owned context: copy `scopeContext` into `q.Context`
+4. On question with `close-context`: copy context then exit scope
+5. Invalid opener → context stays private to that question, scope NOT entered
 
 **Storage**: context is **denormalized** — inherited questions get the full context string copied into their own `context` column. No FK at query time. If opener's code is edited, re-sync copies the new value to all children.
 

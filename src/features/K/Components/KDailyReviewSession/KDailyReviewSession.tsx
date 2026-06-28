@@ -6,6 +6,7 @@ import { useKDailyReviewSession, type KDailyReviewSessionProps } from "./useKDai
 import { KAttachmentViewerDialog } from "../small/KAttachmentViewerDialog";
 import type { KAttachment } from "../../types/kAttachment.type";
 import { getShikiHighlighter, SHIKI_THEME } from "../../utils/shikiHighlighter";
+import { useDebugLog } from "@/shared";
 
 export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, onBack, isQuickQuiz }: KDailyReviewSessionProps) {
     const {
@@ -31,8 +32,46 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
         handleSwipeStart,
     } = useKDailyReviewSession({ nodeId, questions, onComplete, isQuickQuiz });
 
+    const debugLog = useDebugLog();
     const [selectedAtt, setSelectedAtt] = useState<KAttachment | null>(null);
     const [contextHtml, setContextHtml] = useState<string>("");
+
+    // Log session load: dump open-context/close-context scope summary
+    useEffect(() => {
+        if (!questions?.length) return;
+        const scopeSummary = questions.map(q => ({
+            id: q.id,
+            directives: (q as any).directives ?? null,
+            hasContext: q.context != null && q.context !== "",
+            contextLen: q.context?.length ?? 0,
+        }));
+        const openers  = scopeSummary.filter(x => Array.isArray(x.directives) && x.directives.includes("open-context")).map(x => x.id);
+        const closers  = scopeSummary.filter(x => Array.isArray(x.directives) && x.directives.includes("close-context")).map(x => x.id);
+        const withCtx  = scopeSummary.filter(x => x.hasContext).map(x => x.id);
+        debugLog.log("KDailyReviewSession", "session-load-scope", {
+            totalQuestions: questions.length,
+            openers,
+            closers,
+            questionsWithContext: withCtx,
+            detail: scopeSummary,
+        });
+        debugLog.flush();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [questions]);
+
+    // Log per-question context as user advances
+    useEffect(() => {
+        if (!currentQuestion) return;
+        debugLog.log("KDailyReviewSession", "question-context-check", {
+            questionId: currentQuestion.id,
+            index: currentIndex,
+            hasContext: currentQuestion.context != null && currentQuestion.context !== "",
+            contextLen: currentQuestion.context?.length ?? 0,
+            directives: (currentQuestion as any).directives ?? null,
+        });
+        debugLog.flush();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentQuestion?.id]);
 
     useEffect(() => {
         const raw = currentQuestion?.context;
