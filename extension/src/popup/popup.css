@@ -102,3 +102,51 @@ kbd {
     border-radius: 6px;
     word-break: break-word;
 }
+
+.token-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 12px;
+}
+
+.token-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.token-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.token-badge {
+    font-size: 10px;
+    font-weight: 600;
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    border-radius: 9999px;
+    padding: 1px 8px;
+}
+
+.token-input {
+    width: 100%;
+    font-size: 11px;
+    font-family: ui-monospace, monospace;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 7px 8px;
+    resize: none;
+    color: #1f2937;
+    background: #f9fafb;
+    line-height: 1.5;
+}
+.token-input:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 0;
+    border-color: transparent;
+}

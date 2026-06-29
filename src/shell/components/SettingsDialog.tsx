@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared";
 import { Label } from "@/shared";
-import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle, GitBranch, Download } from "lucide-react";
+import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle, GitBranch, Download, Copy, Check } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { ScrollArea } from "@/shared";
 import { keywordService, useKeywordHelper } from "@/shared";
@@ -57,6 +57,7 @@ export function SettingsDialog() {
     const [syncReport, setSyncReport] = useState<KeywordSyncReport | null>(null);
     const [syncError, setSyncError] = useState<string | null>(null);
     const { loadKeywords } = useKeywordHelper();
+    const [tokenCopied, setTokenCopied] = useState(false);
 
     // K Repo Sync
     const { syncStatus, statusMessage, syncDirection, repoUrl, lastPushAt, setRepoUrl } = useKRepoSyncStore();
@@ -325,6 +326,28 @@ export function SettingsDialog() {
                                         )}
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Extension Token */}
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium">Extension Token</Label>
+                                <p className="text-xs text-muted-foreground">
+                                    Copy your JWT to paste into the SuperApp Chrome extension.
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        if (!$user?.userToken) return;
+                                        navigator.clipboard.writeText($user.userToken);
+                                        setTokenCopied(true);
+                                        setTimeout(() => setTokenCopied(false), 2000);
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-accent transition-all text-sm w-full justify-center"
+                                >
+                                    {tokenCopied
+                                        ? <><Check className="w-4 h-4 text-green-500" /><span className="text-green-500">Copied!</span></>
+                                        : <><Copy className="w-4 h-4" />Copy Token</>
+                                    }
+                                </button>
                             </div>
                         </div>
 

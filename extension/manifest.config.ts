@@ -26,6 +26,18 @@ export default defineManifest({
             js: ["src/content.ts"],
             run_at: "document_idle",
         },
+        {
+            matches: [
+                "https://www.facebook.com/*",
+                "https://facebook.com/*",
+                "https://www.instagram.com/*",
+                "https://instagram.com/*",
+                "https://www.youtube.com/*",
+                "https://youtube.com/*",
+            ],
+            js: ["src/review/review-content.ts"],
+            run_at: "document_idle",
+        },
     ],
     commands: {
         "capture-page": {

@@ -1,6 +1,53 @@
 import { isSignedIn } from "./lib/auth";
 import { showToastInTab } from "./lib/toast";
 import { dataUrlToBlob, uploadImage } from "./lib/upload";
+import { REVIEW_TOKEN_KEY } from "./review/reviewApi";
+
+const BASE = "https://www.tungle.uk";
+const KNOWLEDGE_ID = 1;
+
+function getJwtExpiryMs(token: string): number | null {
+    try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return typeof payload.exp === "number" ? payload.exp * 1000 : null;
+    } catch {
+        return null;
+    }
+}
+
+async function refreshReviewToken(): Promise<string | null> {
+    try {
+        console.log("[SA-Review-BG] refreshing token via browser session...");
+        const res = await fetch(`${BASE}/api/auth/refresh`, {
+            method: "POST",
+            credentials: "include",
+        });
+        if (!res.ok) { console.warn("[SA-Review-BG] refresh failed:", res.status); return null; }
+        const data = await res.json();
+        const token: string | null = data.user?.token ?? null;
+        if (token) {
+            await chrome.storage.local.set({ [REVIEW_TOKEN_KEY]: token });
+            console.log("[SA-Review-BG] token refreshed, expires:", new Date(getJwtExpiryMs(token) ?? 0).toISOString());
+        }
+        return token;
+    } catch (e) {
+        console.error("[SA-Review-BG] refresh error:", e);
+        return null;
+    }
+}
+
+async function getValidReviewToken(): Promise<string | null> {
+    const r = await chrome.storage.local.get(REVIEW_TOKEN_KEY);
+    const token = (r[REVIEW_TOKEN_KEY] as string) ?? null;
+    if (!token) return null;
+    const expiryMs = getJwtExpiryMs(token);
+    // Refresh if token expires within 2 minutes
+    if (!expiryMs || expiryMs - Date.now() < 120_000) {
+        console.log("[SA-Review-BG] token expiring soon (or no expiry), auto-refreshing...");
+        return refreshReviewToken();
+    }
+    return token;
+}
 
 // TODO RESTORE: set to true to require sign-in again.
 const REQUIRE_SIGN_IN = false;
@@ -93,3 +140,64 @@ chrome.runtime.onMessage.addListener((msg: IncomingMessage, sender) => {
         void showToastInTab(tabId, `Capture failed: ${msg.error}`, "error");
     }
 });
+
+// Handle K Review fetch/submit — runs in service worker to avoid CORS
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    if (msg?.type === "SA_REVIEW_FETCH") {
+        getValidReviewToken().then(token => {
+            console.log("[SA-Review-BG] FETCH token present:", !!token, token ? token.slice(0, 20) + "..." : "none");
+            if (!token) { sendResponse([]); return; }
+            const url = `${BASE}/api/k/${KNOWLEDGE_ID}/knowledge-review-all-session`;
+            console.log("[SA-Review-BG] fetching:", url);
+            fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+                .then(r => {
+                    console.log("[SA-Review-BG] response status:", r.status);
+                    return r.ok ? r.json() : [];
+                })
+                .then(json => {
+                    console.log("[SA-Review-BG] raw json:", json);
+                    const list = Array.isArray(json) ? json : (json.object ?? json.data ?? []);
+                    console.log("[SA-Review-BG] sending", list.length, "questions");
+                    sendResponse(list);
+                })
+                .catch(e => { console.error("[SA-Review-BG] fetch error:", e); sendResponse([]); });
+        });
+        return true; // keep channel open for async response
+    }
+
+    if (msg?.type === "SA_REVIEW_SUBMIT") {
+        getValidReviewToken().then(token => {
+            console.log("[SA-Review-BG] SUBMIT token present:", !!token, "questionId:", msg.questionId, "score:", msg.selfScore);
+            if (!token) { sendResponse({}); return; }
+            fetch(`${BASE}/api/k/${KNOWLEDGE_ID}/daily-submit`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({
+                    answers: [{
+                        questionId: msg.questionId,
+                        answerText: null,
+                        responseTimeMs: msg.responseTimeMs,
+                        selfScore: msg.selfScore,
+                    }],
+                }),
+            })
+                .then(r => r.json().then(j => { console.log("[SA-Review-BG] SUBMIT response:", r.status, j); sendResponse({}); }))
+                .catch(e => { console.error("[SA-Review-BG] SUBMIT error:", e); sendResponse({}); });
+        });
+        return true;
+    }
+
+    if (msg?.type === "SA_REVIEW_MARK_DRAFT") {
+        getValidReviewToken().then(token => {
+            if (!token) { sendResponse({}); return; }
+            fetch(`${BASE}/api/k/${KNOWLEDGE_ID}/questions/${msg.questionId}/mark-draft`, {
+                method: "PATCH",
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(r => { console.log("[SA-Review-BG] MARK_DRAFT response:", r.status); sendResponse({}); })
+                .catch(e => { console.error("[SA-Review-BG] MARK_DRAFT error:", e); sendResponse({}); });
+        });
+        return true;
+    }
+});
+

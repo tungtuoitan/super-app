@@ -265,7 +265,11 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
                         }}
                     >
                         {currentQuestion.answer
-                            ? <p className="text-foreground/80 whitespace-pre-wrap leading-relaxed">{currentQuestion.answer}</p>
+                            ? <div className="leading-relaxed">
+                                {currentQuestion.answer.split('\n').map((line, i) => (
+                                    <p key={i} className={cn("whitespace-pre-wrap text-foreground/80", i > 0 && "opacity-30")}>{line || ' '}</p>
+                                ))}
+                              </div>
                             : <p className="italic text-muted-foreground/40">—</p>
                         }
                     </div>
