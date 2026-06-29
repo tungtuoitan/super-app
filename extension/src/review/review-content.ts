@@ -88,6 +88,14 @@ async function mount() {
         li { margin: 2px 0; }
         /* shiki */
         .shiki { margin: 0; background: #1e1e1e !important; }
+        /* scrollbar */
+        * { scrollbar-width: thin; scrollbar-color: rgba(121,121,121,0.4) transparent; }
+        *::-webkit-scrollbar { width: 10px; height: 10px; }
+        *::-webkit-scrollbar-track { background: transparent; }
+        *::-webkit-scrollbar-thumb { background-color: rgba(121,121,121,0.4); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+        *::-webkit-scrollbar-thumb:hover { background-color: rgba(100,100,100,0.7); }
+        *::-webkit-scrollbar-thumb:active { background-color: rgba(191,191,191,1); }
+        *::-webkit-scrollbar-corner { background: transparent; }
     `;
     shadow.appendChild(style);
 

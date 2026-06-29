@@ -3,9 +3,21 @@ import type { Highlighter, BundledLanguage, BundledTheme } from "shiki";
 // Languages we actually use (matches BE DetectLanguage output).
 const LANGS: BundledLanguage[] = [
     "csharp", "python", "javascript", "typescript", "go", "java",
-    "rust", "cpp", "c", "sql", "shell", "ruby", "php",
+    "rust", "cpp", "c", "sql", "shell", "bash", "ruby", "php",
     "markdown", "json", "yaml",
 ];
+
+// Aliases for common fence labels not matching Shiki's bundled-language ids.
+const FENCE_LANG_ALIASES: Record<string, string> = {
+    cs:         "csharp",
+    js:         "javascript",
+    ts:         "typescript",
+    py:         "python",
+    sh:         "bash",
+    zsh:        "bash",
+    "c++":      "cpp",
+    dockerfile: "shell",
+};
 
 const THEME: BundledTheme = "dark-plus"; // VSCode's literal default dark theme
 
@@ -64,4 +76,15 @@ export function resolveLang(
         }
     }
     return normaliseLang(lang);
+}
+
+// Parse a fenced code block string (```lang\ncode\n```) into lang + code.
+// Applies FENCE_LANG_ALIASES and falls back to "plaintext" for unknown langs.
+export function parseFencedCode(raw: string): { lang: string; code: string } {
+    const langMatch = raw.match(/^```(\w*)/);
+    const rawLang = langMatch?.[1]?.toLowerCase() || "";
+    const normalized = FENCE_LANG_ALIASES[rawLang] ?? rawLang;
+    const lang = (LANGS as string[]).includes(normalized) ? normalized : "text";
+    const code = raw.replace(/^```\w*\n?/, "").replace(/\n?```$/, "");
+    return { lang, code };
 }

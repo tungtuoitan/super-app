@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
+import { marked } from "marked";
 import { ArrowLeft, PenLine, Move, LayoutGrid, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SCORE_DELAY_MS, BALL_BG, RING_COLOR, NEUTRAL_RING, SCORE_BUTTONS, SCORE_CONFIG } from "./kDailyReviewSession.constants";
 import { useKDailyReviewSession, type KDailyReviewSessionProps } from "./useKDailyReviewSession.helper";
 import { KAttachmentViewerDialog } from "../small/KAttachmentViewerDialog";
 import type { KAttachment } from "../../types/kAttachment.type";
-import { getShikiHighlighter, SHIKI_THEME } from "../../utils/shikiHighlighter";
+import { getShikiHighlighter, SHIKI_THEME, parseFencedCode } from "../../utils/shikiHighlighter";
 import { useDebugLog } from "@/shared";
+
+marked.setOptions({ breaks: true });
 
 export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, onBack, isQuickQuiz }: KDailyReviewSessionProps) {
     const {
@@ -76,11 +79,7 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
     useEffect(() => {
         const raw = currentQuestion?.context;
         if (!raw) { setContextHtml(""); return; }
-        // Extract language from opening fence line e.g. ```python
-        const langMatch = raw.match(/^```(\w*)/);
-        const lang = langMatch?.[1] || "text";
-        // Strip fence lines to get the raw code
-        const code = raw.replace(/^```\w*\n?/, "").replace(/\n?```$/, "");
+        const { lang, code } = parseFencedCode(raw);
         let cancelled = false;
         getShikiHighlighter()
             .then(hl => {
@@ -217,9 +216,10 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
                 )}
 
                 {/* Question */}
-                <p className="text-lg font-semibold text-center leading-relaxed text-white shrink-0">
-                    {currentQuestion.question}
-                </p>
+                <p
+                    className="text-lg font-semibold text-center leading-relaxed text-white shrink-0"
+                    dangerouslySetInnerHTML={{ __html: marked.parseInline(currentQuestion.question) as string }}
+                />
 
                 {/* Attachment pills — shown when question has code attachments */}
                 {currentQuestion.attachments && currentQuestion.attachments.length > 0 && (
@@ -265,15 +265,13 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
                         }}
                     >
                         {currentQuestion.answer
-                            ? <div className="leading-relaxed">
-                                {currentQuestion.answer.split('\n').map((line, i) => (
-                                    <p key={i} className={cn("whitespace-pre-wrap text-foreground/80", i > 0 && "opacity-30")}>{line || ' '}</p>
-                                ))}
-                              </div>
-                            : <p className="italic text-muted-foreground/40">—</p>
+                            ? <div
+                                className="leading-relaxed text-foreground/80"
+                                dangerouslySetInnerHTML={{ __html: marked.parse(currentQuestion.answer) as string }}
+                              />
+                            : <p className="italic text-muted-foreground/40">&#8212;</p>
                         }
                     </div>
-
 
                     {/* Tap hint — appears when reveal is unlocked but answer not yet shown */}
                     {!showResult && canReveal && (
@@ -282,7 +280,6 @@ export function KDailyReviewSession({ nodeId, quizTitle, questions, onComplete, 
                         </div>
                     )}
                 </div>
-
 
                 {/* Score buttons — desktop only; mobile always uses ball gesture */}
                 {!isMobile && (

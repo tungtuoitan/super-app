@@ -218,33 +218,33 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                             </div>
                         )}
 
-                        {/* Answer box — fills remaining space, content centered; lists stay left-aligned via CSS */}
-                        <div
-                            onClick={handleReveal}
-                            style={{
-                                flex: 1,
-                                overflowY: "auto",
-                                borderRadius: 10,
-                                border: "none",
-                                background: "#18181b",
-                                padding: 14,
-                                fontSize: 14,
-                                lineHeight: 1.6,
-                                cursor: canReveal && !showResult ? "pointer" : "default",
-                                filter: showResult ? "none" : "blur(6px)",
-                                transition: "filter 0.25s",
-                                position: "relative",
-                                color: "rgba(244,244,245,0.85)",
-                                textAlign: "center",
-                            }}
-                        >
-                            {current?.answer
-                                ? <div dangerouslySetInnerHTML={{ __html: md(current.answer) }} style={{ margin: 0 }} />
-                                : <span style={{ color: "rgba(244,244,245,0.3)", fontStyle: "italic" }}>—</span>
-                            }
+                        {/* Answer box wrapper — tap hint is sibling so it's never blurred */}
+                        <div style={{ flex: 1, position: "relative", minHeight: 0 }}>
+                            <div
+                                onClick={handleReveal}
+                                style={{
+                                    position: "absolute", inset: 0,
+                                    overflowY: "auto",
+                                    borderRadius: 10,
+                                    background: "#18181b",
+                                    padding: 14,
+                                    fontSize: 14,
+                                    lineHeight: 1.6,
+                                    cursor: canReveal && !showResult ? "pointer" : "default",
+                                    filter: showResult ? "none" : "blur(6px)",
+                                    transition: "filter 0.25s",
+                                    color: "rgba(244,244,245,0.85)",
+                                    textAlign: "center",
+                                }}
+                            >
+                                {current?.answer
+                                    ? <div dangerouslySetInnerHTML={{ __html: md(current.answer) }} style={{ margin: 0 }} />
+                                    : <span style={{ color: "rgba(244,244,245,0.3)", fontStyle: "italic" }}>—</span>
+                                }
+                            </div>
                             {!showResult && canReveal && (
-                                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.15em", textTransform: "uppercase" }}>tap</span>
+                                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", zIndex: 1 }}>
+                                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", letterSpacing: "0.15em", textTransform: "uppercase" }}>tap</span>
                                 </div>
                             )}
                         </div>

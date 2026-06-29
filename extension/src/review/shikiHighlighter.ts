@@ -2,9 +2,20 @@ import type { Highlighter, BundledLanguage, BundledTheme } from "shiki";
 
 const LANGS: BundledLanguage[] = [
     "csharp", "python", "javascript", "typescript", "go", "java",
-    "rust", "cpp", "c", "sql", "shell", "ruby", "php",
-    "markdown", "json", "yaml",
+    "rust", "cpp", "c", "sql", "shell", "bash", "ruby", "php",
+    "markdown", "json", "yaml", "plaintext",
 ];
+
+const LANG_ALIASES: Record<string, string> = {
+    cs:         "csharp",
+    js:         "javascript",
+    ts:         "typescript",
+    py:         "python",
+    sh:         "bash",
+    zsh:        "bash",
+    "c++":      "cpp",
+    dockerfile: "shell",
+};
 
 const THEME: BundledTheme = "dark-plus";
 
@@ -22,7 +33,9 @@ export const SHIKI_THEME = THEME;
 
 export function parseFencedCode(raw: string): { lang: string; code: string } {
     const langMatch = raw.match(/^```(\w*)/);
-    const lang = langMatch?.[1] || "text";
+    const rawLang = langMatch?.[1]?.toLowerCase() || "";
+    const normalized = LANG_ALIASES[rawLang] ?? rawLang;
+    const lang = (LANGS as string[]).includes(normalized) ? normalized : "plaintext";
     const code = raw.replace(/^```\w*\n?/, "").replace(/\n?```$/, "");
     return { lang, code };
 }
