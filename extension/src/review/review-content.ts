@@ -6,7 +6,7 @@ import { ReviewOverlay } from "./ReviewOverlay";
 const HOST_ID = "__sa_review_host__";
 
 function isReviewSite(): boolean {
-    const h = location.hostname;
+    const h = window.location.hostname;
     return (
         h.includes("facebook.com") ||
         h.includes("instagram.com") ||
@@ -73,6 +73,24 @@ async function mount() {
     document.body.appendChild(host);
 
     const shadow = host.attachShadow({ mode: "open" });
+
+    const style = document.createElement("style");
+    style.textContent = `
+        * { box-sizing: border-box; }
+        p { margin: 0 0 6px; }
+        p:last-child { margin-bottom: 0; }
+        code { background: rgba(255,255,255,0.1); border-radius: 4px; padding: 1px 5px; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.88em; color: #e4e4e7; }
+        pre { background: #09090b; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; overflow-x: auto; margin: 4px 0; }
+        pre code { background: none; padding: 0; font-size: 12px; color: rgba(244,244,245,0.75); }
+        strong { color: #f4f4f5; font-weight: 700; }
+        em { color: #a1a1aa; }
+        ul, ol { display: inline-block; text-align: left; margin: 4px 0 4px 18px; padding: 0; }
+        li { margin: 2px 0; }
+        /* shiki */
+        .shiki { margin: 0; background: #1e1e1e !important; }
+    `;
+    shadow.appendChild(style);
+
     const container = document.createElement("div");
     shadow.appendChild(container);
 

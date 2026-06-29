@@ -1,7 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
+import { marked } from "marked";
 import type { KDailySessionQuestion } from "./reviewApi";
 import { submitAnswer, markDraft } from "./reviewApi";
 import { getShikiHighlighter, parseFencedCode, SHIKI_THEME } from "./shikiHighlighter";
+
+marked.setOptions({ breaks: true });
+
+function md(text: string): string {
+    return marked.parse(text) as string;
+}
+
+function mdInline(text: string): string {
+    return marked.parseInline(text) as string;
+}
 
 const REVEAL_DELAY_MS = 3000;
 const SCORE_DELAY_MS  = 1500;
@@ -22,13 +33,14 @@ interface Props {
 }
 
 export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
-    const [index,       setIndex]       = useState(0);
-    const [showResult,  setShowResult]  = useState(false);
-    const [canReveal,   setCanReveal]   = useState(false);
-    const [canScore,    setCanScore]    = useState(false);
-    const [freeLeft,    setFreeLeft]    = useState(0);
-    const [isBreak,     setIsBreak]     = useState(false);
-    const [contextHtml, setContextHtml] = useState("");
+    const [index,        setIndex]       = useState(0);
+    const [showResult,   setShowResult]  = useState(false);
+    const [canReveal,    setCanReveal]   = useState(false);
+    const [canScore,     setCanScore]    = useState(false);
+    const [contextHtml,  setContextHtml] = useState("");
+    const [hasAnswered,  setHasAnswered] = useState(false);
+    const [minimized,    setMinimized]   = useState(false);
+    const [miniLeft,     setMiniLeft]    = useState(0);
     const startRef = useRef(Date.now());
 
     const total   = questions.length;
@@ -66,29 +78,24 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
         return () => clearTimeout(t);
     }, [showResult, index]);
 
-    // free-window countdown
+    // minimize countdown
     useEffect(() => {
-        onBreakChange?.(isBreak);
-        if (!isBreak) return;
-        setFreeLeft(FREE_WINDOW_SEC);
+        onBreakChange?.(minimized);
+        if (!minimized) return;
+        setMiniLeft(FREE_WINDOW_SEC);
         const iv = setInterval(() => {
-            setFreeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(iv);
-                    setIsBreak(false);
-                    return 0;
-                }
+            setMiniLeft(prev => {
+                if (prev <= 1) { clearInterval(iv); setMinimized(false); return 0; }
                 return prev - 1;
             });
         }, 1000);
         return () => clearInterval(iv);
-    }, [isBreak]);
+    }, [minimized]);
 
     const advance = () => {
         const next = index + 1;
         if (next >= total) { onClose(); return; }
         setIndex(next);
-        setIsBreak(true);
     };
 
     const handleReveal = () => {
@@ -100,39 +107,43 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
         if (!canScore) return;
         const elapsed = Date.now() - startRef.current;
         submitAnswer(current.id, score, elapsed);
+        setHasAnswered(true);
         advance();
     };
 
     const handleDraft = () => {
         markDraft(current.id);
+        setHasAnswered(true);
         advance();
     };
 
-    const overlayVisible = !isBreak;
-
     return (
         <>
-            {/* Backdrop */}
-            {overlayVisible && (
-                <div style={{
+            {/* Backdrop — clickable to minimize after first answer */}
+            <div
+                onClick={hasAnswered && !minimized ? () => setMinimized(true) : undefined}
+                style={{
                     position: "fixed", inset: 0, zIndex: 2147483639,
-                    background: "rgba(0,0,0,0.6)",
-                    backdropFilter: "blur(6px)",
-                    WebkitBackdropFilter: "blur(6px)",
-                    pointerEvents: "none",
-                }} />
-            )}
+                    background: minimized ? "transparent" : "rgba(0,0,0,0.6)",
+                    backdropFilter: minimized ? "none" : "blur(6px)",
+                    WebkitBackdropFilter: minimized ? "none" : "blur(6px)",
+                    cursor: hasAnswered && !minimized ? "pointer" : "default",
+                    pointerEvents: minimized ? "none" : "auto",
+                }}
+            />
 
             {/* Center card */}
-            {overlayVisible && (
-                <div
-                    style={{
+            {!minimized && (
+            <div
+                onClick={e => e.stopPropagation()}
+                style={{
                         position: "fixed",
                         top: "50%", left: "50%",
                         transform: "translate(-50%, -50%)",
                         zIndex: 2147483640,
-                        width: "min(560px, 92vw)",
-                        maxHeight: "85vh",
+                        width: 700,
+                        height: 450,
+                        maxHeight: "unset",
                         display: "flex",
                         flexDirection: "column",
                         background: "#18181b",
@@ -150,7 +161,12 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                     {/* Header */}
                     <div style={{ padding: "12px 16px 8px", borderBottom: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                            <span style={{ fontSize: 12, color: "#71717a" }}>K Review</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                {/* <span style={{ fontSize: 12, color: "#71717a" }}>K Review</span> */}
+                                {current?.nodeName && (
+                                    <span style={{ fontSize: 11, color: "#a78bfa" }}>{current.nodeName}</span>
+                                )}
+                            </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                                 <button
                                     onClick={handleDraft}
@@ -171,15 +187,14 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                     </div>
 
                     {/* Content */}
-                    <div style={{ flex: 1, overflowY: "auto", padding: "20px 20px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
-                        {current?.nodeName && (
-                            <p style={{ fontSize: 11, color: "#a78bfa", textAlign: "center", margin: 0 }}>{current.nodeName}</p>
-                        )}
-
-                        {/* Question */}
-                        <p style={{ fontSize: 17, fontWeight: 600, textAlign: "center", lineHeight: 1.5, margin: 0, color: "#f4f4f5" }}>
-                            {current?.question}
-                        </p>
+                    <div style={{ flex: 1, overflow: "hidden", padding: "20px 20px 0", display: "flex", flexDirection: "column", gap: 14 }}>
+                        {/* Question — centered */}
+                        <div style={{ textAlign: "center", flexShrink: 0 }}>
+                            <span
+                                style={{ fontSize: 17, fontWeight: 600, lineHeight: 1.5, color: "#f4f4f5" }}
+                                dangerouslySetInnerHTML={{ __html: mdInline(current?.question ?? "") }}
+                            />
+                        </div>
 
                         {/* Context code block */}
                         {current?.context && (
@@ -203,15 +218,16 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                             </div>
                         )}
 
-                        {/* Answer box */}
+                        {/* Answer box — fills remaining space, content centered; lists stay left-aligned via CSS */}
                         <div
                             onClick={handleReveal}
                             style={{
+                                flex: 1,
+                                overflowY: "auto",
                                 borderRadius: 10,
-                                border: "1px solid rgba(255,255,255,0.1)",
-                                background: "#09090b",
+                                border: "none",
+                                background: "#18181b",
                                 padding: 14,
-                                minHeight: 80,
                                 fontSize: 14,
                                 lineHeight: 1.6,
                                 cursor: canReveal && !showResult ? "pointer" : "default",
@@ -219,11 +235,11 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                                 transition: "filter 0.25s",
                                 position: "relative",
                                 color: "rgba(244,244,245,0.85)",
-                                whiteSpace: "pre-wrap",
+                                textAlign: "center",
                             }}
                         >
                             {current?.answer
-                                ? current.answer
+                                ? <div dangerouslySetInnerHTML={{ __html: md(current.answer) }} style={{ margin: 0 }} />
                                 : <span style={{ color: "rgba(244,244,245,0.3)", fontStyle: "italic" }}>—</span>
                             }
                             {!showResult && canReveal && (
@@ -232,8 +248,10 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                                 </div>
                             )}
                         </div>
+                    </div>
 
-                        {/* Score buttons */}
+                    {/* Fixed footer — score buttons */}
+                    <div style={{ flexShrink: 0, padding: "12px 20px 16px", display: "flex", flexDirection: "column", gap: 8, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                         <div style={{ display: "flex", gap: 8, opacity: showResult ? (canScore ? 1 : 0.4) : 0, pointerEvents: showResult && canScore ? "all" : "none", transition: "opacity 0.3s" }}>
                             {SCORE_BUTTONS.map(b => (
                                 <button
@@ -253,18 +271,11 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                             ))}
                         </div>
                     </div>
-
-                    {/* Footer hint */}
-                    <div style={{ padding: "8px 16px 12px", textAlign: "center", flexShrink: 0, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)" }}>
-                            {!showResult && canReveal ? "Tap answer to reveal" : !showResult && !canReveal ? "..." : ""}
-                        </span>
-                    </div>
                 </div>
             )}
 
-            {/* Break badge */}
-            {isBreak && (
+            {/* Minimize badge */}
+            {minimized && (
                 <div style={{
                     position: "fixed", bottom: 24, right: 24, zIndex: 2147483641,
                     background: "#18181b", border: "1px solid rgba(99,102,241,0.5)",
@@ -272,7 +283,7 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                     fontFamily: "system-ui, sans-serif",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                 }}>
-                    Next question in <b style={{ color: "#818cf8" }}>{freeLeft}s</b>
+                    Next question in <b style={{ color: "#818cf8" }}>{miniLeft}s</b>
                 </div>
             )}
         </>
