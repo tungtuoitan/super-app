@@ -18,6 +18,19 @@ const REVEAL_DELAY_MS = 3000;
 const SCORE_DELAY_MS  = 1500;
 const FREE_WINDOW_SEC = 30;
 
+const QUOTES = [
+    { text: "An investment in knowledge pays the best interest.", author: "Benjamin Franklin" },
+    { text: "The more that you read, the more things you will know.", author: "Dr. Seuss" },
+    { text: "Learning never exhausts the mind.", author: "Leonardo da Vinci" },
+    { text: "The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice.", author: "Brian Herbert" },
+    { text: "Education is not the filling of a pail, but the lighting of a fire.", author: "W.B. Yeats" },
+    { text: "Tell me and I forget. Teach me and I remember. Involve me and I learn.", author: "Benjamin Franklin" },
+    { text: "The beautiful thing about learning is that nobody can take it away from you.", author: "B.B. King" },
+    { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", author: "Mahatma Gandhi" },
+    { text: "Spaced repetition is the closest thing we have to a cheat code for the brain.", author: "" },
+    { text: "Every expert was once a beginner.", author: "Helen Hayes" },
+];
+
 const SCORE_BUTTONS = [
     { score: 1, label: "Again", color: "#ef4444", bg: "rgba(239,68,68,0.15)"   },
     { score: 2, label: "Hard",  color: "#f97316", bg: "rgba(249,115,22,0.15)"  },
@@ -41,6 +54,8 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
     const [hasAnswered,  setHasAnswered] = useState(false);
     const [minimized,    setMinimized]   = useState(false);
     const [miniLeft,     setMiniLeft]    = useState(0);
+    const [done,         setDone]        = useState(false);
+    const [quote]                        = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)]);
     const startRef = useRef(Date.now());
 
     const total   = questions.length;
@@ -94,7 +109,7 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
 
     const advance = () => {
         const next = index + 1;
-        if (next >= total) { onClose(); return; }
+        if (next >= total) { setDone(true); return; }
         setIndex(next);
     };
 
@@ -119,21 +134,67 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
 
     return (
         <>
-            {/* Backdrop — clickable to minimize after first answer */}
+            {/* Backdrop */}
             <div
-                onClick={hasAnswered && !minimized ? () => setMinimized(true) : undefined}
+                onClick={!done && hasAnswered && !minimized ? () => setMinimized(true) : undefined}
                 style={{
                     position: "fixed", inset: 0, zIndex: 2147483639,
                     background: minimized ? "transparent" : "rgba(0,0,0,0.6)",
                     backdropFilter: minimized ? "none" : "blur(6px)",
                     WebkitBackdropFilter: minimized ? "none" : "blur(6px)",
-                    cursor: hasAnswered && !minimized ? "pointer" : "default",
+                    cursor: !done && hasAnswered && !minimized ? "pointer" : "default",
                     pointerEvents: minimized ? "none" : "auto",
                 }}
             />
 
+            {/* Done screen */}
+            {done && (
+                <div
+                    style={{
+                        position: "fixed", top: "50%", left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        zIndex: 2147483640,
+                        width: 700, height: 450,
+                        display: "flex", flexDirection: "column",
+                        alignItems: "center", justifyContent: "center",
+                        background: "#18181b",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        borderRadius: 16,
+                        boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
+                        fontFamily: "system-ui, -apple-system, sans-serif",
+                        color: "#f4f4f5",
+                        gap: 24, padding: "40px 60px",
+                        textAlign: "center",
+                    }}
+                    onClick={e => e.stopPropagation()}
+                >
+                    <div style={{ fontSize: 36 }}>✓</div>
+                    <div style={{ fontSize: 13, color: "#a1a1aa", fontWeight: 500, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                        Session complete &nbsp;·&nbsp; {total} question{total !== 1 ? "s" : ""}
+                    </div>
+                    <div style={{ maxWidth: 480 }}>
+                        <p style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.6, color: "#f4f4f5", fontStyle: "italic", margin: 0 }}>
+                            &ldquo;{quote.text}&rdquo;
+                        </p>
+                        {quote.author && (
+                            <p style={{ fontSize: 12, color: "#71717a", marginTop: 12 }}>— {quote.author}</p>
+                        )}
+                    </div>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            marginTop: 8, padding: "10px 32px", borderRadius: 10,
+                            background: "#6366f1", border: "none", color: "#fff",
+                            fontSize: 13, fontWeight: 600, cursor: "pointer",
+                        }}
+                    >
+                        Close
+                    </button>
+                </div>
+            )}
+
             {/* Center card */}
-            {!minimized && (
+            {!done && !minimized && (
             <div
                 onClick={e => e.stopPropagation()}
                 style={{
