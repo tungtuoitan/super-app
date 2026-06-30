@@ -55,15 +55,21 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
     const [minimized,    setMinimized]   = useState(false);
     const [miniLeft,     setMiniLeft]    = useState(0);
     const [done,         setDone]        = useState(false);
+    const [answeredIds,  setAnsweredIds] = useState<Set<number>>(new Set());
+    const [copiedCtx,    setCopiedCtx]  = useState(false);
     const [quote]                        = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)]);
     const startRef = useRef(Date.now());
 
-    const total   = questions.length;
-    const current = questions[index];
-    const progress = total > 0 ? Math.round(((index + 1) / total) * 100) : 0;
+    const remaining = questions.filter(q => !answeredIds.has(q.id));
+    const total     = remaining.length;
+    const current   = remaining[index];
+    const progress  = questions.length > 0 ? Math.round(((answeredIds.size) / questions.length) * 100) : 0;
+
+    const currentId = current?.id;
 
     // reset per question
     useEffect(() => {
+        if (currentId === undefined) return;
         setShowResult(false);
         setCanReveal(false);
         setCanScore(false);
@@ -71,7 +77,7 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
         startRef.current = Date.now();
         const t = setTimeout(() => setCanReveal(true), REVEAL_DELAY_MS);
 
-        const raw = questions[index]?.context;
+        const raw = current?.context;
         if (raw) {
             const { lang, code } = parseFencedCode(raw);
             let cancelled = false;
@@ -83,7 +89,7 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
         }
 
         return () => clearTimeout(t);
-    }, [index]);
+    }, [currentId]);
 
     // score delay after reveal
     useEffect(() => {
@@ -91,7 +97,7 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
         setCanScore(false);
         const t = setTimeout(() => setCanScore(true), SCORE_DELAY_MS);
         return () => clearTimeout(t);
-    }, [showResult, index]);
+    }, [showResult, currentId]);
 
     // minimize countdown
     useEffect(() => {
@@ -107,10 +113,29 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
         return () => clearInterval(iv);
     }, [minimized]);
 
-    const advance = () => {
-        const next = index + 1;
-        if (next >= total) { setDone(true); return; }
-        setIndex(next);
+    const markAnswered = (id: number) => {
+        setAnsweredIds(prev => {
+            const next = new Set(prev).add(id);
+            // keep index in bounds; if this was the last remaining question, done
+            const nextRemaining = questions.filter(q => !next.has(q.id));
+            if (nextRemaining.length === 0) { setDone(true); }
+            else { setIndex(i => Math.min(i, nextRemaining.length - 1)); }
+            return next;
+        });
+        setHasAnswered(true);
+    };
+
+    // reset copy state per question
+    useEffect(() => { setCopiedCtx(false); }, [currentId]);
+
+    const handleCopyCtx = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const raw = current?.context ?? "";
+        const plain = raw.replace(/^```\w*\n?/, "").replace(/\n?```$/, "");
+        navigator.clipboard.writeText(plain).then(() => {
+            setCopiedCtx(true);
+            setTimeout(() => setCopiedCtx(false), 1500);
+        }).catch(() => {});
     };
 
     const handleReveal = () => {
@@ -122,14 +147,12 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
         if (!canScore) return;
         const elapsed = Date.now() - startRef.current;
         submitAnswer(current.id, score, elapsed);
-        setHasAnswered(true);
-        advance();
+        markAnswered(current.id);
     };
 
     const handleDraft = () => {
         markDraft(current.id);
-        setHasAnswered(true);
-        advance();
+        markAnswered(current.id);
     };
 
     return (
@@ -239,7 +262,7 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                                 >
                                     Draft
                                 </button>
-                                <span style={{ fontSize: 12, color: "#71717a" }}>{index + 1} / {total}</span>
+                                <span style={{ fontSize: 12, color: "#71717a" }}>{answeredIds.size + 1} / {questions.length}</span>
                             </div>
                         </div>
                         <div style={{ height: 3, borderRadius: 9999, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
@@ -259,13 +282,26 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
 
                         {/* Context code block */}
                         {current?.context && (
+                            <div style={{ position: "relative", flexShrink: 0 }}>
+                                <button
+                                    onClick={handleCopyCtx}
+                                    style={{
+                                        position: "absolute", top: 6, right: 6, zIndex: 2,
+                                        fontSize: 10, padding: "2px 7px", borderRadius: 5,
+                                        border: "1px solid rgba(255,255,255,0.15)",
+                                        background: copiedCtx ? "rgba(34,197,94,0.2)" : "rgba(255,255,255,0.07)",
+                                        color: copiedCtx ? "#4ade80" : "rgba(244,244,245,0.5)",
+                                        cursor: "pointer", lineHeight: 1.6,
+                                    }}
+                                >
+                                    {copiedCtx ? "copied" : "copy"}
+                                </button>
                             <div style={{
                                 borderRadius: 8,
                                 border: "1px solid rgba(255,255,255,0.08)",
                                 overflow: "hidden",
                                 maxHeight: 180,
                                 overflowY: "auto",
-                                flexShrink: 0,
                                 fontSize: 12,
                                 lineHeight: 1.55,
                                 fontFamily: "ui-monospace, SFMono-Regular, monospace",
@@ -276,6 +312,7 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                                         {current.context.replace(/^```\w*\n?/, "").replace(/\n?```$/, "")}
                                       </pre>
                                 }
+                            </div>
                             </div>
                         )}
 
@@ -299,7 +336,7 @@ export function ReviewOverlay({ questions, onClose, onBreakChange }: Props) {
                                 }}
                             >
                                 {current?.answer
-                                    ? <div dangerouslySetInnerHTML={{ __html: md(current.answer) }} style={{ margin: 0 }} />
+                                    ? <div className="answer-body" dangerouslySetInnerHTML={{ __html: md(current.answer) }} style={{ margin: 0 }} />
                                     : <span style={{ color: "rgba(244,244,245,0.3)", fontStyle: "italic" }}>—</span>
                                 }
                             </div>

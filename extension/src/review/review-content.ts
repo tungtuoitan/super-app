@@ -62,7 +62,10 @@ async function mount() {
     if (!isReviewSite()) return;
     if (document.getElementById(HOST_ID)) return;
 
-    const questions = await fetchQuestions();
+    const raw = await fetchQuestions();
+    // Deduplicate by ID — guards against API returning the same question twice
+    // and against re-mount race when Facebook SPA navigation detaches the shadow host
+    const questions = [...new Map(raw.map(q => [q.id, q])).values()];
     if (!questions.length) return;
 
     lockScroll();
@@ -96,6 +99,8 @@ async function mount() {
         *::-webkit-scrollbar-thumb:hover { background-color: rgba(100,100,100,0.7); }
         *::-webkit-scrollbar-thumb:active { background-color: rgba(191,191,191,1); }
         *::-webkit-scrollbar-corner { background: transparent; }
+        /* dim answer sentences after the first */
+        .answer-body > *:not(:first-child) { color: rgba(244,244,245,0.4); }
     `;
     shadow.appendChild(style);
 
