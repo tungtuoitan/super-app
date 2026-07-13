@@ -29,7 +29,7 @@ const SHARED = { group: ["@/shared/**"], allowTypeImports: true, message: "Impor
 // ─── Feature list ─────────────────────────────────────────────────────────────
 // To add a new feature: append its name here. Done.
 
-const FEATURES = ["project", "taskDetail", "multiProject", "K", "Wiki", "lifeLog", "note", "workspace"];
+const FEATURES = ["project", "taskDetail", "multiProject", "K", "Wiki", "lifeLog", "note", "workspace", "dailyLog"];
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 

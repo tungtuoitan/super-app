@@ -43,6 +43,7 @@ export const shellConstants = {
                 lifeLog: "lifeLog",
                 lifeLogGraph: "lifeLogGraph",
                 lifeLogTrack: "lifeLogTrack",
+                dailyLog: "dailyLog",
                 kKnowledge: "k-knowledge",
                 kNode: "k-node",
                 kDailyReview: "k-daily-review",

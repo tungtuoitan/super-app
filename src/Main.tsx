@@ -7,6 +7,7 @@ import { KProviders } from "@/features/K";
 import { NoteProviders } from "@/features/note";
 import { WsProviders } from "@/features/workspace";
 import { ProjectProviders } from "@/features/project";
+import { DailyLogProviders } from "@/features/dailyLog";
 import { MpTaskProvider } from "@/features/multiProject";
 import { TaskDetailProvider } from "@/features/taskDetail";
 import { TaskDetailSectionProvider } from "@/features/taskDetail";
@@ -74,10 +75,12 @@ export function Main() {
                                                                                                             <MultiTimelineProvider>
                                                                                                                 <WikiProvider>
                                                                                                                     <NoteProviders>
-                                                                                                                        <MenuContext>
-                                                                                                                            <WorkspaceKeywordPluginInit />
-                                                                                                                            <MainNav />
-                                                                                                                        </MenuContext>
+                                                                                                                        <DailyLogProviders>
+                                                                                                                            <MenuContext>
+                                                                                                                                <WorkspaceKeywordPluginInit />
+                                                                                                                                <MainNav />
+                                                                                                                            </MenuContext>
+                                                                                                                        </DailyLogProviders>
                                                                                                                     </NoteProviders>
                                                                                                                 </WikiProvider>
                                                                                                             </MultiTimelineProvider>
