@@ -4,12 +4,11 @@ import { useDailyLogTemplateStore } from "../store/useDailyLogTemplate.store";
 import { useDailyLogHelper } from "../hooks/useDailyLog.helper";
 import { useDailyLogDetailHeadless } from "../hooks/useDailyLog.headless";
 import { DailyLogSection } from "./DailyLogSection";
-import { DailyLogTemplateDialog } from "./DailyLogTemplateDialog";
 import { formatDayMonth, isSameLocalDay, startOfLocalDay, addDays } from "../utils/dailyLog.utils";
 import { dailyLogConstants } from "../dailyLog.constants";
 import type { DailyLogFieldTemplate, DailyLogFieldType, DailyLogSection as DailyLogSectionType } from "../types/dailyLog.types";
-import { useMemo, useState } from "react";
-import { Lock, Settings2 } from "lucide-react";
+import { useMemo } from "react";
+import { Lock } from "lucide-react";
 
 /** Rehydrate a persisted template snapshot back into an array of field templates. */
 function parseTemplateSnapshot(templateJson: string | null): DailyLogFieldTemplate[] | null {
@@ -24,6 +23,9 @@ function parseTemplateSnapshot(templateJson: string | null): DailyLogFieldTempla
             fieldKey: String(f.fieldKey ?? ""),
             label: String(f.label ?? ""),
             fieldType: (f.fieldType ?? "text") as DailyLogFieldType,
+            groupOrder: f.groupOrder ?? null,
+            groupLabel: f.groupLabel ?? null,
+            lineOrder: f.lineOrder ?? null,
             rangeMin: f.rangeMin ?? null,
             rangeMax: f.rangeMax ?? null,
             sortOrder: Number(f.sortOrder ?? 0),
@@ -49,19 +51,11 @@ export function DailyLogEditorPanel() {
     useDailyLogDetailHeadless();
     const { logs } = useDailyLogStore();
     const { selectedDate, isDirty, isSaving } = useDailyLogDetailStore();
-    const { fields, isLoading: isTemplateLoading } = useDailyLogTemplateStore();
+    const { fields } = useDailyLogTemplateStore();
     const { upsertLog } = useDailyLogHelper();
-    const [templateOpen, setTemplateOpen] = useState(false);
 
     const isToday = selectedDate ? isSameLocalDay(selectedDate, startOfLocalDay(new Date())) : false;
     const readOnly = !isToday;
-
-    /**
-     * Structure resolution:
-     *  - Today → live template (so users see form edits immediately).
-     *  - Past/future → template snapshot on the log; falls back to live template
-     *    for legacy rows that pre-date snapshotting.
-     */
     const activeFields = useMemo<DailyLogFieldTemplate[]>(() => {
         const liveFields = fields.filter((f) => f.deletedAt == null);
         if (isToday || !selectedDate) return liveFields;
@@ -94,15 +88,6 @@ export function DailyLogEditorPanel() {
                 <div className="flex items-center gap-1">
                     {isToday && (
                         <button
-                            onClick={() => setTemplateOpen(true)}
-                            className="text-[11px] px-2 py-1 rounded hover:bg-muted text-muted-foreground/70 hover:text-foreground flex items-center gap-1 transition-colors"
-                            title="Edit form template"
-                        >
-                            <Settings2 className="w-3 h-3" />
-                        </button>
-                    )}
-                    {isToday && (
-                        <button
                             onClick={() => {
                                 const snapshot = JSON.stringify(fields.filter((f) => f.deletedAt == null));
                                 upsertLog(selectedDate, snapshot);
@@ -122,9 +107,6 @@ export function DailyLogEditorPanel() {
             </div>
 
             <div className="flex-1 overflow-hidden">
-                {isTemplateLoading && activeFields.length === 0 && (
-                    <div className="px-6 py-3 text-xs text-muted-foreground/70">Loading form…</div>
-                )}
                 <div className="h-full grid grid-cols-2 overflow-hidden">
                     {dailyLogConstants.sections.map((section, i) => (
                         <div
@@ -144,8 +126,6 @@ export function DailyLogEditorPanel() {
                     ))}
                 </div>
             </div>
-
-            {templateOpen && <DailyLogTemplateDialog onClose={() => setTemplateOpen(false)} />}
         </div>
     );
 }

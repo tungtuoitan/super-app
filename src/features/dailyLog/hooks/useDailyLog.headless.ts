@@ -3,21 +3,22 @@ import { useAuthStore } from "@/shared";
 import { useDailyLogStore } from "../store/useDailyLog.store";
 import { useDailyLogDetailStore } from "../store/useDailyLogDetail.store";
 import { useDailyLogTemplateStore } from "../store/useDailyLogTemplate.store";
-import { useDailyLogHelper, useDailyLogTemplateHelper } from "./useDailyLog.helper";
+import { useDailyLogHelper } from "./useDailyLog.helper";
 import { isSameLocalDay, parseValues } from "../utils/dailyLog.utils";
+import templateJson from "../dailyLog.template.json";
+import type { DailyLogFieldTemplate } from "../types/dailyLog.types";
 
-/** Initial fetch of template + logs whenever user or date range changes. */
+/** Initial fetch of logs whenever user or date range changes. Template is loaded from static JSON. */
 export const useDailyLogHeadless = () => {
     const { $user } = useAuthStore();
     const { dateRange } = useDailyLogStore();
     const { loadLogs } = useDailyLogHelper();
-    const { loadTemplate } = useDailyLogTemplateHelper();
+    const { setFields } = useDailyLogTemplateStore();
 
     useEffect(() => {
-        if (!$user.userId) return;
-        loadTemplate();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [$user.userId, $user.userToken]);
+        setFields(templateJson as unknown as DailyLogFieldTemplate[]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (!$user.userId) return;

@@ -28,6 +28,9 @@ function _hydrateField(dto: DailyLogFieldTemplateDTO): DailyLogFieldTemplate {
         fieldKey: dto.fieldKey,
         label: dto.label,
         fieldType: dto.fieldType as DailyLogFieldType,
+        groupOrder: dto.groupOrder ?? null,
+        groupLabel: dto.groupLabel ?? null,
+        lineOrder: dto.lineOrder ?? null,
         rangeMin: dto.rangeMin ?? null,
         rangeMax: dto.rangeMax ?? null,
         sortOrder: dto.sortOrder,
@@ -129,6 +132,9 @@ export const useDailyLogTemplateHelper = () => {
             fieldKey: string;
             label: string;
             fieldType: DailyLogFieldType;
+            groupOrder?: number | null;
+            groupLabel?: string | null;
+            lineOrder?: number | null;
             rangeMin?: number | null;
             rangeMax?: number | null;
             sortOrder: number;

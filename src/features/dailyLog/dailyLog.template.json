@@ -1,0 +1,11 @@
+[
+  { "id": 0, "userId": 0, "section": "input",  "fieldKey": "note",         "label": "Note",                  "fieldType": "longText",  "groupOrder": null, "groupLabel": null, "lineOrder": null, "rangeMin": null, "rangeMax": null, "sortOrder": 0, "deletedAt": null },
+
+  { "id": 0, "userId": 0, "section": "output", "fieldKey": "note",         "label": "Note",                  "fieldType": "longText",  "groupOrder": null, "groupLabel": null, "lineOrder": null, "rangeMin": null, "rangeMax": null, "sortOrder": 0, "deletedAt": null },
+
+  { "id": 0, "userId": 0, "section": "output", "fieldKey": "popcorn",      "label": "Popcorn",               "fieldType": "checkbox",  "groupOrder": 1, "groupLabel": "Positive", "lineOrder": 0, "rangeMin": null, "rangeMax": null, "sortOrder": 1, "deletedAt": null },
+  { "id": 0, "userId": 0, "section": "output", "fieldKey": "walk",         "label": "Walk",                  "fieldType": "checkbox",  "groupOrder": 1, "groupLabel": null,       "lineOrder": 1, "rangeMin": null, "rangeMax": null, "sortOrder": 2, "deletedAt": null },
+  { "id": 0, "userId": 0, "section": "output", "fieldKey": "bed_before_11","label": "Go to bed before 11pm", "fieldType": "checkbox",  "groupOrder": 1, "groupLabel": null,       "lineOrder": 2, "rangeMin": null, "rangeMax": null, "sortOrder": 3, "deletedAt": null },
+  { "id": 0, "userId": 0, "section": "output", "fieldKey": "add_10q",      "label": "Add 10Q",               "fieldType": "checkbox",  "groupOrder": 1, "groupLabel": null,       "lineOrder": 3, "rangeMin": null, "rangeMax": null, "sortOrder": 4, "deletedAt": null },
+  { "id": 0, "userId": 0, "section": "output", "fieldKey": "learn_50q",    "label": "Learn 50Q",             "fieldType": "checkbox",  "groupOrder": 1, "groupLabel": null,       "lineOrder": 4, "rangeMin": null, "rangeMax": null, "sortOrder": 5, "deletedAt": null }
+]

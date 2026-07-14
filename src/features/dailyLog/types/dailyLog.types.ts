@@ -24,6 +24,9 @@ export interface DailyLogFieldTemplate {
     fieldKey: string;
     label: string;
     fieldType: DailyLogFieldType;
+    groupOrder?: number | null;
+    groupLabel?: string | null;
+    lineOrder?: number | null;
     /** For fieldType="range": inclusive min bound. Ignored for other types. */
     rangeMin?: number | null;
     /** For fieldType="range": inclusive max bound. Ignored for other types. */

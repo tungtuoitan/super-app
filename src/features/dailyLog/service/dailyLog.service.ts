@@ -19,6 +19,9 @@ export interface DailyLogFieldTemplateDTO {
     fieldKey: string;
     label: string;
     fieldType: string;
+    groupOrder?: number | null;
+    groupLabel?: string | null;
+    lineOrder?: number | null;
     rangeMin?: number | null;
     rangeMax?: number | null;
     sortOrder: number;
@@ -105,6 +108,9 @@ const upsertTemplate = async (
         fieldKey: string;
         label: string;
         fieldType: string;
+        groupOrder?: number | null;
+        groupLabel?: string | null;
+        lineOrder?: number | null;
         rangeMin?: number | null;
         rangeMax?: number | null;
         sortOrder: number;
