@@ -43,3 +43,13 @@ storybook-static
 
 
 database-objects/SuperApp-dev/obj
+
+# Local Claude Code settings/overrides - per-machine, may contain
+# credentials in allowlisted commands. Never commit (see issue 0044 of
+# TungRoot - VPS root/SQL password leaked here in plaintext 2026-09-06).
+.claude/settings.local.json
+
+# Real VPS/DB credentials for skills - gitignored, referenced by
+# SKILL.md instead of embedding values directly (see issue 0044 of
+# TungRoot). Ask Tung if this file is missing on a fresh machine.
+.claude/skills/credentials.local.md

@@ -13,7 +13,7 @@ Deploy the latest code from GitHub to the production server at `157.66.101.51`.
 |--------|-------|
 | Host | `157.66.101.51` |
 | User | `root` |
-| Password | `***REDACTED-ROTATED-PASSWORD***` |
+| Password | see `.claude/skills/credentials.local.md` (gitignored — never put the real value back in this file, see issue 0044 of TungRoot) |
 | Public domain | `https://www.tungle.uk` |
 
 ## Server Layout
@@ -37,7 +37,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect("157.66.101.51", username="root", password="***REDACTED-ROTATED-PASSWORD***", timeout=30)
+client.connect("157.66.101.51", username="root", password="<read from .claude/skills/credentials.local.md>", timeout=30)
 
 def run(cmd, timeout=300):
     stdin, stdout, stderr = client.exec_command(cmd, timeout=timeout)

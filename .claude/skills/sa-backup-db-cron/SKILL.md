@@ -14,7 +14,7 @@ You are managing the **SuperApp production DB backup cron job** on the VPS.
 | SSH method | Python paramiko (sshpass not available on Windows) |
 | DB engine | SQL Server (native, not Docker) |
 | DB name | `SuperApp-pro` |
-| DB user/pass | `sa` / `***REDACTED-ROTATED-PASSWORD***` |
+| DB user/pass | `sa` / see `.claude/skills/credentials.local.md` (gitignored — never put the real value back in this file, see issue 0044 of TungRoot) |
 | sqlcmd path | `/opt/mssql-tools18/bin/sqlcmd` |
 | Backup dir | `/var/opt/mssql/backup/` |
 | Backup script | `/root/backup-superapp.sh` |
@@ -32,7 +32,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect("157.66.101.51", username="root", password="***REDACTED-ROTATED-PASSWORD***", timeout=30)
+client.connect("157.66.101.51", username="root", password="<read from .claude/skills/credentials.local.md>", timeout=30)
 
 def run(cmd, timeout=120):
     stdin, stdout, stderr = client.exec_command(cmd, timeout=timeout)
@@ -56,7 +56,7 @@ KEEP_DAYS=14
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] ===== Backup start =====" >> "$LOG_FILE"
 
-/opt/mssql-tools18/bin/sqlcmd -S localhost,1433 -U sa -P '***REDACTED-ROTATED-PASSWORD***' -No -Q "
+/opt/mssql-tools18/bin/sqlcmd -S localhost,1433 -U sa -P '<read from .claude/skills/credentials.local.md>' -No -Q "
 BACKUP DATABASE [SuperApp-pro]
 TO DISK = N'${BACKUP_FILE}'
 WITH FORMAT, INIT, COMPRESSION;
