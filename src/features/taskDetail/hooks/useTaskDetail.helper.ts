@@ -18,7 +18,7 @@ import { useAuthStore, useKeywordSelector } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useEditorTabBarHelper } from "@/shell";
 import { useConsoleHelper } from "@/shared";
-import { parseAsLocalDate, toLocalISOString } from "@/shared";
+import { parseInstant, toInstantISO, parseDateOnly, toDateOnly } from "@/shared";
 import { useTaskLinkedKeywordsHelper } from "../hooks/useTaskLinkedKeywords.helper";
 import { useCommandPaletteHelper } from "@/shell";
 import { useKeywordNavigationHelper } from "@/shell";
@@ -133,10 +133,10 @@ export const useTaskDetailHelper = () => {
                         description: sectionDescription,
                         status: taskToSave.status || "open",
                         priority: taskToSave.priority || "low",
-                        startDate: toLocalISOString(taskToSave.startDate),
-                        endDate: toLocalISOString(taskToSave.endDate),
+                        startDate: toDateOnly(taskToSave.startDate),
+                        endDate: toDateOnly(taskToSave.endDate),
                         orderIndex: taskToSave.orderIndex || 0,
-                        deletedAt: isRestoreMode ? null : toLocalISOString(taskToSave.deletedAt),
+                        deletedAt: isRestoreMode ? null : toInstantISO(taskToSave.deletedAt),
                         folderWorkspaceItemId: taskToSave.folderWorkspaceItemId,
                         checklistJson: sectionChecklist,
                         processJson: sectionProcess,
@@ -168,12 +168,12 @@ export const useTaskDetailHelper = () => {
                     description: savedTask.description,
                     status: savedTask.status,
                     priority: savedTask.priority,
-                    startDate: parseAsLocalDate(savedTask.startDate),
-                    endDate: parseAsLocalDate(savedTask.endDate),
+                    startDate: parseDateOnly(savedTask.startDate),
+                    endDate: parseDateOnly(savedTask.endDate),
                     orderIndex: savedTask.orderIndex,
-                    createdAt: parseAsLocalDate(savedTask.createdAt) || new Date(),
-                    updatedAt: parseAsLocalDate(savedTask.updatedAt),
-                    deletedAt: parseAsLocalDate(savedTask.deletedAt),
+                    createdAt: parseInstant(savedTask.createdAt) || new Date(),
+                    updatedAt: parseInstant(savedTask.updatedAt),
+                    deletedAt: parseInstant(savedTask.deletedAt),
                     folderWorkspaceItemId: savedTask.folderWorkspaceItemId,
                     checklistJson: savedTask.checklistJson ?? null,
                     processJson: savedTask.processJson ?? null,

@@ -8,7 +8,7 @@ import type { Task } from "@/features/taskDetail";
 import { shellConstants } from "@/shell";
 import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
-import { toLocalISOString } from "@/shared";
+import { toDateOnly } from "@/shared";
 import { constants } from "@/shared";
 import { useTaskTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../../store/useTaskTimeline.store";
 import { useTaskTimelineSelector } from "../../Selectors/TaskTimelineSelector";
@@ -97,8 +97,8 @@ export const useTaskTimelineHelper = () => {
                     description: task.description,
                     status: task.status,
                     priority: task.priority,
-                    startDate: toLocalISOString(startDate),
-                    endDate: toLocalISOString(endDate),
+                    startDate: toDateOnly(startDate),
+                    endDate: toDateOnly(endDate),
                     orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson,

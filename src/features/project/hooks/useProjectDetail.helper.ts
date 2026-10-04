@@ -13,7 +13,7 @@ import { useWorkspaceHelper } from "@/features/workspace";
 import { useSideBarHelper } from "@/shell";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
 import { useConsoleHelper } from "@/shared";
-import { parseAsLocalDate, toLocalISOString } from "@/shared";
+import { parseInstant, parseDateOnly, toDateOnly } from "@/shared";
 import { constants } from "@/shared";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import type { TabType } from "../types/projectDetail.type";
@@ -22,7 +22,7 @@ import {useProjectStore} from "../store/useProject.store";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
- * Uses parseAsLocalDate to treat backend UTC as local time
+ * Calendar dates (startDate/endDate) -> parseDateOnly, instants -> parseInstant
  */
 const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
     return dtos.map((dto) => ({
@@ -30,11 +30,11 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         name: dto.name,
         description: dto.description,
         status: dto.status,
-        startDate: parseAsLocalDate(dto.startDate),
-        endDate: parseAsLocalDate(dto.endDate),
-        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
-        updatedAt: parseAsLocalDate(dto.updatedAt),
-        deletedAt: parseAsLocalDate(dto.deletedAt),
+        startDate: parseDateOnly(dto.startDate),
+        endDate: parseDateOnly(dto.endDate),
+        createdAt: parseInstant(dto.createdAt) || new Date(),
+        updatedAt: parseInstant(dto.updatedAt),
+        deletedAt: parseInstant(dto.deletedAt),
         workspaceId: dto.workspaceId,
         image: dto.image,
     }));
@@ -137,15 +137,15 @@ export const useProjectDetailHelper = () => {
 
         try {
             // ============================================================
-            // Step 3: Prepare upsert data - use toLocalISOString to preserve local time
+            // Step 3: Prepare upsert data - calendar dates as "YYYY-MM-DD" (toDateOnly)
             // ============================================================
             const upsertData = {
                 id: isCreateMode ? 0 : selectedProject.id, // Always use 0 for create
                 name: selectedProject.name,
                 description: selectedProject.description,
                 status: selectedProject.status,
-                startDate: toLocalISOString(selectedProject.startDate),
-                endDate: toLocalISOString(selectedProject.endDate),
+                startDate: toDateOnly(selectedProject.startDate),
+                endDate: toDateOnly(selectedProject.endDate),
                 deletedAt: isRestoreMode ? null : undefined, // null = restore, undefined = don't touch,
                 workspaceId: selectedProject.workspaceId,
                 image: selectedProject.image || null,
@@ -168,17 +168,17 @@ export const useProjectDetailHelper = () => {
                 throw new Error("Failed to save project: No data returned from server");
             }
 
-            // Transform DTO to domain model using parseAsLocalDate
+            // Transform DTO to domain model (parseDateOnly / parseInstant)
             const transformedProject: Project = {
                 id: savedProject.id,
                 name: savedProject.name,
                 description: savedProject.description,
                 status: savedProject.status,
-                startDate: parseAsLocalDate(savedProject.startDate),
-                endDate: parseAsLocalDate(savedProject.endDate),
-                createdAt: parseAsLocalDate(savedProject.createdAt) || new Date(),
-                updatedAt: parseAsLocalDate(savedProject.updatedAt),
-                deletedAt: parseAsLocalDate(savedProject.deletedAt),
+                startDate: parseDateOnly(savedProject.startDate),
+                endDate: parseDateOnly(savedProject.endDate),
+                createdAt: parseInstant(savedProject.createdAt) || new Date(),
+                updatedAt: parseInstant(savedProject.updatedAt),
+                deletedAt: parseInstant(savedProject.deletedAt),
                 workspaceId: savedProject.workspaceId,
                 image: savedProject.image,
             };

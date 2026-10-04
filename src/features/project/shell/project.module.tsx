@@ -11,7 +11,7 @@ import { taskService, transformTaskData } from "@/features/taskDetail";
 import type { TaskDTO } from "@/features/taskDetail";
 import { MultiProjectEditorPanel } from "@/features/multiProject";
 import type { KeywordPlugin } from "@/shell";
-import { parseKeywordLink } from "@/shared";
+import { parseKeywordLink, parseDateOnly } from "@/shared";
 import { projectService } from "../service/project.service";
 import type { ProjectDTO } from "../service/project.service";
 import type { Project } from "..";
@@ -28,8 +28,8 @@ const _transformProject = (dto: ProjectDTO): Project => ({
     name: dto.name,
     description: dto.description,
     status: dto.status,
-    startDate: dto.startDate ? new Date(dto.startDate) : null,
-    endDate: dto.endDate ? new Date(dto.endDate) : null,
+    startDate: parseDateOnly(dto.startDate),
+    endDate: parseDateOnly(dto.endDate),
     createdAt: new Date(dto.createdAt),
     updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
     deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
@@ -219,8 +219,8 @@ export const projectKeywordPlugin: KeywordPlugin = {
                         name: dto.name,
                         description: dto.description,
                         status: dto.status,
-                        startDate: dto.startDate ? new Date(dto.startDate) : null,
-                        endDate: dto.endDate ? new Date(dto.endDate) : null,
+                        startDate: parseDateOnly(dto.startDate),
+                        endDate: parseDateOnly(dto.endDate),
                         createdAt: new Date(dto.createdAt),
                         updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,
                         deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
@@ -260,8 +260,8 @@ export const projectKeywordPlugin: KeywordPlugin = {
                         description: dto.description,
                         status: dto.status,
                         priority: dto.priority,
-                        startDate: dto.startDate ? new Date(dto.startDate) : null,
-                        endDate: dto.endDate ? new Date(dto.endDate) : null,
+                        startDate: parseDateOnly(dto.startDate),
+                        endDate: parseDateOnly(dto.endDate),
                         orderIndex: dto.orderIndex,
                         createdAt: new Date(dto.createdAt),
                         updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : null,

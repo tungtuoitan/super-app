@@ -13,7 +13,7 @@ import { useMenuContextHelper } from "@/shared";
 import { TrackIconDisplay } from "./TrackIconDisplay";
 import { useDeviceStore } from "@/shared";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { toLocalISOString } from "@/shared";
+import { toInstantISO } from "@/shared";
 import { constants } from "@/shared";
 import type { LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import {useKeywordHelper} from "@/shared";
@@ -75,7 +75,7 @@ export function TrackItem({ track, onClick }: TrackItemProps) {
     const handleClick = async () => {
         if (didLongPressRef.current) return;
         setFlashing(true);
-        const occurAt = toLocalISOString(new Date()) ?? undefined;
+        const occurAt = toInstantISO(new Date()) ?? undefined;
         const trackLogCount = logs.filter((l) => l.trackId === track.id && l.deletedAt === null).length;
         const nextIndex = trackLogCount + 1;
         await createLog({

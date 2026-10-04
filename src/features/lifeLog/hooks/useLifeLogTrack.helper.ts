@@ -9,7 +9,7 @@ import { useAuthStore } from "@/shared";
 import type { LifeLogTrack, LifeLogTrackDTO, UpsertLifeLogTrackDTO } from "@/features/lifeLog/types/lifeLog.types";
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { toLocalISOString } from "@/shared";
+import { toInstantISO } from "@/shared";
 import { useDebugLog } from "@/shared";
 
 function transformTrack(dto: LifeLogTrackDTO): LifeLogTrack {
@@ -92,7 +92,7 @@ export function useLifeLogTrackHelper() {
                 description: existing.description,
                 isSensitive: existing.isSensitive,
                 color: existing.color,
-                deletedAt: toLocalISOString(new Date()) ?? undefined,
+                deletedAt: toInstantISO(new Date()) ?? undefined,
             }]);
             debugLog.log("lifelog", "deleteTrack:success", { id });
             await loadTracks();

@@ -13,7 +13,7 @@ import { useConsoleHelper } from "@/shared";
 import { taskService, transformTaskData } from "@/features/taskDetail";
 import type { TaskDTO } from "@/features/taskDetail";
 import { flowService } from "@/shared";
-import { toLocalISOString } from "@/shared";
+import { toDateOnly } from "@/shared";
 import { useMultiProjectTaskFlowProcessHelper } from "./useMultiProjectTaskFlowProcess.helper";
 import type { TaskFlowNodeData, FlowEdgeData } from "../../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/taskDetail";
@@ -162,8 +162,8 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 const result = await taskService._upsertTaskBatch($user.userToken, [{
                     id: task.id, projectId: task.projectId, parentTaskId: task.parentTaskId,
                     type: task.type, title: trimmed, description: task.description, status: task.status,
-                    priority: task.priority, startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
+                    priority: task.priority, startDate: toDateOnly(task.startDate),
+                    endDate: toDateOnly(task.endDate), orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
                     isMilestone: task.isMilestone,
@@ -307,8 +307,8 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 const result = await taskService._upsertTaskBatch($user.userToken, [{
                     id: task.id, projectId: newProjectId, parentTaskId: task.parentTaskId,
                     type: task.type, title: task.title, description: task.description, status: task.status,
-                    priority: task.priority, startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
+                    priority: task.priority, startDate: toDateOnly(task.startDate),
+                    endDate: toDateOnly(task.endDate), orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
                     isMilestone: task.isMilestone,
@@ -361,8 +361,8 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
                 const result = await taskService._upsertTaskBatch($user.userToken, [{
                     id: task.id, projectId: task.projectId, parentTaskId: task.parentTaskId,
                     type: task.type, title: task.title, description: task.description, status: newStatus,
-                    priority: task.priority, startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
+                    priority: task.priority, startDate: toDateOnly(task.startDate),
+                    endDate: toDateOnly(task.endDate), orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
                     isMilestone: task.isMilestone,

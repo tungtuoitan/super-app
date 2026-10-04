@@ -6,7 +6,7 @@ import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTas
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useAuthStore } from "@/shared";
 import { taskService, parseChecklistJson, checklistProgress, toggleChecklistItem, getItemCheckState, flatItemIndex, getFlatItems } from "@/features/taskDetail";
-import { toLocalISOString } from "@/shared";
+import { toDateOnly } from "@/shared";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
 
@@ -67,8 +67,8 @@ export const useMultiProjectTaskFlowProcessHelper = () => {
                     id: task.id, projectId: task.projectId, parentTaskId: task.parentTaskId,
                     type: task.type, title: task.title, description: task.description,
                     status: allDone ? "completed" : task.status,
-                    priority: task.priority, startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,
+                    priority: task.priority, startDate: toDateOnly(task.startDate),
+                    endDate: toDateOnly(task.endDate), orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson, processJson: newJsonStr, customTabsJson: task.customTabsJson,
                     isMilestone: task.isMilestone,

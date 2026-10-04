@@ -9,7 +9,7 @@ import { useProjectStore } from "@/features/project";
 import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
 import { projectService } from "@/features/project";
-import { toLocalISOString } from "@/shared";
+import { toDateOnly } from "@/shared";
 import { useMultiTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
@@ -101,7 +101,7 @@ export const useMultiTimelineHelper = () => {
                 id: task.id, projectId: task.projectId, parentTaskId: task.parentTaskId,
                 type: task.type, title: task.title, description: task.description,
                 status: task.status, priority: task.priority,
-                startDate: toLocalISOString(startDate), endDate: toLocalISOString(endDate),
+                startDate: toDateOnly(startDate), endDate: toDateOnly(endDate),
                 orderIndex: task.orderIndex,
                 folderWorkspaceItemId: task.folderWorkspaceItemId,
                 checklistJson: task.checklistJson,
@@ -136,8 +136,8 @@ export const useMultiTimelineHelper = () => {
             const upsertData = {
                 id: project.id,
                 name: project.name || "",
-                startDate: toLocalISOString(startDate),
-                endDate: toLocalISOString(endDate),
+                startDate: toDateOnly(startDate),
+                endDate: toDateOnly(endDate),
             };
             const result = await projectService.upsertProjectBatch($user.userToken, [upsertData]);
             if (result.success) {

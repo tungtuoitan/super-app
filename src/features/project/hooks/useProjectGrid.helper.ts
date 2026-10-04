@@ -11,14 +11,14 @@ import { useMenuContextHelper } from "@/shared";
 import { useConsoleHelper } from "@/shared";
 import { useProjectTabHelper } from "./useProjectTab.helper";
 import { useProjectDetailStore } from "../store/useProjectDetail.store";
-import { parseAsLocalDate } from "@/shared";
+import { parseInstant, parseDateOnly } from "@/shared";
 import {Project} from "../types/project.types";
 import {generateTempId, generateUnsavedName} from "@/features/workspace";
 import type { ProjectGridMenuData } from "@/shared";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
- * Uses parseAsLocalDate to treat backend UTC as local time
+ * Calendar dates (startDate/endDate) -> parseDateOnly, instants -> parseInstant
  */
 const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
     return dtos.map((dto) => ({
@@ -26,11 +26,11 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         name: dto.name,
         description: dto.description,
         status: dto.status,
-        startDate: parseAsLocalDate(dto.startDate),
-        endDate: parseAsLocalDate(dto.endDate),
-        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
-        updatedAt: parseAsLocalDate(dto.updatedAt),
-        deletedAt: parseAsLocalDate(dto.deletedAt),
+        startDate: parseDateOnly(dto.startDate),
+        endDate: parseDateOnly(dto.endDate),
+        createdAt: parseInstant(dto.createdAt) || new Date(),
+        updatedAt: parseInstant(dto.updatedAt),
+        deletedAt: parseInstant(dto.deletedAt),
         workspaceId: dto.workspaceId,
         image: dto.image,
     }));

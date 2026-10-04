@@ -9,7 +9,7 @@ import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
-import { toLocalISOString } from "@/shared";
+import { toDateOnly } from "@/shared";
 import { useMultiProjectKanbanSelector } from "../../Selectors/useMultiProjectKanban.selector";
 import {useAuthStore} from "@/shared";
 
@@ -96,8 +96,8 @@ export const useMultiProjectKanbanHelper = () => {
                     description: task.description,
                     status: newStatus,
                     priority: task.priority,
-                    startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate),
+                    startDate: toDateOnly(task.startDate),
+                    endDate: toDateOnly(task.endDate),
                     orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson,
@@ -117,8 +117,8 @@ export const useMultiProjectKanbanHelper = () => {
                         description: subtask.description,
                         status: update.newStatus,
                         priority: subtask.priority,
-                        startDate: toLocalISOString(subtask.startDate),
-                        endDate: toLocalISOString(subtask.endDate),
+                        startDate: toDateOnly(subtask.startDate),
+                        endDate: toDateOnly(subtask.endDate),
                         orderIndex: subtask.orderIndex,
                         folderWorkspaceItemId: subtask.folderWorkspaceItemId,
                         checklistJson: subtask.checklistJson,

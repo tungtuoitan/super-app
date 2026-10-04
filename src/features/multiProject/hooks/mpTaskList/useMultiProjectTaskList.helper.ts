@@ -10,7 +10,7 @@ import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useConsoleHelper } from "@/shared";
 import { taskService, getSubtasksOutsideRange, computeReorderedTasks } from "@/features/taskDetail";
-import { toLocalISOString } from "@/shared";
+import { toDateOnly } from "@/shared";
 import {useMultiProjectTaskGridHelper} from "./useMultiProjectTaskGrid.helper";
 import {useAuthStore} from "@/shared";
 
@@ -40,8 +40,8 @@ export const useMultiProjectTaskListHelper = () => {
                 description: task.description,
                 status: field === "status" ? newValue : task.status,
                 priority: field === "priority" ? newValue : task.priority,
-                startDate: toLocalISOString(task.startDate),
-                endDate: toLocalISOString(task.endDate),
+                startDate: toDateOnly(task.startDate),
+                endDate: toDateOnly(task.endDate),
                 orderIndex: task.orderIndex,
                 folderWorkspaceItemId: task.folderWorkspaceItemId,
                 checklistJson: task.checklistJson,
@@ -104,8 +104,8 @@ export const useMultiProjectTaskListHelper = () => {
                 description: task.description,
                 status: task.status,
                 priority: task.priority,
-                startDate: field === "startDate" ? toLocalISOString(newValue) : toLocalISOString(task.startDate),
-                endDate: field === "endDate" ? toLocalISOString(newValue) : toLocalISOString(task.endDate),
+                startDate: field === "startDate" ? toDateOnly(newValue) : toDateOnly(task.startDate),
+                endDate: field === "endDate" ? toDateOnly(newValue) : toDateOnly(task.endDate),
                 orderIndex: task.orderIndex,
                 folderWorkspaceItemId: task.folderWorkspaceItemId,
                 checklistJson: task.checklistJson,
@@ -149,8 +149,8 @@ export const useMultiProjectTaskListHelper = () => {
                 description: dragTask.description,
                 status: dragTask.status,
                 priority: dragTask.priority,
-                startDate: toLocalISOString(dragTask.startDate),
-                endDate: toLocalISOString(dragTask.endDate),
+                startDate: toDateOnly(dragTask.startDate),
+                endDate: toDateOnly(dragTask.endDate),
                 orderIndex: dragTask.orderIndex,
                 folderWorkspaceItemId: dragTask.folderWorkspaceItemId,
                 checklistJson: dragTask.checklistJson,
@@ -204,8 +204,8 @@ export const useMultiProjectTaskListHelper = () => {
                 description: task.description,
                 status: task.status,
                 priority: task.priority,
-                startDate: toLocalISOString(task.startDate),
-                endDate: toLocalISOString(task.endDate),
+                startDate: toDateOnly(task.startDate),
+                endDate: toDateOnly(task.endDate),
                 orderIndex: task.orderIndex,
                 folderWorkspaceItemId: task.folderWorkspaceItemId,
                 checklistJson: task.checklistJson,
@@ -260,8 +260,8 @@ export const useMultiProjectTaskListHelper = () => {
                     description: t.description,
                     status: t.status,
                     priority: t.priority,
-                    startDate: toLocalISOString(t.startDate),
-                    endDate: toLocalISOString(t.endDate),
+                    startDate: toDateOnly(t.startDate),
+                    endDate: toDateOnly(t.endDate),
                     orderIndex: changes.get(t.id)!,
                     folderWorkspaceItemId: t.folderWorkspaceItemId,
                     checklistJson: t.checklistJson,
@@ -303,8 +303,8 @@ export const useMultiProjectTaskListHelper = () => {
                 description: task.description,
                 status: task.status,
                 priority: task.priority,
-                startDate: toLocalISOString(task.startDate),
-                endDate: toLocalISOString(task.endDate),
+                startDate: toDateOnly(task.startDate),
+                endDate: toDateOnly(task.endDate),
                 orderIndex: task.orderIndex,
                 folderWorkspaceItemId: task.folderWorkspaceItemId,
                 checklistJson: task.checklistJson,

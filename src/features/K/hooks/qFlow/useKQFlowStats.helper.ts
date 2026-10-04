@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { parseAsLocalDate } from "@/shared";
+import { parseInstant } from "@/shared";
 import type { KQuestion } from "@/features/K/types/kQuiz.type";
 
 const MASTER_STREAK  = 5;
@@ -13,7 +13,7 @@ export function useKQFlowStats(questions: KQuestion[]) {
 
     const dueCount = reviewableQuestions.filter(q => {
         if (!q.srsNextReviewAt) return false;
-        const d = parseAsLocalDate(q.srsNextReviewAt);
+        const d = parseInstant(q.srsNextReviewAt);
         return d !== null && d <= now;
     }).length;
     const newCount        = reviewableQuestions.filter(q => !q.srsNextReviewAt).length;

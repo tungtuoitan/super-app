@@ -1,187 +1,142 @@
 ---
-name: sa-fake-utc
-description: SuperApp date handling strategy — "Fake UTC". How dates flow between FE, API, and DB without timezone shift.
+name: sa-date-handling
+description: SuperApp date handling strategy (thay thế "Fake UTC" cũ — folder vẫn tên sa-fake-utc để không gãy link). Phân biệt INSTANT (ISO 8601 có offset) và CALENDAR DATE ("YYYY-MM-DD"); 4 helper parseInstant / toInstantISO / parseDateOnly / toDateOnly trong src/shared/utils/date.utils.ts. Dùng khi đọc/gửi bất kỳ field ngày giờ nào giữa FE và API.
 ---
 
-# SuperApp — Chiến lược "Fake UTC"
+# SuperApp — Date handling (instant vs calendar date)
 
-## Vấn đề
+> **Tên cũ:** `sa-fake-utc` ("Fake UTC" — gửi giờ local giả làm UTC bằng
+> `toLocalISOString`, đọc bằng `parseAsLocalDate`). Convention đó **đã bỏ**;
+> 2 helper cũ đã bị xoá khỏi code. Folder giữ tên `sa-fake-utc` chỉ để không
+> gãy link/reference.
 
-JavaScript `Date.toISOString()` luôn convert sang UTC thật:
+## Hai loại giá trị ngày giờ
 
-```
-Local: 2024-01-15 09:00 (GMT+7, Vietnam)
-.toISOString() → "2024-01-15T02:00:00.000Z"  ← sai, bị lùi 7 tiếng
-```
+| Loại | Ý nghĩa | Ví dụ field | Dạng trên API |
+|---|---|---|---|
+| **INSTANT** | 1 thời điểm thật trên trục thời gian | `createdAt`, `updatedAt`, `deletedAt`, `occurAt`, `occurredAt`, `srsNextReviewAt`, `lastPushAt`, `expiry`... | ISO 8601 **có offset**: `"2026-10-04T09:00:00.000+07:00"` (BE trả theo timezone của user). BE **từ chối** input không có offset. `"...Z"` là offset hợp lệ. |
+| **CALENDAR DATE** | 1 ngày trên lịch, không giờ, không timezone | task `startDate`/`endDate`, `projectStartDate`/`projectEndDate`/`parentStartDate`/`parentEndDate` (trên task), project `startDate`/`endDate`, daily log `logDate`, user `dateOfBirth` | `"YYYY-MM-DD"` (cả chiều đọc lẫn ghi) |
 
-DB lưu string này, rồi khi FE đọc lại và parse bằng `new Date()`, nó lại interpret là UTC → hiển thị sai giờ.
-
-## Giải pháp: Fake UTC
-
-**Quy ước:** Mọi date trong hệ thống đều được xử lý như thể user ở UTC. Không có conversion timezone ở bất kỳ đâu.
-
-- **FE → API**: gửi local time nhưng giả vờ nó là UTC (dùng `toLocalISOString`)
-- **DB**: lưu đúng string đó (không convert)
-- **API → FE**: trả về đúng string đó, FE parse như local time (dùng `parseAsLocalDate`)
-
-Kết quả: `2024-01-15 09:00` ở VN → DB lưu `"2024-01-15T09:00:00.000Z"` → FE đọc lại hiển thị `09:00` ✓
+Quy tắc chọn: field là "ngày trên lịch" (người dùng chọn 1 ngày, không quan tâm giờ) → CALENDAR DATE. Mọi thứ còn lại (timestamp hệ thống, sự kiện xảy ra lúc nào) → INSTANT.
 
 ---
 
-## File cốt lõi
+## File cốt lõi: `src/shared/utils/date.utils.ts`
 
-`src/shared/utils/date.utils.ts` — export 2 hàm duy nhất.
-
-### `toLocalISOString(date: Date | null | undefined): string | null`
-
-Dùng khi **gửi date lên API** (trong service call, upsert payload).
+Export qua `@/shared`:
 
 ```ts
-import { toLocalISOString } from "@/shared";
-
-// Thay vì:
-startDate: date.toISOString()           // ❌ shift timezone
-
-// Dùng:
-startDate: toLocalISOString(date)       // ✓ giữ nguyên giờ local
+import { parseInstant, toInstantISO, parseDateOnly, toDateOnly } from "@/shared";
 ```
 
-Nó lấy các component local (`getFullYear`, `getMonth`, `getDate`, `getHours`...) rồi ghép thành ISO string kết thúc bằng `Z` — nhưng giá trị là local time, không phải UTC.
+| Hàm | Chiều | Làm gì |
+|---|---|---|
+| `parseInstant(s?: string \| null): Date \| null` | API → FE | `new Date(s)`; rỗng/invalid → `null` |
+| `toInstantISO(d?: Date \| null): string \| null` | FE → API | `d.toISOString()` (UTC `Z`); rỗng/invalid → `null` |
+| `parseDateOnly(s?: string \| null): Date \| null` | API → FE | lấy 10 ký tự đầu `"YYYY-MM-DD"` → `new Date(y, m-1, d)` = **0h LOCAL** |
+| `toDateOnly(d?: Date \| null): string \| null` | FE → API | `"YYYY-MM-DD"` từ `getFullYear/getMonth/getDate` **LOCAL** |
 
-### `parseAsLocalDate(isoString: string | null | undefined): Date | null`
-
-Dùng khi **nhận date từ API** (trong DTO → domain transform).
-
-```ts
-import { parseAsLocalDate } from "@/shared";
-
-// Thay vì:
-startDate: new Date(dto.startDate)          // ❌ interpret as UTC → sai giờ
-
-// Dùng:
-startDate: parseAsLocalDate(dto.startDate)  // ✓ treat values as local time
-```
-
-Nó regex-parse string, lấy raw numbers rồi gọi `new Date(year, month-1, day, hours, ...)` — constructor này dùng local time.
+Calendar date sau `parseDateOnly` là `Date` ở 0h local — đúng thứ timeline/grid/kanban đang tính toán (so sánh ngày, cộng ngày, `differenceInDays`...). Không cần đổi logic timeline.
 
 ---
 
-## Pattern chuẩn trong FE
+## Pattern chuẩn
 
-### 1. DTO → Domain (khi nhận từ API)
-
-Toàn bộ date fields trong transform function đều dùng `parseAsLocalDate`:
+### 1. DTO → Domain (nhận từ API)
 
 ```ts
 // src/features/taskDetail/utils/TaskDetail.utils.ts
-import { parseAsLocalDate } from "@/shared";
-
 function dtoToDomain(dto: TaskDTO): Task {
     return {
         ...dto,
-        startDate:   parseAsLocalDate(dto.startDate),
-        endDate:     parseAsLocalDate(dto.endDate),
-        createdAt:   parseAsLocalDate(dto.createdAt) || new Date(),
-        updatedAt:   parseAsLocalDate(dto.updatedAt),
-        deletedAt:   parseAsLocalDate(dto.deletedAt),
+        startDate:        parseDateOnly(dto.startDate),
+        endDate:          parseDateOnly(dto.endDate),
+        projectStartDate: parseDateOnly(dto.projectStartDate),
+        createdAt:        parseInstant(dto.createdAt) || new Date(),
+        updatedAt:        parseInstant(dto.updatedAt),
+        deletedAt:        parseInstant(dto.deletedAt),
     };
 }
 ```
 
-### 2. Domain → API Request (khi gửi lên)
+Với INSTANT, `new Date(dto.createdAt)` cũng đúng (string có offset) — `parseInstant` chỉ thêm null-safe + invalid → `null`.
 
-Mọi date field trong payload đều dùng `toLocalISOString`:
+### 2. Domain → API request (gửi lên)
 
 ```ts
-// src/features/project/task/hooks/taskTimeline/useTaskTimeline.helper.ts
-import { toLocalISOString } from "@/shared";
-
 await taskService.upsert({
-    startDate: toLocalISOString(startDate),
-    endDate:   toLocalISOString(endDate),
+    startDate: toDateOnly(task.startDate),   // "2026-10-04"
+    endDate:   toDateOnly(task.endDate),
+    deletedAt: toInstantISO(task.deletedAt), // "2026-10-04T02:00:00.000Z"
 });
 ```
 
-### 3. "Now" timestamp (deletedAt, occurAt, v.v.)
+### 3. Timestamp "bây giờ"
 
 ```ts
-deletedAt: toLocalISOString(new Date())
-occurAt:   toLocalISOString(new Date())
+deletedAt: toInstantISO(new Date())   // hoặc new Date().toISOString() — tương đương
+occurAt:   toInstantISO(new Date())
+```
+
+### 4. Key theo ngày (group/map theo ngày local)
+
+```ts
+const key = toDateOnly(d);   // ✓ ngày local
+const key = d.toISOString().slice(0, 10);   // ❌ ngày UTC — ở VN trước 7h sáng ra ngày hôm trước
+```
+
+### 5. Tính khoảng thời gian ("5 phút trước")
+
+```ts
+const diff = Date.now() - parseInstant(dto.createdAt)!.getTime();   // ✓ instant thật, so được trực tiếp
 ```
 
 ---
 
-## Quy tắc bắt buộc
+## KHÔNG được làm
+
+```ts
+// ❌ new Date("YYYY-MM-DD") — JS parse date-only string là UTC 0h
+//    → ở timezone âm (Mỹ) thành ngày hôm trước; ở VN thành 7h sáng thay vì 0h.
+new Date(dto.startDate);
+new Date("2026-10-04");
+
+// ❌ toISOString() cho calendar date — convert sang UTC
+//    → ở VN, 0h ngày 04 thành "2026-10-03T17:00:00.000Z" (lệch sang ngày 03).
+payload.startDate = task.startDate.toISOString();
+
+// ❌ toISOString().slice(0, 10) để lấy "ngày" — là ngày UTC, không phải ngày local.
+
+// ❌ Gửi INSTANT không có offset — BE sẽ từ chối.
+payload.deletedAt = "2026-10-04T09:00:00";
+
+// ❌ Gửi thẳng Date object trong payload — JSON.stringify gọi toISOString()
+//    → calendar date bị lệch ngày. Luôn convert bằng toDateOnly / toInstantISO.
+
+// ✓ Đúng
+payload.startDate = toDateOnly(task.startDate);
+payload.deletedAt = toInstantISO(new Date());
+const start = parseDateOnly(dto.startDate);
+const created = parseInstant(dto.createdAt);
+```
+
+---
+
+## Bảng tra nhanh
 
 | Tình huống | Dùng |
 |---|---|
-| Date field trong API request payload | `toLocalISOString(date)` |
-| Date field khi map DTO → domain object | `parseAsLocalDate(dto.field)` |
-| Timestamp "hiện tại" gửi lên server | `toLocalISOString(new Date())` |
-| So sánh/tính toán date trong FE | Dùng `Date` object bình thường sau khi đã parse |
-| Hiển thị date cho user | Dùng `Date` object sau `parseAsLocalDate`, format tùy UI |
+| Đọc calendar date từ DTO | `parseDateOnly(dto.field)` |
+| Gửi calendar date lên API / query param | `toDateOnly(date)` |
+| Đọc instant từ DTO | `parseInstant(dto.field)` (hoặc `new Date(str)`) |
+| Gửi instant lên API | `toInstantISO(date)` (hoặc `date.toISOString()`) |
+| So sánh/tính toán trong FE | `Date` object bình thường sau khi parse |
+| Hiển thị | format `Date` theo UI (date-fns `format`...) — luôn ra giờ/ngày local |
 
-## Lỗi thường gặp
+## Lưu ý
 
-```ts
-// ❌ Sai — dùng toISOString() chuẩn
-payload.dueDate = date.toISOString();
-
-// ❌ Sai — parse bằng new Date() trực tiếp
-const d = new Date(dto.dueDate);
-
-// ❌ Sai — quên parse, giữ nguyên string từ DTO
-const task = { dueDate: dto.dueDate };
-
-// ✓ Đúng
-payload.dueDate = toLocalISOString(date);
-const d = parseAsLocalDate(dto.dueDate);
-```
-
----
-
-## BE (tham khảo)
-
-BE không làm gì đặc biệt — nhận string, lưu thẳng vào DB dạng `DATETIME` hoặc `TIMESTAMP` **không có timezone conversion**. Khi trả về cũng trả nguyên string đó. Convention là BE treat tất cả datetime column như "local time của user" chứ không convert sang UTC thật.
-
-### BE (.NET): Dùng `DateTime.Now`
-
-```csharp
-// ✓ Đúng — local server time
-entity.CreatedAt = DateTime.Now;
-entity.UpdatedAt = DateTime.Now;
-
-// ❌ Sai — UTC, lệch 7h so với Vietnam
-DateTime.UtcNow;
-```
-
-### DB: Dùng `datetime2` + `sysdatetime()`
-
-```sql
-[created_at] DATETIME2(3) DEFAULT (sysdatetime()) NOT NULL
--- sysdatetime()    = local server time ✓
--- sysutcdatetime() = UTC              ❌
-```
-
----
-
-### 4. So sánh/tính toán thời gian (ví dụ "5 phút trước")
-
-```ts
-// ✓ Đúng — cả hai đều là local time
-const diff = new Date().getTime() - parseAsLocalDate(dto.createdAt)!.getTime();
-
-// ❌ Sai — trộn local Date() với UTC-parsed date → lệch ±7h
-const diff = new Date().getTime() - new Date(dto.createdAt).getTime();
-```
-
----
-
-## Lưu ý phạm vi áp dụng
-
-- ✓ App single-timezone (toàn bộ user ở cùng timezone)
-- ✓ "Display time" — user thấy đúng giờ họ nhập
-- ✗ Không phù hợp cho app multi-timezone cần sync cross-timezone
+- Calendar date **không có giờ**: nếu UI cho chọn giờ cho task start/end (DateRangePicker có ô giờ), phần giờ sẽ bị bỏ khi gửi `toDateOnly`.
+- Instant hiển thị theo timezone của **trình duyệt** (`Date` local). BE trả offset theo timezone user (setting profile) — 2 cái trùng nhau khi user ở đúng timezone đã cài.
 
 ---
 
@@ -189,4 +144,4 @@ const diff = new Date().getTime() - new Date(dto.createdAt).getTime();
 
 {{USER_TASK}}
 
-Áp dụng chiến lược Fake UTC: dùng `toLocalISOString` khi gửi lên API, `parseAsLocalDate` khi nhận từ API.
+Áp dụng convention trên: calendar date → `parseDateOnly` / `toDateOnly`; instant → `parseInstant` / `toInstantISO`. Không dùng `new Date("YYYY-MM-DD")` và không `toISOString()` cho calendar date.

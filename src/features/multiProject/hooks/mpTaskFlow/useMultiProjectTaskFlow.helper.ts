@@ -11,7 +11,7 @@ import { applyEdgeChanges } from "@xyflow/react";
 import type { EdgeChange } from "@xyflow/react";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProjectTaskFlow.selector";
-import { useAuthStore, useConsoleHelper, flowService, parseAsLocalDate } from "@/shared";
+import { useAuthStore, useConsoleHelper, flowService, parseInstant, parseDateOnly } from "@/shared";
 import { taskService, transformTaskData } from "@/features/taskDetail";
 import type { TaskDTO } from "@/features/taskDetail";
 import { projectService } from "@/features/project";
@@ -108,11 +108,11 @@ export const useMultiProjectTaskFlowHelper = () => {
                         name: dto.name,
                         description: dto.description,
                         status: dto.status,
-                        startDate: parseAsLocalDate(dto.startDate),
-                        endDate: parseAsLocalDate(dto.endDate),
-                        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
-                        updatedAt: parseAsLocalDate(dto.updatedAt),
-                        deletedAt: parseAsLocalDate(dto.deletedAt),
+                        startDate: parseDateOnly(dto.startDate),
+                        endDate: parseDateOnly(dto.endDate),
+                        createdAt: parseInstant(dto.createdAt) || new Date(),
+                        updatedAt: parseInstant(dto.updatedAt),
+                        deletedAt: parseInstant(dto.deletedAt),
                         workspaceId: dto.workspaceId,
                         image: dto.image,
                     }))

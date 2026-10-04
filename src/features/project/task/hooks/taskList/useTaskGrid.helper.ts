@@ -11,14 +11,14 @@ import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useMenuContextHelper } from "@/shared";
 import { useConsoleHelper } from "@/shared";
-import { parseAsLocalDate, toLocalISOString } from "@/shared";
+import { parseInstant, toInstantISO, parseDateOnly, toDateOnly } from "@/shared";
 import {usePTaskStore} from "@/features/project/store/usePTask.store";
 import {generateTempId} from "@/features/workspace";
 import type { TaskGridMenuData } from "@/shared";
 
 /**
  * Transform task DTOs (dates as strings) to domain models (dates as Date objects)
- * Uses parseAsLocalDate to treat backend UTC as local time
+ * Calendar dates (startDate/endDate) -> parseDateOnly, instants -> parseInstant
  */
 const transformTaskData = (dtos: TaskDTO[]): Task[] => {
     return dtos.map((dto) => ({
@@ -31,22 +31,22 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         description: dto.description,
         status: dto.status,
         priority: dto.priority,
-        startDate: parseAsLocalDate(dto.startDate),
-        endDate: parseAsLocalDate(dto.endDate),
+        startDate: parseDateOnly(dto.startDate),
+        endDate: parseDateOnly(dto.endDate),
         orderIndex: dto.orderIndex,
-        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
-        updatedAt: parseAsLocalDate(dto.updatedAt),
-        deletedAt: parseAsLocalDate(dto.deletedAt),
+        createdAt: parseInstant(dto.createdAt) || new Date(),
+        updatedAt: parseInstant(dto.updatedAt),
+        deletedAt: parseInstant(dto.deletedAt),
         folderWorkspaceItemId: dto.folderWorkspaceItemId,
         checklistJson: dto.checklistJson ?? null,
         processJson: dto.processJson ?? null,
         customTabsJson: dto.customTabsJson ?? null,
         isMilestone: dto.isMilestone ?? false,
         // Limit dates for warning display
-        projectStartDate: parseAsLocalDate(dto.projectStartDate),
-        projectEndDate: parseAsLocalDate(dto.projectEndDate),
-        parentStartDate: parseAsLocalDate(dto.parentStartDate),
-        parentEndDate: parseAsLocalDate(dto.parentEndDate),
+        projectStartDate: parseDateOnly(dto.projectStartDate),
+        projectEndDate: parseDateOnly(dto.projectEndDate),
+        parentStartDate: parseDateOnly(dto.parentStartDate),
+        parentEndDate: parseDateOnly(dto.parentEndDate),
     }));
 };
 
@@ -132,7 +132,7 @@ export const useTaskGridHelper = () => {
 
             // Handle persisted tasks - call API
             if (persistedTaskIds.length > 0) {
-                const deletedAt = type === "soft-delete" ? toLocalISOString(new Date()) : null;
+                const deletedAt = type === "soft-delete" ? toInstantISO(new Date()) : null;
 
                 const batchRequests = persistedTaskIds.map((id) => {
                     const task = tasks.find((t) => t.id === id);
@@ -149,8 +149,8 @@ export const useTaskGridHelper = () => {
                         description: task.description,
                         status: task.status,
                         priority: task.priority,
-                        startDate: toLocalISOString(task.startDate),
-                        endDate: toLocalISOString(task.endDate),
+                        startDate: toDateOnly(task.startDate),
+                        endDate: toDateOnly(task.endDate),
                         orderIndex: task.orderIndex,
                         deletedAt: deletedAt,
                         folderWorkspaceItemId: task.folderWorkspaceItemId,
@@ -306,10 +306,10 @@ export const useTaskGridHelper = () => {
                 description: task.description,
                 status: task.status,
                 priority: task.priority,
-                startDate: toLocalISOString(task.startDate),
-                endDate: toLocalISOString(task.endDate),
+                startDate: toDateOnly(task.startDate),
+                endDate: toDateOnly(task.endDate),
                 orderIndex: task.orderIndex,
-                deletedAt: toLocalISOString(task.deletedAt),
+                deletedAt: toInstantISO(task.deletedAt),
                 folderWorkspaceItemId: task.folderWorkspaceItemId,
                 checklistJson: task.checklistJson,
                 processJson: task.processJson,
@@ -361,8 +361,8 @@ export const useTaskGridHelper = () => {
                     description: task.description,
                     status: task.status,
                     priority: task.priority,
-                    startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate),
+                    startDate: toDateOnly(task.startDate),
+                    endDate: toDateOnly(task.endDate),
                     orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson,

@@ -1,4 +1,4 @@
-﻿import { parseAsLocalDate } from "@/shared";
+﻿import { parseInstant } from "@/shared";
 
 interface KScoreBarProps {
     /** Last ≤10 scores, each 0–5, oldest→newest */
@@ -19,7 +19,7 @@ const dotColor = (point: number) =>
     point >= 4 ? "#22c55e" : point >= 2 ? "#eab308" : "#ef4444";
 
 function formatNextReview(iso: string): string {
-    const diff = (parseAsLocalDate(iso)?.getTime() ?? Date.now()) - Date.now();
+    const diff = (parseInstant(iso)?.getTime() ?? Date.now()) - Date.now();
     if (diff <= 0) return "due";
 
     if (diff < 3_600_000) {
@@ -47,7 +47,7 @@ export function KScoreBar({ scores, srsNextReviewAt, retention }: KScoreBarProps
     ];
 
     const isDue = srsNextReviewAt
-        ? (parseAsLocalDate(srsNextReviewAt)?.getTime() ?? Infinity) <= Date.now()
+        ? (parseInstant(srsNextReviewAt)?.getTime() ?? Infinity) <= Date.now()
         : false;
 
     return (

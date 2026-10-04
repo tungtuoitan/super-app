@@ -10,7 +10,7 @@ export interface UpdateUserProfileRequest {
     lastName?: string | null;
     avatarUrl?: string | null;
     bio?: string | null;
-    dateOfBirth?: string | null; // ISO date string
+    dateOfBirth?: string | null; // calendar date "YYYY-MM-DD" (use toDateOnly / parseDateOnly)
     gender?: string | null;
     country?: string | null;
     city?: string | null;

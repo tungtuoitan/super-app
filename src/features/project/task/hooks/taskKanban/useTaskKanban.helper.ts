@@ -7,7 +7,7 @@
 
 import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
-import { toLocalISOString } from "@/shared";
+import { toDateOnly } from "@/shared";
 import { useTaskKanbanSelector } from "../../Selectors/TaskKanbanSelector";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import {useAuthStore} from "@/shared";
@@ -97,8 +97,8 @@ export const useTaskKanbanHelper = () => {
                     description: task.description,
                     status: newStatus,
                     priority: task.priority,
-                    startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate),
+                    startDate: toDateOnly(task.startDate),
+                    endDate: toDateOnly(task.endDate),
                     orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson,
@@ -118,8 +118,8 @@ export const useTaskKanbanHelper = () => {
                         description: subtask.description,
                         status: update.newStatus,
                         priority: subtask.priority,
-                        startDate: toLocalISOString(subtask.startDate),
-                        endDate: toLocalISOString(subtask.endDate),
+                        startDate: toDateOnly(subtask.startDate),
+                        endDate: toDateOnly(subtask.endDate),
                         orderIndex: subtask.orderIndex,
                         folderWorkspaceItemId: subtask.folderWorkspaceItemId,
                         checklistJson: subtask.checklistJson,

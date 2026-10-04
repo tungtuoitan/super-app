@@ -8,7 +8,7 @@
 import type { Task } from "@/features/taskDetail";
 import { useConsoleHelper } from "@/shared";
 import { taskService, getSubtasksOutsideRange } from "@/features/taskDetail";
-import { toLocalISOString } from "@/shared";
+import { toDateOnly } from "@/shared";
 import { useTaskGridHelper } from "./useTaskGrid.helper";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import {useAuthStore} from "@/shared";
@@ -39,8 +39,8 @@ export const useTaskGridUpdateHelper = () => {
                     description: task.description,
                     status: field === "status" ? newValue : task.status,
                     priority: field === "priority" ? newValue : task.priority,
-                    startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate),
+                    startDate: toDateOnly(task.startDate),
+                    endDate: toDateOnly(task.endDate),
                     orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson,
@@ -99,8 +99,8 @@ export const useTaskGridUpdateHelper = () => {
                     description: task.description,
                     status: task.status,
                     priority: task.priority,
-                    startDate: field === "startDate" ? toLocalISOString(newValue) : toLocalISOString(task.startDate),
-                    endDate: field === "endDate" ? toLocalISOString(newValue) : toLocalISOString(task.endDate),
+                    startDate: field === "startDate" ? toDateOnly(newValue) : toDateOnly(task.startDate),
+                    endDate: field === "endDate" ? toDateOnly(newValue) : toDateOnly(task.endDate),
                     orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson,
@@ -141,8 +141,8 @@ export const useTaskGridUpdateHelper = () => {
                     description: dragTask.description,
                     status: dragTask.status,
                     priority: dragTask.priority,
-                    startDate: toLocalISOString(dragTask.startDate),
-                    endDate: toLocalISOString(dragTask.endDate),
+                    startDate: toDateOnly(dragTask.startDate),
+                    endDate: toDateOnly(dragTask.endDate),
                     orderIndex: dragTask.orderIndex,
                     folderWorkspaceItemId: dragTask.folderWorkspaceItemId,
                     checklistJson: dragTask.checklistJson,
@@ -192,8 +192,8 @@ export const useTaskGridUpdateHelper = () => {
                     description: task.description,
                     status: task.status,
                     priority: task.priority,
-                    startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate),
+                    startDate: toDateOnly(task.startDate),
+                    endDate: toDateOnly(task.endDate),
                     orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson,

@@ -7,7 +7,7 @@ import { useAuthStore } from "@/shared";
 import { useTaskCommentStore } from "../../store/useTaskComment.store";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { taskCommentService } from "../../service/taskComment.service";
-import { parseAsLocalDate } from "@/shared";
+import { parseInstant } from "@/shared";
 import type { TaskComment, TaskCommentDTO } from "../../types/taskComment.types";
 
 /** Transform DTO (string dates) → domain model (Date objects) */
@@ -17,9 +17,9 @@ const transformComment = (dto: TaskCommentDTO): TaskComment => ({
     parentCommentId: dto.parentCommentId,
     content: dto.content,
     userId: dto.userId,
-    createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
-    updatedAt: parseAsLocalDate(dto.updatedAt),
-    deletedAt: parseAsLocalDate(dto.deletedAt),
+    createdAt: parseInstant(dto.createdAt) || new Date(),
+    updatedAt: parseInstant(dto.updatedAt),
+    deletedAt: parseInstant(dto.deletedAt),
 });
 
 export const useTaskCommentHelper = () => {

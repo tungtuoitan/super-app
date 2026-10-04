@@ -11,7 +11,7 @@ import { useAuthStore } from "@/shared";
 import { parseApiError, isUnauthorizedError } from "@/shared";
 import { useMenuContextHelper } from "@/shared";
 import { useConsoleHelper } from "@/shared";
-import { parseAsLocalDate, toLocalISOString } from "@/shared";
+import { parseInstant, toInstantISO, parseDateOnly, toDateOnly } from "@/shared";
 import {generateTempId} from "@/features/workspace";
 
 /**
@@ -28,12 +28,12 @@ const transformTaskData = (dtos: TaskDTO[]): Task[] => {
         description: dto.description,
         status: dto.status,
         priority: dto.priority,
-        startDate: parseAsLocalDate(dto.startDate),
-        endDate: parseAsLocalDate(dto.endDate),
+        startDate: parseDateOnly(dto.startDate),
+        endDate: parseDateOnly(dto.endDate),
         orderIndex: dto.orderIndex,
-        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
-        updatedAt: parseAsLocalDate(dto.updatedAt),
-        deletedAt: parseAsLocalDate(dto.deletedAt),
+        createdAt: parseInstant(dto.createdAt) || new Date(),
+        updatedAt: parseInstant(dto.updatedAt),
+        deletedAt: parseInstant(dto.deletedAt),
         folderWorkspaceItemId: dto.folderWorkspaceItemId,
         checklistJson: dto.checklistJson ?? null,
         processJson: dto.processJson ?? null,
@@ -106,7 +106,7 @@ export const useMultiProjectTaskGridHelper = () => {
             }
 
             if (persistedTaskIds.length > 0) {
-                const deletedAt = type === "soft-delete" ? toLocalISOString(new Date()) : null;
+                const deletedAt = type === "soft-delete" ? toInstantISO(new Date()) : null;
 
                 const batchRequests = persistedTaskIds.map((id) => {
                     const task = tasks.find((t) => t.id === id);
@@ -123,8 +123,8 @@ export const useMultiProjectTaskGridHelper = () => {
                         description: task.description,
                         status: task.status,
                         priority: task.priority,
-                        startDate: toLocalISOString(task.startDate),
-                        endDate: toLocalISOString(task.endDate),
+                        startDate: toDateOnly(task.startDate),
+                        endDate: toDateOnly(task.endDate),
                         orderIndex: task.orderIndex,
                         deletedAt: deletedAt,
                         folderWorkspaceItemId: task.folderWorkspaceItemId,
@@ -279,8 +279,8 @@ export const useMultiProjectTaskGridHelper = () => {
                     description: task.description,
                     status: task.status,
                     priority: task.priority,
-                    startDate: toLocalISOString(task.startDate),
-                    endDate: toLocalISOString(task.endDate),
+                    startDate: toDateOnly(task.startDate),
+                    endDate: toDateOnly(task.endDate),
                     orderIndex: task.orderIndex,
                     folderWorkspaceItemId: task.folderWorkspaceItemId,
                     checklistJson: task.checklistJson,

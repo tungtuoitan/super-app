@@ -9,7 +9,7 @@ import { useAuthStore } from "@/shared";
 import type { LifeLogLog, LifeLogLogDTO, UpsertLifeLogLogDTO, LogType } from "@/features/lifeLog/types/lifeLog.types";
 import { useSnackbar } from "notistack";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { parseAsLocalDate, toLocalISOString } from "@/shared";
+import { parseInstant, toInstantISO } from "@/shared";
 import { useDebugLog } from "@/shared";
 
 export function transformLog(dto: LifeLogLogDTO): LifeLogLog {
@@ -22,10 +22,10 @@ export function transformLog(dto: LifeLogLogDTO): LifeLogLog {
         description: dto.description ?? undefined,
         isSensitive: dto.isSensitive ?? false,
         location: dto.location ?? undefined,
-        occurAt: dto.occurAt ? parseAsLocalDate(dto.occurAt) ?? undefined : undefined,
-        createdAt: parseAsLocalDate(dto.createdAt) ?? new Date(),
-        updatedAt: dto.updatedAt ? parseAsLocalDate(dto.updatedAt) ?? undefined : undefined,
-        deletedAt: dto.deletedAt ? parseAsLocalDate(dto.deletedAt) : null,
+        occurAt: dto.occurAt ? parseInstant(dto.occurAt) ?? undefined : undefined,
+        createdAt: parseInstant(dto.createdAt) ?? new Date(),
+        updatedAt: dto.updatedAt ? parseInstant(dto.updatedAt) ?? undefined : undefined,
+        deletedAt: dto.deletedAt ? parseInstant(dto.deletedAt) : null,
     };
 
     return result;
@@ -106,8 +106,8 @@ export function useLifeLogLogHelper() {
                 description: existing.description,
                 isSensitive: existing.isSensitive,
                 location: existing.location,
-                occurAt: existing.occurAt ? toLocalISOString(existing.occurAt) ?? undefined : undefined,
-                deletedAt: toLocalISOString(new Date()) ?? undefined,
+                occurAt: existing.occurAt ? toInstantISO(existing.occurAt) ?? undefined : undefined,
+                deletedAt: toInstantISO(new Date()) ?? undefined,
             }]);
             setLogs((prev) => prev.filter((l) => l.id !== logId));
             debugLog.log("lifelog", "deleteLog:success", { logId });

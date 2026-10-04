@@ -6,7 +6,7 @@
 
 import { constants } from "@/shared";
 import { projectConstants } from "@/features/project/project.constants";
-import { parseAsLocalDate } from "@/shared";
+import { parseInstant, parseDateOnly } from "@/shared";
 import {Task, TaskDTO} from "../types/task.types";
 
 /** Task status bg/text colors from constants */
@@ -35,7 +35,7 @@ export const formatDate = (date: Date | null | undefined): string => {
 
 /**
  * Transform task DTOs (string dates) -> domain models (Date objects).
- * Uses parseAsLocalDate to treat backend UTC strings as local time.
+ * Calendar dates (start/end, project/parent ranges) -> parseDateOnly, instants -> parseInstant.
  */
 export const transformTaskData = (dtos: TaskDTO[]): Task[] =>
     dtos.map((dto) => ({
@@ -48,21 +48,21 @@ export const transformTaskData = (dtos: TaskDTO[]): Task[] =>
         description: dto.description,
         status: dto.status,
         priority: dto.priority,
-        startDate: parseAsLocalDate(dto.startDate),
-        endDate: parseAsLocalDate(dto.endDate),
+        startDate: parseDateOnly(dto.startDate),
+        endDate: parseDateOnly(dto.endDate),
         orderIndex: dto.orderIndex,
-        createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
-        updatedAt: parseAsLocalDate(dto.updatedAt),
-        deletedAt: parseAsLocalDate(dto.deletedAt),
+        createdAt: parseInstant(dto.createdAt) || new Date(),
+        updatedAt: parseInstant(dto.updatedAt),
+        deletedAt: parseInstant(dto.deletedAt),
         folderWorkspaceItemId: dto.folderWorkspaceItemId,
         checklistJson: dto.checklistJson ?? null,
         processJson: dto.processJson ?? null,
         customTabsJson: dto.customTabsJson ?? null,
         isMilestone: dto.isMilestone ?? false,
-        projectStartDate: parseAsLocalDate(dto.projectStartDate),
-        projectEndDate: parseAsLocalDate(dto.projectEndDate),
-        parentStartDate: parseAsLocalDate(dto.parentStartDate),
-        parentEndDate: parseAsLocalDate(dto.parentEndDate),
+        projectStartDate: parseDateOnly(dto.projectStartDate),
+        projectEndDate: parseDateOnly(dto.projectEndDate),
+        parentStartDate: parseDateOnly(dto.parentStartDate),
+        parentEndDate: parseDateOnly(dto.parentEndDate),
     }));
 
 

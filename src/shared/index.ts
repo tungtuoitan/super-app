@@ -197,7 +197,7 @@ export { userProfileService } from "./userProfile/userProfile.service";
 export type { UpdateUserProfileRequest } from "./userProfile/userProfile.types";
 
 // ── utils ─────────────────────────────────────────────────────────────────
-export { parseAsLocalDate, toLocalISOString } from "./utils/date.utils";
+export { parseInstant, toInstantISO, parseDateOnly, toDateOnly } from "./utils/date.utils";
 export { fuzzyMatchWithDiacritics, removeDiacritics, containsNormalized } from "./utils/fuzzy-search.utils";
 export { getDeviceFingerprint } from "./device/deviceFingerprint";
 export { formatDate, formatDateTime, isEmpty, truncateText, getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "./utils/formatters";

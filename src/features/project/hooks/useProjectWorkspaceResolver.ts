@@ -6,7 +6,7 @@
  */
 
 import { useRef, useEffect } from "react";
-import { useAuthStore, parseAsLocalDate } from "@/shared";
+import { useAuthStore, parseInstant, parseDateOnly } from "@/shared";
 import { useProjectStore } from "../store/useProject.store";
 import { projectService } from "../service/project.service";
 import type { ProjectDTO } from "../service/project.service";
@@ -37,11 +37,11 @@ export function useProjectWorkspaceResolver() {
                 name: dto.name,
                 description: dto.description,
                 status: dto.status,
-                startDate: parseAsLocalDate(dto.startDate),
-                endDate: parseAsLocalDate(dto.endDate),
-                createdAt: parseAsLocalDate(dto.createdAt) || new Date(),
-                updatedAt: parseAsLocalDate(dto.updatedAt),
-                deletedAt: parseAsLocalDate(dto.deletedAt),
+                startDate: parseDateOnly(dto.startDate),
+                endDate: parseDateOnly(dto.endDate),
+                createdAt: parseInstant(dto.createdAt) || new Date(),
+                updatedAt: parseInstant(dto.updatedAt),
+                deletedAt: parseInstant(dto.deletedAt),
                 workspaceId: dto.workspaceId,
             };
             setProjects((prev) => {

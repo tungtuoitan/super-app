@@ -4,7 +4,7 @@ import { shellConstants } from "@/shell";
 import { useLifeLogLogHelper } from "../hooks/useLifeLogLog.helper";
 import { useLifeLogTrackHelper } from "../hooks/useLifeLogTrack.helper";
 import { useLifeLogStore } from "../store/useLifeLog.store";
-import { toLocalISOString } from "@/shared";
+import { toInstantISO } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { LifeLogLog, LifeLogTrack } from "@/features/lifeLog/types/lifeLog.types";
 import {SaveActions} from "@/shell";
@@ -33,7 +33,7 @@ export function useLifeLogSaveActions(): SaveActions {
                 description: log.description,
                 isSensitive: log.isSensitive,
                 location: log.location,
-                occurAt: log.occurAt ? toLocalISOString(log.occurAt) ?? undefined : undefined,
+                occurAt: log.occurAt ? toInstantISO(log.occurAt) ?? undefined : undefined,
             });
             if (saved) {
                 if (isNew) {

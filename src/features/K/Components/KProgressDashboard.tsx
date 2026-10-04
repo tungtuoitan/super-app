@@ -7,6 +7,7 @@ import type { KItemV2 } from "../types/kV2.type";
 import { KProgressRetentionChart } from "./small/KProgressRetentionChart";
 import { KProgressMasteryChart } from "./small/KProgressMasteryChart";
 import { KProgressQuestionCountChart } from "./small/KProgressQuestionCountChart";
+import { toDateOnly } from "@/shared";
 
 const C = { high: "#30d158", mid: "#ff9f0a", low: "#8e8e93", blue: "#0071e3", orange: "#ff6b35" };
 
@@ -170,7 +171,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
     const streakDays = Array.from({ length: 14 }, (_, idx) => {
         const d = new Date(today);
         d.setDate(d.getDate() - (13 - idx));
-        const key = d.toISOString().slice(0, 10);
+        const key = toDateOnly(d) ?? "";
         const avg = reviewMap.get(key);
         const level: 0 | 1 | 2 | 3 = avg == null ? 0 : avg >= 80 ? 3 : avg >= 65 ? 2 : 1;
         return { key, level, isToday: idx === 13 };

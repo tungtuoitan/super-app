@@ -9,7 +9,7 @@
  *   - findTask      (to look up a task from their store; falls back to tab metadata)
  */
 
-import { useAuthStore, useConsoleHelper, useDebugLog, parseApiError, isUnauthorizedError } from "@/shared";
+import { useAuthStore, useConsoleHelper, useDebugLog, parseApiError, isUnauthorizedError, toDateOnly, toInstantISO } from "@/shared";
 import type { BaseTab } from "@/shell";
 import type { Task } from "../types/task.types";
 import { taskService } from "../service/task.service";
@@ -97,10 +97,10 @@ export function useTaskFolderHelper() {
                 description: savedTask.description,
                 status: savedTask.status,
                 priority: savedTask.priority,
-                startDate: savedTask.startDate ? savedTask.startDate.toISOString() : null,
-                endDate: savedTask.endDate ? savedTask.endDate.toISOString() : null,
+                startDate: toDateOnly(savedTask.startDate),
+                endDate: toDateOnly(savedTask.endDate),
                 orderIndex: savedTask.orderIndex,
-                deletedAt: savedTask.deletedAt ? savedTask.deletedAt.toISOString() : null,
+                deletedAt: toInstantISO(savedTask.deletedAt),
                 folderWorkspaceItemId,
                 checklistJson: savedTask.checklistJson,
                 processJson: savedTask.processJson,

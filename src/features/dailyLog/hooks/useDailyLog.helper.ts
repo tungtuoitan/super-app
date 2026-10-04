@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/shared";
+import { useAuthStore, parseDateOnly } from "@/shared";
 import { dailyLogService } from "../service/dailyLog.service";
 import type { DailyLogDTO, DailyLogFieldTemplateDTO } from "../service/dailyLog.service";
 import { useDailyLogStore } from "../store/useDailyLog.store";
@@ -11,7 +11,7 @@ function _hydrateLog(dto: DailyLogDTO): DailyLog {
     return {
         id: dto.id,
         userId: dto.userId,
-        logDate: new Date(dto.logDate),
+        logDate: parseDateOnly(dto.logDate) ?? new Date(NaN),
         valuesJson: dto.valuesJson ?? "{}",
         templateJson: dto.templateJson ?? null,
         createdAt: new Date(dto.createdAt),
@@ -102,7 +102,7 @@ export const useDailyLogHelper = () => {
         if (!$user.userId) return [];
         const res = await dailyLogService.getFieldHistory($user.userToken, fieldPath, formatIsoDate(from), formatIsoDate(to));
         if (!res.success || !res.data) return [];
-        return res.data.map((p) => ({ logDate: new Date(p.logDate), value: p.value }));
+        return res.data.map((p) => ({ logDate: parseDateOnly(p.logDate) ?? new Date(NaN), value: p.value }));
     };
 
     return { loadLogs, upsertLog, patchDraftValue, loadFieldHistory };
