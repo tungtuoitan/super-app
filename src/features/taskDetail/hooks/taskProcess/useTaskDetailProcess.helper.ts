@@ -15,7 +15,6 @@ import { useAuthStore } from "@/shared";
 import { ChecklistJSON } from "../../types/checklist.types";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useEditorTabBarHelper } from "@/shell";
-import { isChecklistAllDone } from "../../utils/checklist.utils";
 
 export type ProcessUpdater = ChecklistJSON | ((current: ChecklistJSON) => ChecklistJSON);
 
@@ -43,30 +42,25 @@ export const useTaskDetailProcessHelper = () => {
         if (serverSaveTimerRef.current) clearTimeout(serverSaveTimerRef.current);
     }, []);
 
-    /** Persist processJson to server — auto-completes task when all steps done */
+    /** Persist processJson to server — status is never changed here (task #1468) */
     const saveProcessToServer = async (json: ChecklistJSON, task: Task) => {
             if (task.id <= 0 || !$user.userToken) return;
-            const allDone = isChecklistAllDone(json);
-            const newStatus = allDone
-                ? "completed"
-                : task.status === "completed" ? "in_progress" : task.status;
             const newProcessJson = JSON.stringify(json);
 
             await taskService._patchTask($user.userToken, task.id, {
                 processJson: newProcessJson,
-                status: newStatus,
             });
 
             const activeTabId = getActiveTab()?.id;
             if (activeTabId) patchTab(activeTabId, (cur) => ({
-                data: { ...(cur.data as Task), processJson: newProcessJson, status: newStatus },
-                data0: { ...(cur.data as Task), processJson: newProcessJson, status: newStatus },
+                data: { ...(cur.data as Task), processJson: newProcessJson },
+                data0: { ...(cur.data as Task), processJson: newProcessJson },
                 hasUnsavedChanges: false,
             }));
 
             setTasks((prev) =>
                 prev.map((t) =>
-                    t.id === task.id ? { ...t, processJson: newProcessJson, status: newStatus } : t,
+                    t.id === task.id ? { ...t, processJson: newProcessJson } : t,
                 ),
             );
         };
