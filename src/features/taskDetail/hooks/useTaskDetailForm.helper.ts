@@ -12,7 +12,7 @@ import { useAuthStore, useGetStandardRegistry } from "@/shared";
 import { IAutoCompleteOptions, IStatusOption } from "@/shared";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useEditorTabBarHelper } from "@/shell";
-import {getChecklistTemplate, isChecklistAllDone, parseChecklistJson, parseTextToChecklist} from "../utils/checklist.utils";
+import {getChecklistTemplate, parseTextToChecklist} from "../utils/checklist.utils";
 
 export const useTaskDetailFormHelper = () => {
     const { $user } = useAuthStore();
@@ -101,13 +101,6 @@ export const useTaskDetailFormHelper = () => {
 
     const handleStatusChange = (_e: React.SyntheticEvent, newValue: IStatusOption | null) => {
             if (!newValue) return;
-            if (newValue.code === "completed" && selectedTask?.checklistJson) {
-                const checklist = parseChecklistJson(selectedTask.checklistJson);
-                if (checklist && !isChecklistAllDone(checklist)) {
-                    alert("Complete all checklist items before closing this task.");
-                    return;
-                }
-            }
             handleFieldChange("status", newValue.code);
         };
 
