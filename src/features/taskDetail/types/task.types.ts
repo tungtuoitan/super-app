@@ -9,7 +9,7 @@ export interface Task {
     type: string;
     taskType: string;
     title: string;
-    note?: string | null;
+    description?: string | null;
     status: string;
     priority: string;
     startDate?: Date | null;
@@ -54,7 +54,7 @@ export interface TaskDTO {
     type: string;
     taskType: string;
     title: string;
-    note?: string | null;
+    description?: string | null;
     status: string;
     priority: string;
     startDate?: string | null;

@@ -257,7 +257,7 @@ export const projectKeywordPlugin: KeywordPlugin = {
                         type: dto.type,
                         taskType: dto.taskType || "personal",
                         title: dto.title,
-                        note: dto.note,
+                        description: dto.description,
                         status: dto.status,
                         priority: dto.priority,
                         startDate: dto.startDate ? new Date(dto.startDate) : null,

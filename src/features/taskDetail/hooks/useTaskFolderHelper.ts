@@ -94,7 +94,7 @@ export function useTaskFolderHelper() {
                 parentTaskId: savedTask.parentTaskId,
                 type: savedTask.type,
                 title: savedTask.title,
-                note: savedTask.note,
+                description: savedTask.description,
                 status: savedTask.status,
                 priority: savedTask.priority,
                 startDate: savedTask.startDate ? savedTask.startDate.toISOString() : null,

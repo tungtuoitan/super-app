@@ -43,11 +43,11 @@ export function useTaskDetailHeadless() {
     }, [selectedTask?.id, selectedTask?.folderWorkspaceItemId, currentProject?.workspaceId]);
 
     // Sync hasUnsavedChanges for editor tab.
-    // Excludes section fields (note, checklistJson, processJson, customTabsJson)
+    // Excludes section fields (description, checklistJson, processJson, customTabsJson)
     // because those are saved independently via section Save buttons.
     useEffect(() => {
         if (!tab) return;
-        const sectionKeys = ["note", "checklistJson", "processJson", "customTabsJson"];
+        const sectionKeys = ["description", "checklistJson", "processJson", "customTabsJson"];
         const stripSections = (obj: any) => {
             if (!obj) return obj;
             const copy = { ...obj };

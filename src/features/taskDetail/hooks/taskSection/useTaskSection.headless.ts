@@ -29,7 +29,7 @@ export function useTaskSectionHeadless() {
         if (!selectedTask) return;
         setDescKey((p) => p + 1);
         setDescDirty(false);
-        savedNoteRef.current = selectedTask.note ?? "";
+        savedNoteRef.current = selectedTask.description ?? "";
     }, [selectedTask?.id]);
 
     const isSectionDirtyRef = useRef(isSectionDirty);

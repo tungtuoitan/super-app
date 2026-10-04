@@ -54,7 +54,7 @@ const _upsertTaskBatch = async (
         type?: string;
         taskType?: string;
         title: string;
-        note?: string | null;
+        description?: string | null;
         status?: string;
         priority?: string;
         startDate?: string | null;
@@ -122,7 +122,7 @@ const _patchTask = async (
     _token: string,
     taskId: number,
     patch: {
-        note?: string;
+        description?: string;
         checklistJson?: string;
         processJson?: string;
         customTabsJson?: string;

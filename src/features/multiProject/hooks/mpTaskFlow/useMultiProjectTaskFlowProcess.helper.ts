@@ -65,7 +65,7 @@ export const useMultiProjectTaskFlowProcessHelper = () => {
             try {
                 const result = await taskService._upsertTaskBatch($user.userToken, [{
                     id: task.id, projectId: task.projectId, parentTaskId: task.parentTaskId,
-                    type: task.type, title: task.title, note: task.note,
+                    type: task.type, title: task.title, description: task.description,
                     status: allDone ? "completed" : task.status,
                     priority: task.priority, startDate: toLocalISOString(task.startDate),
                     endDate: toLocalISOString(task.endDate), orderIndex: task.orderIndex,

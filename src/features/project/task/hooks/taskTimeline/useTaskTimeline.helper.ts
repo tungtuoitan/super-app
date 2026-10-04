@@ -94,7 +94,7 @@ export const useTaskTimelineHelper = () => {
                     parentTaskId: task.parentTaskId,
                     type: task.type,
                     title: task.title,
-                    note: task.note,
+                    description: task.description,
                     status: task.status,
                     priority: task.priority,
                     startDate: toLocalISOString(startDate),

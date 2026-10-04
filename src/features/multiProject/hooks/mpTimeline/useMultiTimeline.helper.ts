@@ -99,7 +99,7 @@ export const useMultiTimelineHelper = () => {
         try {
             const upsertData = {
                 id: task.id, projectId: task.projectId, parentTaskId: task.parentTaskId,
-                type: task.type, title: task.title, note: task.note,
+                type: task.type, title: task.title, description: task.description,
                 status: task.status, priority: task.priority,
                 startDate: toLocalISOString(startDate), endDate: toLocalISOString(endDate),
                 orderIndex: task.orderIndex,

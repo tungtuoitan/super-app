@@ -45,7 +45,7 @@ export const transformTaskData = (dtos: TaskDTO[]): Task[] =>
         type: dto.type,
         taskType: dto.taskType || "personal",
         title: dto.title,
-        note: dto.note,
+        description: dto.description,
         status: dto.status,
         priority: dto.priority,
         startDate: parseAsLocalDate(dto.startDate),

@@ -44,15 +44,15 @@ export const useTaskSectionHelper = () => {
     }
 
     const handleDescChange = (value: string) => {
-        updateTabDataSilent("note", value);
+        updateTabDataSilent("description", value);
         setDescDirty(value !== savedNoteRef.current);
     }
 
     const handleDescSave = async () => {
         if (!selectedTask || selectedTask.id <= 0) return;
-        const currentNote = selectedTask.note ?? "";
+        const currentNote = selectedTask.description ?? "";
         const oldNote = savedNoteRef.current;
-        await taskService._patchTask($user.userToken, selectedTask.id, { note: currentNote });
+        await taskService._patchTask($user.userToken, selectedTask.id, { description: currentNote });
         const activeTabId = getActiveTab()?.id;
         if (activeTabId) patchTab(activeTabId, (cur) => ({ data0: { ...(cur.data as Task) } }));
         if (oldNote !== currentNote) submitVersionComment("desc", oldNote, currentNote);
@@ -62,7 +62,7 @@ export const useTaskSectionHelper = () => {
     
     const handleDescDiscard = () => {
         if (!selectedTask) return;
-        updateTabDataSilent("note", savedNoteRef.current);
+        updateTabDataSilent("description", savedNoteRef.current);
         setDescDirty(false);
         setDescKey((p) => p + 1);
     }

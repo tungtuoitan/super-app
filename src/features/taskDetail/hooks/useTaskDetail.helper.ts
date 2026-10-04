@@ -117,7 +117,7 @@ export const useTaskDetailHelper = () => {
                 // For existing tasks: send original (last-saved) values for section fields
                 // so Ctrl+S doesn't overwrite in-progress section edits.
                 // Sections save themselves independently via PATCH.
-                const sectionNote = isCreateMode ? taskToSave.note : (originalTask?.note ?? taskToSave.note);
+                const sectionDescription = isCreateMode ? taskToSave.description : (originalTask?.description ?? taskToSave.description);
                 const sectionChecklist = isCreateMode ? taskToSave.checklistJson : (originalTask?.checklistJson ?? taskToSave.checklistJson);
                 const sectionProcess = isCreateMode ? taskToSave.processJson : (originalTask?.processJson ?? taskToSave.processJson);
                 const sectionCustomTabs = isCreateMode ? taskToSave.customTabsJson : (originalTask?.customTabsJson ?? taskToSave.customTabsJson);
@@ -130,7 +130,7 @@ export const useTaskDetailHelper = () => {
                         type: taskToSave.type || "task",
                         taskType: taskToSave.taskType || "personal",
                         title: taskToSave.title,
-                        note: sectionNote,
+                        description: sectionDescription,
                         status: taskToSave.status || "open",
                         priority: taskToSave.priority || "low",
                         startDate: toLocalISOString(taskToSave.startDate),
@@ -165,7 +165,7 @@ export const useTaskDetailHelper = () => {
                     type: savedTask.type,
                     taskType: savedTask.taskType || "personal",
                     title: savedTask.title,
-                    note: savedTask.note,
+                    description: savedTask.description,
                     status: savedTask.status,
                     priority: savedTask.priority,
                     startDate: parseAsLocalDate(savedTask.startDate),

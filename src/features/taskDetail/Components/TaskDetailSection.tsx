@@ -92,7 +92,7 @@ export function TaskDetailSection() {
 
     const isNewTask = !selectedTask || selectedTask.id <= 0;
 
-    const descContent = selectedTask?.note ?? ""
+    const descContent = selectedTask?.description ?? ""
 
     if (!selectedTask) return null;
 
