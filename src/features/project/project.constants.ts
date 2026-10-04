@@ -8,6 +8,8 @@ export const projectConstants = {
     optionColor: {
         projectStatus: {
             colors: {
+                open: { bg: "#1f6f43", text: "#ffffff" },
+                planned: { bg: "#6639ba", text: "#ffffff" },
                 paused: { bg: "#805f52", text: "#ffffff" },
                 active: { bg: "#0969da", text: "#ffffff" },
                 completed: { bg: "#1a7f64", text: "#ffffff" },
@@ -17,6 +19,8 @@ export const projectConstants = {
         } as const,
         timelinePro: {
             colors: {
+                open:      { bg: "#09331c", text: "#E5E7EB" },
+                planned:   { bg: "#2e1f5e", text: "#E5E7EB" },
                 paused:    { bg: "#805f52", text: "#E5E7EB" },
                 active:    { bg: "#1E3A8A", text: "#E5E7EB" },
                 completed: { bg: "#1F5E4B", text: "#E5E7EB" },
@@ -61,11 +65,14 @@ export const projectConstants = {
         } as const,
     },
     optionOrder: {
+        // Flow: open -> planned -> active -> paused -> completed / dropped
         projectStatuses: {
-            Paused: 1,
-            Active: 2,
-            Completed: 3,
-            Dropped: 4,
+            Open: 1,
+            Planned: 2,
+            Active: 3,
+            Paused: 4,
+            Completed: 5,
+            Dropped: 6,
         } as Record<string, number>,
         taskStatuses: {
             Open: 1,
