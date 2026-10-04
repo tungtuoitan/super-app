@@ -14,7 +14,6 @@ import type { BaseTab } from "@/shell";
 import type { KeywordPlugin } from "@/shell";
 import { parseKeywordLink } from "@/shared";
 import { useLifeLogSaveActions } from "../hooks/useLifeLogSaveActions";
-import { useLifeLogTabHelper } from "../hooks/useLifeLogTab.helper";
 
 
 const LifeLogGraphPanelAdapter = () => <LifeLogGraphPanel />;
@@ -54,16 +53,11 @@ export const lifeLogModule: ModuleDefinition = {
     id: "LifeLog",
     icon: Shell,
     label: "LifeLog",
+    // Retired 2026-10-04 (task #1466): logs/tracks now live in task comments. Remove code in #1449.
+    hideFromActivityBar: true,
     hideRightSideBarFilter: true,
 
     useSaveActions: useLifeLogSaveActions,
-
-    useShortcuts: () => {
-        const { openNewLogTab } = useLifeLogTabHelper();
-        return [
-            { key: "l", ctrl: true, handler: openNewLogTab }, 
-        ];
-    },
 
     onTabClose: (tab: BaseTab) => {
         const { setLogs, setTracks } = getLifeLogState();

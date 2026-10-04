@@ -19,6 +19,8 @@ export const dailyLogModule: ModuleDefinition = {
     id: "DailyLog",
     icon: CalendarDays,
     label: "Daily Log",
+    // Retired 2026-10-04 (task #1466). Remove code in #1449.
+    hideFromActivityBar: true,
     hideRightSideBarFilter: true,
 
     useSaveActions,

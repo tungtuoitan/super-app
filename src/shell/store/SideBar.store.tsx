@@ -28,10 +28,17 @@ export interface SideBarContextData {
     setMobileReviewActive: Dispatch<SetStateAction<boolean>>;
 }
 
+// Modules hidden for good (task #1466) — a saved selection falls back to Project.
+const RETIRED_MODULES = ["LifeLog", "DailyLog"];
+const initialModuleName = (): string => {
+    const saved = storageService.get<string>(`${STORAGE_KEYS.MODULE_NAME}`);
+    return saved && !RETIRED_MODULES.includes(saved) ? saved : "Project";
+};
+
 const _store = create<SideBarContextData>((set, get) => ({
     searchQuery: "",
     setSearchQuery: zSetter("searchQuery", set, get),
-    moduleName: storageService.get<string>(`${STORAGE_KEYS.MODULE_NAME}`) ?? "Project",
+    moduleName: initialModuleName(),
     setModuleName: zSetter("moduleName", set, get),
     filterViewKey: null,
     setFilterViewKey: zSetter("filterViewKey", set, get),
