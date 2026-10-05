@@ -11,7 +11,7 @@ import { shellConstants, useEditorTabBarHelper } from "@/shell";
 import { taskService, getTaskStatusColors, TIMELINE_QUICK_STATUSES } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";
 import { usePTaskStore } from "@/features/project/store/usePTask.store";
-import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
+import { useMpTaskStore } from "@/features/multiProject";
 
 export const useTaskTimelineMenuHelper = () => {
     const { contextData } = useMenuContext();

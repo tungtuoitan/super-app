@@ -10,7 +10,7 @@ export { MultiProjectDetailContent } from "./Components/MultiProjectDetailConten
 // Stores / Providers
 export { MultiTimelineProvider } from "./store/useMultiTimeline.store";
 export { MultiTaskFlowProvider } from "./store/useMultiTaskFlow.store";
-export { MpTaskProvider } from "./store/useMpTask.store";
+export { MpTaskProvider, useMpTaskStore } from "./store/useMpTask.store";
 
 // Hooks
 export { useTaskFlowMenuHelper } from "./hooks/mpTaskFlow/useTaskFlowMenu.helper";
