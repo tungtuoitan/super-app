@@ -14,7 +14,7 @@ import { ScrollArea } from "@/shared";
 import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { useTaskTabHelper } from "@/features/taskDetail";
-import { useConsoleHelper, formatTaskLabel } from "@/shared";
+import { useConsoleHelper, formatTaskLabel, useMenuContextHelper, MENU_CONTEXT_TYPES } from "@/shared";
 import { cn } from "@/lib/utils";
 import { useTaskTimelineSelector } from "../Selectors/TaskTimelineSelector";
 import { useTaskTimelineHelper } from "../hooks/taskTimeline/useTaskTimeline.helper";
@@ -32,6 +32,7 @@ function TaskTimelineViewInner() {
     const { taskGridIsLoading, taskGridError } = usePTaskStore();
     const { openTaskTab } = useTaskTabHelper();
     const _console = useConsoleHelper();
+    const { showContextMenu } = useMenuContextHelper();
     useTaskTimelineHeadless();
 
     // Call stores/selectors/helpers directly — no params passing
@@ -87,6 +88,7 @@ function TaskTimelineViewInner() {
                                     )}
                                     style={{ height: TIMELINE_ROW_HEIGHT }}
                                     onClick={() => openTaskTab(task)}
+                                    onContextMenu={(e) => showContextMenu(e, MENU_CONTEXT_TYPES.taskTimeline, { taskId: task.id })}
                                     onMouseEnter={() => setHoveredTaskId(task.id)}
                                     onMouseLeave={() => setHoveredTaskId(null)}
                                 >

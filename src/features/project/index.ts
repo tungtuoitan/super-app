@@ -69,6 +69,7 @@ export { PTaskProvider } from "./store/usePTask.store";
 export { TaskGridMenu } from "./task/contexts/menus/TaskGridMenu";
 export { TaskFlowMenu } from "./task/contexts/menus/TaskFlowMenu";
 export { TaskFlowNodeMenu } from "./task/contexts/menus/TaskFlowNodeMenu";
+export { TaskTimelineMenu } from "./task/contexts/menus/TaskTimelineMenu";
 
 export { projectConstants } from "./project.constants";
 export { registerProjectFilters } from "./shell/project.filterConfig";

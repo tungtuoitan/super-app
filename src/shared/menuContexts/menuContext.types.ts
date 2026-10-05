@@ -38,6 +38,11 @@ export interface WsGridMenuData {
     selectedWorkspaces: Array<{ id: number; deletedAt?: Date | null }>;
 }
 
+export interface TaskTimelineMenuData {
+    /** Right-clicked task (bar or task-name row) — looked up in PTask / MpTask stores */
+    taskId: number;
+}
+
 export interface TaskFlowMenuData {
     flowPosition: { x: number; y: number };
     /** Pre-bound handler from TaskFlowCanvas (inside MultiTaskFlowProvider) */

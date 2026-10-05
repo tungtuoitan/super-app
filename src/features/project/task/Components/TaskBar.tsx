@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo, useCallback, useRef, useState, useEffect } from "react";
-import { formatTaskLabel } from "@/shared";
+import { formatTaskLabel, useMenuContextHelper, MENU_CONTEXT_TYPES } from "@/shared";
 import { CornerDownRight, Diamond } from "lucide-react";
 import type { Task } from "@/features/taskDetail";
 import { getTaskStatusColors, getTaskBarColors, isStatusNonDraggable, TIMELINE_ROW_HEIGHT, TIMELINE_TASK_BAR_HEIGHT, TIMELINE_MIN_BAR_WIDTH, TIMELINE_SUBTASK_BAR_HEIGHT } from "@/features/taskDetail";
@@ -25,6 +25,8 @@ export interface TaskBarProps {
 
 export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick, isSubtask = false, parentTask, project, allTasks = [], onValidationError }: TaskBarProps) {
     const barRef = useRef<HTMLDivElement>(null);
+    const { showContextMenu } = useMenuContextHelper();
+    const openStatusMenu = (e: React.MouseEvent) => showContextMenu(e, MENU_CONTEXT_TYPES.taskTimeline, { taskId: task.id });
     const statusColors = getTaskStatusColors(task.status);
     const isDragDisabled = task.deletedAt || isStatusNonDraggable(task.status);
 
@@ -72,7 +74,7 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
 
     // ── Mouse down ───────────────────────────────────────
     const handleMouseDown = (e: React.MouseEvent, type: "move" | "resize-left" | "resize-right") => {
-        if (isDragDisabled) return;
+        if (isDragDisabled || e.button !== 0) return; // right-click → status menu, not drag/open
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(true); setHasDragged(false); setDragType(type);
@@ -167,7 +169,7 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
 
     if (!hasValidDates) {
         return (
-            <div className={cn("absolute flex items-center px-2 text-muted-foreground italic cursor-pointer hover:text-foreground", isSubtask ? "h-[20px] text-[10px]" : "h-[28px] text-xs")} style={{ top: 4, left: isSubtask ? 20 : 4 }} onClick={() => onTaskClick(task)}>
+            <div className={cn("absolute flex items-center px-2 text-muted-foreground italic cursor-pointer hover:text-foreground", isSubtask ? "h-[20px] text-[10px]" : "h-[28px] text-xs")} style={{ top: 4, left: isSubtask ? 20 : 4 }} onClick={() => onTaskClick(task)} onContextMenu={openStatusMenu}>
                 {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 flex-shrink-0" />}
                 {task.isMilestone && <Diamond className="h-2.5 w-2.5 mr-1 text-amber-500 fill-amber-500 flex-shrink-0" aria-label="Milestone" />}
                 <span className="truncate">{formatTaskLabel(task)}</span>
@@ -177,7 +179,7 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
     }
 
     return (
-        <div ref={barRef} className={cn("absolute flex items-center rounded-md transition-shadow group", isDragDisabled ? "cursor-default" : "cursor-pointer", isDragging && "shadow-lg z-10", (task.deletedAt || isDragDisabled) && "opacity-60")} style={{ left: currentLeft, width: currentWidth, height: barHeight, top: (TIMELINE_ROW_HEIGHT - barHeight) / 2, backgroundColor: barColor, borderLeft: `3px solid ${statusColors.bg}` }}>
+        <div ref={barRef} className={cn("absolute flex items-center rounded-md transition-shadow group", isDragDisabled ? "cursor-default" : "cursor-pointer", isDragging && "shadow-lg z-10", (task.deletedAt || isDragDisabled) && "opacity-60")} style={{ left: currentLeft, width: currentWidth, height: barHeight, top: (TIMELINE_ROW_HEIGHT - barHeight) / 2, backgroundColor: barColor, borderLeft: `3px solid ${statusColors.bg}` }} onContextMenu={openStatusMenu}>
             {!isDragDisabled && <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20" onMouseDown={(e) => handleMouseDown(e, "resize-left")} />}
             {task.priority === "high" && <div className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10 pointer-events-none" />}
             <div className={cn("flex-1 flex items-center px-2 overflow-visible", !isDragDisabled && "cursor-grab active:cursor-grabbing")} onMouseDown={(e) => handleMouseDown(e, "move")}>

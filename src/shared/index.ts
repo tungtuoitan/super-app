@@ -169,6 +169,7 @@ export type {
     ProjectGridMenuData,
     TaskGridMenuData,
     TaskFlowMenuData,
+    TaskTimelineMenuData,
     WsGridMenuData,
     WorkspaceSelectorMenuData,
     LogListMenuData,

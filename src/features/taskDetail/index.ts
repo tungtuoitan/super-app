@@ -51,6 +51,7 @@ export {
     TIMELINE_MIN_BAR_WIDTH,
     TIMELINE_EXTEND_DAYS,
     TIMELINE_ZOOM_STEP,
+    TIMELINE_QUICK_STATUSES,
     WEEKEND_STRIPE_BG,
 } from "./utils/taskGrid.constants";
 

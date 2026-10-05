@@ -17,7 +17,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shar
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useTaskTabHelper } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";
-import { useConsoleHelper, formatTaskLabel } from "@/shared";
+import { useConsoleHelper, formatTaskLabel, useMenuContextHelper, MENU_CONTEXT_TYPES } from "@/shared";
 import { cn } from "@/lib/utils";
 import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/taskDetail";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
@@ -48,6 +48,7 @@ export function MultiProjectTimelineView() {
     // ── Handlers (from helper) ───────────────────────────
     const { handleScroll, scrollToToday, handleZoomIn, handleZoomOut, handleTaskDateChange } = useMultiTimelineHelper();
     const { openMultiProjectTaskContextMenu } = useMultiProjectTaskGridHelper();
+    const { showContextMenu } = useMenuContextHelper();
 
     const handleContextMenu = (event: React.MouseEvent) => {
         openMultiProjectTaskContextMenu(event, undefined, projectIds, (task: Task) => {
@@ -78,7 +79,7 @@ export function MultiProjectTimelineView() {
                         {filteredTasks.map((task) => {
                             const isSubtask = !!task.parentTaskId;
                             return (
-                                <div key={task.id} className={cn("flex items-center cursor-pointer border-b border-transparent", hoveredItemId === task.id && "bg-muted/50", isSubtask ? "px-2 bg-muted/10" : "px-3")} style={{ height: TIMELINE_ROW_HEIGHT }} onClick={() => openTaskTab(task)} onMouseEnter={() => setHoveredItemId(task.id)} onMouseLeave={() => setHoveredItemId(null)}>
+                                <div key={task.id} className={cn("flex items-center cursor-pointer border-b border-transparent", hoveredItemId === task.id && "bg-muted/50", isSubtask ? "px-2 bg-muted/10" : "px-3")} style={{ height: TIMELINE_ROW_HEIGHT }} onClick={() => openTaskTab(task)} onContextMenu={(e) => showContextMenu(e, MENU_CONTEXT_TYPES.taskTimeline, { taskId: task.id })} onMouseEnter={() => setHoveredItemId(task.id)} onMouseLeave={() => setHoveredItemId(null)}>
                                     {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground mr-1 flex-shrink-0" />}
                                     <span className={cn("truncate", isSubtask ? "text-xs" : "text-sm")}>{formatTaskLabel(task)}</span>
                                 </div>

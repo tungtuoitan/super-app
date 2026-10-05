@@ -24,7 +24,7 @@ import { menuContextRegistry } from "@/shared";
 // ── Menu components ───────────────────────────────────────────────────────────
 import { WorkspaceFolderNodeMenu, WorkspaceChildNodeMenu, WorkspaceSelectorMenu, WsGridMenu } from "@/features/workspace";
 import { NoteGridMenu, RichTextEditorMenu } from "@/features/note";
-import { ProjectGridMenu, TaskGridMenu, TaskFlowMenu, TaskFlowNodeMenu } from "@/features/project";
+import { ProjectGridMenu, TaskGridMenu, TaskFlowMenu, TaskFlowNodeMenu, TaskTimelineMenu } from "@/features/project";
 import { LogListMenu, TrackPanelMenu } from "@/features/lifeLog";
 import { KNodeMenu, KNodePanelCardMenu, KMenu, KQFlowMenu, KNodePanelBlankMenu } from "@/features/K";
 import { WikiGraphNodeMenu } from "@/features/Wiki";
@@ -74,6 +74,7 @@ menuContextRegistry.register({ handles: ["project-grid"],          component: Pr
 menuContextRegistry.register({ handles: ["task-grid"],             component: TaskGridMenu });
 menuContextRegistry.register({ handles: ["task-flow"],             component: TaskFlowMenu });
 menuContextRegistry.register({ handles: ["task-flow-node"],        component: TaskFlowNodeMenu });
+menuContextRegistry.register({ handles: ["task-timeline"],         component: TaskTimelineMenu });
 menuContextRegistry.register({ handles: ["lifelog-log"],           component: LogListMenu });
 menuContextRegistry.register({ handles: ["lifelog-track"],         component: TrackPanelMenu });
 menuContextRegistry.register({ handles: ["k-node"],                component: KNodeMenu });

@@ -21,6 +21,7 @@ export const MENU_CONTEXT_TYPES = {
     projectGrid:        "project-grid",
     taskGrid:           "task-grid",
     taskFlow:           "task-flow",
+    taskTimeline:       "task-timeline",
 
     // LifeLog
     lifelogLog:         "lifelog-log",
