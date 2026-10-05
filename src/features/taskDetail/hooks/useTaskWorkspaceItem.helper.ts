@@ -92,9 +92,9 @@ export const useTaskWorkspaceItemHelper = () => {
         openTab(note, shellConstants.vscode.tab.tabTypes.note);
     }
 
-    /** The BE may have created the task folder — keep the open task tab in sync (folder items, later saves). */
+    /** The BE may have (re)created the task folder — keep the open task tab in sync (folder items, later saves). */
     const syncTaskFolderId = (task: Task, folderId?: number | null) => {
-        if (task.folderWorkspaceItemId || !folderId) return;
+        if (!folderId || task.folderWorkspaceItemId === folderId) return;
         const tab = getActiveTab();
         if (!tab || (tab.data as Task)?.id !== task.id) return;
         patchTab(tab.id, (cur) => ({
@@ -106,25 +106,24 @@ export const useTaskWorkspaceItemHelper = () => {
     /**
      * Create a new note for a task.
      * Opens a bare note tab. On save, addNoteToTaskFolder places the note inside the task's
-     * workspace folder — the folder is created first when the task has none (task #1487).
+     * workspace folder — asked from the BE first, which creates it when the task has none or its
+     * folder sits in another workspace (task moved to another project) — task #1487.
      */
     const createTaskNote = async (task: Task, workspaceId?: number | null) => {
-        let folderWorkspaceItemId = task.folderWorkspaceItemId ?? null;
-        if (!folderWorkspaceItemId) {
-            try {
-                const res = await linkService._getOrCreateTaskFolder(task.id);
-                folderWorkspaceItemId = res.object?.folderWorkspaceItemId ?? null;
-                workspaceId = workspaceId ?? res.object?.workspaceId;
-            } catch (error) {
-                _console.error((await parseApiError(error)) || "Could not create the task folder");
-                return;
-            }
-            if (!folderWorkspaceItemId) {
-                _console.error("Could not create the task folder");
-                return;
-            }
-            syncTaskFolderId(task, folderWorkspaceItemId);
+        let folderWorkspaceItemId: number | null = null;
+        try {
+            const res = await linkService._getOrCreateTaskFolder(task.id);
+            folderWorkspaceItemId = res.object?.folderWorkspaceItemId ?? null;
+            workspaceId = res.object?.workspaceId ?? workspaceId;
+        } catch (error) {
+            _console.error((await parseApiError(error)) || "Could not create the task folder");
+            return;
         }
+        if (!folderWorkspaceItemId) {
+            _console.error("Could not create the task folder");
+            return;
+        }
+        syncTaskFolderId(task, folderWorkspaceItemId);
 
         const existingIds = openTabs
             .filter((t) => t.type === shellConstants.vscode.tab.tabTypes.note)
