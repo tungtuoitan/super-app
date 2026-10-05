@@ -96,7 +96,18 @@ function ActivePanel({ tab }: { tab: BaseTab }) {
     );
 }
 
+/** No tab open → the homepage (progress dashboard, TungRoot #1481) if registered, else a plain welcome. */
+const HOME_TAB: BaseTab = { id: "home-empty", type: shellConstants.vscode.tab.tabTypes.home, data: null, data0: null, title: "Home", hasUnsavedChanges: false };
+
 function WelcomeState() {
+    const HomePanel = moduleRegistry.getEditorPanel(shellConstants.vscode.tab.tabTypes.home);
+    if (HomePanel) {
+        return (
+            <ErrorBoundary FallbackComponent={TabPanelErrorFallback} resetKeys={["home-empty"]}>
+                <HomePanel tab={HOME_TAB} />
+            </ErrorBoundary>
+        );
+    }
     return (
         <div className="flex-1 flex items-center justify-center text-muted-foreground/70">
             <div className="text-center">

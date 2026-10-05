@@ -21,6 +21,7 @@ export type TabType =
     | typeof shellConstants.vscode.tab.tabTypes.kNode
     | typeof shellConstants.vscode.tab.tabTypes.kDailyReview
     | typeof shellConstants.vscode.tab.tabTypes.wikiInfo
+    | typeof shellConstants.vscode.tab.tabTypes.home
     | "folder"
     | "settings";
 
