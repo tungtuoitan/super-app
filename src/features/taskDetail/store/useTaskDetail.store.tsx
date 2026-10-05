@@ -7,6 +7,7 @@ import { useContext, createContext, Dispatch, SetStateAction, useState, useRef, 
 import type { LinkedKeyword, TaskFolderItem } from "../types/taskDetail.types";
 import type { Project } from "../types/task.types";
 import { IAutoCompleteOptions } from "@/shared";
+import type { LinkDTO } from "@/shared";
 
 export type { TaskFolderItem } from "../types/taskDetail.types";
 
@@ -24,6 +25,12 @@ export interface TaskDetailContextData {
     setFolderItems: Dispatch<SetStateAction<TaskFolderItem[]>>;
     isLoadingFolderItems: boolean;
     setIsLoadingFolderItems: Dispatch<SetStateAction<boolean>>;
+
+    // Links (task #1477)
+    taskLinks: LinkDTO[];
+    setTaskLinks: Dispatch<SetStateAction<LinkDTO[]>>;
+    isLoadingTaskLinks: boolean;
+    setIsLoadingTaskLinks: Dispatch<SetStateAction<boolean>>;
 
     // Project Options
     projectOptions: IAutoCompleteOptions[];
@@ -51,6 +58,10 @@ export const taskDetailContextDefaultValue: TaskDetailContextData = {
     setFolderItems: () => {},
     isLoadingFolderItems: false,
     setIsLoadingFolderItems: () => {},
+    taskLinks: [],
+    setTaskLinks: () => {},
+    isLoadingTaskLinks: false,
+    setIsLoadingTaskLinks: () => {},
     projectOptions: [],
     setProjectOptions: () => {},
     isLoadingProjects: false,
@@ -78,6 +89,10 @@ export const TaskDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     const [folderItems, setFolderItems] = useState<TaskFolderItem[]>([]);
     const [isLoadingFolderItems, setIsLoadingFolderItems] = useState(false);
 
+    // Links
+    const [taskLinks, setTaskLinks] = useState<LinkDTO[]>([]);
+    const [isLoadingTaskLinks, setIsLoadingTaskLinks] = useState(false);
+
     // Project Options
     const [projectOptions, setProjectOptions] = useState<IAutoCompleteOptions[]>([]);
     const [isLoadingProjects, setIsLoadingProjects] = useState(false);
@@ -96,6 +111,8 @@ export const TaskDetailProvider: React.FC<React.PropsWithChildren<unknown>> = ({
                 isLoadingLinkedKeywords, setIsLoadingLinkedKeywords,
                 folderItems, setFolderItems,
                 isLoadingFolderItems, setIsLoadingFolderItems,
+                taskLinks, setTaskLinks,
+                isLoadingTaskLinks, setIsLoadingTaskLinks,
                 projectOptions, setProjectOptions,
                 isLoadingProjects, setIsLoadingProjects,
                 parentTaskOptions, setParentTaskOptions,

@@ -4,6 +4,7 @@ import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailFormHelper } from "./useTaskDetailForm.helper";
 import { useTaskLinkedKeywordsHelper } from "./useTaskLinkedKeywords.helper";
 import { useTaskWorkspaceItemHelper } from "./useTaskWorkspaceItem.helper";
+import { useTaskLinksHelper } from "./useTaskLinks.helper";
 import { useEditorTabBarHelper } from "@/shell";
 import type { BaseTab } from "@/shell";
 
@@ -12,6 +13,7 @@ export function useTaskDetailHeadless() {
     const { loadAllProjects, loadProjectOptions, loadParentTaskOptions } = useTaskDetailFormHelper();
     const { loadLinkedKeywords } = useTaskLinkedKeywordsHelper();
     const { loadFolderItems } = useTaskWorkspaceItemHelper();
+    const { loadTaskLinks } = useTaskLinksHelper();
     const { setParentTaskOptions, taskDetailContentRef } = useTaskDetailStore();
     const { getActiveTab, patchTab } = useEditorTabBarHelper();
 
@@ -33,6 +35,7 @@ export function useTaskDetailHeadless() {
     useEffect(() => {
         if (selectedTask?.id && selectedTask.id > 0) {
             loadLinkedKeywords(selectedTask.id);
+            loadTaskLinks(selectedTask.id);
         }
     }, [selectedTask?.id]);
 

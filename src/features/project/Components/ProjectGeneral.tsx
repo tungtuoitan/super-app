@@ -15,6 +15,7 @@ import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector
 import { useProjectGeneralHeadless } from "../hooks/useProjectGeneral.headless";
 import { formatDateTime } from "@/shared";
 import { ProjectImagePicker } from "./ProjectImagePicker";
+import { ProjectLinks } from "./small/ProjectLinks";
 
 /**
  * ProjectGeneral
@@ -146,6 +147,9 @@ export function ProjectGeneral() {
                                         onChange={handleImageChange}
                                     />
                                 </div>
+
+                            {/* Project Links — task #1477 */}
+                            <ProjectLinks />
 
                             <p className="text-xs text-left text-muted-foreground leading-relaxed">
                                 Created: {selectedProject.createdAt ? formatDateTime(selectedProject.createdAt) : "N/A"}

@@ -20,6 +20,7 @@ import { CardContent } from "@/shared";
 import { FileText, AlertCircle, Link2, X, Loader2, Plus, FilePlus, FileIcon, Diamond } from "lucide-react";
 import { Alert, AlertDescription, KeywordStaticIcon, Checkbox } from "@/shared";
 import { TaskDetailSection } from "./TaskDetailSection";
+import { TaskLinks } from "./small/TaskLinks";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailKeywordSelector } from "../Selectors/TaskDetailKeywordSelector";
 import { useTaskDetailFormSelector } from "../Selectors/TaskDetailFormSelector";
@@ -259,6 +260,9 @@ export function TaskDetailContent() {
                                 )}
                             </div>
                         )}
+
+                        {/* Links (URL / GitHub / Drive) — task #1477 */}
+                        <TaskLinks />
 
                         {/* Linked Keywords */}
                         {selectedTask.id > 0 && (

@@ -5,7 +5,7 @@
  */
 
 
-import { standardRegistryConstants, useAuthStore } from "@/shared";
+import { standardRegistryConstants, useAuthStore, _isLinkMime, _openExternalUrl } from "@/shared";
 import { shellConstants } from "@/shell";
 import type { Note } from "@/features/note";
 import { type Task } from "../types/task.types";
@@ -41,11 +41,13 @@ export const useTaskWorkspaceItemHelper = () => {
                 return;
             }
 
+            // Links are listed in the task's Links section, not here (task #1477)
             const children = result.object.flatData.filter(
                 (item) =>
                     item.parentId === task.folderWorkspaceItemId &&
                     (item.entityType === 3 || item.entityType === 4) &&
-                    !item.deletedAt
+                    !item.deletedAt &&
+                    !(item.entityType === 4 && _isLinkMime((item as WorkspaceFileItem).data.mimeType))
             ) as (WorkspaceNoteItem | WorkspaceFileItem)[];
 
             setFolderItems(children.map((item) => ({
@@ -54,6 +56,7 @@ export const useTaskWorkspaceItemHelper = () => {
                 entityType: item.entityType,
                 name: item.data.name,
                 noteData: item.entityType === 3 ? (item as WorkspaceNoteItem).data : undefined,
+                url: item.entityType === 4 ? (item as WorkspaceFileItem).data.url : undefined,
             })));
         } catch {
             setFolderItems([]);
@@ -66,6 +69,10 @@ export const useTaskWorkspaceItemHelper = () => {
      * Open a note from the task's folder in an editor tab.
      */
     const openFolderItem = (item: TaskFolderItem) => {
+        if (item.entityType === 4) {
+            _openExternalUrl(item.url);
+            return;
+        }
         if (item.entityType !== 3 || !item.noteData) return;
         const note: Note = {
             id: item.entityId,

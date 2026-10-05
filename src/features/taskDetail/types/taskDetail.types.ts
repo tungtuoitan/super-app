@@ -12,6 +12,8 @@ export interface TaskFolderItem {
     entityType: 3 | 4;
     name: string;
     noteData?: NoteEntity;
+    /** File items: url to open (Drive webViewLink). */
+    url?: string | null;
 }
 
 export interface LinkedKeyword {
@@ -34,5 +36,5 @@ export interface TaskWorkspaceItemDTO {
     id: number;
     taskId: number;
     workspaceItemId: number;
-    itemType: number; // 2 = Folder, 3 = Note
+    itemType: number; // 2 = Folder, 3 = Note, 4 = File/link
 }
