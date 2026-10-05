@@ -1,0 +1,5 @@
+# Script chạy trên Linux (VPS) / bash -> giữ LF kể cả khi checkout trên Windows (autocrlf).
+*.sh   text eol=lf
+*.mjs  text eol=lf
+*.js   text eol=lf
+*.sql  text eol=lf
