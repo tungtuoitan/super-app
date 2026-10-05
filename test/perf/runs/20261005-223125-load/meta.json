@@ -1,0 +1,20 @@
+{
+  "id": "20261005-223125-load",
+  "kind": "load",
+  "note": "dồn tải 10 VU, thử RCSI ON + index parent_task_id",
+  "startedAt": "2026-10-05T15:31:25.315Z",
+  "params": {
+    "VUS": "10",
+    "DURATION": "1m",
+    "RAMP": "10s",
+    "THINK_MS": "0"
+  },
+  "restoredDb": true,
+  "appliedExperiments": [
+    "db/experiments/rcsi-and-parent-index.sql"
+  ],
+  "workloadStart": 1791214314,
+  "workloadEnd": 1791214404,
+  "finishedAt": "2026-10-05T15:33:40.136Z",
+  "k6ExitCode": 99
+}

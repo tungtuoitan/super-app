@@ -1,0 +1,14 @@
+{
+  "id": "20261005-222252-baseline",
+  "kind": "baseline",
+  "note": "baseline chuẩn, chưa sửa (RCSI OFF)",
+  "startedAt": "2026-10-05T15:22:52.781Z",
+  "params": {
+    "REPS": 30
+  },
+  "restoredDb": true,
+  "appliedExperiments": [],
+  "workloadStart": 1791213800,
+  "workloadEnd": 1791213883,
+  "finishedAt": "2026-10-05T15:24:59.045Z"
+}

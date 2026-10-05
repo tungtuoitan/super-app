@@ -1,0 +1,543 @@
+{
+  "id": "20261005-223125-load",
+  "kind": "load",
+  "note": "dồn tải 10 VU, thử RCSI ON + index parent_task_id",
+  "startedAt": "2026-10-05T15:31:25.315Z",
+  "params": {
+    "VUS": "10",
+    "DURATION": "1m",
+    "RAMP": "10s",
+    "THINK_MS": "0"
+  },
+  "beBuild": "037b557",
+  "beQuota": "100% CPU, 700 MB RAM",
+  "db": {
+    "rcsi": true,
+    "taskIndexes": [
+      "ix_task_parent_task_id (filtered)",
+      "ix_task_parent_task_id_all",
+      "ix_task_project_id (filtered)",
+      "ix_task_start_end_date (filtered)",
+      "ix_task_status (filtered)",
+      "pk_task"
+    ],
+    "tasks": 78400
+  },
+  "appliedExperiments": [
+    "db/experiments/rcsi-and-parent-index.sql"
+  ],
+  "server": {
+    "memAvailableMbAtStart": 2156,
+    "swapUsedMbAtStart": 1395,
+    "loadAvgAtStart": 1.29
+  },
+  "workload": {
+    "requests": 2790,
+    "rps": 31.2,
+    "failedRate": 0,
+    "iterations": 2391,
+    "vusMax": 10,
+    "dataReceivedMb": 519.29,
+    "dataSentMb": 1.7,
+    "duration": {
+      "avg": 254.8,
+      "med": 147.3,
+      "p90": 438.8,
+      "p95": 718.7,
+      "p99": 2323.6,
+      "max": 3288.2
+    },
+    "waiting": {
+      "avg": 218.1,
+      "med": 144.7,
+      "p90": 381.1,
+      "p95": 584.7,
+      "p99": 1539.8,
+      "max": 3243.7
+    },
+    "receiving": {
+      "avg": 36.8,
+      "med": 0,
+      "p90": 57.3,
+      "p95": 170.4,
+      "p99": 799.9,
+      "max": 1259.6
+    },
+    "read": {
+      "avg": 286.8,
+      "med": 141.9,
+      "p90": 511.7,
+      "p95": 1310.7,
+      "p99": 2492.2,
+      "max": 3236.1
+    },
+    "write": {
+      "avg": 221.7,
+      "med": 203.1,
+      "p90": 353.6,
+      "p95": 392.4,
+      "p99": 542.1,
+      "max": 805
+    },
+    "thresholdsOk": false,
+    "endpoints": {
+      "PATCH /api/task/{id}": {
+        "avg": 224.2,
+        "med": 203.7,
+        "p90": 353.3,
+        "p95": 385.4,
+        "p99": 540.3,
+        "max": 674.5,
+        "count": 168
+      },
+      "GET /api/task/{id}": {
+        "avg": 135.7,
+        "med": 112.9,
+        "p90": 259.5,
+        "p95": 289.8,
+        "p99": 382.7,
+        "max": 460.4,
+        "count": 377
+      },
+      "POST /api/taskcomment": {
+        "avg": 158.1,
+        "med": 143.8,
+        "p90": 270.8,
+        "p95": 299.9,
+        "p99": 354.3,
+        "max": 388.6,
+        "count": 164
+      },
+      "GET /api/task?projectIds": {
+        "avg": 157.8,
+        "med": 137.3,
+        "p90": 288.7,
+        "p95": 324.1,
+        "p99": 392.1,
+        "max": 462.3,
+        "count": 598
+      },
+      "POST /api/task": {
+        "avg": 270.4,
+        "med": 267.7,
+        "p90": 379.8,
+        "p95": 428.2,
+        "p99": 678.9,
+        "max": 753.6,
+        "count": 118
+      },
+      "GET floor (401)": {
+        "avg": 64.1,
+        "med": 29.3,
+        "p90": 194.1,
+        "p95": 247.4,
+        "p99": 279,
+        "max": 298.9,
+        "count": 261
+      },
+      "GET /api/taskcomment": {
+        "avg": 137.8,
+        "med": 117.1,
+        "p90": 260.2,
+        "p95": 301.6,
+        "p99": 338.3,
+        "max": 363.7,
+        "count": 253
+      },
+      "GET /api/project": {
+        "avg": 117,
+        "med": 95.9,
+        "p90": 215.4,
+        "p95": 265.8,
+        "p99": 310.3,
+        "max": 534.9,
+        "count": 365
+      },
+      "GET /api/task?status&priority": {
+        "avg": 922.1,
+        "med": 533.3,
+        "p90": 2125.7,
+        "p95": 2527.5,
+        "p99": 3075.6,
+        "max": 3236.1,
+        "count": 368
+      },
+      "DELETE /api/task": {
+        "avg": 260.9,
+        "med": 257,
+        "p90": 384.8,
+        "p95": 468,
+        "p99": 662.6,
+        "max": 805,
+        "count": 108
+      }
+    }
+  },
+  "vps": {
+    "before": {
+      "samples": 2,
+      "load1": {
+        "avg": 1.1,
+        "min": 1.09,
+        "max": 1.19
+      },
+      "host_cpu": {
+        "avg": 6,
+        "min": 6,
+        "max": 6
+      },
+      "iowait": {
+        "avg": 0.5,
+        "min": 0,
+        "max": 1
+      },
+      "mem_avail_mb": {
+        "avg": 2154.5,
+        "min": 2154,
+        "max": 2155
+      },
+      "swap_used_mb": {
+        "avg": 1394,
+        "min": 1394,
+        "max": 1394
+      },
+      "cpu_sql": {
+        "avg": 2,
+        "min": 2,
+        "max": 2
+      },
+      "cpu_prod_be": {
+        "avg": 1,
+        "min": 1,
+        "max": 1
+      },
+      "cpu_perf_be": {
+        "avg": 1.5,
+        "min": 1,
+        "max": 2
+      },
+      "rss_sql_mb": {
+        "avg": 516,
+        "min": 516,
+        "max": 516
+      },
+      "rss_prod_be_mb": {
+        "avg": 341,
+        "min": 341,
+        "max": 341
+      },
+      "rss_perf_be_mb": {
+        "avg": 128,
+        "min": 128,
+        "max": 128
+      },
+      "threads_perf_be": {
+        "avg": 17,
+        "min": 17,
+        "max": 17
+      },
+      "prod_ms": {
+        "avg": 1.3,
+        "min": 1.2,
+        "max": 1.3
+      },
+      "prod_errors": 0
+    },
+    "during": {
+      "samples": 18,
+      "load1": {
+        "avg": 3.7,
+        "min": 1,
+        "max": 6.05
+      },
+      "host_cpu": {
+        "avg": 72.8,
+        "min": 8,
+        "max": 90
+      },
+      "iowait": {
+        "avg": 1.1,
+        "min": 0,
+        "max": 6
+      },
+      "mem_avail_mb": {
+        "avg": 2077.2,
+        "min": 2035,
+        "max": 2154
+      },
+      "swap_used_mb": {
+        "avg": 1388.4,
+        "min": 1350,
+        "max": 1394
+      },
+      "cpu_sql": {
+        "avg": 42.8,
+        "min": 2,
+        "max": 58
+      },
+      "cpu_prod_be": {
+        "avg": 1.2,
+        "min": 1,
+        "max": 3
+      },
+      "cpu_perf_be": {
+        "avg": 84.6,
+        "min": 1,
+        "max": 98
+      },
+      "rss_sql_mb": {
+        "avg": 518.8,
+        "min": 516,
+        "max": 523
+      },
+      "rss_prod_be_mb": {
+        "avg": 342.9,
+        "min": 341,
+        "max": 347
+      },
+      "rss_perf_be_mb": {
+        "avg": 214.8,
+        "min": 128,
+        "max": 244
+      },
+      "threads_perf_be": {
+        "avg": 28,
+        "min": 17,
+        "max": 32
+      },
+      "prod_ms": {
+        "avg": 2,
+        "min": 0.9,
+        "max": 5.9
+      },
+      "prod_errors": 0
+    },
+    "after": {
+      "samples": 3,
+      "load1": {
+        "avg": 4.7,
+        "min": 4.29,
+        "max": 5.07
+      },
+      "host_cpu": {
+        "avg": 31,
+        "min": 6,
+        "max": 56
+      },
+      "iowait": {
+        "avg": 0.7,
+        "min": 0,
+        "max": 2
+      },
+      "mem_avail_mb": {
+        "avg": 2079,
+        "min": 2078,
+        "max": 2080
+      },
+      "swap_used_mb": {
+        "avg": 1347,
+        "min": 1347,
+        "max": 1347
+      },
+      "cpu_sql": {
+        "avg": 9.3,
+        "min": 2,
+        "max": 24
+      },
+      "cpu_prod_be": {
+        "avg": 5.3,
+        "min": 1,
+        "max": 14
+      },
+      "cpu_perf_be": {
+        "avg": 36,
+        "min": 1,
+        "max": 54
+      },
+      "rss_sql_mb": {
+        "avg": 523,
+        "min": 523,
+        "max": 523
+      },
+      "rss_prod_be_mb": {
+        "avg": 363,
+        "min": 363,
+        "max": 363
+      },
+      "rss_perf_be_mb": {
+        "avg": 237.3,
+        "min": 232,
+        "max": 240
+      },
+      "threads_perf_be": {
+        "avg": 29.7,
+        "min": 29,
+        "max": 30
+      },
+      "prod_ms": {
+        "avg": 0.9,
+        "min": 0.8,
+        "max": 1.1
+      },
+      "prod_errors": 0
+    }
+  },
+  "sql": {
+    "note": "Wait/counter là toàn instance SQL Server (gồm cả prod + DB khác) trong khoảng run; fileIo chỉ SuperApp-perf.",
+    "seconds": 106,
+    "lockWaits": {
+      "count": 6,
+      "ms": 63
+    },
+    "pageIoLatch": {
+      "count": 209,
+      "ms": 562
+    },
+    "writeLog": {
+      "count": 1237,
+      "ms": 5434
+    },
+    "asyncNetworkIo": {
+      "count": 0,
+      "ms": 0
+    },
+    "cpuPressure": {
+      "count": 6726,
+      "ms": 29576
+    },
+    "waitsTop": [
+      {
+        "type": "SOS_SCHEDULER_YIELD",
+        "count": 6726,
+        "ms": 29576,
+        "signalMs": 29516
+      },
+      {
+        "type": "WRITELOG",
+        "count": 1237,
+        "ms": 5434,
+        "signalMs": 1384
+      },
+      {
+        "type": "WAIT_ON_SYNC_STATISTICS_REFRESH",
+        "count": 31,
+        "ms": 487,
+        "signalMs": 0
+      },
+      {
+        "type": "PAGEIOLATCH_SH",
+        "count": 169,
+        "ms": 373,
+        "signalMs": 36
+      },
+      {
+        "type": "PREEMPTIVE_OS_AUTHENTICATIONOPS",
+        "count": 30,
+        "ms": 223,
+        "signalMs": 0
+      },
+      {
+        "type": "RESERVED_MEMORY_ALLOCATION_EXT",
+        "count": 83958,
+        "ms": 209,
+        "signalMs": 0
+      },
+      {
+        "type": "PAGEIOLATCH_EX",
+        "count": 40,
+        "ms": 189,
+        "signalMs": 3
+      },
+      {
+        "type": "IO_COMPLETION",
+        "count": 143,
+        "ms": 141,
+        "signalMs": 2
+      },
+      {
+        "type": "PREEMPTIVE_OS_CRYPTOPS",
+        "count": 45,
+        "ms": 97,
+        "signalMs": 0
+      },
+      {
+        "type": "PREEMPTIVE_OS_QUERYREGISTRY",
+        "count": 116,
+        "ms": 80,
+        "signalMs": 0
+      },
+      {
+        "type": "PREEMPTIVE_OS_NETVALIDATEPASSWORDPOLICY",
+        "count": 15,
+        "ms": 60,
+        "signalMs": 0
+      },
+      {
+        "type": "LCK_M_RS_U",
+        "count": 2,
+        "ms": 58,
+        "signalMs": 5
+      },
+      {
+        "type": "PREEMPTIVE_OS_CLOSEHANDLE",
+        "count": 8,
+        "ms": 42,
+        "signalMs": 0
+      },
+      {
+        "type": "PREEMPTIVE_OS_WRITEFILE",
+        "count": 3,
+        "ms": 20,
+        "signalMs": 0
+      },
+      {
+        "type": "PREEMPTIVE_OS_CRYPTACQUIRECONTEXT",
+        "count": 15,
+        "ms": 13,
+        "signalMs": 0
+      }
+    ],
+    "counters": {
+      "Lazy writes/sec": 0,
+      "Page reads/sec": 17.9,
+      "Page writes/sec": 8.5,
+      "Page life expectancy": 697,
+      "Page life expectancy [000]": 697,
+      "User Connections": 13,
+      "Processes blocked": 0,
+      "Lock Requests/sec": 704.56,
+      "Lock Timeouts/sec": 0.08,
+      "Number of Deadlocks/sec": 0,
+      "Lock Waits/sec": 0.01,
+      "Lock Wait Time (ms)": 0.6,
+      "Transactions/sec [SuperApp-perf]": 18.51,
+      "Log Flushes/sec [SuperApp-perf]": 10.16,
+      "Log Bytes Flushed/sec [SuperApp-perf]": 21758.66,
+      "Full Scans/sec": 33.48,
+      "Index Searches/sec": 843.02,
+      "Batch Requests/sec": 74.33,
+      "SQL Compilations/sec": 1.65,
+      "SQL Re-Compilations/sec": 0,
+      "Memory Grants Pending": 0,
+      "Version Store Size (KB)": 416
+    },
+    "fileIo": {
+      "ROWS": {
+        "reads": 148,
+        "mbRead": 10.88,
+        "avgReadStallMs": 3.08,
+        "writes": 0,
+        "mbWritten": 0,
+        "avgWriteStallMs": 0
+      },
+      "LOG": {
+        "reads": 0,
+        "mbRead": 0,
+        "avgReadStallMs": 0,
+        "writes": 1077,
+        "mbWritten": 2.2,
+        "avgWriteStallMs": 2.86
+      }
+    }
+  }
+}

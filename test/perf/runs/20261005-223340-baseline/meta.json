@@ -1,0 +1,16 @@
+{
+  "id": "20261005-223340-baseline",
+  "kind": "baseline",
+  "note": "baseline, thử RCSI ON + index parent_task_id",
+  "startedAt": "2026-10-05T15:33:40.215Z",
+  "params": {
+    "REPS": 30
+  },
+  "restoredDb": true,
+  "appliedExperiments": [
+    "db/experiments/rcsi-and-parent-index.sql"
+  ],
+  "workloadStart": 1791214448,
+  "workloadEnd": 1791214521,
+  "finishedAt": "2026-10-05T15:35:37.519Z"
+}

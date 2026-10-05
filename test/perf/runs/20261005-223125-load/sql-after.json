@@ -1,0 +1,1032 @@
+{
+  "at": "2026-10-05T15:33:24.993Z",
+  "waits": [
+    {
+      "t": "LCK_M_SCH_S",
+      "n": 623126,
+      "ms": 40023240,
+      "sig": 3370686
+    },
+    {
+      "t": "LCK_M_SCH_M",
+      "n": 601250,
+      "ms": 12627050,
+      "sig": 1647127
+    },
+    {
+      "t": "LCK_M_S",
+      "n": 968,
+      "ms": 1161030,
+      "sig": 4072
+    },
+    {
+      "t": "LCK_M_U",
+      "n": 166,
+      "ms": 10156,
+      "sig": 68
+    },
+    {
+      "t": "LCK_M_X",
+      "n": 195,
+      "ms": 1849,
+      "sig": 292
+    },
+    {
+      "t": "LCK_M_IX",
+      "n": 403,
+      "ms": 404605,
+      "sig": 982
+    },
+    {
+      "t": "LCK_M_RS_U",
+      "n": 64,
+      "ms": 101084,
+      "sig": 128
+    },
+    {
+      "t": "LATCH_SH",
+      "n": 18,
+      "ms": 39,
+      "sig": 12
+    },
+    {
+      "t": "LATCH_EX",
+      "n": 5501,
+      "ms": 5337,
+      "sig": 2235
+    },
+    {
+      "t": "PAGELATCH_SH",
+      "n": 4534,
+      "ms": 4972,
+      "sig": 1441
+    },
+    {
+      "t": "PAGELATCH_UP",
+      "n": 88,
+      "ms": 263,
+      "sig": 15
+    },
+    {
+      "t": "PAGELATCH_EX",
+      "n": 16961,
+      "ms": 5339,
+      "sig": 3343
+    },
+    {
+      "t": "PAGEIOLATCH_SH",
+      "n": 29386,
+      "ms": 67343,
+      "sig": 9356
+    },
+    {
+      "t": "PAGEIOLATCH_UP",
+      "n": 15560,
+      "ms": 35870,
+      "sig": 377
+    },
+    {
+      "t": "PAGEIOLATCH_EX",
+      "n": 5410,
+      "ms": 13155,
+      "sig": 1257
+    },
+    {
+      "t": "SLEEP_TASK",
+      "n": 39743471,
+      "ms": 38328377595,
+      "sig": 7083991
+    },
+    {
+      "t": "THREADPOOL",
+      "n": 1478,
+      "ms": 1069107,
+      "sig": 0
+    },
+    {
+      "t": "SOS_SCHEDULER_YIELD",
+      "n": 5186014,
+      "ms": 1262220,
+      "sig": 1244258
+    },
+    {
+      "t": "CMEMTHREAD",
+      "n": 9588,
+      "ms": 541265,
+      "sig": 8027
+    },
+    {
+      "t": "SOS_PROCESS_AFFINITY_MUTEX",
+      "n": 282,
+      "ms": 71,
+      "sig": 41
+    },
+    {
+      "t": "SOS_SYNC_TASK_ENQUEUE_EVENT",
+      "n": 10,
+      "ms": 9,
+      "sig": 0
+    },
+    {
+      "t": "DISPATCHER_QUEUE_SEMAPHORE",
+      "n": 195042,
+      "ms": 43331090421,
+      "sig": 251197
+    },
+    {
+      "t": "SOS_SMALL_PAGE_ALLOC",
+      "n": 10,
+      "ms": 1,
+      "sig": 1
+    },
+    {
+      "t": "SLEEP_WORKSPACE_ALLOCATEPAGE",
+      "n": 11991,
+      "ms": 183970,
+      "sig": 35863
+    },
+    {
+      "t": "MEMORY_ALLOCATION_EXT",
+      "n": 166077700,
+      "ms": 854772,
+      "sig": 0
+    },
+    {
+      "t": "RESERVED_MEMORY_ALLOCATION_EXT",
+      "n": 2088978,
+      "ms": 7192,
+      "sig": 0
+    },
+    {
+      "t": "SESSION_WAIT_STATS_CHILDREN",
+      "n": 86,
+      "ms": 49,
+      "sig": 33
+    },
+    {
+      "t": "PREEMPTIVE_XE_DISPATCHER",
+      "n": 2,
+      "ms": 8178013897,
+      "sig": 0
+    },
+    {
+      "t": "XE_BUFFERMGR_ALLPROCESSED_EVENT",
+      "n": 58660,
+      "ms": 225218,
+      "sig": 4929
+    },
+    {
+      "t": "PREEMPTIVE_XE_CALLBACKEXECUTE",
+      "n": 8046556,
+      "ms": 36533,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_XE_GETTARGETSTATE",
+      "n": 322540,
+      "ms": 4170221,
+      "sig": 0
+    },
+    {
+      "t": "XE_SESSION_FLUSH",
+      "n": 4,
+      "ms": 23,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_XE_SESSIONCOMMIT",
+      "n": 14955,
+      "ms": 13725,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_XE_TARGETINIT",
+      "n": 5982,
+      "ms": 2001,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_XE_TARGETFINALIZE",
+      "n": 5978,
+      "ms": 1854,
+      "sig": 0
+    },
+    {
+      "t": "XE_TIMER_MUTEX",
+      "n": 266,
+      "ms": 11,
+      "sig": 5
+    },
+    {
+      "t": "XE_TIMER_EVENT",
+      "n": 3036810,
+      "ms": 10844705159,
+      "sig": 10837899969
+    },
+    {
+      "t": "XE_DISPATCHER_WAIT",
+      "n": 238790,
+      "ms": 10842962608,
+      "sig": 0
+    },
+    {
+      "t": "SOS_WORK_DISPATCHER",
+      "n": 56956783,
+      "ms": 260991715644,
+      "sig": 38311618
+    },
+    {
+      "t": "LAZYWRITER_SLEEP",
+      "n": 11486431,
+      "ms": 10843296584,
+      "sig": 1830682
+    },
+    {
+      "t": "IO_COMPLETION",
+      "n": 5485,
+      "ms": 7986,
+      "sig": 404
+    },
+    {
+      "t": "ASYNC_IO_COMPLETION",
+      "n": 517,
+      "ms": 56321,
+      "sig": 151
+    },
+    {
+      "t": "ASYNC_NETWORK_IO",
+      "n": 9695,
+      "ms": 12773551,
+      "sig": 1933
+    },
+    {
+      "t": "SLEEP_BPOOL_FLUSH",
+      "n": 30484,
+      "ms": 27098,
+      "sig": 778
+    },
+    {
+      "t": "CHKPT",
+      "n": 1,
+      "ms": 9691,
+      "sig": 19
+    },
+    {
+      "t": "SLEEP_DBSTARTUP",
+      "n": 36,
+      "ms": 3897,
+      "sig": 230
+    },
+    {
+      "t": "SLEEP_MASTERMDREADY",
+      "n": 1,
+      "ms": 807,
+      "sig": 2
+    },
+    {
+      "t": "SLEEP_MASTERUPGRADED",
+      "n": 1,
+      "ms": 663,
+      "sig": 3
+    },
+    {
+      "t": "SLEEP_MASTERDBREADY",
+      "n": 2,
+      "ms": 10230,
+      "sig": 30
+    },
+    {
+      "t": "SLEEP_DCOMSTARTUP",
+      "n": 1,
+      "ms": 381,
+      "sig": 0
+    },
+    {
+      "t": "SLEEP_SYSTEMTASK",
+      "n": 1,
+      "ms": 9646,
+      "sig": 0
+    },
+    {
+      "t": "ASYNC_DISKPOOL_LOCK",
+      "n": 35,
+      "ms": 2,
+      "sig": 1
+    },
+    {
+      "t": "ONDEMAND_TASK_QUEUE",
+      "n": 3755241,
+      "ms": 10845354177,
+      "sig": 355031
+    },
+    {
+      "t": "LOGMGR_QUEUE",
+      "n": 93947882,
+      "ms": 10823109338,
+      "sig": 766086
+    },
+    {
+      "t": "REQUEST_FOR_DEADLOCK_SEARCH",
+      "n": 2168270,
+      "ms": 10840933272,
+      "sig": 10840933272
+    },
+    {
+      "t": "CHECKPOINT_QUEUE",
+      "n": 20115,
+      "ms": 10845561339,
+      "sig": 5713
+    },
+    {
+      "t": "PARALLEL_BACKUP_QUEUE",
+      "n": 1,
+      "ms": 9,
+      "sig": 0
+    },
+    {
+      "t": "BACKUPBUFFER",
+      "n": 21648,
+      "ms": 32960,
+      "sig": 4735
+    },
+    {
+      "t": "BACKUPIO",
+      "n": 30802,
+      "ms": 33282,
+      "sig": 1811
+    },
+    {
+      "t": "BACKUPTHREAD",
+      "n": 2115,
+      "ms": 42699,
+      "sig": 397
+    },
+    {
+      "t": "SQLTRACE_FILE_BUFFER",
+      "n": 11219,
+      "ms": 4666806,
+      "sig": 3209
+    },
+    {
+      "t": "SQLTRACE_INCREMENTAL_FLUSH_SLEEP",
+      "n": 2706996,
+      "ms": 10829655590,
+      "sig": 16850
+    },
+    {
+      "t": "BROKER_MASTERSTART",
+      "n": 1,
+      "ms": 2,
+      "sig": 0
+    },
+    {
+      "t": "BROKER_EVENTHANDLER",
+      "n": 75,
+      "ms": 10845982022,
+      "sig": 77
+    },
+    {
+      "t": "WRITELOG",
+      "n": 3316357,
+      "ms": 22490141,
+      "sig": 426211
+    },
+    {
+      "t": "CXPACKET",
+      "n": 67909,
+      "ms": 19978,
+      "sig": 4813
+    },
+    {
+      "t": "CXSYNC_CONSUMER",
+      "n": 887,
+      "ms": 1768,
+      "sig": 277
+    },
+    {
+      "t": "CXSYNC_PORT",
+      "n": 5365,
+      "ms": 41145,
+      "sig": 2529
+    },
+    {
+      "t": "CXCONSUMER",
+      "n": 3729,
+      "ms": 217025,
+      "sig": 2384
+    },
+    {
+      "t": "HTBUILD",
+      "n": 6,
+      "ms": 29,
+      "sig": 0
+    },
+    {
+      "t": "WAITFOR",
+      "n": 80,
+      "ms": 80522,
+      "sig": 269
+    },
+    {
+      "t": "EXECSYNC",
+      "n": 253,
+      "ms": 357,
+      "sig": 108
+    },
+    {
+      "t": "MSQL_XP",
+      "n": 414,
+      "ms": 2737,
+      "sig": 0
+    },
+    {
+      "t": "LOGBUFFER",
+      "n": 3,
+      "ms": 40,
+      "sig": 34
+    },
+    {
+      "t": "CLR_CRST",
+      "n": 12,
+      "ms": 35,
+      "sig": 15
+    },
+    {
+      "t": "CLR_MANUAL_EVENT",
+      "n": 766,
+      "ms": 3139,
+      "sig": 176
+    },
+    {
+      "t": "CLR_AUTO_EVENT",
+      "n": 758,
+      "ms": 21690808433,
+      "sig": 246
+    },
+    {
+      "t": "SQLCLR_ASSEMBLY",
+      "n": 9,
+      "ms": 2,
+      "sig": 0
+    },
+    {
+      "t": "PRINT_ROLLBACK_PROGRESS",
+      "n": 11,
+      "ms": 33008,
+      "sig": 1
+    },
+    {
+      "t": "LOGMGR_FLUSH",
+      "n": 136,
+      "ms": 95,
+      "sig": 18
+    },
+    {
+      "t": "BROKER_INIT",
+      "n": 4,
+      "ms": 4003,
+      "sig": 0
+    },
+    {
+      "t": "RESOURCE_SEMAPHORE_MUTEX",
+      "n": 17,
+      "ms": 85,
+      "sig": 2
+    },
+    {
+      "t": "SNI_CRITICAL_SECTION",
+      "n": 8360,
+      "ms": 2194,
+      "sig": 640
+    },
+    {
+      "t": "RESOURCE_SEMAPHORE_QUERY_COMPILE",
+      "n": 19,
+      "ms": 3319,
+      "sig": 163
+    },
+    {
+      "t": "BROKER_TASK_STOP",
+      "n": 61336,
+      "ms": 602922109,
+      "sig": 15019
+    },
+    {
+      "t": "DAC_INIT",
+      "n": 1,
+      "ms": 22,
+      "sig": 0
+    },
+    {
+      "t": "BROKER_TO_FLUSH",
+      "n": 5291775,
+      "ms": 5423002871,
+      "sig": 707954
+    },
+    {
+      "t": "PREEMPTIVE_OS_AUTHENTICATIONOPS",
+      "n": 653103,
+      "ms": 2082568,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_DELETESECURITYCONTEXT",
+      "n": 23600,
+      "ms": 16003,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_QUERYCONTEXTATTRIBUTES",
+      "n": 47206,
+      "ms": 4316,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_AUTHORIZATIONOPS",
+      "n": 23879,
+      "ms": 1897,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_LOOKUPACCOUNTSID",
+      "n": 42,
+      "ms": 512,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_REVERTTOSELF",
+      "n": 23603,
+      "ms": 1637,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_CRYPTOPS",
+      "n": 11128326,
+      "ms": 2194432,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_CRYPTACQUIRECONTEXT",
+      "n": 3818671,
+      "ms": 690144,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_NETVALIDATEPASSWORDPOLICY",
+      "n": 3491564,
+      "ms": 3769547,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_NETVALIDATEPASSWORDPOLICYFREE",
+      "n": 3491564,
+      "ms": 554041,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_FILEOPS",
+      "n": 2489,
+      "ms": 16902,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_CLOSEHANDLE",
+      "n": 5286923,
+      "ms": 3026318,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_CREATEFILE",
+      "n": 1616,
+      "ms": 6035,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_DELETEFILE",
+      "n": 26,
+      "ms": 85,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_FINDFILE",
+      "n": 74,
+      "ms": 1535,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_FILESIZEGET",
+      "n": 466,
+      "ms": 237,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_FLUSHFILEBUFFERS",
+      "n": 3346520,
+      "ms": 30553371,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_GETDISKFREESPACE",
+      "n": 41,
+      "ms": 52,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_GETFILEATTRIBUTES",
+      "n": 1008,
+      "ms": 1030,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_GETVOLUMEPATHNAME",
+      "n": 276,
+      "ms": 2097,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_GETVOLUMENAMEFORVOLUMEMOUNTPOINT",
+      "n": 6,
+      "ms": 1,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_REMOVEDIRECTORY",
+      "n": 4,
+      "ms": 5,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_WRITEFILE",
+      "n": 620110,
+      "ms": 16324654,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_WRITEFILEGATHER",
+      "n": 72,
+      "ms": 42432,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_LIBRARYOPS",
+      "n": 1,
+      "ms": 3,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_GETPROCADDRESS",
+      "n": 414,
+      "ms": 60,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_LOADLIBRARY",
+      "n": 3,
+      "ms": 699,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_OS_QUERYREGISTRY",
+      "n": 5437392,
+      "ms": 2647222,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_SB_STOPENDPOINT",
+      "n": 1,
+      "ms": 2,
+      "sig": 0
+    },
+    {
+      "t": "WRITE_COMPLETION",
+      "n": 707,
+      "ms": 1687,
+      "sig": 52
+    },
+    {
+      "t": "PERFORMANCE_COUNTERS_RWLOCK",
+      "n": 2,
+      "ms": 52,
+      "sig": 13
+    },
+    {
+      "t": "SQLTRACE_FILE_WRITE_IO_COMPLETION",
+      "n": 144,
+      "ms": 495,
+      "sig": 8
+    },
+    {
+      "t": "PWAIT_ALL_COMPONENTS_INITIALIZED",
+      "n": 3,
+      "ms": 10991,
+      "sig": 4
+    },
+    {
+      "t": "SP_SERVER_DIAGNOSTICS_SLEEP",
+      "n": 1164499,
+      "ms": 10845801831,
+      "sig": 10845801831
+    },
+    {
+      "t": "STARTUP_DEPENDENCY_MANAGER",
+      "n": 286,
+      "ms": 29716,
+      "sig": 482
+    },
+    {
+      "t": "HADR_CLUSAPI_CALL",
+      "n": 2200,
+      "ms": 271,
+      "sig": 0
+    },
+    {
+      "t": "LOGPOOL_CONSUMER",
+      "n": 3,
+      "ms": 27,
+      "sig": 0
+    },
+    {
+      "t": "HADR_FILESTREAM_IOMGR_IOCOMPLETION",
+      "n": 21654192,
+      "ms": 10845806916,
+      "sig": 2615247
+    },
+    {
+      "t": "DIRTY_PAGE_POLL",
+      "n": 108212231,
+      "ms": 10844862357,
+      "sig": 740380
+    },
+    {
+      "t": "WAIT_XTP_HOST_WAIT",
+      "n": 3,
+      "ms": 822,
+      "sig": 1
+    },
+    {
+      "t": "QDS_CTXS",
+      "n": 1,
+      "ms": 31,
+      "sig": 1
+    },
+    {
+      "t": "QDS_PERSIST_TASK_MAIN_LOOP_SLEEP",
+      "n": 180725,
+      "ms": 10843649011,
+      "sig": 27681
+    },
+    {
+      "t": "PREEMPTIVE_OS_VERIFYTRUST",
+      "n": 4,
+      "ms": 1108,
+      "sig": 0
+    },
+    {
+      "t": "SLEEP_BUFFERPOOL_HELPLW",
+      "n": 2408,
+      "ms": 238,
+      "sig": 235
+    },
+    {
+      "t": "QDS_ASYNC_QUEUE",
+      "n": 876,
+      "ms": 10846038078,
+      "sig": 977
+    },
+    {
+      "t": "PREEMPTIVE_OS_GETFINALFILEPATHBYHANDLE",
+      "n": 4,
+      "ms": 1,
+      "sig": 0
+    },
+    {
+      "t": "PARALLEL_REDO_WORKER_SYNC",
+      "n": 23,
+      "ms": 25,
+      "sig": 2
+    },
+    {
+      "t": "PARALLEL_REDO_DRAIN_WORKER",
+      "n": 4,
+      "ms": 253,
+      "sig": 29
+    },
+    {
+      "t": "PARALLEL_REDO_WORKER_WAIT_WORK",
+      "n": 252,
+      "ms": 2369,
+      "sig": 361
+    },
+    {
+      "t": "SLEEP_PHYSMASTERDBREADY",
+      "n": 1,
+      "ms": 1695,
+      "sig": 42
+    },
+    {
+      "t": "PWAIT_EXTENSIBILITY_CLEANUP_TASK",
+      "n": 36155,
+      "ms": 10846095195,
+      "sig": 10846095195
+    },
+    {
+      "t": "WAIT_ON_SYNC_STATISTICS_REFRESH",
+      "n": 2209,
+      "ms": 39158,
+      "sig": 0
+    },
+    {
+      "t": "PREEMPTIVE_SNI_SOCKET_BIND",
+      "n": 6,
+      "ms": 3,
+      "sig": 0
+    },
+    {
+      "t": "MULTITHREADED_VERSION_CLEANUP_WAIT_WORK",
+      "n": 5,
+      "ms": 4,
+      "sig": 3
+    },
+    {
+      "t": "PREEMPTIVE_SERVICE_CONTROL_MANGER",
+      "n": 375,
+      "ms": 1665,
+      "sig": 0
+    },
+    {
+      "t": "XE_RING_TARGET_MUTEX",
+      "n": 1,
+      "ms": 1,
+      "sig": 0
+    },
+    {
+      "t": "PURVIEW_POLICY_SDK_PREEMPTIVE_SCHEDULING",
+      "n": 125,
+      "ms": 26,
+      "sig": 0
+    },
+    {
+      "t": "AZURE_IMDS_VERSIONS",
+      "n": 3,
+      "ms": 181177,
+      "sig": 0
+    }
+  ],
+  "counters": [
+    {
+      "name": "Lazy writes/sec",
+      "inst": "",
+      "v": 24594,
+      "type": 272696576
+    },
+    {
+      "name": "Page reads/sec",
+      "inst": "",
+      "v": 432593,
+      "type": 272696576
+    },
+    {
+      "name": "Page writes/sec",
+      "inst": "",
+      "v": 280591,
+      "type": 272696576
+    },
+    {
+      "name": "Page life expectancy",
+      "inst": "",
+      "v": 697,
+      "type": 65792
+    },
+    {
+      "name": "Page life expectancy",
+      "inst": "000",
+      "v": 697,
+      "type": 65792
+    },
+    {
+      "name": "User Connections",
+      "inst": "",
+      "v": 13,
+      "type": 65792
+    },
+    {
+      "name": "Processes blocked",
+      "inst": "",
+      "v": 0,
+      "type": 65792
+    },
+    {
+      "name": "Lock Requests/sec",
+      "inst": "_Total",
+      "v": 2047437815,
+      "type": 272696576
+    },
+    {
+      "name": "Lock Timeouts/sec",
+      "inst": "_Total",
+      "v": 4825,
+      "type": 272696576
+    },
+    {
+      "name": "Number of Deadlocks/sec",
+      "inst": "_Total",
+      "v": 152,
+      "type": 272696576
+    },
+    {
+      "name": "Lock Waits/sec",
+      "inst": "_Total",
+      "v": 695509,
+      "type": 272696576
+    },
+    {
+      "name": "Lock Wait Time (ms)",
+      "inst": "_Total",
+      "v": 54515272,
+      "type": 272696576
+    },
+    {
+      "name": "Transactions/sec",
+      "inst": "SuperApp-perf",
+      "v": 2040,
+      "type": 272696576
+    },
+    {
+      "name": "Log Flushes/sec",
+      "inst": "SuperApp-perf",
+      "v": 1098,
+      "type": 272696576
+    },
+    {
+      "name": "Log Bytes Flushed/sec",
+      "inst": "SuperApp-perf",
+      "v": 2408448,
+      "type": 272696576
+    },
+    {
+      "name": "Full Scans/sec",
+      "inst": "",
+      "v": 1445903,
+      "type": 272696576
+    },
+    {
+      "name": "Index Searches/sec",
+      "inst": "",
+      "v": 206349193,
+      "type": 272696576
+    },
+    {
+      "name": "Batch Requests/sec",
+      "inst": "",
+      "v": 804764,
+      "type": 272696576
+    },
+    {
+      "name": "SQL Compilations/sec",
+      "inst": "",
+      "v": 120995,
+      "type": 272696576
+    },
+    {
+      "name": "SQL Re-Compilations/sec",
+      "inst": "",
+      "v": 3413,
+      "type": 272696576
+    },
+    {
+      "name": "Memory Grants Pending",
+      "inst": "",
+      "v": 0,
+      "type": 65792
+    },
+    {
+      "name": "Version Store Size (KB)",
+      "inst": "",
+      "v": 416,
+      "type": 65792
+    }
+  ],
+  "fileIo": [
+    {
+      "type": "ROWS",
+      "reads": 1566,
+      "bytesRead": 123650048,
+      "stallReadMs": 10102,
+      "writes": 5,
+      "bytesWritten": 1130496,
+      "stallWriteMs": 19
+    },
+    {
+      "type": "LOG",
+      "reads": 39,
+      "bytesRead": 1138688,
+      "stallReadMs": 24,
+      "writes": 1100,
+      "bytesWritten": 2424320,
+      "stallWriteMs": 3126
+    }
+  ],
+  "perfDbSessions": {
+    "sessions": 10
+  }
+}

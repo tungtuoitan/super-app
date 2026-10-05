@@ -1,0 +1,690 @@
+{
+  "id": "20261005-223340-baseline",
+  "kind": "baseline",
+  "note": "baseline, thử RCSI ON + index parent_task_id",
+  "startedAt": "2026-10-05T15:33:40.215Z",
+  "params": {
+    "REPS": 30
+  },
+  "beBuild": "037b557",
+  "beQuota": "100% CPU, 700 MB RAM",
+  "db": {
+    "rcsi": true,
+    "taskIndexes": [
+      "ix_task_parent_task_id (filtered)",
+      "ix_task_parent_task_id_all",
+      "ix_task_project_id (filtered)",
+      "ix_task_start_end_date (filtered)",
+      "ix_task_status (filtered)",
+      "pk_task"
+    ],
+    "tasks": 78400
+  },
+  "appliedExperiments": [
+    "db/experiments/rcsi-and-parent-index.sql"
+  ],
+  "server": {
+    "memAvailableMbAtStart": 2205,
+    "swapUsedMbAtStart": 1347,
+    "loadAvgAtStart": 3.72
+  },
+  "workload": {
+    "reps": 30,
+    "warmup": 3,
+    "profiles": {
+      "normal": {
+        "email": "perf+0100@test.local",
+        "projects": 40,
+        "tasks": 320,
+        "sampleProjectTasks": 8,
+        "endpoints": {
+          "GET /api/project (không token, sàn pipeline)": {
+            "p50": 1.8,
+            "p95": 11.3,
+            "p99": 15.1,
+            "max": 15.1,
+            "mean": 3,
+            "bytes": 0,
+            "failures": 0
+          },
+          "GET /api/project": {
+            "p50": 13,
+            "p95": 15.8,
+            "p99": 24.4,
+            "max": 24.4,
+            "mean": 13.3,
+            "bytes": 14364,
+            "failures": 0
+          },
+          "GET /api/project?status=active,open&deletedAt=null": {
+            "p50": 11.7,
+            "p95": 14.5,
+            "p99": 67.6,
+            "max": 67.6,
+            "mean": 13.6,
+            "bytes": 9038,
+            "failures": 0
+          },
+          "GET /api/project/{id}": {
+            "p50": 7.7,
+            "p95": 10,
+            "p99": 13.3,
+            "max": 13.3,
+            "mean": 8,
+            "bytes": 556,
+            "failures": 0
+          },
+          "GET /api/task?projectIds={id}&deletedAt=null": {
+            "p50": 17.6,
+            "p95": 25.2,
+            "p99": 25.4,
+            "max": 25.4,
+            "mean": 18.5,
+            "bytes": 11872,
+            "failures": 0
+          },
+          "GET /api/task?status=open,in_progress,...&priority=...": {
+            "p50": 79.1,
+            "p95": 124.1,
+            "p99": 138.3,
+            "max": 138.3,
+            "mean": 81.8,
+            "bytes": 360760,
+            "failures": 0
+          },
+          "GET /api/task (toàn bộ task của user)": {
+            "p50": 74,
+            "p95": 96.4,
+            "p99": 100.4,
+            "max": 100.4,
+            "mean": 73.5,
+            "bytes": 467080,
+            "failures": 0
+          },
+          "GET /api/task?deletedAt=null": {
+            "p50": 43.7,
+            "p95": 63.5,
+            "p99": 66.7,
+            "max": 66.7,
+            "mean": 45.9,
+            "bytes": 467080,
+            "failures": 0
+          },
+          "GET /api/task/{id}": {
+            "p50": 13.4,
+            "p95": 19.7,
+            "p99": 24.6,
+            "max": 24.6,
+            "mean": 14.5,
+            "bytes": 2243,
+            "failures": 0
+          },
+          "GET /api/task?searchText=...": {
+            "p50": 51.9,
+            "p95": 86.6,
+            "p99": 95.7,
+            "max": 95.7,
+            "mean": 56.8,
+            "bytes": 82120,
+            "failures": 0
+          },
+          "GET /api/taskcomment?taskId={id}": {
+            "p50": 13.9,
+            "p95": 17,
+            "p99": 22.8,
+            "max": 22.8,
+            "mean": 14.1,
+            "bytes": 3984,
+            "failures": 0
+          },
+          "POST /api/task (tạo 1 task)": {
+            "p50": 30.3,
+            "p95": 46.2,
+            "p99": 50.3,
+            "max": 50.3,
+            "mean": 32.8,
+            "bytes": 733,
+            "failures": 0
+          },
+          "PATCH /api/task/{id} (status)": {
+            "p50": 27.4,
+            "p95": 32.5,
+            "p99": 37.1,
+            "max": 37.1,
+            "mean": 28.1,
+            "bytes": 752,
+            "failures": 0
+          },
+          "POST /api/taskcomment (tạo comment)": {
+            "p50": 19.4,
+            "p95": 25.6,
+            "p99": 28.1,
+            "max": 28.1,
+            "mean": 19.4,
+            "bytes": 426,
+            "failures": 0
+          },
+          "DELETE /api/task (xoá vĩnh viễn 1 task)": {
+            "p50": 36.5,
+            "p95": 46,
+            "p99": 47.2,
+            "max": 47.2,
+            "mean": 37.7,
+            "bytes": 205,
+            "failures": 0
+          }
+        }
+      },
+      "heavy": {
+        "email": "perf+0001@test.local",
+        "projects": 40,
+        "tasks": 3200,
+        "sampleProjectTasks": 80,
+        "endpoints": {
+          "GET /api/project (không token, sàn pipeline)": {
+            "p50": 1.7,
+            "p95": 3.9,
+            "p99": 18.6,
+            "max": 18.6,
+            "mean": 2.5,
+            "bytes": 0,
+            "failures": 0
+          },
+          "GET /api/project": {
+            "p50": 10.4,
+            "p95": 17.6,
+            "p99": 20.5,
+            "max": 20.5,
+            "mean": 11.2,
+            "bytes": 14284,
+            "failures": 0
+          },
+          "GET /api/project?status=active,open&deletedAt=null": {
+            "p50": 10.4,
+            "p95": 14.9,
+            "p99": 15.3,
+            "max": 15.3,
+            "mean": 10.7,
+            "bytes": 8988,
+            "failures": 0
+          },
+          "GET /api/project/{id}": {
+            "p50": 7,
+            "p95": 9.1,
+            "p99": 9.3,
+            "max": 9.3,
+            "mean": 7.2,
+            "bytes": 554,
+            "failures": 0
+          },
+          "GET /api/task?projectIds={id}&deletedAt=null": {
+            "p50": 22.3,
+            "p95": 28.2,
+            "p99": 31.8,
+            "max": 31.8,
+            "mean": 23,
+            "bytes": 118308,
+            "failures": 0
+          },
+          "GET /api/task?status=open,in_progress,...&priority=...": {
+            "p50": 302.7,
+            "p95": 691,
+            "p99": 697.2,
+            "max": 697.2,
+            "mean": 338.8,
+            "bytes": 3275320,
+            "failures": 0
+          },
+          "GET /api/task (toàn bộ task của user)": {
+            "p50": 454.1,
+            "p95": 964.4,
+            "p99": 967.2,
+            "max": 967.2,
+            "mean": 535.2,
+            "bytes": 4724520,
+            "failures": 0
+          },
+          "GET /api/task?deletedAt=null": {
+            "p50": 208.4,
+            "p95": 478,
+            "p99": 837.1,
+            "max": 837.1,
+            "mean": 275.8,
+            "bytes": 4724520,
+            "failures": 0
+          },
+          "GET /api/task/{id}": {
+            "p50": 8.7,
+            "p95": 13.9,
+            "p99": 20,
+            "max": 20,
+            "mean": 9.5,
+            "bytes": 1340,
+            "failures": 0
+          },
+          "GET /api/task?searchText=...": {
+            "p50": 120.5,
+            "p95": 222.8,
+            "p99": 225.6,
+            "max": 225.6,
+            "mean": 137.8,
+            "bytes": 714880,
+            "failures": 0
+          },
+          "GET /api/taskcomment?taskId={id}": {
+            "p50": 11.2,
+            "p95": 15.3,
+            "p99": 21.4,
+            "max": 21.4,
+            "mean": 11.7,
+            "bytes": 3974,
+            "failures": 0
+          },
+          "POST /api/task (tạo 1 task)": {
+            "p50": 31.7,
+            "p95": 37.7,
+            "p99": 43.2,
+            "max": 43.2,
+            "mean": 32.1,
+            "bytes": 733,
+            "failures": 0
+          },
+          "PATCH /api/task/{id} (status)": {
+            "p50": 31.4,
+            "p95": 37.5,
+            "p99": 40.1,
+            "max": 40.1,
+            "mean": 31.4,
+            "bytes": 752,
+            "failures": 0
+          },
+          "POST /api/taskcomment (tạo comment)": {
+            "p50": 13.2,
+            "p95": 18.8,
+            "p99": 19.8,
+            "max": 19.8,
+            "mean": 14.1,
+            "bytes": 426,
+            "failures": 0
+          },
+          "DELETE /api/task (xoá vĩnh viễn 1 task)": {
+            "p50": 35.8,
+            "p95": 49.4,
+            "p99": 50,
+            "max": 50,
+            "mean": 36,
+            "bytes": 205,
+            "failures": 0
+          }
+        }
+      }
+    }
+  },
+  "vps": {
+    "before": {
+      "samples": 2,
+      "load1": {
+        "avg": 3.3,
+        "min": 3.15,
+        "max": 3.42
+      },
+      "host_cpu": {
+        "avg": 6.5,
+        "min": 6,
+        "max": 7
+      },
+      "iowait": {
+        "avg": 0,
+        "min": 0,
+        "max": 0
+      },
+      "mem_avail_mb": {
+        "avg": 2196.5,
+        "min": 2196,
+        "max": 2197
+      },
+      "swap_used_mb": {
+        "avg": 1347,
+        "min": 1347,
+        "max": 1347
+      },
+      "cpu_sql": {
+        "avg": 2,
+        "min": 2,
+        "max": 2
+      },
+      "cpu_prod_be": {
+        "avg": 1,
+        "min": 1,
+        "max": 1
+      },
+      "cpu_perf_be": {
+        "avg": 1.5,
+        "min": 1,
+        "max": 2
+      },
+      "rss_sql_mb": {
+        "avg": 523,
+        "min": 523,
+        "max": 523
+      },
+      "rss_prod_be_mb": {
+        "avg": 363,
+        "min": 363,
+        "max": 363
+      },
+      "rss_perf_be_mb": {
+        "avg": 128,
+        "min": 128,
+        "max": 128
+      },
+      "threads_perf_be": {
+        "avg": 18,
+        "min": 18,
+        "max": 18
+      },
+      "prod_ms": {
+        "avg": 1.9,
+        "min": 1,
+        "max": 2.8
+      },
+      "prod_errors": 0
+    },
+    "during": {
+      "samples": 15,
+      "load1": {
+        "avg": 2.6,
+        "min": 2.38,
+        "max": 2.9
+      },
+      "host_cpu": {
+        "avg": 62.6,
+        "min": 8,
+        "max": 76
+      },
+      "iowait": {
+        "avg": 1.5,
+        "min": 0,
+        "max": 10
+      },
+      "mem_avail_mb": {
+        "avg": 2018.1,
+        "min": 1948,
+        "max": 2191
+      },
+      "swap_used_mb": {
+        "avg": 1346.2,
+        "min": 1346,
+        "max": 1347
+      },
+      "cpu_sql": {
+        "avg": 31.6,
+        "min": 2,
+        "max": 73
+      },
+      "cpu_prod_be": {
+        "avg": 1.5,
+        "min": 1,
+        "max": 6
+      },
+      "cpu_perf_be": {
+        "avg": 67.6,
+        "min": 2,
+        "max": 90
+      },
+      "rss_sql_mb": {
+        "avg": 523.5,
+        "min": 523,
+        "max": 524
+      },
+      "rss_prod_be_mb": {
+        "avg": 365.7,
+        "min": 363,
+        "max": 367
+      },
+      "rss_perf_be_mb": {
+        "avg": 206.9,
+        "min": 131,
+        "max": 231
+      },
+      "threads_perf_be": {
+        "avg": 21.3,
+        "min": 18,
+        "max": 23
+      },
+      "prod_ms": {
+        "avg": 1.4,
+        "min": 0.9,
+        "max": 2.4
+      },
+      "prod_errors": 0
+    },
+    "after": {
+      "samples": 3,
+      "load1": {
+        "avg": 2.1,
+        "min": 1.96,
+        "max": 2.32
+      },
+      "host_cpu": {
+        "avg": 19.3,
+        "min": 6,
+        "max": 45
+      },
+      "iowait": {
+        "avg": 2,
+        "min": 0,
+        "max": 5
+      },
+      "mem_avail_mb": {
+        "avg": 2101.7,
+        "min": 2100,
+        "max": 2104
+      },
+      "swap_used_mb": {
+        "avg": 1346,
+        "min": 1346,
+        "max": 1346
+      },
+      "cpu_sql": {
+        "avg": 5,
+        "min": 2,
+        "max": 11
+      },
+      "cpu_prod_be": {
+        "avg": 1,
+        "min": 1,
+        "max": 1
+      },
+      "cpu_perf_be": {
+        "avg": 19.7,
+        "min": 0,
+        "max": 57
+      },
+      "rss_sql_mb": {
+        "avg": 524,
+        "min": 524,
+        "max": 524
+      },
+      "rss_prod_be_mb": {
+        "avg": 367,
+        "min": 367,
+        "max": 367
+      },
+      "rss_perf_be_mb": {
+        "avg": 235,
+        "min": 235,
+        "max": 235
+      },
+      "threads_perf_be": {
+        "avg": 22.3,
+        "min": 21,
+        "max": 23
+      },
+      "prod_ms": {
+        "avg": 1.2,
+        "min": 1.1,
+        "max": 1.3
+      },
+      "prod_errors": 0
+    }
+  },
+  "sql": {
+    "note": "Wait/counter là toàn instance SQL Server (gồm cả prod + DB khác) trong khoảng run; fileIo chỉ SuperApp-perf.",
+    "seconds": 88.6,
+    "lockWaits": {
+      "count": 8,
+      "ms": 55
+    },
+    "pageIoLatch": {
+      "count": 53,
+      "ms": 65
+    },
+    "writeLog": {
+      "count": 655,
+      "ms": 1518
+    },
+    "asyncNetworkIo": {
+      "count": 0,
+      "ms": 0
+    },
+    "cpuPressure": {
+      "count": 3467,
+      "ms": 164
+    },
+    "waitsTop": [
+      {
+        "type": "CXSYNC_PORT",
+        "count": 815,
+        "ms": 6690,
+        "signalMs": 130
+      },
+      {
+        "type": "CXPACKET",
+        "count": 10890,
+        "ms": 2611,
+        "signalMs": 693
+      },
+      {
+        "type": "WRITELOG",
+        "count": 655,
+        "ms": 1518,
+        "signalMs": 87
+      },
+      {
+        "type": "WAIT_ON_SYNC_STATISTICS_REFRESH",
+        "count": 35,
+        "ms": 1076,
+        "signalMs": 0
+      },
+      {
+        "type": "IO_COMPLETION",
+        "count": 805,
+        "ms": 642,
+        "signalMs": 5
+      },
+      {
+        "type": "CXCONSUMER",
+        "count": 405,
+        "ms": 382,
+        "signalMs": 227
+      },
+      {
+        "type": "LATCH_EX",
+        "count": 965,
+        "ms": 190,
+        "signalMs": 118
+      },
+      {
+        "type": "SOS_SCHEDULER_YIELD",
+        "count": 3467,
+        "ms": 164,
+        "signalMs": 151
+      },
+      {
+        "type": "CXSYNC_CONSUMER",
+        "count": 132,
+        "ms": 155,
+        "signalMs": 37
+      },
+      {
+        "type": "RESERVED_MEMORY_ALLOCATION_EXT",
+        "count": 89474,
+        "ms": 114,
+        "signalMs": 0
+      },
+      {
+        "type": "PREEMPTIVE_OS_WRITEFILE",
+        "count": 9,
+        "ms": 75,
+        "signalMs": 0
+      },
+      {
+        "type": "PREEMPTIVE_OS_QUERYREGISTRY",
+        "count": 115,
+        "ms": 60,
+        "signalMs": 0
+      },
+      {
+        "type": "PAGEIOLATCH_SH",
+        "count": 41,
+        "ms": 52,
+        "signalMs": 3
+      },
+      {
+        "type": "LCK_M_X",
+        "count": 7,
+        "ms": 49,
+        "signalMs": 5
+      },
+      {
+        "type": "PREEMPTIVE_OS_AUTHENTICATIONOPS",
+        "count": 10,
+        "ms": 32,
+        "signalMs": 0
+      }
+    ],
+    "counters": {
+      "Lazy writes/sec": 0,
+      "Page reads/sec": 7.24,
+      "Page writes/sec": 71.49,
+      "Page life expectancy": 815,
+      "Page life expectancy [000]": 815,
+      "User Connections": 4,
+      "Processes blocked": 0,
+      "Lock Requests/sec": 1044.22,
+      "Lock Timeouts/sec": 0.01,
+      "Number of Deadlocks/sec": 0,
+      "Lock Waits/sec": 0.03,
+      "Lock Wait Time (ms)": 0.72,
+      "Transactions/sec [SuperApp-perf]": 12.71,
+      "Log Flushes/sec [SuperApp-perf]": 7.33,
+      "Log Bytes Flushed/sec [SuperApp-perf]": 13401.72,
+      "Full Scans/sec": 19.58,
+      "Index Searches/sec": 3927.23,
+      "Batch Requests/sec": 37.83,
+      "SQL Compilations/sec": 0.98,
+      "SQL Re-Compilations/sec": 0.01,
+      "Memory Grants Pending": 0,
+      "Version Store Size (KB)": 216
+    },
+    "fileIo": {
+      "ROWS": {
+        "reads": 44,
+        "mbRead": 4.38,
+        "avgReadStallMs": 1.48,
+        "writes": 0,
+        "mbWritten": 0,
+        "avgWriteStallMs": 0
+      },
+      "LOG": {
+        "reads": 0,
+        "mbRead": 0,
+        "avgReadStallMs": 0,
+        "writes": 649,
+        "mbWritten": 1.13,
+        "avgWriteStallMs": 2.07
+      }
+    }
+  }
+}
