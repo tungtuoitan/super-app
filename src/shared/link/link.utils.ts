@@ -38,7 +38,7 @@ export const _openExternalUrl = (url?: string | null): boolean => {
 
 /**
  * GitHub URL pointing into a repo (task #1488): github.com/<owner>/<repo>, optionally /blob/... or
- * /tree/..., optionally #L5 / #L5-L10. Not other GitHub pages (commit, pull, issues…).
+ * /tree/... (optionally #L5 / #L5-L10), or /commit/<sha>. Not other GitHub pages (pull, issues…).
  */
 export const _isGithubRepoUrl = (url?: string | null): boolean => {
     if (!_isSafeUrl(url)) return false;
@@ -49,6 +49,7 @@ export const _isGithubRepoUrl = (url?: string | null): boolean => {
     const parts = u.pathname.split("/").filter(Boolean);
     if (parts.length < 2 || (linkConstants.githubNonRepoOwners as readonly string[]).includes(parts[0].toLowerCase())) return false;
     if (parts.length === 2) return true;
+    if (parts[2] === "commit") return parts.length === 4 && /^[0-9a-f]{7,40}$/i.test(parts[3]);
     return parts.length >= 4 && (parts[2] === "blob" || parts[2] === "tree");
 };
 
