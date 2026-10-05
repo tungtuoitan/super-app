@@ -167,3 +167,12 @@ export const formatMonthLabel = (monthStr: string): string => {
     const [year, month] = monthStr.split("-").map(Number);
     return `01/${month}/${year}`;
 };
+
+/**
+ * Task label with its DB id in front ("#1473 Title") so tasks can be referred to by id.
+ * New, unsaved tasks (id <= 0) show the title only.
+ */
+export function formatTaskLabel(task: { id?: number | null; title?: string | null }, fallback: string = "Untitled"): string {
+    const title = task.title || fallback;
+    return task.id && task.id > 0 ? `#${task.id} ${title}` : title;
+}

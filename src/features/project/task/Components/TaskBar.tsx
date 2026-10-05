@@ -4,6 +4,7 @@
  */
 
 import React, { useMemo, useCallback, useRef, useState, useEffect } from "react";
+import { formatTaskLabel } from "@/shared";
 import { CornerDownRight, Diamond } from "lucide-react";
 import type { Task } from "@/features/taskDetail";
 import { getTaskStatusColors, getTaskBarColors, isStatusNonDraggable, TIMELINE_ROW_HEIGHT, TIMELINE_TASK_BAR_HEIGHT, TIMELINE_MIN_BAR_WIDTH, TIMELINE_SUBTASK_BAR_HEIGHT } from "@/features/taskDetail";
@@ -169,7 +170,7 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
             <div className={cn("absolute flex items-center px-2 text-muted-foreground italic cursor-pointer hover:text-foreground", isSubtask ? "h-[20px] text-[10px]" : "h-[28px] text-xs")} style={{ top: 4, left: isSubtask ? 20 : 4 }} onClick={() => onTaskClick(task)}>
                 {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 flex-shrink-0" />}
                 {task.isMilestone && <Diamond className="h-2.5 w-2.5 mr-1 text-amber-500 fill-amber-500 flex-shrink-0" aria-label="Milestone" />}
-                <span className="truncate">{task.title || "Untitled"}</span>
+                <span className="truncate">{formatTaskLabel(task)}</span>
                 <span className="ml-1 text-muted-foreground/60">(no dates)</span>
             </div>
         );
@@ -182,7 +183,7 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
             <div className={cn("flex-1 flex items-center px-2 overflow-visible", !isDragDisabled && "cursor-grab active:cursor-grabbing")} onMouseDown={(e) => handleMouseDown(e, "move")}>
                 {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 flex-shrink-0" style={{ color: `${taskBarColors.text}b3` }} />}
                 {task.isMilestone && <Diamond className="h-2.5 w-2.5 mr-1 fill-current flex-shrink-0" style={{ color: "#f59e0b" }} aria-label="Milestone" />}
-                <span className={cn("font-medium whitespace-nowrap", isSubtask ? "text-[10px]" : "text-xs")} style={{ color: taskBarColors.text, textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>{task.title || "Untitled"}</span>
+                <span className={cn("font-medium whitespace-nowrap", isSubtask ? "text-[10px]" : "text-xs")} style={{ color: taskBarColors.text, textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>{formatTaskLabel(task)}</span>
             </div>
             {!isDragDisabled && <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20" onMouseDown={(e) => handleMouseDown(e, "resize-right")} />}
         </div>

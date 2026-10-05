@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { ListTodo, Columns, GanttChartSquare, CalendarRange, GitBranch, RefreshCw } from "lucide-react";
+import { ListTodo, Columns, GanttChartSquare, CalendarRange, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea, ScrollBar } from "@/shared";
 import { MultiProjectTaskList } from "./MultiProjectTaskList";
@@ -26,7 +26,7 @@ const TABS: TabConfig[] = [
     { id: "taskList", label: "ALL TASKS", icon: <ListTodo className="h-4 w-4" /> },
     { id: "kanban", label: "KANBAN", icon: <Columns className="h-4 w-4" /> },
     { id: "timeline", label: "TASK TIMELINE", icon: <GanttChartSquare className="h-4 w-4" /> },
-    { id: "taskFlow", label: "TASK FLOW", icon: <GitBranch className="h-4 w-4" /> },
+    // TASK FLOW hidden (task #1473) — view code kept; a saved "taskFlow" inner tab falls back to ALL TASKS.
 ];
 
 /**

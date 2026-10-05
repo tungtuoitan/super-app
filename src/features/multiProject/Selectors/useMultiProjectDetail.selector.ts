@@ -19,8 +19,9 @@ export const useMultiProjectDetailSelector = () => {
     const currentTab = getActiveTab();
 
     // Active inner tab
-    const activeTab = useMemo(() => {
-        return (currentTab?.metadata?.innerTab as TabType) || "taskList";
+    const activeTab = useMemo((): TabType => {
+        const inner = currentTab?.metadata?.innerTab as TabType | undefined;
+        return inner && inner !== "taskFlow" ? inner : "taskList";
     }, [currentTab?.metadata?.innerTab]);
 
     // All available projects (not deleted)

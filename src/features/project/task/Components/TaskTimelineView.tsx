@@ -14,7 +14,7 @@ import { ScrollArea } from "@/shared";
 import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { useTaskTabHelper } from "@/features/taskDetail";
-import { useConsoleHelper } from "@/shared";
+import { useConsoleHelper, formatTaskLabel } from "@/shared";
 import { cn } from "@/lib/utils";
 import { useTaskTimelineSelector } from "../Selectors/TaskTimelineSelector";
 import { useTaskTimelineHelper } from "../hooks/taskTimeline/useTaskTimeline.helper";
@@ -92,7 +92,7 @@ function TaskTimelineViewInner() {
                                 >
                                     {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground mr-1 flex-shrink-0" />}
                                     <span className={cn("truncate", isSubtask ? "text-xs" : "text-sm")}>
-                                        {task.title || "Untitled"}
+                                        {formatTaskLabel(task)}
                                     </span>
                                 </div>
                             );
