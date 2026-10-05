@@ -115,6 +115,15 @@ export { fileService } from "./file/file.service";
 export { _isImageFile, _blobToBase64 } from "./file/file.utils";
 export type { UploadContext } from "./file/file.types";
 
+// ── link (task #1477) ────────────────────────────────────────────────────
+export { linkService } from "./link/link.service";
+export { linkConstants } from "./link/link.constants";
+export { _isLinkMime, _isSafeUrl, _getLinkKind, _openExternalUrl, _normalizeUrl, _linkDefaultName } from "./link/link.utils";
+export { useLinkDialogHelper } from "./link/useLinkDialog.helper";
+export { LinkDialog } from "./link/LinkDialog";
+export { LinkKindIcon } from "./link/LinkKindIcon";
+export type { LinkDTO, LinkKind, LinkFormValues, LinkDialogOptions, AddLinkRequest, UpdateFileRequest } from "./link/link.types";
+
 // ── flow ──────────────────────────────────────────────────────────────────
 export { flowService } from "./flow/flow.service";
 export type { FlowEdgeDTO, FlowNodePositionDTO } from "./flow/flow.types";

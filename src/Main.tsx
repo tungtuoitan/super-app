@@ -17,6 +17,7 @@ import { MultiTimelineProvider } from "@/features/multiProject";
 import { WikiProvider } from "@/features/Wiki/";
 import { MenuContext } from "@/shared";
 import { ConfirmationPopoverProvider } from "@/shared";
+import { LinkDialog } from "@/shared";
 import MainNav from "./shell/components/main/MainNav";
 import { NavProvider } from "@/contexts/NavigationContext";
 
@@ -97,6 +98,7 @@ export function Main() {
                                                             </AuthStoreProvider>
                                                         </AuthCallbackProvider>
                                                         <ConfirmationPopoverContainer />
+                                                        <LinkDialog />
                                                     </ConfirmationPopoverProvider>
                                                 </MenuContextStoreProvider>
                                             </CommandPaletteProvider>
