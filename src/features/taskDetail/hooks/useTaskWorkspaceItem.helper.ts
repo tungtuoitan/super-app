@@ -5,7 +5,7 @@
  */
 
 
-import { standardRegistryConstants, useAuthStore, _isLinkMime, _openExternalUrl } from "@/shared";
+import { standardRegistryConstants, useAuthStore, useConsoleHelper, linkService, parseApiError, _isLinkMime, _openExternalUrl } from "@/shared";
 import { shellConstants } from "@/shell";
 import type { Note } from "@/features/note";
 import { type Task } from "../types/task.types";
@@ -19,7 +19,8 @@ import { useEditorTabBarHelper } from "@/shell";
 
 export const useTaskWorkspaceItemHelper = () => {
     const { $user } = useAuthStore();
-    const { openTabs, openTab } = useEditorTabBarHelper();
+    const _console = useConsoleHelper();
+    const { openTabs, openTab, getActiveTab, patchTab } = useEditorTabBarHelper();
     const { setShouldFocusNoteName } = useNoteDetailStore();
     const { setFolderItems, setIsLoadingFolderItems } = useTaskDetailStore();
 
@@ -41,7 +42,7 @@ export const useTaskWorkspaceItemHelper = () => {
                 return;
             }
 
-            // Links are listed in the task's Links section, not here (task #1477)
+            // Links come from GET /api/task/{id}/links (edit/remove need their LinkDTO) — task #1477/#1487
             const children = result.object.flatData.filter(
                 (item) =>
                     item.parentId === task.folderWorkspaceItemId &&
@@ -57,6 +58,7 @@ export const useTaskWorkspaceItemHelper = () => {
                 name: item.data.name,
                 noteData: item.entityType === 3 ? (item as WorkspaceNoteItem).data : undefined,
                 url: item.entityType === 4 ? (item as WorkspaceFileItem).data.url : undefined,
+                createdAt: item.createdAt,
             })));
         } catch {
             setFolderItems([]);
@@ -90,12 +92,40 @@ export const useTaskWorkspaceItemHelper = () => {
         openTab(note, shellConstants.vscode.tab.tabTypes.note);
     }
 
+    /** The BE may have created the task folder — keep the open task tab in sync (folder items, later saves). */
+    const syncTaskFolderId = (task: Task, folderId?: number | null) => {
+        if (task.folderWorkspaceItemId || !folderId) return;
+        const tab = getActiveTab();
+        if (!tab || (tab.data as Task)?.id !== task.id) return;
+        patchTab(tab.id, (cur) => ({
+            data: { ...(cur.data as Task), folderWorkspaceItemId: folderId },
+            data0: cur.data0 ? { ...(cur.data0 as Task), folderWorkspaceItemId: folderId } : cur.data0,
+        }));
+    }
+
     /**
      * Create a new note for a task.
-     * Opens a bare note tab. On save, upsertOrchestraitor will place the note
-     * inside the task's workspace folder via parentId.
+     * Opens a bare note tab. On save, addNoteToTaskFolder places the note inside the task's
+     * workspace folder — the folder is created first when the task has none (task #1487).
      */
-    const createTaskNote = (task: Task, workspaceId?: number | null) => {
+    const createTaskNote = async (task: Task, workspaceId?: number | null) => {
+        let folderWorkspaceItemId = task.folderWorkspaceItemId ?? null;
+        if (!folderWorkspaceItemId) {
+            try {
+                const res = await linkService._getOrCreateTaskFolder(task.id);
+                folderWorkspaceItemId = res.object?.folderWorkspaceItemId ?? null;
+                workspaceId = workspaceId ?? res.object?.workspaceId;
+            } catch (error) {
+                _console.error((await parseApiError(error)) || "Could not create the task folder");
+                return;
+            }
+            if (!folderWorkspaceItemId) {
+                _console.error("Could not create the task folder");
+                return;
+            }
+            syncTaskFolderId(task, folderWorkspaceItemId);
+        }
+
         const existingIds = openTabs
             .filter((t) => t.type === shellConstants.vscode.tab.tabTypes.note)
             .map((t) => (t.data as Note).id);
@@ -121,9 +151,9 @@ export const useTaskWorkspaceItemHelper = () => {
             metadata: {
                 taskId: task.id,
                 taskTitle: task.title,
-                taskSnapshot: task,
-                // folderWorkspaceItemId tells upsertOrchestraitor where to place the note
-                folderWorkspaceItemId: task.folderWorkspaceItemId ?? null,
+                taskSnapshot: { ...task, folderWorkspaceItemId },
+                // folderWorkspaceItemId tells addNoteToTaskFolder where to place the note
+                folderWorkspaceItemId,
                 // workspaceId lets addNoteToTaskFolder place the note without re-fetching project
                 workspaceId: workspaceId ?? null,
             },
@@ -134,6 +164,7 @@ export const useTaskWorkspaceItemHelper = () => {
         loadFolderItems,
         openFolderItem,
         createTaskNote,
+        syncTaskFolderId,
     };
 };
 

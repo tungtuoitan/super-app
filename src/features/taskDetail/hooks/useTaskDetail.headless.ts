@@ -39,9 +39,10 @@ export function useTaskDetailHeadless() {
         }
     }, [selectedTask?.id]);
 
+    // Also runs for a task without folder → clears the previous task's items (Notes & Links is always shown)
     useEffect(() => {
-        if (selectedTask?.id && selectedTask.id > 0 && selectedTask.folderWorkspaceItemId && currentProject?.workspaceId) {
-            loadFolderItems(selectedTask, currentProject.workspaceId);
+        if (selectedTask?.id && selectedTask.id > 0) {
+            loadFolderItems(selectedTask, currentProject?.workspaceId ?? 0);
         }
     }, [selectedTask?.id, selectedTask?.folderWorkspaceItemId, currentProject?.workspaceId]);
 

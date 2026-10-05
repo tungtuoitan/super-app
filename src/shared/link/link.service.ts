@@ -4,7 +4,7 @@
 import { config } from "config/app.config";
 import { apiFetch } from "../fetch/apiClient";
 import type { ResultOptions } from "../fetch/resultOptions.types";
-import type { AddLinkRequest, LinkDTO, UpdateFileRequest } from "./link.types";
+import type { AddLinkRequest, LinkDTO, TaskFolderRef, UpdateFileRequest } from "./link.types";
 
 const _json = async <T>(res: Response): Promise<T> => {
     if (res.ok) return (await res.json()) as T;
@@ -23,6 +23,10 @@ const _addTaskLink = async (taskId: number, body: AddLinkRequest): Promise<Resul
 
 const _removeTaskLink = async (taskId: number, workspaceItemId: number): Promise<ResultOptions<unknown>> =>
     _json(await apiFetch(`${config.api.baseURL}/api/task/${taskId}/links/${workspaceItemId}`, { method: "DELETE" }));
+
+/** Task folder (created by the BE when missing) — a new task note is placed there (task #1487). */
+const _getOrCreateTaskFolder = async (taskId: number): Promise<ResultOptions<TaskFolderRef>> =>
+    _json(await apiFetch(`${config.api.baseURL}/api/task/${taskId}/folder`, { method: "POST" }));
 
 const _getProjectLinks = async (projectId: number): Promise<ResultOptions<LinkDTO>> =>
     _json(await apiFetch(`${config.api.baseURL}/api/project/${projectId}/links`));
@@ -48,6 +52,7 @@ export const linkService = {
     _getTaskLinks,
     _addTaskLink,
     _removeTaskLink,
+    _getOrCreateTaskFolder,
     _getProjectLinks,
     _addProjectLink,
     _removeProjectLink,

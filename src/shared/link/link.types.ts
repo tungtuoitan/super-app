@@ -18,6 +18,12 @@ export interface LinkDTO {
     createdAt?: string | null;
 }
 
+/** POST /api/task/{id}/folder */
+export interface TaskFolderRef {
+    folderWorkspaceItemId: number;
+    workspaceId: number;
+}
+
 export interface AddLinkRequest {
     url?: string;
     name?: string;

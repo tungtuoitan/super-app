@@ -17,17 +17,16 @@ import {
     GenericAutoComplete,
 } from "@/shared";
 import { CardContent } from "@/shared";
-import { FileText, AlertCircle, Link2, X, Loader2, Plus, FilePlus, FileIcon, Diamond } from "lucide-react";
+import { AlertCircle, Link2, X, Loader2, Plus, Diamond } from "lucide-react";
 import { Alert, AlertDescription, KeywordStaticIcon, Checkbox } from "@/shared";
 import { TaskDetailSection } from "./TaskDetailSection";
-import { TaskLinks } from "./small/TaskLinks";
+import { TaskNotesLinks } from "./small/TaskNotesLinks";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskDetailKeywordSelector } from "../Selectors/TaskDetailKeywordSelector";
 import { useTaskDetailFormSelector } from "../Selectors/TaskDetailFormSelector";
 import { useTaskDetailHelper } from "../hooks/useTaskDetail.helper";
 import { formatDate } from "../utils/TaskDetail.utils";
 import { useTaskDetailFormHelper } from "../hooks/useTaskDetailForm.helper";
-import { useTaskWorkspaceItemHelper } from "../hooks/useTaskWorkspaceItem.helper";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 
 /**
@@ -59,8 +58,6 @@ export function TaskDetailContent() {
     const {
         linkedKeywords,
         isLoadingLinkedKeywords,
-        folderItems,
-        isLoadingFolderItems,
         projectOptions,
         isLoadingProjects,
         parentTaskOptions,
@@ -82,8 +79,6 @@ export function TaskDetailContent() {
         handleNavigateKeyword,
         handleUnlinkKeyword,
     } = useTaskDetailHelper();
-
-    const { openFolderItem, createTaskNote } = useTaskWorkspaceItemHelper();
 
     // ── Early return ──────────────────────────────────────────────────────────
     if (!selectedTask) {
@@ -220,49 +215,8 @@ export function TaskDetailContent() {
                             <span className="text-sm font-medium">Milestone</span>
                         </label>
 
-                        {/* Inner List */}
-                        {selectedTask.id > 0 && selectedTask.folderWorkspaceItemId && (
-                            <div className="space-y-1">
-                                <label className="text-sm font-medium flex items-center gap-2">
-                                    <FileText className="h-4 w-4" />
-                                    Inner List
-                                    {isLoadingFolderItems && <Loader2 className="h-3 w-3 animate-spin" />}
-                                    {!isDisabled && (
-                                        <button
-                                            onClick={() => createTaskNote(selectedTask, currentProject?.workspaceId)}
-                                            className="ml-auto p-0.5 rounded hover:bg-muted transition-colors"
-                                            title="Create note"
-                                        >
-                                            <FilePlus className="h-3.5 w-3.5" />
-                                        </button>
-                                    )}
-                                </label>
-                                {folderItems.length > 0 ? (
-                                    <div className="space-y-1 max-h-[160px] overflow-y-auto">
-                                        {folderItems.map((item) => (
-                                            <div
-                                                key={item.workspaceItemId}
-                                                className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm bg-muted/50 hover:bg-muted cursor-pointer"
-                                                onClick={() => openFolderItem(item)}
-                                                title={item.name}
-                                            >
-                                                <FileIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                                                <span className="flex-1 truncate hover:text-primary hover:underline text-left">
-                                                    {item.name.length > 26 ? item.name.slice(0, 26) + "..." : item.name}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    !isLoadingFolderItems && (
-                                        <p className="text-xs text-muted-foreground">No notes yet</p>
-                                    )
-                                )}
-                            </div>
-                        )}
-
-                        {/* Links (URL / GitHub / Drive) — task #1477 */}
-                        <TaskLinks />
+                        {/* Notes & Links — task folder notes + links (task #1487) */}
+                        <TaskNotesLinks />
 
                         {/* Linked Keywords */}
                         {selectedTask.id > 0 && (
@@ -273,15 +227,6 @@ export function TaskDetailContent() {
                                     {isLoadingLinkedKeywords && <Loader2 className="h-3 w-3 animate-spin" />}
                                     {!isDisabled && (
                                         <div className="ml-auto flex items-center gap-1">
-                                            {!selectedTask.folderWorkspaceItemId && (
-                                                <button
-                                                    onClick={() => createTaskNote(selectedTask, currentProject?.workspaceId)}
-                                                    className="p-0.5 rounded hover:bg-muted transition-colors"
-                                                    title="Create note"
-                                                >
-                                                    <FilePlus className="h-3.5 w-3.5" />
-                                                </button>
-                                            )}
                                             <button
                                                 onClick={handleOpenLinkPalette}
                                                 className="p-0.5 rounded hover:bg-muted transition-colors"

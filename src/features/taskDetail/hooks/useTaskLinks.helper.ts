@@ -1,15 +1,16 @@
 /**
- * Task Links Helper (task #1477)
- * Functions only — links of a task (URL / GitHub / Drive, or an item of the project's workspace).
+ * Task Links Helper (task #1477, #1487)
+ * Functions only — links of a task (URL / GitHub / Drive, or an item of the project's workspace)
+ * and opening a row of the "Notes & Links" section.
  * A new link is created by the BE inside the task folder (folder created if missing) and tied to
  * the task through pro.task_workspace_item. State lives in useTaskDetailStore.
  */
 import { useAuthStore, useConsoleHelper, useConfirmationPopoverHelper, useLinkDialogHelper, linkService, parseApiError, _openExternalUrl } from "@/shared";
 import type { LinkDTO } from "@/shared";
-import { useEditorTabBarHelper } from "@/shell";
 import { workspaceService } from "@/features/workspace";
 import type { WorkspaceNoteItem } from "@/features/workspace";
 import type { Task } from "../types/task.types";
+import type { TaskNotesLinksItem } from "../types/taskDetail.types";
 import { useTaskDetailStore } from "../store/useTaskDetail.store";
 import { useTaskWorkspaceItemHelper } from "./useTaskWorkspaceItem.helper";
 
@@ -18,9 +19,8 @@ export const useTaskLinksHelper = () => {
     const _console = useConsoleHelper();
     const { showConfirmation } = useConfirmationPopoverHelper();
     const { openLinkDialog } = useLinkDialogHelper();
-    const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { setTaskLinks, setIsLoadingTaskLinks } = useTaskDetailStore();
-    const { openFolderItem } = useTaskWorkspaceItemHelper();
+    const { openFolderItem, syncTaskFolderId } = useTaskWorkspaceItemHelper();
 
     const loadTaskLinks = async (taskId: number) => {
         if (!taskId || taskId <= 0) {
@@ -38,18 +38,6 @@ export const useTaskLinksHelper = () => {
         }
     };
 
-    /** The BE may have created the task folder — keep the open tab in sync (Inner List, later saves). */
-    const _syncFolderId = (task: Task, added?: LinkDTO) => {
-        if (task.folderWorkspaceItemId || !added?.parentId) return;
-        const tab = getActiveTab();
-        if (!tab || (tab.data as Task)?.id !== task.id) return;
-        const folderId = added.parentId;
-        patchTab(tab.id, (cur) => ({
-            data: { ...(cur.data as Task), folderWorkspaceItemId: folderId },
-            data0: cur.data0 ? { ...(cur.data0 as Task), folderWorkspaceItemId: folderId } : cur.data0,
-        }));
-    };
-
     const addTaskLink = (task: Task) => {
         openLinkDialog({
             title: "Add link to task",
@@ -61,7 +49,7 @@ export const useTaskLinksHelper = () => {
                 } catch (error) {
                     throw new Error((await parseApiError(error)) || "Could not add the link");
                 }
-                _syncFolderId(task, res.data?.[0]);
+                syncTaskFolderId(task, res.data?.[0]?.parentId);
                 _console.success("Link added");
                 await loadTaskLinks(task.id);
             },
@@ -85,12 +73,14 @@ export const useTaskLinksHelper = () => {
     };
 
     const removeTaskLink = (event: React.MouseEvent, task: Task, link: LinkDTO) => {
+        // Same rule as the BE: only a link sitting in the task folder belongs to the task (soft-deleted)
+        const isOwned = link.isLink && link.parentId === task.folderWorkspaceItemId;
         showConfirmation({
             title: link.name,
-            subtitle: link.isLink
+            subtitle: isOwned
                 ? "Remove this link from the task? It is also deleted from the task folder (restorable from the workspace)."
                 : "Unlink this item from the task? The item itself stays in the workspace.",
-            confirmText: link.isLink ? "Remove" : "Unlink",
+            confirmText: isOwned ? "Remove" : "Unlink",
             cancelText: "Cancel",
             confirmColor: "destructive",
             cancelColor: "outline",
@@ -98,7 +88,7 @@ export const useTaskLinksHelper = () => {
             onConfirm: async () => {
                 try {
                     await linkService._removeTaskLink(task.id, link.workspaceItemId);
-                    _console.success(link.isLink ? "Link removed" : "Item unlinked");
+                    _console.success(isOwned ? "Link removed" : "Item unlinked");
                 } catch (error) {
                     _console.error((await parseApiError(error)) || "Could not remove the link");
                 }
@@ -124,5 +114,14 @@ export const useTaskLinksHelper = () => {
         }
     };
 
-    return { loadTaskLinks, addTaskLink, editTaskLink, removeTaskLink, openTaskLink };
+    /** Row of "Notes & Links": a task-folder item opens from the tree data, anything else through its link. */
+    const openNotesLinksItem = (item: TaskNotesLinksItem) => {
+        if (item.folderItem) {
+            openFolderItem(item.folderItem);
+            return;
+        }
+        if (item.link) openTaskLink(item.link);
+    };
+
+    return { loadTaskLinks, addTaskLink, editTaskLink, removeTaskLink, openNotesLinksItem };
 };
