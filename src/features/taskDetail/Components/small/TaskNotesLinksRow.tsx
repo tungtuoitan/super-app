@@ -2,8 +2,8 @@
  * TaskNotesLinksRow — one row of "Notes & Links" (task #1487).
  * Icon: note / link (by host) / file / folder. Link → edit + remove; item linked from elsewhere → unlink.
  */
-import { X, Pencil, FileText, FileIcon, Folder } from "lucide-react";
-import { LinkKindIcon } from "@/shared";
+import { X, Pencil, FileText, FileIcon, Folder, Laptop } from "lucide-react";
+import { LinkKindIcon, _isGithubRepoUrl, _openLocalUrl } from "@/shared";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskNotesLinksSelector } from "../../Selectors/TaskNotesLinksSelector";
 import { useTaskLinksHelper } from "../../hooks/useTaskLinks.helper";
@@ -42,6 +42,18 @@ export function TaskNotesLinksRow({ workspaceItemId }: { workspaceItemId: number
                 >
                     linked
                 </span>
+            )}
+            {_isGithubRepoUrl(url) && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        _openLocalUrl(url);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-background transition-opacity"
+                    title="Open local (VS Code)"
+                >
+                    <Laptop className="h-3 w-3" />
+                </button>
             )}
             {!isDisabled && link?.isLink && (
                 <button

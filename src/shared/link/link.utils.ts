@@ -36,6 +36,29 @@ export const _openExternalUrl = (url?: string | null): boolean => {
     return true;
 };
 
+/**
+ * GitHub URL pointing into a repo (task #1488): github.com/<owner>/<repo>, optionally /blob/... or
+ * /tree/..., optionally #L5 / #L5-L10. Not other GitHub pages (commit, pull, issues…).
+ */
+export const _isGithubRepoUrl = (url?: string | null): boolean => {
+    if (!_isSafeUrl(url)) return false;
+    const u = new URL(url!.trim());
+    const host = u.hostname.toLowerCase();
+    if (host !== "github.com" && host !== "www.github.com") return false;
+    if (u.hash && !/^#L\d+(-L\d+)?$/.test(u.hash)) return false;
+    const parts = u.pathname.split("/").filter(Boolean);
+    if (parts.length < 2 || (linkConstants.githubNonRepoOwners as readonly string[]).includes(parts[0].toLowerCase())) return false;
+    if (parts.length === 2) return true;
+    return parts.length >= 4 && (parts[2] === "blob" || parts[2] === "tree");
+};
+
+/** Hand a GitHub repo URL to the local "tungroot://" handler (VS Code). Unregistered protocol → browser does nothing. */
+export const _openLocalUrl = (url?: string | null): boolean => {
+    if (!_isGithubRepoUrl(url)) return false;
+    window.location.href = linkConstants.localOpenPrefix + encodeURIComponent(url!.trim());
+    return true;
+};
+
 export const _validateLinkForm = (name: string, url: string, showUrl: boolean): { name?: string; url?: string } => {
     const errors: { name?: string; url?: string } = {};
     if (name.trim().length > linkConstants.maxNameLength) errors.name = `Max ${linkConstants.maxNameLength} characters`;

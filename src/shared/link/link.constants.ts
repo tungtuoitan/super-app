@@ -8,6 +8,10 @@ export const linkConstants = {
     projectFolderName: "Links",
     maxUrlLength: 1000,
     maxNameLength: 255,
+    /** Custom protocol handled by a script on Tung's machine → opens the repo/file in VS Code (task #1488). */
+    localOpenPrefix: "tungroot://open?url=",
+    /** First path segments of github.com that are site pages, not an owner (/orgs/x, /settings/tokens…). */
+    githubNonRepoOwners: ["orgs", "settings", "users", "apps", "marketplace", "topics", "sponsors", "features", "explore", "notifications", "login"],
     kinds: {
         github: "github",
         drive: "drive",

@@ -2,8 +2,8 @@
  * ProjectLinks — "Links" of a project (task #1477): GitHub / Drive / web links kept in the
  * "Links" folder at the root of the project's workspace.
  */
-import { Loader2, Plus, X, Pencil } from "lucide-react";
-import { LinkKindIcon } from "@/shared";
+import { Loader2, Plus, X, Pencil, Laptop } from "lucide-react";
+import { LinkKindIcon, _isGithubRepoUrl, _openLocalUrl } from "@/shared";
 import { useProjectDetailSelector } from "../../Selectors/useProjectDetail.selector";
 import { useProjectLinksStore } from "../../store/useProjectLinks.store";
 import { useProjectLinksHelper } from "../../hooks/useProjectLinks.helper";
@@ -45,6 +45,18 @@ export function ProjectLinks() {
                         >
                             <LinkKindIcon url={link.url} className="h-3.5 w-3.5 text-sky-500 shrink-0" />
                             <span className="flex-1 truncate hover:text-primary hover:underline">{link.name}</span>
+                            {_isGithubRepoUrl(link.url) && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        _openLocalUrl(link.url);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-background transition-opacity"
+                                    title="Open local (VS Code)"
+                                >
+                                    <Laptop className="h-3 w-3" />
+                                </button>
+                            )}
                             {canEdit && (
                                 <>
                                     <button

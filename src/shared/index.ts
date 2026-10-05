@@ -118,7 +118,7 @@ export type { UploadContext } from "./file/file.types";
 // ── link (task #1477) ────────────────────────────────────────────────────
 export { linkService } from "./link/link.service";
 export { linkConstants } from "./link/link.constants";
-export { _isLinkMime, _isSafeUrl, _getLinkKind, _openExternalUrl, _normalizeUrl, _linkDefaultName } from "./link/link.utils";
+export { _isLinkMime, _isSafeUrl, _getLinkKind, _openExternalUrl, _isGithubRepoUrl, _openLocalUrl, _normalizeUrl, _linkDefaultName } from "./link/link.utils";
 export { useLinkDialogHelper } from "./link/useLinkDialog.helper";
 export { LinkDialog } from "./link/LinkDialog";
 export { LinkKindIcon } from "./link/LinkKindIcon";
