@@ -9,6 +9,8 @@ export const workspaceConstants = {
         k: "k",
         note: "note",
         file: "file",
+        // Link = file item with mimeType text/x-uri (task #1477); only used as a menu action type
+        link: "link",
         workspace: "workspace",
         // @deprecated — use node
         folder: "node",

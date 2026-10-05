@@ -11,6 +11,7 @@ import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
 import { WorkspaceFileItem } from "@/features/workspace/types/workspace-v2.types";
 import { constants } from "@/shared";
 import { useMenuContextHelper } from "@/shared";
+import { LinkKindIcon, _isLinkMime, _openExternalUrl } from "@/shared";
 import { StatusDot } from "./StatusDot";
 import { HighlightText } from "./HighlightText";
 
@@ -64,6 +65,7 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
     const entityId = fileItem.entityId; // files.id (for API calls, context menu)
     const isSelected = isFolderSelected(workspaceItemId); // Use workspace_items.id for selection
     const FileIcon = getFileIcon(fileItem.data.extension);
+    const isLink = _isLinkMime(fileItem.data.mimeType);
 
     // Check if this node is being dragged
     const isDragging = node.state.isDragging;
@@ -146,7 +148,8 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
             setLastSelectedItemId(workspaceItemId);
             node.select();
 
-            // TODO: Open file preview or download
+            // Link / uploaded file: open its url in a new tab (task #1477)
+            if (!_ITEMSTATUS.isDirectlyDeleted) _openExternalUrl(fileItem.data.url);
         }
     };
 
@@ -199,7 +202,11 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
 
                 {/* File Icon */}
                 <div className="mr-2 flex items-center">
-                    <FileIcon className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-gray-400"}`} />
+                    {isLink ? (
+                        <LinkKindIcon url={fileItem.data.url} className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-sky-400"}`} />
+                    ) : (
+                        <FileIcon className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-gray-400"}`} />
+                    )}
                 </div>
 
                 {/* File Info */}
@@ -209,11 +216,11 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
                         highlight={treeType === "workspaceTree" ? searchQuery : ""}
                         className={`text-sm truncate ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"} ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}
                     />
-                    {fileItem.data.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.data.fileSizeFormatted}</span>}
+                    {!isLink && fileItem.data.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.data.fileSizeFormatted}</span>}
                     <StatusDot
                         isUnsaved={isUnsaved}
                         isDuplicate={isDuplicate}
-                        itemType="File"
+                        itemType={isLink ? "Link" : "File"}
                         itemName={fileItem.data.name}
                         targetWorkspaceName={targetWorkspace?.name}
                     />

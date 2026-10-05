@@ -6,17 +6,20 @@ import {
     Edit as EditIcon,
     Trash2 as DeleteIcon,
     RotateCcw as RestoreIcon,
+    Link2 as LinkIcon,
 } from "lucide-react";
 import { constants } from "@/shared";
 import { useWorkspaceFolderMenuHelper } from "../../hooks/useWorkspaceFolderMenu.helper";
 import { useWorkspaceStore } from "../../store/workspace.store";
 import { useMenuContext } from "@/shared";
 import { useTreeStatusHelper } from "../../hooks/useTreeStatusHelper";
+import { useWorkspaceLinkMenuHelper } from "../../hooks/useWorkspaceLinkMenu.helper";
 
 export function WorkspaceFolderNodeMenu() {
     const { contextData } = useMenuContext();
     const { selectedItemIds } = useWorkspaceStore();
     const { createFolder, editFolder, dhr_items, createNewNote } = useWorkspaceFolderMenuHelper();
+    const { createLink } = useWorkspaceLinkMenuHelper();
     const _TREESTATUS = useTreeStatusHelper();
 
     const entityId = contextData?.entityId;
@@ -26,6 +29,7 @@ export function WorkspaceFolderNodeMenu() {
     const addMenuItems = [
         { type: workspaceConstants.itemTypes.folder, icon: AddIcon, label: "New Folder", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
         { type: workspaceConstants.itemTypes.note, icon: AddIcon, label: "New Note", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
+        { type: workspaceConstants.itemTypes.link, icon: LinkIcon, label: "New Link", disabled: _ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted || _TREESTATUS.selectedItemStatuses.isMultiple },
         { type: workspaceConstants.itemTypes.file, icon: AddIcon, label: "New File", disabled: true },
     ];
 
@@ -38,6 +42,8 @@ export function WorkspaceFolderNodeMenu() {
                         createNewNote(contextData);
                     } else if (item.type === workspaceConstants.itemTypes.folder) {
                         createFolder(item.type, contextData);
+                    } else if (item.type === workspaceConstants.itemTypes.link) {
+                        createLink(contextData);
                     }
                 };
                 return (

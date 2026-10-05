@@ -4,7 +4,7 @@ import { useConfirmationPopoverHelper, useMenuContextHelper } from "@/shared";
 import { getWorkspaceConfirmMessage } from "../utils/confirmMessage";
 import { noteService } from "@/features/note";
 import { useAuthStore } from "@/shared";
-import { parseApiError, isUnauthorizedError } from "@/shared";
+import { parseApiError, isUnauthorizedError, _isLinkMime } from "@/shared";
 import { useMenuContext } from "@/shared";
 import { workspaceService } from "../service/workspace.service";
 import { useWorkspaceLoader } from "./useWorkspace.helper";
@@ -145,7 +145,7 @@ export const useWorkspaceChildMenuHelper = () => {
 
         const confirmMsg = getWorkspaceConfirmMessage({
             type: isHardDelete ? "hard-delete" : "soft-delete",
-            entityType: isFile ? "file" : "note",
+            entityType: isFile ? (_isLinkMime(contextData.data?.mimeType) ? "link" : "file") : "note",
             count: selectedCount,
             isMultiple: isMultipleSelected,
             entityName,

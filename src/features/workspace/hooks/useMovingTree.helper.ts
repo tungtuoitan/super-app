@@ -10,7 +10,7 @@ import { GenericAutoComplete, type IAutoCompleteOptions } from "@/shared";
 import { useDragDropManager } from "react-dnd";
 import { isFolder as isFolderV2, WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import { treeMiniHelper, TreeFolder } from "../utils/workspace.tree.utils";
-import {useConsoleHelper} from "@/shared";
+import {useConsoleHelper, _isLinkMime} from "@/shared";
 import { useWorkspaceLoader } from "./useWorkspace.helper";
 import {SPECIAL_IDS} from "../utils/temp-id.utils";
 
@@ -201,7 +201,7 @@ export const useMovingTreeHelper = () => {
 
                 // Show detailed message for each duplicate
                 duplicateItems.forEach(({ sourceItem, targetItem }) => {
-                    const itemTypeName = sourceItem.entityType === 1 ? "Note" : sourceItem.entityType === 2 ? "Folder" : "File";
+                    const itemTypeName = sourceItem.entityType === 3 ? "Note" : sourceItem.entityType === 2 ? "Folder" : _isLinkMime((sourceItem.data as any)?.mimeType) ? "Link" : "File";
                     const itemName = sourceItem.data.name;
                     _console.error(`${itemTypeName}: ${targetWorkspaceName} is already have ${itemTypeName}: ${itemName}`);
                 });

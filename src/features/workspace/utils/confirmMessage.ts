@@ -5,7 +5,7 @@
 
 import { type ConfirmMessage, type DeleteType } from "@/shared";
 
-export type WorkspaceEntityType = "folder" | "note" | "file" | "workspace";
+export type WorkspaceEntityType = "folder" | "note" | "file" | "link" | "workspace";
 
 export interface WorkspaceConfirmMessageParams {
     type: DeleteType;
@@ -20,12 +20,12 @@ export const getWorkspaceConfirmMessage = (params: WorkspaceConfirmMessageParams
     const { type, entityType, count, isMultiple, entityName, childCount = 0 } = params;
 
     if (type === "soft-delete") {
-        if (entityType === "note" || entityType === "file") {
+        if (entityType === "note" || entityType === "file" || entityType === "link") {
             if (isMultiple) {
-                const label = entityType === "file" ? "files" : "notes";
+                const label = entityType === "note" ? "notes" : `${entityType}s`;
                 return { title: `Delete ${count} ${label}?`, subtitle: `Are you sure you want to delete ${count} selected ${label}?` };
             } else {
-                const label = entityType === "file" ? "file" : "note";
+                const label = entityType;
                 return entityName
                     ? { title: `Delete "${entityName}"?`, subtitle: `This ${label} will be moved to trash.` }
                     : { title: `Delete this ${label}?`, subtitle: `Are you sure you want to delete this ${label}?` };
@@ -44,13 +44,13 @@ export const getWorkspaceConfirmMessage = (params: WorkspaceConfirmMessageParams
             }
         }
     } else {
-        if (entityType === "note" || entityType === "file") {
+        if (entityType === "note" || entityType === "file" || entityType === "link") {
             if (isMultiple) {
-                const label = entityType === "file" ? "files" : "notes";
-                const content = entityType === "file" ? "files" : "note content";
+                const label = entityType === "note" ? "notes" : `${entityType}s`;
+                const content = entityType === "note" ? "note content" : `${entityType}s`;
                 return { title: `⚠️ Permanently delete ${count} ${label}?`, subtitle: `This action CANNOT be undone. All ${content} will be LOST FOREVER.` };
             } else {
-                const content = entityType === "file" ? "file" : "note content";
+                const content = entityType === "note" ? "note content" : entityType;
                 return entityName
                     ? { title: `⚠️ Permanently delete "${entityName}"?`, subtitle: `This action CANNOT be undone. The ${content} will be LOST FOREVER.` }
                     : { title: `⚠️ Permanently delete this ${entityType}?`, subtitle: `This action CANNOT be undone. All ${content} will be LOST FOREVER.` };

@@ -5,7 +5,7 @@ import {useWorkspaceStore} from "../../store/workspace.store";
 interface StatusDotProps {
     isUnsaved: boolean;
     isDuplicate: boolean;
-    itemType: "Note" | "File" | "Folder";
+    itemType: "Note" | "File" | "Link" | "Folder";
     itemName: string;
     targetWorkspaceName?: string;
     workspaceLinks?: WorkspaceLink[]; // List of workspaces that link to this item
