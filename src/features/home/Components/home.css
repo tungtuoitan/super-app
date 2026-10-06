@@ -36,6 +36,7 @@
     --home-bar-met: #e6e6e6;
     --home-mark: #ededed;
 
+    position: relative;
     overflow: hidden;
     color: #ededed;
     background: #0c0c0d;

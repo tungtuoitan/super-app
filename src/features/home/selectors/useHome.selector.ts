@@ -16,7 +16,7 @@ import {
     remainingSeconds,
 } from "../utils/home.utils";
 import { MASKED_PSYCH, buildPsychView, parsePsychBank } from "../utils/homePsych.utils";
-import type { HomeStatusView, PrivacyView } from "../types/home.types";
+import type { HomeStatusView, PrivacyView, TotpDialogView } from "../types/home.types";
 
 /**
  * Everything the home UI renders (TungRoot #1481). In private mode every sensitive part is a
@@ -27,6 +27,7 @@ export const useHomeSelector = () => {
         activity, publicHabits, sensitiveHabits, finance, psychDescription,
         privacyMode, fullUntil, fullDurationMinutes, nowMs,
         todayKey, isLoading, isUnlocking, error, loadedAt, view,
+        totpMode, totpQr, totpSecret, totpError, totpLockedUntil, totpBusy,
     } = useHomeStore();
     const isFull = privacyMode === "full";
 
@@ -80,5 +81,7 @@ export const useHomeSelector = () => {
 
     const status: HomeStatusView = { isLoading, error, loadedAt, todayKey };
 
-    return { activityView, kpis, dayColumns, dayRows, weekBars, timelineMarks, financeView, psychView, privacy, status, view };
+    const totp: TotpDialogView = { mode: totpMode, qrDataUrl: totpQr, secret: totpSecret, error: totpError, lockedUntil: totpLockedUntil, busy: totpBusy };
+
+    return { activityView, kpis, dayColumns, dayRows, weekBars, timelineMarks, financeView, psychView, privacy, status, view, totp };
 };

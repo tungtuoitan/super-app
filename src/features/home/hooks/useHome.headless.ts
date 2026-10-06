@@ -1,7 +1,8 @@
 import { useEffect } from "react";
+import QRCode from "qrcode";
 import { useAuthStore } from "@/shared";
 import { homeConstants } from "../home.constants";
-import { useHomeStore } from "../store/useHome.store";
+import { getHomeState, useHomeStore } from "../store/useHome.store";
 import { useHomeHelper } from "./useHome.helper";
 
 /** Load public data on mount / user change, refresh hourly and when the day rolls over or the window refocuses. */
@@ -98,4 +99,29 @@ export const useHomeFitHeadless = () => {
         ro.observe(box);
         return () => ro.disconnect();
     }, []);
+};
+
+/** TOTP dialog: draw the QR of the otpauth link while setting up; Escape closes the dialog. */
+export const useHomeTotpHeadless = () => {
+    const { totpUri, totpMode } = useHomeStore();
+    const { closeTotp } = useHomeHelper();
+
+    useEffect(() => {
+        if (!totpUri) return;
+        let cancelled = false;
+        QRCode.toDataURL(totpUri, { margin: 1, width: 400, color: { dark: "#111111", light: "#f2f2f2" } })
+            .then((url) => { if (!cancelled) getHomeState().setTotpQr(url); })
+            .catch(() => { if (!cancelled) getHomeState().setTotpError("Không vẽ được mã QR — nhập khoá bằng tay"); });
+        return () => { cancelled = true; };
+    }, [totpUri]);
+
+    useEffect(() => {
+        if (totpMode === "closed") return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") closeTotp();
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [totpMode]);
 };

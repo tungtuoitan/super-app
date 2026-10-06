@@ -8,7 +8,7 @@ import "./home.css";
 import { homeConstants } from "../home.constants";
 import { useHomeSelector } from "../selectors/useHome.selector";
 import { useHomeHelper } from "../hooks/useHome.helper";
-import { useHomeDataHeadless, useHomeFitHeadless, useHomePrivacyHeadless, useHomeViewKeysHeadless } from "../hooks/useHome.headless";
+import { useHomeDataHeadless, useHomeFitHeadless, useHomePrivacyHeadless, useHomeTotpHeadless, useHomeViewKeysHeadless } from "../hooks/useHome.headless";
 import { HomeHeader } from "./small/HomeHeader";
 import { HomeKpiRow } from "./small/HomeKpiRow";
 import { HomeActivitySection } from "./small/HomeActivitySection";
@@ -17,6 +17,7 @@ import { HomeDayGrid } from "./small/HomeDayGrid";
 import { HomeFinanceCard } from "./small/HomeFinanceCard";
 import { HomePsychPage } from "./small/HomePsychPage";
 import { HomeFinancePage } from "./small/HomeFinancePage";
+import { HomeTotpDialog } from "./small/HomeTotpDialog";
 import type { CSSProperties } from "react";
 
 const SKELETON: CSSProperties = { borderRadius: 16, background: "#161617", border: "1px solid rgba(255,255,255,.06)" };
@@ -27,6 +28,7 @@ export function HomePanel() {
     useHomePrivacyHeadless();
     useHomeViewKeysHeadless();
     useHomeFitHeadless();
+    useHomeTotpHeadless();
     const { status, view } = useHomeSelector();
     const { loadPublic } = useHomeHelper();
 
@@ -89,6 +91,8 @@ export function HomePanel() {
                     {view === "fin" && <HomeFinancePage />}
                 </>
             )}
+
+            <HomeTotpDialog />
         </div>
     );
 }

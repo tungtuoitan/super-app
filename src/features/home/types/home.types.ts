@@ -312,3 +312,42 @@ export interface PsychView {
     /** 12 Monday keys, oldest first */
     weeks: string[];
 }
+
+// ── TOTP unlock (#1489) ───────────────────────────────────────────────────────
+
+export interface TotpStatusDTO {
+    enabled: boolean;
+    lockedUntil: string | null;
+}
+
+export interface TotpSetupDTO {
+    otpauthUri: string;
+    secret: string;
+}
+
+export interface UnlockTokenDTO {
+    token: string;
+    expiresAt: string;
+}
+
+/** HTTP status + payload of a TOTP call (400 wrong code, 404 not set up, 409 enabled, 423 locked). */
+export interface TotpResult<T> {
+    status: number;
+    message: string;
+    object: T | null;
+}
+
+/** closed · loading · setup (scan QR, then first code) · code (enter a code) */
+export type TotpDialogMode = "closed" | "loading" | "setup" | "code";
+
+export interface TotpDialogView {
+    mode: TotpDialogMode;
+    /** QR image (data URL) of the otpauth link — setup only */
+    qrDataUrl: string | null;
+    /** Secret for typing into the app by hand — setup only */
+    secret: string | null;
+    error: string | null;
+    /** Set while wrong codes have locked TOTP */
+    lockedUntil: string | null;
+    busy: boolean;
+}

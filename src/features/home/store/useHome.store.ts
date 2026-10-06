@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { zSetter } from "@/shared";
 import { homeConstants } from "../home.constants";
 import { toDateKey } from "../utils/home.utils";
-import type { ActivityWeekPointDTO, FinanceSummaryDTO, HabitSeriesDTO, HomeView, PrivacyMode } from "../types/home.types";
+import type { ActivityWeekPointDTO, FinanceSummaryDTO, HabitSeriesDTO, HomeView, PrivacyMode, TotpDialogMode } from "../types/home.types";
 
 /**
  * Home (progress dashboard) state — TungRoot #1481.
@@ -26,6 +26,25 @@ export interface HomeContextData {
     /** Current tab (overview or one section expanded) */
     view: HomeView;
     setView: Dispatch<SetStateAction<HomeView>>;
+
+    /** Proof of a fresh TOTP code (#1489) — sent with private requests, wiped with the sensitive data */
+    unlockToken: string | null;
+    setUnlockToken: Dispatch<SetStateAction<string | null>>;
+    totpMode: TotpDialogMode;
+    setTotpMode: Dispatch<SetStateAction<TotpDialogMode>>;
+    /** otpauth:// link + secret while setting TOTP up (shown as QR) */
+    totpUri: string | null;
+    setTotpUri: Dispatch<SetStateAction<string | null>>;
+    totpSecret: string | null;
+    setTotpSecret: Dispatch<SetStateAction<string | null>>;
+    totpQr: string | null;
+    setTotpQr: Dispatch<SetStateAction<string | null>>;
+    totpError: string | null;
+    setTotpError: Dispatch<SetStateAction<string | null>>;
+    totpLockedUntil: string | null;
+    setTotpLockedUntil: Dispatch<SetStateAction<string | null>>;
+    totpBusy: boolean;
+    setTotpBusy: Dispatch<SetStateAction<boolean>>;
 
     privacyMode: PrivacyMode;
     setPrivacyMode: Dispatch<SetStateAction<PrivacyMode>>;
@@ -63,6 +82,23 @@ const _store = create<HomeContextData>((set, get) => ({
     setPsychDescription: zSetter("psychDescription", set, get),
     view: "overview",
     setView: zSetter("view", set, get),
+
+    unlockToken: null,
+    setUnlockToken: zSetter("unlockToken", set, get),
+    totpMode: "closed",
+    setTotpMode: zSetter("totpMode", set, get),
+    totpUri: null,
+    setTotpUri: zSetter("totpUri", set, get),
+    totpSecret: null,
+    setTotpSecret: zSetter("totpSecret", set, get),
+    totpQr: null,
+    setTotpQr: zSetter("totpQr", set, get),
+    totpError: null,
+    setTotpError: zSetter("totpError", set, get),
+    totpLockedUntil: null,
+    setTotpLockedUntil: zSetter("totpLockedUntil", set, get),
+    totpBusy: false,
+    setTotpBusy: zSetter("totpBusy", set, get),
 
     privacyMode: "private",
     setPrivacyMode: zSetter("privacyMode", set, get),
