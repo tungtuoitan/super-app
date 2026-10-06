@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   One-shot runner for SuperApp load testing.
 
@@ -35,17 +35,12 @@ if (-not (Test-Path "$root\.env")) {
     exit 1
 }
 
+# .env chứa tham chiếu vault:// -> chạy lại script trong `secret run` (tung-vault, #1502)
+. "$root\..\vault-env.ps1"
+Invoke-SelfInSecretRun -EnvFile "$root\.env" -ScriptPath $MyInvocation.MyCommand.Path -BoundParameters $PSBoundParameters
+
 # Load .env into the current process
-Get-Content "$root\.env" | ForEach-Object {
-    $line = $_.Trim()
-    if ($line -eq "" -or $line.StartsWith("#")) { return }
-    $kv = $line -split "=", 2
-    if ($kv.Length -eq 2) {
-        $key = $kv[0].Trim()
-        $val = $kv[1].Trim().Trim('"').Trim("'")
-        Set-Item -Path "Env:$key" -Value $val
-    }
-}
+Import-DotEnv "$root\.env"
 
 # CLI overrides win over .env
 if ($Vus)      { $env:VUS       = "$Vus" }

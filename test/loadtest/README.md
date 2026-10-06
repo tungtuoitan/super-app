@@ -34,7 +34,7 @@ In our local baseline, the no-auth scenario hit ~735 req/s vs ~31 req/s with log
 ```powershell
 cd C:\Users\Admin\source\SuperApp\loadtest
 copy .env.example .env
-# Edit .env — fill in DB_PASSWORD at minimum
+# DB_PASSWORD đã là tham chiếu vault:// — run.ps1 tự chạy trong `secret run` (tung-vault). Node script chạy lẻ: secret run --env-file .env -- node seed-users.js
 ```
 
 ## Common workflows

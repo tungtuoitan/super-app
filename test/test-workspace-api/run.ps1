@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Workspace /tree/v2 load test runner.
 
@@ -38,17 +38,12 @@ if (-not (Test-Path "$loadtest\.env")) {
     exit 1
 }
 
+# .env chứa tham chiếu vault:// -> chạy lại script trong `secret run` (tung-vault, #1502)
+. "$root\..\vault-env.ps1"
+Invoke-SelfInSecretRun -EnvFile "$loadtest\.env" -ScriptPath $MyInvocation.MyCommand.Path -BoundParameters $PSBoundParameters
+
 # Load loadtest/.env
-Get-Content "$loadtest\.env" | ForEach-Object {
-    $line = $_.Trim()
-    if ($line -eq "" -or $line.StartsWith("#")) { return }
-    $kv = $line -split "=", 2
-    if ($kv.Length -eq 2) {
-        $key = $kv[0].Trim()
-        $val = $kv[1].Trim().Trim('"').Trim("'")
-        Set-Item -Path "Env:$key" -Value $val
-    }
-}
+Import-DotEnv "$loadtest\.env"
 
 if ($Vus)      { $env:VUS       = "$Vus" }
 if ($RampUp)   { $env:RAMP_UP   = $RampUp }

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Restore SuperApp-test from the frozen .bak (~10-30s).
 
@@ -19,23 +19,13 @@ if (-not (Test-Path "$loadtest\.env")) {
     Write-Host "Missing $loadtest\.env." -ForegroundColor Red
     exit 1
 }
-Get-Content "$loadtest\.env" | ForEach-Object {
-    $line = $_.Trim()
-    if ($line -eq "" -or $line.StartsWith("#")) { return }
-    $kv = $line -split "=", 2
-    if ($kv.Length -eq 2) {
-        Set-Item -Path "Env:$($kv[0].Trim())" -Value ($kv[1].Trim().Trim('"').Trim("'"))
-    }
-}
+
+# .env chứa tham chiếu vault:// -> chạy lại script trong `secret run` (tung-vault, #1502)
+. "$root\..\vault-env.ps1"
+Invoke-SelfInSecretRun -EnvFile "$loadtest\.env" -ScriptPath $MyInvocation.MyCommand.Path -BoundParameters $PSBoundParameters
+Import-DotEnv "$loadtest\.env"
 if (Test-Path "$root\.env") {
-    Get-Content "$root\.env" | ForEach-Object {
-        $line = $_.Trim()
-        if ($line -eq "" -or $line.StartsWith("#")) { return }
-        $kv = $line -split "=", 2
-        if ($kv.Length -eq 2) {
-            Set-Item -Path "Env:$($kv[0].Trim())" -Value ($kv[1].Trim().Trim('"').Trim("'"))
-        }
-    }
+    Import-DotEnv "$root\.env"
 }
 
 node scripts\restore.js
