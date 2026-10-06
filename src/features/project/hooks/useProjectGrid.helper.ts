@@ -15,6 +15,7 @@ import { parseInstant, parseDateOnly } from "@/shared";
 import {Project} from "../types/project.types";
 import {generateTempId, generateUnsavedName} from "@/features/workspace";
 import type { ProjectGridMenuData } from "@/shared";
+import { projectConstants } from "@/features/project/project.constants";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
@@ -64,7 +65,7 @@ export const useProjectGridHelper = () => {
             id: tempId,
             name: name,
             description: "",
-            status: "active",
+            status: "open",
             startDate: null,
             endDate: null,
             createdAt: new Date(),
@@ -181,7 +182,7 @@ export const useProjectGridHelper = () => {
                 status?: string;
             } = {
                 deletedAt: projectGridFilters?.deletedAt ?? "null",
-                status: projectGridFilters?.statusCode ?? "active",
+                status: projectGridFilters?.statusCode ?? projectConstants.filters.defaults.projectGrid.statusCode,
             };
 
             const result = await projectService.getProjects(token, filterParams);

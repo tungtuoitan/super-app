@@ -235,7 +235,7 @@ export function useAuthHelper() {
                 wsGrid: { statusCode: "active", deletedAt: "null" },
                 workspace: { statusCode: "active", deletedAt: "null" },
                 k: { statusCode: "active", deletedAt: "null" },
-                projectGrid: { statusCode: "active" },
+                projectGrid: { statusCode: "open,in_progress" },
                 taskGrid: { status: "open,in_progress,background_progress,paused", priority: "low,medium,high" },
             };
             const userProfile: User = {

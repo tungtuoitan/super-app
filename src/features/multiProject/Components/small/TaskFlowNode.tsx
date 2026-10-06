@@ -292,7 +292,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                                 onWheel={(e) => e.stopPropagation()}
                             >
                                 {allProjects.map((p) => {
-                                    const isActive = p.status === "active";
+                                    const isActive = projectConstants.liveStatuses.includes(p.status);
                                     const isDeleted = !!p.deletedAt;
                                     const isCurrent = p.id === data.task.projectId;
                                     return (

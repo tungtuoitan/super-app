@@ -12,6 +12,7 @@ import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDe
 import { useMultiProjectDetailHelper } from "./useMultiProjectDetail.helper";
 import { useMultiProjectTaskGridHelper } from "../mpTaskList/useMultiProjectTaskGrid.helper";
 import {useAuthStore} from "@/shared";
+import { projectConstants } from "@/features/project/project.constants";
 
 export function useMultiProjectDetailHeadless() {
     const { projects } = useProjectStore();
@@ -31,7 +32,7 @@ export function useMultiProjectDetailHeadless() {
     // Initialize selected projects on first load if not set
     useEffect(() => {
         if (projects.length > 0 && !currentTab?.metadata?.selectedProjectIds) {
-            const activeProjects = projects.filter((p) => p.status === "active" && !p.deletedAt);
+            const activeProjects = projects.filter((p) => projectConstants.liveStatuses.includes(p.status) && !p.deletedAt);
             setSelectedProjectIds(activeProjects.map((p) => p.id));
         }
     }, [projects, currentTab?.metadata?.selectedProjectIds]);

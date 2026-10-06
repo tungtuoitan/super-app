@@ -19,6 +19,7 @@ import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector
 import type { TabType } from "../types/projectDetail.type";
 import {Project} from "../types/project.types";
 import {useProjectStore} from "../store/useProject.store";
+import { projectConstants } from "@/features/project/project.constants";
 
 /**
  * Transform project DTOs (dates as strings) to domain models (dates as Date objects)
@@ -64,7 +65,7 @@ export const useProjectDetailHelper = () => {
                 status?: string;
             } = {
                 deletedAt: projectGridFilters?.deletedAt ?? "null",
-                status: projectGridFilters?.statusCode ?? "active",
+                status: projectGridFilters?.statusCode ?? projectConstants.filters.defaults.projectGrid.statusCode,
             };
 
             const result = await projectService.getProjects(token, filterParams);

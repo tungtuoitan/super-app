@@ -10,6 +10,7 @@ import type { Task } from "@/features/taskDetail";
 import { StatusAutoComplete, IStatusOption } from "@/shared";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/features/project/types/project.types";
+import { projectConstants } from "@/features/project/project.constants";
 
 /**
  * Memoized Status Cell
@@ -168,7 +169,7 @@ export const ProjectCell = function ProjectCell({
                     onClick={(e) => e.stopPropagation()}
                 >
                     {allProjects.map((p) => {
-                        const isActive = p.status === "active";
+                        const isActive = projectConstants.liveStatuses.includes(p.status);
                         const isDeleted = !!p.deletedAt;
                         const isCurrent = p.id === task.projectId;
                         return (

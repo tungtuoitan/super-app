@@ -32,8 +32,8 @@ export const useMultiProjectTaskListSelector = () => {
     /** All projects sorted: active → inactive → deleted (for project-picker dropdown) */
     const allProjects = useMemo(
         () => [...projects].sort((a, b) => {
-            const aScore = a.deletedAt ? 2 : a.status === "active" ? 0 : 1;
-            const bScore = b.deletedAt ? 2 : b.status === "active" ? 0 : 1;
+            const aScore = a.deletedAt ? 2 : projectConstants.liveStatuses.includes(a.status) ? 0 : 1;
+            const bScore = b.deletedAt ? 2 : projectConstants.liveStatuses.includes(b.status) ? 0 : 1;
             return aScore - bScore || a.name.localeCompare(b.name);
         }),
         [projects],

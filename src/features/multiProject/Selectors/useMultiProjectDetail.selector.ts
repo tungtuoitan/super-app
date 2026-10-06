@@ -9,6 +9,7 @@ import { useProjectStore } from "@/features/project";
 import type { TabType } from "../types/multiProjectDetail.type";
 import { useEditorTabBarHelper } from "@/shell";
 import { useMpTaskStore } from "../store/useMpTask.store";
+import { projectConstants } from "@/features/project/project.constants";
 
 export const useMultiProjectDetailSelector = () => {
     const { getActiveTab } = useEditorTabBarHelper();
@@ -34,7 +35,7 @@ export const useMultiProjectDetailSelector = () => {
     const selectedProjectIds: number[] = useMemo(() => {
         const saved = currentTab?.metadata?.selectedProjectIds as number[] | undefined;
         if (saved && saved.length > 0) return saved;
-        const activeProjects = projects.filter((p) => p.status === "active" && !p.deletedAt);
+        const activeProjects = projects.filter((p) => projectConstants.liveStatuses.includes(p.status) && !p.deletedAt);
         return activeProjects.map((p) => p.id);
     }, [currentTab?.metadata?.selectedProjectIds, projects]);
 

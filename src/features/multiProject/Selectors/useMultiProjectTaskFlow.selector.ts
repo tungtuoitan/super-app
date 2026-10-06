@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { useProjectStore } from "@/features/project";
 import { useMultiTaskFlowStore } from "@/features/multiProject/store/useMultiTaskFlow.store";
 import { useMultiProjectDetailSelector } from "./useMultiProjectDetail.selector";
+import { projectConstants } from "@/features/project/project.constants";
 
 export const useMultiProjectTaskFlowSelector = () => {
     const { projects } = useProjectStore();
@@ -38,8 +39,8 @@ export const useMultiProjectTaskFlowSelector = () => {
     /** All projects including deleted, sorted: active → inactive → deleted */
     const allProjects = useMemo(
         () => [...allProjectsForPicker].sort((a, b) => {
-            const aScore = a.deletedAt ? 2 : a.status === "active" ? 0 : 1;
-            const bScore = b.deletedAt ? 2 : b.status === "active" ? 0 : 1;
+            const aScore = a.deletedAt ? 2 : projectConstants.liveStatuses.includes(a.status) ? 0 : 1;
+            const bScore = b.deletedAt ? 2 : projectConstants.liveStatuses.includes(b.status) ? 0 : 1;
             return aScore - bScore || a.name.localeCompare(b.name);
         }),
         [allProjectsForPicker],

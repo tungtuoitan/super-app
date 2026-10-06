@@ -8,6 +8,7 @@ import { useEditorTabBarHelper } from "@/shell";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import type { TabType } from "../../types/multiProjectDetail.type";
 import { useMpTaskStore } from "../../store/useMpTask.store";
+import { projectConstants } from "@/features/project/project.constants";
 
 export const useMultiProjectDetailHelper = () => {
     const { getActiveTab, patchTab } = useEditorTabBarHelper();
@@ -41,7 +42,7 @@ export const useMultiProjectDetailHelper = () => {
 
     // Select all active projects
     const handleSelectAllActive = () => {
-        setSelectedProjectIds(availableProjects.filter((p) => p.status === "active").map((p) => p.id));
+        setSelectedProjectIds(availableProjects.filter((p) => projectConstants.liveStatuses.includes(p.status)).map((p) => p.id));
     };
 
     // Select all projects
