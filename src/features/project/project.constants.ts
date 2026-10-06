@@ -10,21 +10,23 @@ export const projectConstants = {
     optionColor: {
         projectStatus: {
             colors: {
+                // Cùng màu với status task tương ứng (dropped = cancelled)
                 open: { bg: "#1f6f43", text: "#ffffff" },
-                in_progress: { bg: "#0969da", text: "#ffffff" },
-                paused: { bg: "#805f52", text: "#ffffff" },
-                completed: { bg: "#1a7f64", text: "#ffffff" },
-                dropped: { bg: "#57606a", text: "#ffffff" },
+                in_progress: { bg: "#FCCC3E", text: "#1a1a1a" },
+                paused: { bg: "#575757", text: "#ffffff" },
+                completed: { bg: "#6f42c1", text: "#ffffff" },
+                dropped: { bg: "#78716c", text: "#ffffff" },
             } as Record<string, { bg: string; text: string }>,
             default: { bg: "#57606a", text: "#ffffff" },
         } as const,
         timelinePro: {
             colors: {
+                // Cùng màu với timelineTask (dropped = cancelled)
                 open:        { bg: "#09331c", text: "#E5E7EB" },
-                in_progress: { bg: "#1E3A8A", text: "#E5E7EB" },
-                paused:      { bg: "#805f52", text: "#E5E7EB" },
-                completed: { bg: "#1F5E4B", text: "#E5E7EB" },
-                dropped:   { bg: "#374151", text: "#E5E7EB" },
+                in_progress: { bg: "#6e560b", text: "#E5E7EB" },
+                paused:      { bg: "#464646", text: "#ffffff" },
+                completed:   { bg: "#311a5e", text: "#E5E7EB" },
+                dropped:     { bg: "#3d3730", text: "#E5E7EB" },
             } as Record<string, { bg: string; text: string }>,
             default: { bg: "#374151", text: "#E5E7EB" },
         } as const,

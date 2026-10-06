@@ -47,6 +47,7 @@ export interface FilterFieldConfig {
     label: string; // Display label (e.g., "Status", "Created Date")
     type: "checkbox" | "radio" | "dateRange" | "text"; // Filter UI type
     standardRegistryType?: string; // If type=checkbox, which standard registry to use
+    optionOrder?: Record<string, number>; // Display rank of registry options by label (e.g., { Open: 1 })
     defaultValue?: FilterValue; // Default filter value
 }
 

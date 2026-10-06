@@ -1,5 +1,6 @@
 import type { FilterDefinition, FilterFieldConfig } from "@/shell";
 import { filterRegistry } from "@/shell";
+import { projectConstants } from "@/features/project/project.constants";
 
 export const PROJECT_GRID_FILTER_FIELDS: readonly FilterFieldConfig[] = [
     {
@@ -7,6 +8,7 @@ export const PROJECT_GRID_FILTER_FIELDS: readonly FilterFieldConfig[] = [
         label: "Status",
         type: "checkbox",
         standardRegistryType: "project_status",
+        optionOrder: projectConstants.optionOrder.projectStatuses,
     },
 ] as const;
 

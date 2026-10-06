@@ -11,6 +11,7 @@ import { Button, Popover, PopoverContent, PopoverTrigger, Checkbox, RadioGroup, 
 import { useGenericFilterHelper } from "./useGenericFilterHelper";
 import { useSideBarStore } from "../store/SideBar.store";
 import { filterRegistry } from "./filterRegistry";
+import { filterUtils } from "./filter.utils";
 import { getMonthFromIndex, getIndexFromMonth, formatMonthLabel } from "@/shared";
 import { FilterFieldConfig, ViewFilter } from "./filter.types";
 
@@ -315,7 +316,7 @@ export function GenericFilterPopup() {
                                     <FilterStandardRegistryField
                                         key={group.key}
                                         group={group}
-                                        options={registriesByType[group.standardRegistryType] || []}
+                                        options={filterUtils.sortOptions(registriesByType[group.standardRegistryType] || [], group.optionOrder)}
                                         error={error}
                                         isValueActive={isPendingValueActive}
                                         onToggle={handleCheckboxToggle}

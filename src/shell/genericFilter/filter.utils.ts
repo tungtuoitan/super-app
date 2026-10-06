@@ -89,6 +89,16 @@ const parseDateRange = (filterValue?: FilterValue): { from?: string; to?: string
     };
 };
 
+/**
+ * Sort registry options by a label -> rank map; unranked options go last, keeping their order
+ * @param options - Registry options (e.g., [{ code: "paused", description: "Paused" }])
+ * @param order - Rank by label (e.g., { Open: 1, Paused: 3 })
+ */
+const sortOptions = <T extends { code: string; description?: string }>(options: T[], order?: Record<string, number>): T[] => {
+    if (!order) return options;
+    return [...options].sort((a, b) => (order[a.description || a.code] ?? 999) - (order[b.description || b.code] ?? 999));
+};
+
 export const filterUtils = {
     parse,
     stringify,
@@ -97,4 +107,5 @@ export const filterUtils = {
     remove,
     toggle,
     parseDateRange,
+    sortOptions,
 };
