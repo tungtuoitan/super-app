@@ -10,6 +10,8 @@ import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTim
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "./useMultiTimeline.helper";
 import { storageService } from "@/shared";
+import { resolveTimelineSpan } from "../../utils/multiTimelineSpan.utils";
+import { isStatusNonDraggable } from "@/features/taskDetail";
 import {useAuthStore} from "@/shared";
 
 /** Minimum span (days) of the project week overview — ~6 months */
@@ -44,14 +46,10 @@ export function useMultiTimelineHeadless() {
         let maxDate = new Date(today);
 
         items.forEach((item) => {
-            if (item.startDate) {
-                if (item.startDate < minDate) minDate = new Date(item.startDate);
-                if (item.startDate > maxDate) maxDate = new Date(item.startDate);
-            }
-            if (item.endDate) {
-                if (item.endDate < minDate) minDate = new Date(item.endDate);
-                if (item.endDate > maxDate) maxDate = new Date(item.endDate);
-            }
+            const span = resolveTimelineSpan(item, null, isStatusNonDraggable(item.status || ""));
+            if (!span) return;
+            if (span.start < minDate) minDate = new Date(span.start);
+            if (span.end > maxDate) maxDate = new Date(span.end);
         });
 
         const start = new Date(minDate);

@@ -83,6 +83,8 @@ export const useMultiTimelineSelector = () => {
         return { timelineStart: start, dates: generateDateRange(start, end) };
     }, [timelineRange, mode]);
 
+    const timelineEnd = dates.length ? dates[dates.length - 1] : null;
+
     // ── Week columns (project mode) ──────────────────────
     const weeks = useMemo(() => {
         if (mode !== "project") return [];
@@ -161,6 +163,7 @@ export const useMultiTimelineSelector = () => {
         filteredProjects,
         items,
         timelineStart,
+        timelineEnd,
         dates,
         pxPerDay,
         weeks,

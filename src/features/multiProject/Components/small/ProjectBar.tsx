@@ -6,33 +6,34 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import type { Project } from "@/features/project";
 import { getProjectStatusColors } from "@/features/project";
-import { TIMELINE_MIN_BAR_WIDTH } from "@/features/taskDetail";
+import { TIMELINE_MIN_BAR_WIDTH, isStatusNonDraggable } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
 import { PRO_ROW_HEIGHT } from "@/features/multiProject/utils/multiProjectDetail.constants";
+import { resolveTimelineSpan, applyTimelineDrag, describeTimelineSpan, daysBetween } from "@/features/multiProject/utils/multiTimelineSpan.utils";
 
 const PRO_BAR_HEIGHT = 36;
+/** Open-ended bar (no end date) fades out on the right */
+const OPEN_END_MASK = "linear-gradient(to right, #000 calc(100% - 160px), transparent)";
 
 export interface ProjectBarProps {
     project: Project;
     timelineStart: Date;
+    timelineEnd: Date | null;
     dayWidth: number;
     onDateChange: (projectId: number, startDate: Date | null, endDate: Date | null) => void;
     onProjectClick: (project: Project) => void;
 }
 
-export function ProjectBar({ project, timelineStart, dayWidth, onDateChange, onProjectClick }: ProjectBarProps) {
+export function ProjectBar({ project, timelineStart, timelineEnd, dayWidth, onDateChange, onProjectClick }: ProjectBarProps) {
     const barRef = useRef<HTMLDivElement>(null);
     const statusColors = getProjectStatusColors(project.status || "");
 
     // ── Position from dates ──────────────────────────────
-    const { left, width, hasValidDates } = (() => {
-        if (!project.startDate && !project.endDate) return { left: 0, width: TIMELINE_MIN_BAR_WIDTH, hasValidDates: false };
-        const start = project.startDate || project.endDate || new Date();
-        const end = project.endDate || project.startDate || new Date();
-        const startDiff = Math.floor((start.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24));
-        const duration = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
-        return { left: startDiff * dayWidth, width: Math.max(TIMELINE_MIN_BAR_WIDTH, duration * dayWidth - 4), hasValidDates: true };
-    })()
+    const span = resolveTimelineSpan(project, timelineEnd, isStatusNonDraggable(project.status || ""));
+    const hasValidDates = !!span;
+    const { left, width } = span
+        ? { left: daysBetween(timelineStart, span.start) * dayWidth, width: Math.max(TIMELINE_MIN_BAR_WIDTH, (daysBetween(span.start, span.end) + 1) * dayWidth - (span.isOpenEnded ? 0 : 4)) }
+        : { left: 0, width: TIMELINE_MIN_BAR_WIDTH };
 
     // ── Drag state ───────────────────────────────────────
     const [isDragging, setIsDragging] = useState(false);
@@ -89,27 +90,9 @@ export function ProjectBar({ project, timelineStart, dayWidth, onDateChange, onP
             const dL = Math.round((_cL - left) / dayWidth);
             const dW = Math.round((_cW - width) / dayWidth);
 
-            if (dL !== 0 || dW !== 0) {
-                let nS: Date | null = project.startDate ? new Date(project.startDate) : null;
-                let nE: Date | null = project.endDate ? new Date(project.endDate) : null;
-                const effS = project.startDate || project.endDate;
-                const effE = project.endDate || project.startDate;
-
-                if (_dT === "move") {
-                    if (nS) nS.setDate(nS.getDate() + dL);
-                    if (nE) nE.setDate(nE.getDate() + dL);
-                } else if (_dT === "resize-left") {
-                    if (nS) nS.setDate(nS.getDate() + dL);
-                    else if (effS) { nS = new Date(effS); nS.setDate(nS.getDate() + dL); }
-                    if (!nE && effE) nE = new Date(effE);
-                    if (nS && nE && nS > nE) nS = new Date(nE);
-                } else if (_dT === "resize-right") {
-                    if (nE) nE.setDate(nE.getDate() + dW);
-                    else if (effE) { nE = new Date(effE); nE.setDate(nE.getDate() + dW); }
-                    if (!nS && effS) nS = new Date(effS);
-                    if (nS && nE && nE < nS) nE = new Date(nS);
-                }
-                onDateChange(project.id, nS, nE);
+            if ((dL !== 0 || dW !== 0) && span && _dT) {
+                const { startDate, endDate } = applyTimelineDrag(project, span, _dT, dL, dW);
+                onDateChange(project.id, startDate, endDate);
             } else {
                 setCurrentLeft(left); setCurrentWidth(width);
                 if (!_hD) onProjectClick(project);
@@ -120,7 +103,7 @@ export function ProjectBar({ project, timelineStart, dayWidth, onDateChange, onP
         document.addEventListener("mousemove", handleMouseMove);
         document.addEventListener("mouseup", handleMouseUp);
         return () => { document.removeEventListener("mousemove", handleMouseMove); document.removeEventListener("mouseup", handleMouseUp); };
-    }, [isDragging, dragStartX, originalLeft, originalWidth, left, width, project, dayWidth]);
+    }, [isDragging, dragStartX, originalLeft, originalWidth, left, width, project, dayWidth, timelineEnd]);
 
     // ── Render ───────────────────────────────────────────
     if (!hasValidDates) {
@@ -133,10 +116,10 @@ export function ProjectBar({ project, timelineStart, dayWidth, onDateChange, onP
     }
 
     return (
-        <div ref={barRef} className={cn("absolute flex items-center rounded-lg transition-shadow group cursor-pointer", isDragging && "shadow-lg z-10")} style={{ left: currentLeft, width: currentWidth, height: PRO_BAR_HEIGHT, top: (PRO_ROW_HEIGHT - PRO_BAR_HEIGHT) / 2, backgroundColor: `${statusColors.bg}30`, border: `2px solid ${statusColors.bg}`, borderLeft: `4px solid ${statusColors.bg}` }}>
+        <div ref={barRef} title={span ? describeTimelineSpan(span) : undefined} className={cn("absolute flex items-center rounded-lg transition-shadow group cursor-pointer", isDragging && "shadow-lg z-10")} style={{ left: currentLeft, width: currentWidth, height: PRO_BAR_HEIGHT, top: (PRO_ROW_HEIGHT - PRO_BAR_HEIGHT) / 2, backgroundColor: `${statusColors.bg}30`, border: `2px solid ${statusColors.bg}`, borderLeft: `4px solid ${statusColors.bg}`, ...(span?.isOpenEnded && { borderRight: "none", borderTopRightRadius: 0, borderBottomRightRadius: 0, maskImage: OPEN_END_MASK, WebkitMaskImage: OPEN_END_MASK }), ...(span?.isStartEstimated && { borderLeftStyle: "dashed" as const }) }}>
             <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20" onMouseDown={(e) => handleMouseDown(e, "resize-left")} />
             <div className="flex-1 flex items-center px-3 overflow-visible cursor-grab active:cursor-grabbing" onMouseDown={(e) => handleMouseDown(e, "move")}>
-                <span className="font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: statusColors.bg }}>{project.name || "Untitled"}</span>
+                <span className="sticky left-3 font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: statusColors.bg }}>{project.name || "Untitled"}</span>
             </div>
             <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20" onMouseDown={(e) => handleMouseDown(e, "resize-right")} />
         </div>

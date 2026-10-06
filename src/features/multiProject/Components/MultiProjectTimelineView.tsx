@@ -43,7 +43,7 @@ export function MultiProjectTimelineView() {
     const { projects, projectIds, hoveredItemId, setHoveredItemId, isTodayVisible, dayWidth, timelineScrollRef } = useMultiTimelineStore();
 
     // ── Computed values (from selector) ──────────────────
-    const { filteredTasks, timelineStart, dates, todayPosition, monthGroups, timelineWidth, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
+    const { filteredTasks, timelineStart, timelineEnd, dates, todayPosition, monthGroups, timelineWidth, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
 
     // ── Handlers (from helper) ───────────────────────────
     const { handleScroll, scrollToToday, handleZoomIn, handleZoomOut, handleTaskDateChange } = useMultiTimelineHelper();
@@ -120,7 +120,7 @@ export function MultiProjectTimelineView() {
                                 const taskProject = projects.find((p) => p.id === task.projectId) || null;
                                 return (
                                     <div key={task.id} className={cn("relative", hoveredItemId === task.id && "bg-muted/40", isSubtask && "bg-muted/10")} style={{ height: TIMELINE_ROW_HEIGHT }} onMouseEnter={() => setHoveredItemId(task.id)} onMouseLeave={() => setHoveredItemId(null)}>
-                                        <TaskBar task={task} timelineStart={timelineStart} dayWidth={dayWidth} onDateChange={handleTaskDateChange} onTaskClick={openTaskTab} isSubtask={isSubtask} parentTask={parentTask} project={taskProject} allTasks={filteredTasks} onValidationError={(msg) => _console.warning(msg)} />
+                                        <TaskBar task={task} timelineStart={timelineStart} timelineEnd={timelineEnd} dayWidth={dayWidth} onDateChange={handleTaskDateChange} onTaskClick={openTaskTab} isSubtask={isSubtask} parentTask={parentTask} project={taskProject} allTasks={filteredTasks} onValidationError={(msg) => _console.warning(msg)} />
                                     </div>
                                 );
                             })}

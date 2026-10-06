@@ -9,10 +9,15 @@ import { CornerDownRight, Diamond } from "lucide-react";
 import type { Task } from "@/features/taskDetail";
 import { getTaskStatusColors, getTaskBarColors, isStatusNonDraggable, TIMELINE_ROW_HEIGHT, TIMELINE_TASK_BAR_HEIGHT, TIMELINE_MIN_BAR_WIDTH, TIMELINE_SUBTASK_BAR_HEIGHT } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
+import { resolveTimelineSpan, applyTimelineDrag, describeTimelineSpan, daysBetween } from "@/features/multiProject/utils/multiTimelineSpan.utils";
+
+/** Open-ended bar (no end date) fades out on the right */
+const OPEN_END_MASK = "linear-gradient(to right, #000 calc(100% - 120px), transparent)";
 
 export interface TaskBarProps {
     task: Task;
     timelineStart: Date;
+    timelineEnd: Date | null;
     dayWidth: number;
     onDateChange: (taskId: number, startDate: Date | null, endDate: Date | null) => void;
     onTaskClick: (task: Task) => void;
@@ -23,7 +28,7 @@ export interface TaskBarProps {
     onValidationError?: (message: string) => void;
 }
 
-export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskClick, isSubtask = false, parentTask, project, allTasks = [], onValidationError }: TaskBarProps) {
+export function TaskBar({ task, timelineStart, timelineEnd, dayWidth, onDateChange, onTaskClick, isSubtask = false, parentTask, project, allTasks = [], onValidationError }: TaskBarProps) {
     const barRef = useRef<HTMLDivElement>(null);
     const { showContextMenu } = useMenuContextHelper();
     const openStatusMenu = (e: React.MouseEvent) => showContextMenu(e, MENU_CONTEXT_TYPES.taskTimeline, { taskId: task.id });
@@ -31,14 +36,11 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
     const isDragDisabled = task.deletedAt || isStatusNonDraggable(task.status);
 
     // ── Position from dates ──────────────────────────────
-    const { left, width, hasValidDates } = (() => {
-        if (!task.startDate && !task.endDate) return { left: 0, width: TIMELINE_MIN_BAR_WIDTH, hasValidDates: false };
-        const start = task.startDate || task.endDate || new Date();
-        const end = task.endDate || task.startDate || new Date();
-        const startDiff = Math.floor((start.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24));
-        const duration = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
-        return { left: startDiff * dayWidth, width: Math.max(TIMELINE_MIN_BAR_WIDTH, duration * dayWidth - 4), hasValidDates: true };
-    })();
+    const span = resolveTimelineSpan(task, timelineEnd, isStatusNonDraggable(task.status || ""));
+    const hasValidDates = !!span;
+    const { left, width } = span
+        ? { left: daysBetween(timelineStart, span.start) * dayWidth, width: Math.max(TIMELINE_MIN_BAR_WIDTH, (daysBetween(span.start, span.end) + 1) * dayWidth - (span.isOpenEnded ? 0 : 4)) }
+        : { left: 0, width: TIMELINE_MIN_BAR_WIDTH };
 
     // ── Drag state ───────────────────────────────────────
     const [isDragging, setIsDragging] = useState(false);
@@ -96,7 +98,8 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
                 let nL = originalLeft + daysDelta * dayWidth;
                 const nR = nL + originalWidth;
                 if (cMin !== null && nL < cMin) nL = cMin;
-                if (cMax !== null && nR > cMax) nL = cMax - originalWidth;
+                if (cMax !== null && nR > cMax && !span?.isOpenEnded) nL = cMax - originalWidth; // open-ended bar always passes cMax — only its start is bounded
+                if (span?.isOpenEnded && cMax !== null && nL > cMax) nL = cMax;
                 setCurrentLeft(nL);
             } else if (dragType === "resize-left") {
                 let nL = originalLeft + daysDelta * dayWidth;
@@ -118,26 +121,8 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
             const dL = Math.round((_cL - left) / dayWidth);
             const dW = Math.round((_cW - width) / dayWidth);
 
-            if (dL !== 0 || dW !== 0) {
-                let nS: Date | null = task.startDate ? new Date(task.startDate) : null;
-                let nE: Date | null = task.endDate ? new Date(task.endDate) : null;
-                const effS = task.startDate || task.endDate;
-                const effE = task.endDate || task.startDate;
-
-                if (_dT === "move") {
-                    if (nS) nS.setDate(nS.getDate() + dL);
-                    if (nE) nE.setDate(nE.getDate() + dL);
-                } else if (_dT === "resize-left") {
-                    if (nS) nS.setDate(nS.getDate() + dL);
-                    else if (effS) { nS = new Date(effS); nS.setDate(nS.getDate() + dL); }
-                    if (!nE && effE) nE = new Date(effE);
-                    if (nS && nE && nS > nE) nS = new Date(nE);
-                } else if (_dT === "resize-right") {
-                    if (nE) nE.setDate(nE.getDate() + dW);
-                    else if (effE) { nE = new Date(effE); nE.setDate(nE.getDate() + dW); }
-                    if (!nS && effS) nS = new Date(effS);
-                    if (nS && nE && nE < nS) nE = new Date(nS);
-                }
+            if ((dL !== 0 || dW !== 0) && span && _dT) {
+                const { startDate: nS, endDate: nE } = applyTimelineDrag(task, span, _dT, dL, dW);
 
                 // Subtask validation
                 if (!isSubtask) {
@@ -163,7 +148,7 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
         document.addEventListener("mousemove", handleMouseMove);
         document.addEventListener("mouseup", handleMouseUp);
         return () => { document.removeEventListener("mousemove", handleMouseMove); document.removeEventListener("mouseup", handleMouseUp); };
-    }, [isDragging, dragStartX, originalLeft, originalWidth, left, width, task, dayWidth, constraints, isSubtask, allTasks]);
+    }, [isDragging, dragStartX, originalLeft, originalWidth, left, width, task, dayWidth, timelineEnd, constraints, isSubtask, allTasks]);
 
     // ── Render ───────────────────────────────────────────
     const taskBarColors = getTaskBarColors(task.status);
@@ -182,13 +167,13 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
     }
 
     return (
-        <div ref={barRef} className={cn("absolute flex items-center rounded-md transition-shadow group", isDragDisabled ? "cursor-default" : "cursor-pointer", isDragging && "shadow-lg z-10", (task.deletedAt || isDragDisabled) && "opacity-60")} style={{ left: currentLeft, width: currentWidth, height: barHeight, top: (TIMELINE_ROW_HEIGHT - barHeight) / 2, backgroundColor: barColor, borderLeft: `3px solid ${statusColors.bg}` }} onContextMenu={openStatusMenu}>
+        <div ref={barRef} title={span ? describeTimelineSpan(span) : undefined} className={cn("absolute flex items-center rounded-md transition-shadow group", isDragDisabled ? "cursor-default" : "cursor-pointer", isDragging && "shadow-lg z-10", (task.deletedAt || isDragDisabled) && "opacity-60")} style={{ left: currentLeft, width: currentWidth, height: barHeight, top: (TIMELINE_ROW_HEIGHT - barHeight) / 2, backgroundColor: barColor, borderLeft: `3px solid ${statusColors.bg}`, ...(span?.isOpenEnded && { borderRight: "none", borderTopRightRadius: 0, borderBottomRightRadius: 0, maskImage: OPEN_END_MASK, WebkitMaskImage: OPEN_END_MASK }), ...(span?.isStartEstimated && { borderLeftStyle: "dashed" as const }) }} onContextMenu={openStatusMenu}>
             {!isDragDisabled && <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20" onMouseDown={(e) => handleMouseDown(e, "resize-left")} />}
             {task.priority === "high" && <div className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10 pointer-events-none" />}
             <div className={cn("flex-1 flex items-center px-2 overflow-visible", !isDragDisabled && "cursor-grab active:cursor-grabbing")} onMouseDown={(e) => handleMouseDown(e, "move")}>
                 {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 flex-shrink-0" style={{ color: `${taskBarColors.text}b3` }} />}
                 {task.isMilestone && <Diamond className="h-2.5 w-2.5 mr-1 fill-current flex-shrink-0" style={{ color: "#f59e0b" }} aria-label="Milestone" />}
-                <span className={cn("font-medium whitespace-nowrap", isSubtask ? "text-[10px]" : "text-xs")} style={{ color: taskBarColors.text, textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>{formatTaskLabel(task)}</span>
+                <span className={cn("sticky left-2 font-medium whitespace-nowrap", isSubtask ? "text-[10px]" : "text-xs")} style={{ color: taskBarColors.text, textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>{formatTaskLabel(task)}</span>
             </div>
             {!isDragDisabled && <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20" onMouseDown={(e) => handleMouseDown(e, "resize-right")} />}
         </div>

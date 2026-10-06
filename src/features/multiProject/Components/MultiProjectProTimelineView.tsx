@@ -40,7 +40,7 @@ export function MultiProjectProTimelineView() {
     const { hoveredItemId, setHoveredItemId, isTodayVisible, weekWidth, timelineScrollRef } = useMultiTimelineStore();
 
     // ── Computed values (from selector) ──────────────────
-    const { filteredProjects, timelineStart, pxPerDay, weeks, weekMonthGroups, todayPosition, timelineWidth, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
+    const { filteredProjects, timelineStart, timelineEnd, pxPerDay, weeks, weekMonthGroups, todayPosition, timelineWidth, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
 
     // ── Handlers (from helper) ───────────────────────────
     const { handleScroll, scrollToToday, handleZoomIn, handleZoomOut, handleProjectDateChange } = useMultiTimelineHelper();
@@ -140,6 +140,7 @@ export function MultiProjectProTimelineView() {
                                     <ProjectBar
                                         project={project}
                                         timelineStart={timelineStart}
+                                        timelineEnd={timelineEnd}
                                         dayWidth={pxPerDay}
                                         onDateChange={handleProjectDateChange}
                                         onProjectClick={openProjectTab}
