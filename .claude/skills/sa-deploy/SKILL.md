@@ -13,7 +13,7 @@ Deploy the latest code from GitHub to the production server at `157.66.101.51`.
 |--------|-------|
 | Host | `157.66.101.51` |
 | User | `root` |
-| Password | see `.claude/skills/credentials.local.md` (gitignored — never put the real value back in this file, see issue 0044 of TungRoot) |
+| Auth | SSH key — alias `vps-superapp` trong `~/.ssh/config` (VPS tắt `PasswordAuthentication`, không dùng password) |
 | Public domain | `https://www.tungle.uk` |
 
 ## Server Layout
@@ -29,29 +29,20 @@ Deploy the latest code from GitHub to the production server at `157.66.101.51`.
 
 ## SSH Method
 
-`sshpass` and `expect` are not available on this Windows machine. Use **Python paramiko** instead:
+Dùng SSH key qua alias `vps-superapp` (VPS đã tắt đăng nhập bằng password — không
+dùng paramiko + password, không đọc password ở đâu cả; secret: skill `credential-ops`):
 
-```python
-import paramiko, sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-
-client = paramiko.SSHClient()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect("157.66.101.51", username="root", password="<read from .claude/skills/credentials.local.md>", timeout=30)
-
-def run(cmd, timeout=300):
-    stdin, stdout, stderr = client.exec_command(cmd, timeout=timeout)
-    stdout.channel.settimeout(timeout)
-    out = stdout.read().decode('utf-8', errors='replace')
-    err = stderr.read().decode('utf-8', errors='replace')
-    return out, err
+```bash
+ssh -o BatchMode=yes vps-superapp 'cd /var/www/Timeline && git pull origin master 2>&1'
 ```
 
-If paramiko is not installed: `pip install paramiko` first.
+- Gọi từ PowerShell mà ssh Windows báo "Bad permissions" thư mục `.ssh` → dùng
+  `"C:/Program Files/Git/usr/bin/ssh.exe"`.
+- Lệnh dài (build FE 3–5 phút) → đặt timeout tool đủ lớn (600s).
 
 ## Full Deploy Steps (FE + BE)
 
-Run all steps in a single Python session to reuse the SSH connection:
+Chạy từng bước bằng `ssh vps-superapp '<lệnh>'` (hoặc gộp nhiều lệnh bằng `&&` trong 1 lần ssh):
 
 1. **Git pull FE** — `cd /var/www/SuperApp && git pull origin master 2>&1`
 2. **Git pull BE** — `cd /var/www/Timeline && git pull origin master 2>&1`
@@ -102,4 +93,4 @@ Startup log lines to look for:
 
 {{USER_TASK}}
 
-Based on the task (e.g. "deploy FE only", "deploy both", "check logs", "restart BE"), execute the appropriate subset of steps above using paramiko. Always show the final service status and last few log lines to confirm success.
+Based on the task (e.g. "deploy FE only", "deploy both", "check logs", "restart BE"), execute the appropriate subset of steps above via `ssh vps-superapp`. Always show the final service status and last few log lines to confirm success.

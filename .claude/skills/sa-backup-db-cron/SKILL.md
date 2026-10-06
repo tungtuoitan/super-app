@@ -11,10 +11,10 @@ You are managing the **SuperApp production DB backup cron job** on the VPS.
 |------|-------|
 | VPS host | `157.66.101.51` |
 | VPS user | `root` |
-| SSH method | Python paramiko (sshpass not available on Windows) |
+| SSH method | SSH key — `ssh vps-superapp` (VPS tắt `PasswordAuthentication`) |
 | DB engine | SQL Server (native, not Docker) |
 | DB name | `SuperApp-pro` |
-| DB user/pass | `sa` / see `.claude/skills/credentials.local.md` (gitignored — never put the real value back in this file, see issue 0044 of TungRoot) |
+| DB user/pass | `sa` — pass đọc ngay trên VPS từ `/var/www/Timeline/.env` (nguồn đúng); máy nhà: vault `vps/sql_server.sa_password`. Không chép pass vào file/skill (issue 0044, 0110) |
 | sqlcmd path | `/opt/mssql-tools18/bin/sqlcmd` |
 | Backup dir | `/var/opt/mssql/backup/` |
 | Backup script | `/root/backup-superapp.sh` |
@@ -24,26 +24,20 @@ You are managing the **SuperApp production DB backup cron job** on the VPS.
 | Google Drive folder | `gdrive:` root = **BackupDB** (folder ID `1hDxMlsP4y6NV7p_fBogvo-La3iRSw0ia`) |
 | Local retention | 14 days (`find ... -mtime +14 -delete`) |
 
-## SSH Template (always use paramiko)
+## SSH
 
-```python
-import paramiko, sys, io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-
-client = paramiko.SSHClient()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-client.connect("157.66.101.51", username="root", password="<read from .claude/skills/credentials.local.md>", timeout=30)
-
-def run(cmd, timeout=120):
-    stdin, stdout, stderr = client.exec_command(cmd, timeout=timeout)
-    out = stdout.read().decode("utf-8", errors="replace")
-    err = stderr.read().decode("utf-8", errors="replace")
-    return out, err
+```bash
+ssh -o BatchMode=yes vps-superapp 'tail -30 /var/log/superapp-backup.log'
 ```
 
-Run via PowerShell: write script to a variable then pipe to `python`.
+Gọi từ PowerShell mà ssh Windows báo "Bad permissions" → `"C:/Program Files/Git/usr/bin/ssh.exe"`.
+Chạy SQL ad-hoc trên VPS: đưa pass qua `SQLCMDPASSWORD` đọc từ `.env` (không `-P`) —
+công thức ở skill `credential-ops`, mục "Chạy SQL trên VPS không lộ pass".
 
 ## Backup Script (`/root/backup-superapp.sh`)
+
+> Bản dưới là bản **đích** (#1502). Script thật trên VPS (06/10) vẫn gắn pass `sa`
+> bằng `-P` — chưa cập nhật, xem task #1502.
 
 ```bash
 #!/bin/bash
@@ -56,7 +50,10 @@ KEEP_DAYS=14
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] ===== Backup start =====" >> "$LOG_FILE"
 
-/opt/mssql-tools18/bin/sqlcmd -S localhost,1433 -U sa -P '<read from .claude/skills/credentials.local.md>' -No -Q "
+# Pass lấy từ .env của app (1 nguồn duy nhất, đổi pass sa không phải sửa script này);
+# qua biến SQLCMDPASSWORD, không -P (argument hiện trong process list).
+export SQLCMDPASSWORD=$(grep ConnectionStrings__SuperAppConnection /var/www/Timeline/.env | sed -E "s/.*Password=([^;]*).*/\1/")
+/opt/mssql-tools18/bin/sqlcmd -S localhost,1433 -U sa -No -Q "
 BACKUP DATABASE [SuperApp-pro]
 TO DISK = N'${BACKUP_FILE}'
 WITH FORMAT, INIT, COMPRESSION;
@@ -116,4 +113,4 @@ rclone ls gdrive: | grep SuperApp-pro
 
 ## Task: {{USER_TASK}}
 
-Based on the user's request, use paramiko to SSH into the VPS and perform the appropriate action (check status, view logs, run manual backup, update script, fix cron, etc.). Always show the result — log tail or file listing — to confirm success.
+Based on the user's request, use `ssh vps-superapp` and perform the appropriate action (check status, view logs, run manual backup, update script, fix cron, etc.). Always show the result — log tail or file listing — to confirm success.

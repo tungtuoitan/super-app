@@ -58,11 +58,11 @@ PORT=3000
 | API port | **5000** |
 | Solution file | `Timeline\SuperApp-Service.sln` |
 | Main project | `Timeline\SuperAppAPI\SuperAppAPI.csproj` |
-| Dev start | `dotnet run` inside `SuperAppAPI/` |
+| Dev start | `powershell -ExecutionPolicy Bypass -File scripts/run-dev.ps1 [-Watch] [-Database SuperApp-test]` (secret qua tung-vault; `dotnet run` trực tiếp sẽ dừng vì secret chưa giải mã) |
 | ORM | Entity Framework Core (SQL Server provider) |
 | Auth | JWT Bearer + Google OAuth 2.0 |
 | Logging | Serilog — daily rolling file in `Logs/superapp-{date}.log` |
-| Config | `.env` file at repo root (loaded by DotNetEnv) |
+| Config | `.env` at repo root, nạp bằng DotNetEnv `NoClobber` (biến môi trường thắng). Dev: secret chỉ là `vault://...`; VPS: `.env` thật `root:www-data 640` |
 
 **Project layers:**
 
@@ -87,9 +87,9 @@ PORT=3000
 | Detail | Value |
 |--------|-------|
 | Engine | Microsoft SQL Server |
-| Host | `157.66.101.51,1433` |
+| Host | `157.66.101.51,1433` (public đã chặn) — máy nhà qua SSH tunnel `127.0.0.1,14330` |
 | Auth | SQL Server (`sa` user) |
-| Password | `sa` sa; (password: ask user if needed) |
+| Password | tung-vault `vps/sql_server.sa_password` (dùng qua `secret run`, skill `credential-ops`); trên VPS nằm trong `/var/www/Timeline/.env` |
 | Dev DB | `SuperApp-dev` |
 | Prod DB | `SuperApp-pro` |
 | Connection names | `SuperAppConnection`, `UserProfileConnection` (both point to same DB) |
@@ -99,7 +99,7 @@ PORT=3000
 
 **Connection string pattern:**
 ```
-Server=157.66.101.51,1433;Database=SuperApp-{dev|pro};User Id=sa;Password=***;
+Server=127.0.0.1,14330;Database=SuperApp-{dev|pro};User Id=sa;   # dev: không có Password, run-dev.ps1 gắn DB_PASSWORD lúc chạy
 TrustServerCertificate=True;Encrypt=False;Connection Timeout=30;
 ```
 

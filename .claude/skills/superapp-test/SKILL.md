@@ -12,7 +12,7 @@ description: >
 
 ## What it is
 
-Database `SuperApp-test` ở `157.66.101.51:1433`, snapshot tại 2026-05-24 với **1000 loadtest users + ~3.087 triệu rows** clone từ user `hoanhtungle@gmail.com` (id=1) trên `SuperApp-pro`.
+Database `SuperApp-test` ở VPS `157.66.101.51` (máy nhà vào qua SSH tunnel `127.0.0.1:14330` — cổng 1433 public đã chặn), snapshot tại 2026-05-24 với **1000 loadtest users + ~3.087 triệu rows** clone từ user `hoanhtungle@gmail.com` (id=1) trên `SuperApp-pro`.
 
 **Mục đích:** restore từ `.bak` (~24s) thay vì phải seed + clone lại (~18 phút) mỗi lần load test.
 
@@ -51,7 +51,7 @@ SuperApp/test/                      # ⭐ Tất cả load test toolkit nằm tro
 │   ├── bin/k6.exe                  # portable k6 v2.0.0
 │   ├── k6/scenario.js              # full flow: login + 5 endpoints
 │   ├── k6/scenario-noauth.js       # uses prewarmed tokens
-│   └── .env                        # DB creds (DB_PASSWORD), VUS, etc.
+│   └── .env                        # DB config (DB_PASSWORD = vault://...), VUS, etc.
 │
 ├── test-workspace-api/             # /api/workspace/{id}/tree/v2 stress (real data)
 │   ├── BENCHMARK-HISTORY.md        # ⭐ Lưu kết quả qua các lần BE thay đổi
@@ -81,29 +81,16 @@ cd C:\Users\Admin\source\SuperApp\test\db-test
 
 ### 2. Point BE qua test DB
 
-**Lưu ý quan trọng:** BE dùng `DotNetEnv` để load `Timeline\.env` — env vars set qua `$env:...` BỊ ghi đè bởi `.env`. Có 2 cách:
+BE chạy qua tung-vault (#1502): `Timeline\.env` chỉ chứa tham chiếu `vault://`,
+`Program.cs` nạp `.env` với `NoClobber` nên biến môi trường thắng `.env`. Đổi DB
+bằng tham số, **không sửa/swap `.env`**:
 
-**Cách A (recommend): tạm swap `Timeline\.env`**
-```powershell
-$envPath = "C:\Users\Admin\source\Timeline\.env"
-Copy-Item $envPath "$envPath.backup-before-loadtest" -Force
-(Get-Content $envPath) -replace "Database=SuperApp-dev","Database=SuperApp-test" | Set-Content $envPath
-# ... chạy test ...
-# restore lại sau:
-Copy-Item "$envPath.backup-before-loadtest" $envPath -Force
-Remove-Item "$envPath.backup-before-loadtest"
-```
-
-**Cách B: sửa Program.cs để env vars override `.env`** — chuẩn hơn nhưng cần edit BE code, chỉ làm khi cần test thường xuyên.
-
-Sau khi swap `.env`, restart BE:
 ```powershell
 # Stop BE cũ nếu đang chạy:
 Get-Process | Where-Object { $_.Path -like "*SuperAppAPI*" } | Stop-Process -Force
 
-# Start mới:
-cd C:\Users\Admin\source\Timeline\SuperAppAPI
-dotnet run --no-launch-profile --urls=http://localhost:5000
+# Start mới trỏ SuperApp-test (tự mở SSH tunnel 14330, giải mã secret, gắn pass vào connection string):
+powershell -ExecutionPolicy Bypass -File C:\Users\Admin\source\timeline\scripts\run-dev.ps1 -Database SuperApp-test
 ```
 Đợi `Now listening on: http://localhost:5000`.
 
@@ -173,7 +160,8 @@ Tree/v2 nặng **28×** vs light reads. Avg payload 600KB. Với data thật, th
 - **Disk VPS hẹp (49GB total).** Bulk DML trong FULL recovery mode làm log phình lên 5GB+ và ăn hết disk → backup fail. `backup.js` đã auto switch SIMPLE recovery + `DBCC SHRINKFILE` trước khi BACKUP. Đừng quay lại FULL recovery cho `SuperApp-test` (nó là test DB, không cần PITR).
 - **dbo.Keywords có UNIQUE(Link).** Clone script append `#u<userId>` vào Link để tránh collision — đừng đổi pattern email/userId nếu không update logic clone.
 - **Connection pool size = 1 trong clone-all.js.** Bắt buộc vì script dùng staging tables (`dbo._stage_*`) liên kết qua nhiều requests; pool >1 sẽ làm staging tables không thấy được. Đừng tăng pool size.
-- **BE đang dùng connection string từ `Timeline\.env`.** Override bằng `$env:ConnectionStrings__SuperAppConnection` trước khi `dotnet run` — KHÔNG sửa file `.env` (sẽ ảnh hưởng dev workflow).
+- **Đổi DB của BE bằng `run-dev.ps1 -Database ...`** — KHÔNG sửa/swap `Timeline\.env` (chỉ chứa `vault://`).
+- **Secret qua tung-vault.** Các `.ps1` (`loadtest\run.ps1`, `db-test\restore.ps1`/`setup.ps1`, `test-workspace-api\run.ps1`) tự chạy lại trong `secret run` nhờ `test\vault-env.ps1`. Node script chạy lẻ phải bọc: `secret run --env-file loadtest\.env -- node seed-users.js` — không thì `DB_PASSWORD` là chuỗi `vault://...`.
 - **Skipped tables (chấp nhận):** flow_edge, flow_node_position, point_history, node_status_history, entity_hashtags, refresh_tokens. Lý do: loose refs / không relevant cho load test.
 
 ## Memory references
@@ -182,7 +170,7 @@ Xem thêm `loadtest-baseline-2026-05-24.md` trong project memory cho chi tiết 
 
 ## Connection info
 
-- Host: `157.66.101.51:1433`
+- Host: `127.0.0.1:14330` (SSH tunnel tới VPS `157.66.101.51:1433`; `run-dev.ps1` tự mở)
 - DB: `SuperApp-test`
-- User: `sa`, password trong `loadtest\.env` (`DB_PASSWORD`)
+- User: `sa`, password ở tung-vault `vps/sql_server.sa_password` (`loadtest\.env` chỉ có tham chiếu) — skill `credential-ops`
 - Backup path: `/var/opt/mssql/data/SuperApp-test.bak` (trên Linux SQL Server host)

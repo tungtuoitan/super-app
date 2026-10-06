@@ -153,7 +153,7 @@ ALTER TABLE schema.table ADD CONSTRAINT CK_constraint_name CHECK (new_name <= va
 2. Apply lên dev (`SuperApp-dev`) và verify
 3. Apply lên prod (`SuperApp-pro`)
 
-Connection: `Server=157.66.101.51,1433; User Id=sa` (password trong `Timeline/.env`)
+Connection: user `sa`. Trên VPS: pass đọc từ `/var/www/Timeline/.env` qua `SQLCMDPASSWORD` (không `-P`). Máy nhà: SSH tunnel `127.0.0.1,14330` + `secret run -e SQLCMDPASSWORD=vps/sql_server.sa_password -- sqlcmd ...` (công thức ở skill `credential-ops`). `Timeline/.env` dev chỉ còn tham chiếu `vault://` — không đọc pass từ đó.
 
 ---
 
