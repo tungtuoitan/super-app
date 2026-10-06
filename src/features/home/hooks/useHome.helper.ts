@@ -7,6 +7,7 @@ import { homeConstants } from "../home.constants";
 import { getHomeState } from "../store/useHome.store";
 import { homeService } from "../service/home.service";
 import { addMonths, buildWeekKeys, monthKey, toDateKey } from "../utils/home.utils";
+import type { HomeView } from "../types/home.types";
 
 const describeError = (e: unknown) => (e instanceof Response ? `HTTP ${e.status}` : e instanceof Error ? e.message : String(e));
 
@@ -36,20 +37,23 @@ export function useHomeHelper() {
 
     /** Fetch sensitive data, then show it for `fullDurationMinutes`. Nothing sensitive is kept on failure. */
     const unlock = async () => {
-        const { todayKey, fullDurationMinutes, setSensitiveHabits, setFinance, setPrivacyMode, setFullUntil, setNowMs, setIsUnlocking, setError } = getHomeState();
+        const { todayKey, fullDurationMinutes, setSensitiveHabits, setFinance, setPsychDescription, setPrivacyMode, setFullUntil, setNowMs, setIsUnlocking, setError } = getHomeState();
         const from = buildWeekKeys(todayKey, homeConstants.activityWeeks)[0];
         const toMonth = monthKey(todayKey);
         setIsUnlocking(true);
         try {
-            const [habits, finance] = await Promise.all([
+            const [habits, finance, psychTask] = await Promise.all([
                 homeService._getHabits(from, todayKey, { excludeTaskIds: homeConstants.publicTrackerIds }),
                 homeService._getFinance(`${addMonths(toMonth, -(homeConstants.financeMonths - 1))}-01`, todayKey),
+                // the bank only shapes the Tâm lý view — a missing tracker must not block unlocking
+                homeService._getTask(homeConstants.psychTrackerId).catch(() => null),
             ]);
             // lock() while the request was in flight → drop the response
             if (!getHomeState().isUnlocking) return;
             const now = Date.now();
             setSensitiveHabits(habits.data ?? []);
             setFinance(finance.object ?? null);
+            setPsychDescription(psychTask?.data?.[0]?.description ?? null);
             setNowMs(now);
             setFullUntil(now + fullDurationMinutes * 60 * 1000);
             setPrivacyMode("full");
@@ -64,12 +68,13 @@ export function useHomeHelper() {
 
     /** Back to private: wipe every sensitive value from memory. */
     const lock = () => {
-        const { setSensitiveHabits, setFinance, setPrivacyMode, setFullUntil, setIsUnlocking } = getHomeState();
+        const { setSensitiveHabits, setFinance, setPsychDescription, setPrivacyMode, setFullUntil, setIsUnlocking } = getHomeState();
         setIsUnlocking(false);
         setPrivacyMode("private");
         setFullUntil(null);
         setSensitiveHabits(null);
         setFinance(null);
+        setPsychDescription(null);
     };
 
     /** Full → private; private → full; a click while unlocking cancels it. */
@@ -114,5 +119,13 @@ export function useHomeHelper() {
         if (dayChanged || stale) loadPublic();
     };
 
-    return { loadPublic, unlock, lock, togglePrivacy, extendFull, changeFullDuration, tick, refreshIfNeeded };
+    /** Open a tab; opening the tab you are on goes back to the overview. */
+    const toggleView = (view: HomeView) => {
+        const { view: current, setView } = getHomeState();
+        setView(current === view ? "overview" : view);
+    };
+
+    const showView = (view: HomeView) => getHomeState().setView(view);
+
+    return { loadPublic, unlock, lock, togglePrivacy, extendFull, changeFullDuration, tick, refreshIfNeeded, toggleView, showView };
 }

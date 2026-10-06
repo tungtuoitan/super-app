@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { zSetter } from "@/shared";
 import { homeConstants } from "../home.constants";
 import { toDateKey } from "../utils/home.utils";
-import type { ActivityWeekPointDTO, FinanceSummaryDTO, HabitSeriesDTO, PrivacyMode } from "../types/home.types";
+import type { ActivityWeekPointDTO, FinanceSummaryDTO, HabitSeriesDTO, HomeView, PrivacyMode } from "../types/home.types";
 
 /**
  * Home (progress dashboard) state — TungRoot #1481.
@@ -20,6 +20,12 @@ export interface HomeContextData {
     setSensitiveHabits: Dispatch<SetStateAction<HabitSeriesDTO[] | null>>;
     finance: FinanceSummaryDTO | null;
     setFinance: Dispatch<SetStateAction<FinanceSummaryDTO | null>>;
+    /** Description (HTML) of the psych tracker — holds the question bank. Full mode only. */
+    psychDescription: string | null;
+    setPsychDescription: Dispatch<SetStateAction<string | null>>;
+    /** Current tab (overview or one section expanded) */
+    view: HomeView;
+    setView: Dispatch<SetStateAction<HomeView>>;
 
     privacyMode: PrivacyMode;
     setPrivacyMode: Dispatch<SetStateAction<PrivacyMode>>;
@@ -53,6 +59,10 @@ const _store = create<HomeContextData>((set, get) => ({
     setSensitiveHabits: zSetter("sensitiveHabits", set, get),
     finance: null,
     setFinance: zSetter("finance", set, get),
+    psychDescription: null,
+    setPsychDescription: zSetter("psychDescription", set, get),
+    view: "overview",
+    setView: zSetter("view", set, get),
 
     privacyMode: "private",
     setPrivacyMode: zSetter("privacyMode", set, get),

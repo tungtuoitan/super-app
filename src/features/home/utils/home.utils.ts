@@ -138,9 +138,12 @@ export const buildTrackerSlots = (
     ];
 };
 
-/** Trackers configured but not on the public allowlist → placeholders in private mode. */
+/**
+ * Habit rows hidden in private mode: configured, not on the public allowlist, and not an "event"
+ * tracker (those only become timeline marks in full mode).
+ */
 export const countMaskedTrackers = (configs: Record<number, TrackerConfig>, publicIds: number[]): number =>
-    Object.keys(configs).map(Number).filter((id) => !publicIds.includes(id)).length;
+    Object.entries(configs).filter(([id, c]) => !publicIds.includes(Number(id)) && c.kind !== "event").length;
 
 const trackDates = (s: HabitSeriesDTO) => s.entries.filter((e) => e.type === "track").map((e) => e.date);
 

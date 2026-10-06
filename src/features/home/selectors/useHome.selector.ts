@@ -15,6 +15,7 @@ import {
     countMaskedTrackers,
     remainingSeconds,
 } from "../utils/home.utils";
+import { MASKED_PSYCH, buildPsychView, parsePsychBank } from "../utils/homePsych.utils";
 import type { HomeStatusView, PrivacyView } from "../types/home.types";
 
 /**
@@ -23,10 +24,11 @@ import type { HomeStatusView, PrivacyView } from "../types/home.types";
  */
 export const useHomeSelector = () => {
     const {
-        activity, publicHabits, sensitiveHabits, finance,
+        activity, publicHabits, sensitiveHabits, finance, psychDescription,
         privacyMode, fullUntil, fullDurationMinutes, nowMs,
-        todayKey, isLoading, isUnlocking, error, loadedAt,
+        todayKey, isLoading, isUnlocking, error, loadedAt, view,
     } = useHomeStore();
+    const isFull = privacyMode === "full";
 
     const weeks = useMemo(() => buildWeekKeys(todayKey, homeConstants.activityWeeks), [todayKey]);
 
@@ -35,32 +37,42 @@ export const useHomeSelector = () => {
         [activity, weeks],
     );
 
+    // The psych tracker feeds the Tâm lý view only; event trackers only become timeline marks.
+    const habitSeries = useMemo(
+        () => (isFull ? (sensitiveHabits ?? []).filter((s) => s.taskId !== homeConstants.psychTrackerId) : null),
+        [sensitiveHabits, isFull],
+    );
     const slots = useMemo(
         () => buildTrackerSlots(
             publicHabits,
-            privacyMode === "full" ? sensitiveHabits : null,
+            habitSeries,
             homeConstants.publicTrackerIds,
             homeConstants.trackers,
             homeConstants.defaultTracker,
             countMaskedTrackers(homeConstants.trackers, homeConstants.publicTrackerIds),
             homeConstants.maskedTrackerLabel,
         ),
-        [publicHabits, sensitiveHabits, privacyMode],
+        [publicHabits, habitSeries],
     );
+    const rowSlots = useMemo(() => slots.filter((s) => s.config?.kind !== "event"), [slots]);
 
-    const kpis = useMemo(() => buildKpis(slots, todayKey), [slots, todayKey]);
+    const kpis = useMemo(() => buildKpis(rowSlots, todayKey), [rowSlots, todayKey]);
     const dayColumns = useMemo(() => buildDayColumns(todayKey, homeConstants.dayGridDays), [todayKey]);
-    const dayRows = useMemo(() => buildDayRows(slots, dayColumns, todayKey), [slots, dayColumns, todayKey]);
-    const weekBars = useMemo(() => buildWeekBars(slots, weeks, todayKey), [slots, weeks, todayKey]);
-    const timelineMarks = useMemo(() => (privacyMode === "full" ? buildTimelineMarks(slots) : []), [slots, privacyMode]);
-    const financeView = useMemo(
-        () => (privacyMode === "full" && finance ? buildFinanceView(finance) : MASKED_FINANCE),
-        [finance, privacyMode],
-    );
+    const dayRows = useMemo(() => buildDayRows(rowSlots, dayColumns, todayKey), [rowSlots, dayColumns, todayKey]);
+    const weekBars = useMemo(() => buildWeekBars(rowSlots, weeks, todayKey), [rowSlots, weeks, todayKey]);
+    const timelineMarks = useMemo(() => (isFull ? buildTimelineMarks(slots) : []), [slots, isFull]);
+    const financeView = useMemo(() => (isFull && finance ? buildFinanceView(finance) : MASKED_FINANCE), [finance, isFull]);
+
+    const psychView = useMemo(() => {
+        if (!isFull) return MASKED_PSYCH;
+        const series = (sensitiveHabits ?? []).find((s) => s.taskId === homeConstants.psychTrackerId) ?? null;
+        const psychWeeks = buildWeekKeys(todayKey, homeConstants.psychWeeks);
+        return buildPsychView(series, parsePsychBank(psychDescription), dayColumns.map((c) => c.date), psychWeeks, todayKey);
+    }, [isFull, sensitiveHabits, psychDescription, dayColumns, todayKey]);
 
     const privacy: PrivacyView = {
         mode: privacyMode,
-        remainingSeconds: privacyMode === "full" ? remainingSeconds(fullUntil, nowMs) : 0,
+        remainingSeconds: isFull ? remainingSeconds(fullUntil, nowMs) : 0,
         fullDurationMinutes,
         durationOptions: homeConstants.fullModeOptions,
         isUnlocking,
@@ -68,5 +80,5 @@ export const useHomeSelector = () => {
 
     const status: HomeStatusView = { isLoading, error, loadedAt, todayKey };
 
-    return { activityView, kpis, dayColumns, dayRows, weekBars, timelineMarks, financeView, privacy, status };
+    return { activityView, kpis, dayColumns, dayRows, weekBars, timelineMarks, financeView, psychView, privacy, status, view };
 };

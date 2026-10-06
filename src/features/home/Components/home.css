@@ -1,0 +1,232 @@
+/* Home — Claude Design v5 (TungRoot #1481). Dark only; scoped under #home-root. */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap");
+
+#home-root {
+    --color-bg: #161617;
+    --color-surface: #1f1f21;
+    --color-text: #ededed;
+    --color-divider: rgba(255, 255, 255, 0.08);
+    --color-accent: #f2b54b;
+    --home-muted: rgba(255, 255, 255, 0.55);
+    --home-tint: rgba(255, 255, 255, 0.035);
+    --home-today: rgba(255, 255, 255, 0.06);
+    --home-group-work: #8ec5a8;
+    --home-group-work-ink: #10241a;
+    --home-group-infra: #e8846b;
+    --home-group-infra-ink: #2a110a;
+    --home-group-superapp: #b59ce0;
+    --home-group-superapp-ink: #1c1230;
+    --home-group-learn: #7fc4d6;
+    --home-group-learn-ink: #0c2228;
+    --home-group-finance: #e6c36a;
+    --home-group-finance-ink: #2a2008;
+    --home-group-life: #e79ab8;
+    --home-group-life-ink: #2e0f1c;
+    --home-group-misc: #9a9aa0;
+    --home-group-misc-ink: #141414;
+    --home-group-other: #6e6e74;
+    --home-group-other-ink: #101010;
+    --home-good: #4ade80;
+    --home-onpace: #a6a6ab;
+    --home-behind: #f87171;
+    --home-over: #808085;
+    --home-neutral: #5a5a5e;
+    --home-bar: #3a3a3e;
+    --home-bar-soft: #2a2a2d;
+    --home-bar-met: #e6e6e6;
+    --home-mark: #ededed;
+
+    overflow: hidden;
+    color: #ededed;
+    background: #0c0c0d;
+    font-family: "Geist", system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+#home-root *,
+#home-root *::before,
+#home-root *::after {
+    box-sizing: border-box;
+}
+#home-root h1,
+#home-root h2 {
+    margin: 0;
+}
+#home-root button:focus-visible {
+    outline: 2px solid #8fb8ff;
+    outline-offset: 2px;
+}
+
+@keyframes home-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+@keyframes home-fade-in {
+    from {
+        opacity: 0;
+        transform: scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+#home-root .home-spin {
+    animation: home-spin 0.9s linear infinite;
+}
+/* re-keyed on every privacy switch → short fade like the design */
+#home-root .home-fx {
+    animation: home-fade-in 170ms ease;
+}
+
+#home-root .home-hatch {
+    position: relative;
+    background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0 2px, transparent 2px 9px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+#home-root .home-section {
+    padding: 16px 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: #161617;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+#home-root .home-card {
+    min-width: 0;
+    padding: 14px 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: #161617;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+#home-root .home-card-link {
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    align-items: stretch;
+}
+#home-root .home-card-link:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+}
+#home-root .home-muted {
+    color: rgba(255, 255, 255, 0.55);
+}
+#home-root .home-tip {
+    position: absolute;
+    padding: 8px 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    border-radius: 12px;
+    background: #1f1f21;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 3;
+}
+#home-root .home-pill-mark {
+    white-space: nowrap;
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: #1f1f21;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: var(--home-mark);
+}
+
+/* buttons */
+#home-root .home-icon-btn {
+    width: 30px;
+    height: 30px;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+}
+#home-root .home-icon-btn:hover,
+#home-root .home-ghost-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ededed;
+}
+#home-root .home-ghost-btn {
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+}
+#home-root .home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    padding: 0 22px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+}
+#home-root .home-btn-light {
+    border: 0;
+    background: #f2f2f2;
+    color: #111;
+    font-weight: 500;
+}
+#home-root .home-btn-light:hover {
+    background: #fff;
+}
+#home-root .home-btn-light:active {
+    background: #d9d9d9;
+}
+#home-root .home-btn-outline {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: transparent;
+    color: #ededed;
+}
+#home-root .home-btn-outline:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+#home-root .home-btn-timer {
+    padding: 0 18px 0 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #1f1f21;
+    color: #ededed;
+}
+#home-root .home-btn-timer:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+}
+#home-root .home-btn-err {
+    margin-left: auto;
+    height: 28px;
+    padding: 0 12px;
+    border: 1px solid rgba(240, 165, 138, 0.5);
+    border-radius: 999px;
+    background: transparent;
+    color: #f0a58a;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+#home-root .home-btn-err:hover {
+    background: rgba(240, 165, 138, 0.12);
+}

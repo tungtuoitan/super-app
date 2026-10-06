@@ -58,3 +58,44 @@ export const useHomePrivacyHeadless = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         []);
 };
+
+/** Keys 1–6 switch tabs (not while typing in a field). */
+export const useHomeViewKeysHeadless = () => {
+    const { showView } = useHomeHelper();
+
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            const el = document.activeElement as HTMLElement | null;
+            if (el && (/INPUT|TEXTAREA|SELECT/.test(el.tagName) || el.isContentEditable)) return;
+            const view = homeConstants.views["123456".indexOf(e.key)];
+            if (view) showView(view.key);
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+};
+
+/**
+ * The v5 layout is drawn for ≥ 1280×820: when the editor area is smaller, zoom the page out so it
+ * still fits without scrolling (same rule as the design). Root element: #home-root.
+ */
+export const useHomeFitHeadless = () => {
+    useEffect(() => {
+        const root = document.getElementById(homeConstants.rootId);
+        const box = root?.parentElement;
+        if (!root || !box) return;
+        const fit = () => {
+            const { clientWidth: w, clientHeight: h } = box;
+            const z = Math.min(1, w / homeConstants.fitWidth, h / homeConstants.fitHeight);
+            root.style.setProperty("zoom", z < 1 ? String(z) : "");
+            root.style.width = z < 1 ? `${w / z}px` : "100%";
+            root.style.height = z < 1 ? `${h / z}px` : "100%";
+        };
+        fit();
+        const ro = new ResizeObserver(fit);
+        ro.observe(box);
+        return () => ro.disconnect();
+    }, []);
+};

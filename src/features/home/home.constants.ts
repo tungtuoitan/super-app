@@ -7,7 +7,7 @@
  * stay hidden until someone adds them here on purpose).
  */
 
-import type { ActivityGroupConfig, TrackerConfig } from "./types/home.types";
+import type { ActivityGroupConfig, HomeView, TrackerConfig } from "./types/home.types";
 
 export const homeConstants = {
     moduleId: "Home",
@@ -33,6 +33,27 @@ export const homeConstants = {
     /** Label for a masked tracker in private mode (followed by its index) */
     maskedTrackerLabel: "Riêng tư",
 
+    /** Bot check-in tracker (#1486): its answers feed the Tâm lý view, not the habit rows. Full mode only. */
+    psychTrackerId: 1486,
+    /** Weeks shown for weekly psych questions */
+    psychWeeks: 12,
+    /** A psych question needs this many answers before averages are shown */
+    psychMinAnswers: 3,
+
+    /** Tabs, in keyboard order (keys 1–6) */
+    views: [
+        { key: "overview", label: "Tổng quan" },
+        { key: "act", label: "Hoạt động" },
+        { key: "hab", label: "Thói quen" },
+        { key: "day", label: "14 ngày" },
+        { key: "psy", label: "Tâm lý" },
+        { key: "fin", label: "Tài chính" },
+    ] as { key: HomeView; label: string }[],
+    /** Below this size the page is zoomed out to fit (Claude Design v5 layout) */
+    rootId: "home-root",
+    fitWidth: 1280,
+    fitHeight: 820,
+
     /** Tracker task ids that may be shown in private mode */
     publicTrackerIds: [1458, 1459, 1460] as number[],
 
@@ -43,14 +64,13 @@ export const homeConstants = {
         1460: { kind: "count", weeklyTarget: 5 },
         1461: { kind: "limit", weeklyLimit: 2, weekendOnly: true },
         1462: { kind: "event" },
-        1486: { kind: "count" },
     } as Record<number, TrackerConfig>,
     defaultTracker: { kind: "count" } as TrackerConfig,
 
     /** Activity groups for the streamgraph (project ids → group); unknown projects go to `otherGroup` */
     activityGroups: [
         { key: "work", label: "Công ty", projectIds: [4, 32] },
-        { key: "infra", label: "Hạ tầng TungRoot", projectIds: [23, 34, 35, 36, 37, 38, 39] },
+        { key: "infra", label: "Hạ tầng", projectIds: [23, 34, 35, 36, 37, 38, 39] },
         { key: "superapp", label: "SuperApp", projectIds: [3, 5, 6, 10, 11, 12] },
         { key: "learn", label: "Học", projectIds: [14, 17, 18, 27, 28, 30, 31, 40] },
         { key: "finance", label: "Tài chính", projectIds: [20, 25] },

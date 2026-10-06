@@ -17,6 +17,8 @@ export interface ActivityWeekPointDTO {
 export interface HabitEntryDTO {
     commentId: number;
     date: string;
+    /** Instant with offset (occurredAt ?? createdAt) — time of day */
+    at: string;
     type: "track" | "comment";
     content: string;
 }
@@ -242,4 +244,71 @@ export interface HomeStatusView {
     /** Epoch ms of the last successful public load */
     loadedAt: number | null;
     todayKey: string;
+}
+
+// ── Views / tabs ──────────────────────────────────────────────────────────────
+
+export type HomeView = "overview" | "act" | "hab" | "day" | "psy" | "fin";
+
+// ── Psychology (bot check-in, tracker #1486) ──────────────────────────────────
+
+/** One question of the bank stored in the tracker description (JSON block). */
+export interface PsychBankQuestion {
+    id: string;
+    text: string;
+    short?: string;
+    type: "scale" | "yesno";
+    min?: number;
+    max?: number;
+    labels?: string[];
+    frequency?: "daily" | "weekly";
+    direction?: "higherIsBetter" | "higherIsWorse";
+}
+
+export type PsychSkipReason = "busy" | "bad" | "none" | "today";
+
+export interface PsychAnswer {
+    /** Instant with offset */
+    at: string;
+    date: string;
+    value: number;
+    label: string;
+    note: string | null;
+}
+
+export interface PsychSkip {
+    at: string;
+    date: string;
+    reason: PsychSkipReason;
+}
+
+export interface PsychQuestionView {
+    id: string;
+    text: string;
+    short: string;
+    type: "scale" | "yesno";
+    min: number;
+    max: number;
+    labels: string[];
+    frequency: "daily" | "weekly";
+    direction: "higherIsBetter" | "higherIsWorse";
+    /** Oldest first */
+    answers: PsychAnswer[];
+    skips: PsychSkip[];
+    /** Daily questions: one point per day of `PsychView.days` (null = no answer) */
+    dayAvg: { date: string; avg: number | null }[];
+    /** One point per week of `PsychView.weeks` */
+    weekAvg: { weekStart: string; avg: number | null }[];
+    latest: PsychAnswer | null;
+}
+
+export interface PsychView {
+    masked: boolean;
+    questions: PsychQuestionView[];
+    /** Prompts in the last 14 days: every answer or skip is one prompt */
+    stats: { asked: number; answered: number; skipped: Record<PsychSkipReason, number> };
+    /** The 14 days of the day grid */
+    days: string[];
+    /** 12 Monday keys, oldest first */
+    weeks: string[];
 }

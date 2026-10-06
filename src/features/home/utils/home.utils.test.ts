@@ -22,8 +22,8 @@ const configs: Record<number, TrackerConfig> = {
     3: { kind: "limit", weeklyLimit: 2, weekendOnly: true },
     4: { kind: "event" },
 };
-const track = (date: string, content = "") => ({ commentId: 0, date, type: "track" as const, content });
-const note = (date: string, content: string) => ({ commentId: 0, date, type: "comment" as const, content });
+const track = (date: string, content = "") => ({ commentId: 0, date, at: `${date}T12:00:00.000+07:00`, type: "track" as const, content });
+const note = (date: string, content: string) => ({ commentId: 0, date, at: `${date}T12:00:00.000+07:00`, type: "comment" as const, content });
 const series = (taskId: number, entries: HabitSeriesDTO["entries"]): HabitSeriesDTO => ({ taskId, title: `T${taskId}`, projectId: 15, status: "background_progress", entries });
 
 const TODAY = "2026-10-07"; // Wednesday
@@ -72,7 +72,7 @@ describe("trackers", () => {
         const slots = buildTrackerSlots(pub, null, [1, 2], configs, { kind: "count" }, 2, "Riêng tư");
         expect(slots.map((s) => s.key)).toEqual(["t1", "t2", "masked1", "masked2"]);
         expect(slots[2]).toEqual({ key: "masked1", label: "Riêng tư 1", config: null, series: null });
-        expect(countMaskedTrackers(configs, [1, 2])).toBe(2);
+        expect(countMaskedTrackers(configs, [1, 2])).toBe(1); // event trackers become marks, not masked rows
     });
 
     it("kpis: daily counts distinct days, count/limit count entries, masked has no values", () => {

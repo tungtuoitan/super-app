@@ -3,6 +3,7 @@
  *   GET /api/dashboard/activity   comments per (week, project)
  *   GET /api/dashboard/habits     trackers + entries per day
  *   GET /api/finance/summary      net worth / months / holdings from the ledger (full mode only, #1482)
+ *   GET /api/task/{id}            psych tracker description = question bank (full mode only)
  */
 
 import { config } from "config/app.config";
@@ -31,4 +32,7 @@ const _getHabits = (from: string, to: string, ids: { taskIds?: number[]; exclude
 const _getFinance = (from: string, to: string) =>
     _get<FinanceSummaryDTO>(`/api/finance/summary?from=${from}&to=${to}&interval=week`);
 
-export const homeService = { _getActivity, _getHabits, _getFinance };
+/** One task (data[0]); used for the psych tracker's question bank. */
+const _getTask = (id: number) => _get<{ id: number; description: string | null }>(`/api/task/${id}`);
+
+export const homeService = { _getActivity, _getHabits, _getFinance, _getTask };
