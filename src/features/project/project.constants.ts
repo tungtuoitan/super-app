@@ -5,7 +5,7 @@
 
 export const projectConstants = {
     // Project statuses coi là "đang sống" — mặc định filter + chọn sẵn ở multi-project
-    liveStatuses: ["open", "in_progress"] as readonly string[],
+    liveStatuses: ["open", "in_progress", "background_progress"] as readonly string[],
     // Status and Priority colors (GitHub-style)
     optionColor: {
         projectStatus: {
@@ -13,6 +13,7 @@ export const projectConstants = {
                 // Cùng màu với status task tương ứng (dropped = cancelled)
                 open: { bg: "#1f6f43", text: "#ffffff" },
                 in_progress: { bg: "#FCCC3E", text: "#1a1a1a" },
+                background_progress: { bg: "#534514", text: "#ffffff" },
                 paused: { bg: "#575757", text: "#ffffff" },
                 completed: { bg: "#6f42c1", text: "#ffffff" },
                 dropped: { bg: "#78716c", text: "#ffffff" },
@@ -24,6 +25,7 @@ export const projectConstants = {
                 // Cùng màu với timelineTask (dropped = cancelled)
                 open:        { bg: "#09331c", text: "#E5E7EB" },
                 in_progress: { bg: "#6e560b", text: "#E5E7EB" },
+                background_progress: { bg: "#251f0c", text: "#ffffff" },
                 paused:      { bg: "#464646", text: "#ffffff" },
                 completed:   { bg: "#311a5e", text: "#E5E7EB" },
                 dropped:     { bg: "#3d3730", text: "#E5E7EB" },
@@ -67,13 +69,14 @@ export const projectConstants = {
         } as const,
     },
     optionOrder: {
-        // Flow: open -> in_progress / paused -> completed / dropped
+        // Flow: open -> in_progress / background_progress / paused -> completed / dropped
         projectStatuses: {
             Open: 1,
             "In Progress": 2,
-            Paused: 3,
-            Completed: 4,
-            Dropped: 5,
+            "Bg Progress": 3,
+            Paused: 4,
+            Completed: 5,
+            Dropped: 6,
         } as Record<string, number>,
         taskStatuses: {
             Open: 1,
@@ -105,7 +108,7 @@ export const projectConstants = {
             wsGrid: { statusCode: "active", deletedAt: "null" },
             workspace: { statusCode: "active", deletedAt: "null" },
             k: { statusCode: "active", deletedAt: "null" },
-            projectGrid: { statusCode: "open,in_progress" },
+            projectGrid: { statusCode: "open,in_progress,background_progress" },
             taskGrid: { status: "open,in_progress,background_progress,paused", priority: "low,medium,high" },
         } as const,
         taskDefaults: {
@@ -136,7 +139,7 @@ export const projectConstants = {
                 { key: "deletedAt", label: "Deleted Status", type: "checkbox", defaultValue: "null" },
             ],
             projectGrid: [
-                { key: "statusCode", label: "Status", type: "checkbox", standardRegistryType: "project_status", defaultValue: "open,in_progress" },
+                { key: "statusCode", label: "Status", type: "checkbox", standardRegistryType: "project_status", defaultValue: "open,in_progress,background_progress" },
             ],
             taskGrid: [
                 { key: "status", label: "Status", type: "checkbox", standardRegistryType: "task_status", defaultValue: "open,in_progress" },

@@ -16,7 +16,7 @@ export const projectGridFilterDefinition: FilterDefinition = {
     viewKey: "projectGrid",
     featureName: "project",
     fieldConfigs: PROJECT_GRID_FILTER_FIELDS,
-    defaultFilters: { statusCode: "open,in_progress" },
+    defaultFilters: { statusCode: "open,in_progress,background_progress" },
 };
 
 export function registerProjectFilters() {
