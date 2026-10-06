@@ -21,6 +21,20 @@ Tab đã mở từ trước khi cài/reload extension: bot tự gắn vào khi c
 reload trang. Riêng tab mới, `chrome://`, `edge://`, cửa hàng extension, trình xem PDF thì trình
 duyệt không bao giờ cho extension chạy — bot chỉ hiện ở trang web thường.
 
+## Đo thời gian Facebook / Instagram (usage.js — #1512, tracker #1511)
+
+- Mỗi phút lấy mẫu 1 lần: **cửa sổ trình duyệt đang focus** + **máy có người dùng trong 5 phút gần
+  nhất** + tab đang xem là facebook.com / instagram.com → cộng thời gian kể từ mẫu trước (tối đa
+  90 giây, để máy ngủ dậy không bị cộng cả tiếng). Đang ở VS Code, khoá máy, rời máy > 5 phút →
+  không tính.
+- `facebook.com/messages` và messenger.com đo riêng thành **Messenger**, không cộng vào FB.
+- Mỗi ngày **1 comment `track` / máy** vào task #1511, tự sửa tại chỗ tối đa 10 phút/lần:
+  `[fb_ins] FB 42' · Ins 13' · tổng 55' · Messenger 8' (không tính) · máy nhà · đo tự động`.
+  Qua ngày thì chốt số cuối của hôm qua (lỗi mạng → thử lại mỗi phút tới khi gửi được).
+- Popup: dòng "FB / Ins hôm nay". Cài đặt: "Task đo FB/Ins" (0 = tắt), "Tên máy" (ghi kèm, để phân
+  biệt máy nhà / máy công ty).
+- Chỉ đo trình duyệt có cài extension — điện thoại, trình duyệt khác không tính.
+
 ## Cách bot quyết định hỏi (scheduler.js)
 
 - Tối đa `maxPerDay` câu/ngày (mặc định 3), cách nhau ít nhất `minGapMinutes` (mặc định 2h), chỉ

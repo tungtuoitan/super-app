@@ -2,8 +2,8 @@
   "name": "superapp-companion",
   "private": true,
   "type": "module",
-  "description": "Browser extension: bot check-in tâm lý (TungRoot #1485). Không cần npm install.",
+  "description": "Browser extension: bot check-in tâm lý (TungRoot #1485) + đo thời gian FB/Ins (#1512). Không cần npm install.",
   "scripts": {
-    "test": "node --test tests/scheduler.test.js"
+    "test": "node --test tests/scheduler.test.js tests/usage.test.js"
   }
 }

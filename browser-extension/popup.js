@@ -32,11 +32,17 @@ async function render() {
     const next = s.next;
     box.append(line("Câu tiếp theo", !next ? "—" : next.ok ? "sẵn sàng (chờ lúc anh rảnh tay)" : next.nextAt ? `sau ${time(next.nextAt)}` : next.reason));
     box.append(line("Bộ câu hỏi", s.bank ? `${s.bank.count} câu · tải ${time(s.bank.loadedAt)}` : "chưa tải được"));
+    if (s.usage) {
+        const m = (sec) => Math.round(sec / 60);
+        box.append(line("FB / Ins hôm nay", `${m(s.usage.facebook)}' / ${m(s.usage.instagram)}'`));
+    }
     if (s.queueLength) box.append(line("Chưa gửi được", `${s.queueLength} câu trả lời (sẽ tự gửi lại)`));
     $("toggleToday").textContent = s.today.disabled ? "Bật lại hôm nay" : "Tắt hôm nay";
     $("toggleToday").dataset.disabled = s.today.disabled ? "1" : "";
     $("apiBase").value = s.settings.apiBase;
     $("trackerTaskId").value = s.settings.trackerTaskId;
+    $("usageTaskId").value = s.settings.usageTaskId;
+    $("deviceLabel").value = s.settings.deviceLabel;
 }
 
 const act = (fn) => async () => {
@@ -50,7 +56,12 @@ $("toggleToday").addEventListener("click", act(() => send({ type: "setDisabledTo
 $("refreshBank").addEventListener("click", act(() => send({ type: "refreshBank" })));
 $("save").addEventListener("click", act(() => send({
     type: "saveSettings",
-    settings: { apiBase: $("apiBase").value, trackerTaskId: Number($("trackerTaskId").value) },
+    settings: {
+        apiBase: $("apiBase").value,
+        trackerTaskId: Number($("trackerTaskId").value),
+        usageTaskId: Number($("usageTaskId").value),
+        deviceLabel: $("deviceLabel").value.trim(),
+    },
 })));
 
 render();

@@ -8,15 +8,18 @@
 import {
     applyOutcome, canPrompt, emptyState, formatComment, isValidAnswer, markShown, parseBank, pickQuestion, rollDay,
 } from "./scheduler.js";
-import { NeedLoginError, fetchTrackerDescription, postComment } from "./api.js";
+import { NeedLoginError, fetchTrackerDescription, postComment, upsertComment } from "./api.js";
+import { formatUsage, sample, shouldReport, siteOf } from "./usage.js";
 
-const DEFAULT_SETTINGS = { apiBase: "https://www.tungle.uk", trackerTaskId: 1486 };
+const DEFAULT_SETTINGS = { apiBase: "https://www.tungle.uk", trackerTaskId: 1486, usageTaskId: 1511, deviceLabel: "" };
 const TICK_MINUTES = 2;
 const BANK_REFRESH_MS = 6 * 3600 * 1000;
 /** Prompt still "active" this long after it should have timed out → the tab died, count as no reaction */
 const STALE_GRACE_MS = 2 * 60 * 1000;
 /** Only show the bot when the computer has had input within this many seconds */
 const IDLE_SECONDS = 60;
+/** FB/Ins timer: reading or watching without touching the keyboard still counts for this long */
+const USAGE_IDLE_SECONDS = 300;
 
 // ── Storage ───────────────────────────────────────────────────────────────────
 
@@ -162,6 +165,57 @@ async function tick() {
     await tryPrompt();
 }
 
+// ── Facebook / Instagram time (#1512) ─────────────────────────────────────────
+
+/** Site of the active tab, only when a browser window has focus and someone is at the computer. */
+async function currentSite() {
+    if ((await chrome.idle.queryState(USAGE_IDLE_SECONDS)) !== "active") return null;
+    const win = await chrome.windows.getLastFocused().catch(() => null);
+    if (!win?.focused) return null;
+    const [tab] = await chrome.tabs.query({ active: true, windowId: win.id });
+    return tab?.url ? siteOf(tab.url) : null;
+}
+
+/** Create/update the day's comment. Returns the state with commentId/reportedText set, or unchanged on failure. */
+async function reportUsage(usage, now, force) {
+    const { apiBase, usageTaskId, deviceLabel } = await getSettings();
+    if (!usageTaskId) return usage;
+    const text = formatUsage(usage, deviceLabel);
+    if (!shouldReport(usage, text, now, force)) return usage;
+    try {
+        const id = await upsertComment(apiBase, {
+            id: usage.commentId, taskId: usageTaskId, type: "track", content: text,
+            occurredAt: new Date(usage.firstAt).toISOString(),
+        });
+        return { ...usage, commentId: id, reportedText: text, reportedAt: now };
+    } catch (e) {
+        await setLocal({ lastError: e instanceof NeedLoginError ? "needLogin" : String(e.message ?? e) });
+        return usage;
+    }
+}
+
+let usageBusy = false;
+async function usageTick() {
+    if (usageBusy) return;
+    usageBusy = true;
+    try {
+        const now = Date.now();
+        const { usage, usageClosed } = await chrome.storage.local.get(["usage", "usageClosed"]);
+        const r = sample(usage, now, await currentSite());
+        await setLocal({ usage: r.usage, ...(r.closed ? { usageClosed: r.closed } : {}) });
+        // Yesterday's final number: retried every minute until it is sent.
+        const closed = r.closed ?? usageClosed;
+        if (closed) {
+            const sent = await reportUsage(closed, now, true);
+            const done = sent.reportedText === formatUsage(sent, (await getSettings()).deviceLabel);
+            await setLocal({ usageClosed: done ? null : sent });
+        }
+        await setLocal({ usage: await reportUsage(r.usage, now, false) });
+    } finally {
+        usageBusy = false;
+    }
+}
+
 // ── Popup status ──────────────────────────────────────────────────────────────
 
 async function status() {
@@ -169,7 +223,9 @@ async function status() {
     const { state: raw, bank, bankLoadedAt, queue, lastError } = await getLocal();
     const state = rollDay(raw, now);
     const settings = await getSettings();
+    const { usage } = await chrome.storage.local.get("usage");
     return {
+        usage: usage?.day === state.day ? usage.sec : null,
         settings,
         lastError,
         queueLength: queue.length,
@@ -181,13 +237,18 @@ async function status() {
 
 // ── Wiring ────────────────────────────────────────────────────────────────────
 
-chrome.runtime.onInstalled.addListener(() => {
+const createAlarms = () => {
     chrome.alarms.create("tick", { periodInMinutes: TICK_MINUTES });
+    chrome.alarms.create("usage", { periodInMinutes: 1 });
+};
+chrome.runtime.onInstalled.addListener(() => {
+    createAlarms();
     loadBank(true);
 });
-chrome.runtime.onStartup.addListener(() => chrome.alarms.create("tick", { periodInMinutes: TICK_MINUTES }));
+chrome.runtime.onStartup.addListener(createAlarms);
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "tick") tick();
+    if (alarm.name === "usage") usageTick();
 });
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {

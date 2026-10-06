@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "SuperApp Companion",
-  "version": "0.1.1",
-  "description": "Con bot nhỏ thỉnh thoảng hỏi 1 câu check-in và ghi vào SuperApp.",
+  "version": "0.2.0",
+  "description": "Con bot nhỏ thỉnh thoảng hỏi 1 câu check-in và ghi vào SuperApp; đo thời gian dùng Facebook/Instagram.",
   "permissions": [
     "storage",
     "alarms",

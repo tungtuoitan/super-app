@@ -63,6 +63,19 @@ export async function fetchTrackerDescription(apiBase, taskId) {
     return task.description ?? "";
 }
 
+/** Create (id 0) or update (id > 0) a task comment in place; returns its id. */
+export async function upsertComment(apiBase, item) {
+    const json = await call(apiBase, "POST", "/api/taskcomment", {
+        id: item.id ?? 0,
+        taskId: item.taskId,
+        type: item.type,
+        content: item.content,
+        occurredAt: item.occurredAt,
+    });
+    const saved = json.data?.[0] ?? json.object;
+    return saved?.id ?? item.id ?? null;
+}
+
 /** Record one outcome as a task comment. occurredAt = when the user reacted. */
 export function postComment(apiBase, item) {
     return call(apiBase, "POST", "/api/taskcomment", {
