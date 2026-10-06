@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "SuperApp Companion",
+  "version": "0.1.1",
+  "description": "Con bot nhỏ thỉnh thoảng hỏi 1 câu check-in và ghi vào SuperApp.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "idle",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "SuperApp Companion",
+    "default_popup": "popup.html"
+  }
+}

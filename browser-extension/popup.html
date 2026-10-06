@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>SuperApp Companion</title>
+  <style>
+    body { font: 13px/1.5 system-ui, "Segoe UI", sans-serif; width: 300px; margin: 0; padding: 12px; color: #1f1f1f; }
+    h1 { font-size: 14px; margin: 0 0 8px; }
+    .line { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; }
+    .line span:first-child { color: #6b6b6b; }
+    .warn { background: #faeeda; color: #633806; border-radius: 6px; padding: 6px 8px; margin: 6px 0; }
+    .btns { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+    button { font: inherit; border: 1px solid #c9c4f0; background: #f6f5fe; color: #3c3489; border-radius: 6px; padding: 4px 8px; cursor: pointer; }
+    details { margin-top: 6px; }
+    label { display: block; margin: 6px 0 2px; color: #6b6b6b; }
+    input, select { width: 100%; box-sizing: border-box; font: inherit; padding: 3px 6px; }
+    #msg { min-height: 1.5em; color: #3c3489; }
+    @media (prefers-color-scheme: dark) { body { background: #1c1b22; color: #eee; } button { background: #2e2b45; color: #cecbf6; border-color: #403c6b; } input, select { background: #24232b; color: #eee; } }
+  </style>
+</head>
+<body>
+  <h1>SuperApp Companion</h1>
+  <div id="status">Đang tải…</div>
+  <div class="btns">
+    <button id="askNow">Hỏi thử ngay</button>
+    <button id="toggleToday">Tắt hôm nay</button>
+    <button id="refreshBank">Tải lại bộ câu hỏi</button>
+  </div>
+  <div id="msg"></div>
+  <details>
+    <summary>Cài đặt</summary>
+    <label for="apiBase">Server</label>
+    <select id="apiBase">
+      <option value="https://www.tungle.uk">tungle.uk (thật)</option>
+      <option value="http://localhost:5000">localhost:5000 (dev)</option>
+    </select>
+    <label for="trackerTaskId">Task tracker (id)</label>
+    <input id="trackerTaskId" type="number" min="1">
+    <div class="btns"><button id="save">Lưu</button></div>
+  </details>
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
