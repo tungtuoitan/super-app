@@ -10,7 +10,10 @@ import { useConsoleHelper } from "@/shared";
 import { taskService } from "@/features/taskDetail";
 import { projectService } from "@/features/project";
 import { toDateOnly } from "@/shared";
-import { useMultiTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/multiProject/store/useMultiTimeline.store";
+import {
+    useMultiTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH,
+    MIN_WEEK_WIDTH, MAX_WEEK_WIDTH, WEEK_ZOOM_STEP,
+} from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
 import {useAuthStore} from "@/shared";
@@ -23,12 +26,12 @@ export const useMultiTimelineHelper = () => {
     const _console = useConsoleHelper();
 
     const {
-        projectIds, timelineRange, setTimelineRange,
-        dayWidth, setDayWidth, setIsTodayVisible, timelineScrollRef,
+        projectIds, mode, timelineRange, setTimelineRange,
+        dayWidth, setDayWidth, weekWidth, setWeekWidth, setIsTodayVisible, timelineScrollRef,
     } = useMultiTimelineStore();
 
     // ── Selector ─────────────────────────────────────────
-    const { filteredTasks, filteredProjects, todayPosition } = useMultiTimelineSelector();
+    const { filteredTasks, filteredProjects, todayPosition, pxPerDay } = useMultiTimelineSelector();
 
     // ── Today visibility ─────────────────────────────────
     const checkTodayVisibility = () => {
@@ -48,7 +51,7 @@ export const useMultiTimelineHelper = () => {
             newStart.setDate(newStart.getDate() - TIMELINE_EXTEND_DAYS);
             setTimelineRange((prev) => (prev ? { ...prev, start: newStart } : null));
             setTimeout(() => {
-                if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = scrollLeft + TIMELINE_EXTEND_DAYS * dayWidth;
+                if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = scrollLeft + TIMELINE_EXTEND_DAYS * pxPerDay;
             }, 0);
         }
 
@@ -66,22 +69,27 @@ export const useMultiTimelineHelper = () => {
     };
 
     // ── Zoom (maintain center point) ─────────────────────
-    const handleZoom = (newDayWidth: number) => {
-        if (!timelineScrollRef.current) { setDayWidth(newDayWidth); return; }
+    // Task mode zooms the day column, project mode zooms the week column.
+    const handleZoom = (newColumnWidth: number) => {
+        const newPxPerDay = mode === "project" ? newColumnWidth / 7 : newColumnWidth;
+        const setColumnWidth = mode === "project" ? setWeekWidth : setDayWidth;
+        if (!timelineScrollRef.current) { setColumnWidth(newColumnWidth); return; }
         const { scrollLeft, clientWidth } = timelineScrollRef.current;
-        const centerDay = (scrollLeft + clientWidth / 2) / dayWidth;
-        setDayWidth(newDayWidth);
+        const centerDay = (scrollLeft + clientWidth / 2) / pxPerDay;
+        setColumnWidth(newColumnWidth);
         setTimeout(() => {
-            if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = centerDay * newDayWidth - clientWidth / 2;
+            if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = centerDay * newPxPerDay - clientWidth / 2;
         }, 0);
     };
 
     const handleZoomIn = () => {
-        handleZoom(Math.min(dayWidth + TIMELINE_ZOOM_STEP, MAX_DAY_WIDTH));
+        if (mode === "project") handleZoom(Math.min(weekWidth + WEEK_ZOOM_STEP, MAX_WEEK_WIDTH));
+        else handleZoom(Math.min(dayWidth + TIMELINE_ZOOM_STEP, MAX_DAY_WIDTH));
     };
 
     const handleZoomOut = () => {
-        handleZoom(Math.max(dayWidth - TIMELINE_ZOOM_STEP, MIN_DAY_WIDTH));
+        if (mode === "project") handleZoom(Math.max(weekWidth - WEEK_ZOOM_STEP, MIN_WEEK_WIDTH));
+        else handleZoom(Math.max(dayWidth - TIMELINE_ZOOM_STEP, MIN_DAY_WIDTH));
     };
 
     // ── Task date change (optimistic) ──────────────────

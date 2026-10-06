@@ -7,11 +7,14 @@
 import { useMemo } from "react";
 import type { Task } from "@/features/taskDetail";
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
-import { useMultiTimelineStore, DEFAULT_DAY_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "@/features/multiProject/store/useMultiTimeline.store";
+import {
+    useMultiTimelineStore, DEFAULT_DAY_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH,
+    DEFAULT_WEEK_WIDTH, MIN_WEEK_WIDTH, MAX_WEEK_WIDTH,
+} from "@/features/multiProject/store/useMultiTimeline.store";
 import { generateDateRange, formatMonthHeader } from "@/features/taskDetail";
 
 export const useMultiTimelineSelector = () => {
-    const { projectIds, projects, mode, timelineRange, dayWidth } = useMultiTimelineStore();
+    const { projectIds, projects, mode, timelineRange, dayWidth, weekWidth } = useMultiTimelineStore();
     const { tasks } = useMpTaskStore();
 
     // ── Filtered & sorted tasks (for mode === "task") ────
@@ -65,19 +68,64 @@ export const useMultiTimelineSelector = () => {
     // ── Items for range computation (generic) ────────────
     const items = mode === "task" ? filteredTasks : filteredProjects;
 
-    // ── Dates from range ─────────────────────────────────
+    // ── Scale: project mode packs 7 days into 1 week column ──
+    const pxPerDay = mode === "project" ? weekWidth / 7 : dayWidth;
+
+    // ── Dates from range (project mode: snapped to whole Mon–Sun weeks) ──
     const { timelineStart, dates } = useMemo(() => {
         if (!timelineRange) return { timelineStart: new Date(), dates: [] as Date[] };
-        return { timelineStart: timelineRange.start, dates: generateDateRange(timelineRange.start, timelineRange.end) };
-    }, [timelineRange]);
+        if (mode !== "project") return { timelineStart: timelineRange.start, dates: generateDateRange(timelineRange.start, timelineRange.end) };
+
+        const start = new Date(timelineRange.start);
+        start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+        const end = new Date(timelineRange.end);
+        end.setDate(end.getDate() + ((7 - end.getDay()) % 7));
+        return { timelineStart: start, dates: generateDateRange(start, end) };
+    }, [timelineRange, mode]);
+
+    // ── Week columns (project mode) ──────────────────────
+    const weeks = useMemo(() => {
+        if (mode !== "project") return [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const result: { start: Date; label: string; title: string; isCurrent: boolean; isMonthEnd: boolean }[] = [];
+        for (let i = 0; i + 6 < dates.length; i += 7) {
+            const start = dates[i];
+            const end = dates[i + 6];
+            const nextStart = dates[i + 7];
+            result.push({
+                start,
+                label: `${start.getDate()}–${end.getDate()}`,
+                title: `${start.toLocaleDateString()} – ${end.toLocaleDateString()}`,
+                isCurrent: today >= start && today <= end,
+                isMonthEnd: !!nextStart && nextStart.getMonth() !== start.getMonth(),
+            });
+        }
+        return result;
+    }, [mode, dates]);
+
+    // ── Month groups for week header (a week belongs to the month of its Thursday) ──
+    const weekMonthGroups = useMemo(() => {
+        const groups: { month: string; weeks: number }[] = [];
+        weeks.forEach((week) => {
+            const thursday = new Date(week.start);
+            thursday.setDate(thursday.getDate() + 3);
+            const month = formatMonthHeader(thursday);
+            const last = groups[groups.length - 1];
+            if (last && last.month === month) last.weeks++;
+            else groups.push({ month, weeks: 1 });
+        });
+        return groups;
+    }, [weeks]);
 
     // ── Today line position ──────────────────────────────
     const todayPosition = useMemo(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const diffDays = Math.floor((today.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24));
-        return diffDays * dayWidth + dayWidth / 2;
-    }, [timelineStart, dayWidth]);
+        return diffDays * pxPerDay + pxPerDay / 2;
+    }, [timelineStart, pxPerDay]);
 
     // ── Month groups for header ──────────────────────────
     const monthGroups = useMemo(() => {
@@ -103,10 +151,10 @@ export const useMultiTimelineSelector = () => {
     }, [dates]);
 
     // ── Zoom info ────────────────────────────────────────
-    const timelineWidth = dates.length * dayWidth;
-    const zoomPercent = Math.round((dayWidth / DEFAULT_DAY_WIDTH) * 100);
-    const canZoomIn = dayWidth < MAX_DAY_WIDTH;
-    const canZoomOut = dayWidth > MIN_DAY_WIDTH;
+    const timelineWidth = dates.length * pxPerDay;
+    const zoomPercent = mode === "project" ? Math.round((weekWidth / DEFAULT_WEEK_WIDTH) * 100) : Math.round((dayWidth / DEFAULT_DAY_WIDTH) * 100);
+    const canZoomIn = mode === "project" ? weekWidth < MAX_WEEK_WIDTH : dayWidth < MAX_DAY_WIDTH;
+    const canZoomOut = mode === "project" ? weekWidth > MIN_WEEK_WIDTH : dayWidth > MIN_DAY_WIDTH;
 
     return {
         filteredTasks,
@@ -114,6 +162,9 @@ export const useMultiTimelineSelector = () => {
         items,
         timelineStart,
         dates,
+        pxPerDay,
+        weeks,
+        weekMonthGroups,
         todayPosition,
         monthGroups,
         timelineWidth,

@@ -12,6 +12,12 @@ import { storageService } from "@/shared";
 export const DEFAULT_DAY_WIDTH = 40;
 export const MIN_DAY_WIDTH = 20;
 export const MAX_DAY_WIDTH = 80;
+/** Project mode: 1 column = 1 week */
+export const DEFAULT_WEEK_WIDTH = 84;
+export const MIN_WEEK_WIDTH = 35;
+export const MAX_WEEK_WIDTH = 210;
+export const WEEK_ZOOM_STEP = 21;
+export const WEEK_WIDTH_STORAGE_KEY = "pro_timeline_week_width";
 
 export interface MultiTimelineContextData {
     // Config (set by parent via setters)
@@ -35,6 +41,8 @@ export interface MultiTimelineContextData {
     setHasScrolledToToday: Dispatch<SetStateAction<boolean>>;
     dayWidth: number;
     setDayWidth: Dispatch<SetStateAction<number>>;
+    weekWidth: number;
+    setWeekWidth: Dispatch<SetStateAction<number>>;
     timelineScrollRef: RefObject<HTMLDivElement>;
 }
 
@@ -57,6 +65,8 @@ const multiTimelineContextDefaultValue: MultiTimelineContextData = {
     setHasScrolledToToday: () => {},
     dayWidth: DEFAULT_DAY_WIDTH,
     setDayWidth: () => {},
+    weekWidth: DEFAULT_WEEK_WIDTH,
+    setWeekWidth: () => {},
     timelineScrollRef: { current: null },
 };
 
@@ -80,6 +90,11 @@ export const MultiTimelineProvider: React.FC<React.PropsWithChildren<unknown>> =
         return stored && stored >= MIN_DAY_WIDTH && stored <= MAX_DAY_WIDTH ? stored : DEFAULT_DAY_WIDTH;
     });
 
+    const [weekWidth, setWeekWidth] = useState(() => {
+        const stored = storageService.get<number>(WEEK_WIDTH_STORAGE_KEY);
+        return stored && stored >= MIN_WEEK_WIDTH && stored <= MAX_WEEK_WIDTH ? stored : DEFAULT_WEEK_WIDTH;
+    });
+
     return (
         <MultiTimelineStore.Provider
             value={{
@@ -92,6 +107,7 @@ export const MultiTimelineProvider: React.FC<React.PropsWithChildren<unknown>> =
                 isTodayVisible, setIsTodayVisible,
                 hasScrolledToToday, setHasScrolledToToday,
                 dayWidth, setDayWidth,
+                weekWidth, setWeekWidth,
                 timelineScrollRef,
             }}
         >

@@ -12,6 +12,9 @@ import { useMultiTimelineHelper } from "./useMultiTimeline.helper";
 import { storageService } from "@/shared";
 import {useAuthStore} from "@/shared";
 
+/** Minimum span (days) of the project week overview — ~6 months */
+const PRO_MIN_RANGE_DAYS = 182;
+
 export function useMultiTimelineHeadless() {
     const { loadTasksForProjects } = useMultiProjectTaskGridHelper();
     const { $user } = useAuthStore();
@@ -20,15 +23,16 @@ export function useMultiTimelineHeadless() {
     const {
         projectIds, storageKey, mode,
         timelineRange, setTimelineRange,
-        dayWidth, hasScrolledToToday, setHasScrolledToToday, timelineScrollRef,
+        dayWidth, weekWidth, hasScrolledToToday, setHasScrolledToToday, timelineScrollRef,
     } = useMultiTimelineStore();
     const { items, todayPosition } = useMultiTimelineSelector();
     const { checkTodayVisibility } = useMultiTimelineHelper();
 
-    // Effect 0: Reset scroll flag on mount so Effect 3 re-scrolls to today
+    // Effect 0: Reset scroll flag on mount / mode switch so Effect 3 re-scrolls to today
+    // (task and project mode use different scales, so the old scroll position is meaningless)
     useEffect(() => {
         setHasScrolledToToday(false);
-    }, []);
+    }, [mode]);
 
     // Effect 1: Initialize timeline range from items
     useEffect(() => {
@@ -69,10 +73,21 @@ export function useMultiTimelineHeadless() {
         setTimelineRange({ start, end });
     }, [items, timelineRange]);
 
-    // Effect 2: Persist dayWidth to localStorage
+    // Effect 1b: Project mode is a week overview — make sure the range spans enough weeks.
+    // Only the end is extended so existing bar positions / scroll offset stay put.
     useEffect(() => {
-        storageService.set(storageKey, dayWidth);
-    }, [storageKey, dayWidth]);
+        if (mode !== "project" || !timelineRange) return;
+        const spanDays = Math.ceil((timelineRange.end.getTime() - timelineRange.start.getTime()) / (1000 * 60 * 60 * 24));
+        if (spanDays >= PRO_MIN_RANGE_DAYS) return;
+        const end = new Date(timelineRange.start);
+        end.setDate(end.getDate() + PRO_MIN_RANGE_DAYS);
+        setTimelineRange((prev) => (prev ? { ...prev, end } : null));
+    }, [mode, timelineRange]);
+
+    // Effect 2: Persist column width (day width in task mode, week width in project mode) to localStorage
+    useEffect(() => {
+        storageService.set(storageKey, mode === "project" ? weekWidth : dayWidth);
+    }, [storageKey, mode, dayWidth, weekWidth]);
 
     // Effect 3: Scroll to today on initial load
     useEffect(() => {
@@ -89,8 +104,8 @@ export function useMultiTimelineHeadless() {
     //     if ($user.userId && projectIds.length > 0) loadTasksForProjects(projectIds);
     // }, [mode, $user.userId, projectIds, $user.filters?.taskGrid]);
 
-    // Effect 5: Recheck today visibility on dayWidth change
+    // Effect 5: Recheck today visibility on zoom change
     useEffect(() => {
         checkTodayVisibility();
-    }, [ dayWidth]);
+    }, [dayWidth, weekWidth]);
 }

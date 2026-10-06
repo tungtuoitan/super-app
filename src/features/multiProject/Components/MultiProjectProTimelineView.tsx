@@ -15,8 +15,8 @@ import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { useProjectTabHelper, getProjectStatusColors } from "@/features/project";
 import { cn } from "@/lib/utils";
-import { TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/taskDetail";
-import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
+import { TIMELINE_HEADER_HEIGHT } from "@/features/taskDetail";
+import { useMultiTimelineStore, WEEK_WIDTH_STORAGE_KEY } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "../hooks/mpTimeline/useMultiTimeline.helper";
 import { useMultiTimelineHeadless } from "../hooks/mpTimeline/useMultiTimeline.headless";
@@ -30,17 +30,17 @@ export function MultiProjectProTimelineView() {
     const { setMode, setStorageKey } = useMultiTimelineStore();
     useEffect(() => {
         setMode("project");
-        setStorageKey("pro_timeline_day_width");
+        setStorageKey(WEEK_WIDTH_STORAGE_KEY);
     }, []);
 
     // ── Side-effects (headless) ──────────────────────────
     useMultiTimelineHeadless();
 
     // ── State (from store) ───────────────────────────────
-    const { hoveredItemId, setHoveredItemId, isTodayVisible, dayWidth, timelineScrollRef } = useMultiTimelineStore();
+    const { hoveredItemId, setHoveredItemId, isTodayVisible, weekWidth, timelineScrollRef } = useMultiTimelineStore();
 
     // ── Computed values (from selector) ──────────────────
-    const { filteredProjects, timelineStart, dates, todayPosition, monthGroups, timelineWidth, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
+    const { filteredProjects, timelineStart, pxPerDay, weeks, weekMonthGroups, todayPosition, timelineWidth, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
 
     // ── Handlers (from helper) ───────────────────────────
     const { handleScroll, scrollToToday, handleZoomIn, handleZoomOut, handleProjectDateChange } = useMultiTimelineHelper();
@@ -91,39 +91,38 @@ export function MultiProjectProTimelineView() {
 
                         <div className="sticky top-0 z-10 bg-background border-b" style={{ height: TIMELINE_HEADER_HEIGHT }}>
                             <div className="flex border-b" style={{ height: 30 }}>
-                                {monthGroups.map((g, i) => (
-                                    <div key={i} className="flex items-center px-2 text-xs font-medium border-r bg-muted/50" style={{ width: g.days * dayWidth }}>
+                                {weekMonthGroups.map((g, i) => (
+                                    <div key={i} className="flex items-center px-2 text-xs font-medium border-r bg-muted/50 overflow-hidden whitespace-nowrap" style={{ width: g.weeks * weekWidth }}>
                                         {g.month}
                                     </div>
                                 ))}
                             </div>
                             <div className="flex" style={{ height: 30 }}>
-                                {dates.map((date, i) => (
+                                {weeks.map((week, i) => (
                                     <div
                                         key={i}
+                                        title={week.title}
                                         className={cn(
-                                            "flex items-center justify-center text-xs",
-                                            isWeekend(date) && "text-muted-foreground",
-                                            isToday(date) && "font-bold text-red-500",
-                                            isFirstDayOfMonth(date) ? "border-r border-border" : "border-r border-dashed border-border/50",
+                                            "flex items-center justify-center text-xs overflow-hidden whitespace-nowrap",
+                                            week.isCurrent && "font-bold text-red-500 bg-red-500/5",
+                                            week.isMonthEnd ? "border-r border-border" : "border-r border-dashed border-border/50",
                                         )}
-                                        style={{ width: dayWidth, background: isWeekend(date) && !isToday(date) ? WEEKEND_STRIPE_BG : undefined }}
+                                        style={{ width: weekWidth }}
                                     >
-                                        {formatDateHeader(date)}
+                                        {week.label}
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         <div className="absolute left-0 right-0 flex pointer-events-none" style={{ top: TIMELINE_HEADER_HEIGHT, height: totalHeight }}>
-                            {dates.map((date, i) => (
+                            {weeks.map((week, i) => (
                                 <div
                                     key={i}
-                                    className="h-full"
+                                    className={cn("h-full", week.isCurrent && "bg-red-500/5")}
                                     style={{
-                                        width: dayWidth,
-                                        borderRight: isFirstDayOfMonth(date) ? "1px solid hsl(var(--border))" : "1px dashed hsl(var(--border) / 0.5)",
-                                        background: isWeekend(date) ? WEEKEND_STRIPE_BG : undefined,
+                                        width: weekWidth,
+                                        borderRight: week.isMonthEnd ? "1px solid hsl(var(--border))" : "1px dashed hsl(var(--border) / 0.5)",
                                     }}
                                 />
                             ))}
@@ -141,7 +140,7 @@ export function MultiProjectProTimelineView() {
                                     <ProjectBar
                                         project={project}
                                         timelineStart={timelineStart}
-                                        dayWidth={dayWidth}
+                                        dayWidth={pxPerDay}
                                         onDateChange={handleProjectDateChange}
                                         onProjectClick={openProjectTab}
                                     />
