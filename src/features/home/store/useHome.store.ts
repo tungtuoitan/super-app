@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import type { Dispatch, SetStateAction } from "react";
 import { zSetter } from "@/shared";
-import { homeConstants } from "../home.constants";
 import { toDateKey } from "../utils/home.utils";
 import type { ActivityWeekPointDTO, FinanceSummaryDTO, HabitSeriesDTO, HomeView, PrivacyMode, TotpDialogMode } from "../types/home.types";
 
@@ -51,8 +50,6 @@ export interface HomeContextData {
     /** Epoch ms when full mode ends */
     fullUntil: number | null;
     setFullUntil: Dispatch<SetStateAction<number | null>>;
-    fullDurationMinutes: number;
-    setFullDurationMinutes: Dispatch<SetStateAction<number>>;
     /** Ticks every second while in full mode (drives the countdown) */
     nowMs: number;
     setNowMs: Dispatch<SetStateAction<number>>;
@@ -104,8 +101,6 @@ const _store = create<HomeContextData>((set, get) => ({
     setPrivacyMode: zSetter("privacyMode", set, get),
     fullUntil: null,
     setFullUntil: zSetter("fullUntil", set, get),
-    fullDurationMinutes: homeConstants.fullModeDefaultMinutes,
-    setFullDurationMinutes: zSetter("fullDurationMinutes", set, get),
     nowMs: Date.now(),
     setNowMs: zSetter("nowMs", set, get),
 

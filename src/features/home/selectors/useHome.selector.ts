@@ -25,7 +25,7 @@ import type { HomeStatusView, PrivacyView, TotpDialogView } from "../types/home.
 export const useHomeSelector = () => {
     const {
         activity, publicHabits, sensitiveHabits, finance, psychDescription,
-        privacyMode, fullUntil, fullDurationMinutes, nowMs,
+        privacyMode, fullUntil, nowMs,
         todayKey, isLoading, isUnlocking, error, loadedAt, view,
         totpMode, totpQr, totpSecret, totpError, totpLockedUntil, totpBusy,
     } = useHomeStore();
@@ -74,8 +74,6 @@ export const useHomeSelector = () => {
     const privacy: PrivacyView = {
         mode: privacyMode,
         remainingSeconds: isFull ? remainingSeconds(fullUntil, nowMs) : 0,
-        fullDurationMinutes,
-        durationOptions: homeConstants.fullModeOptions,
         isUnlocking,
     };
 

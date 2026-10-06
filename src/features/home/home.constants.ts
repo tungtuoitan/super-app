@@ -25,8 +25,7 @@ export const homeConstants = {
     staleAfterMs: 10 * 60 * 1000,
 
     /** Full mode lasts this long, then the page returns to private by itself */
-    fullModeDefaultMinutes: 5,
-    fullModeOptions: [2, 5, 15] as const,
+    fullModeMinutes: 2,
     countdownTickMs: 1000,
 
     /** Label for a masked tracker in private mode (followed by its index) */

@@ -233,8 +233,6 @@ export interface PrivacyView {
     mode: PrivacyMode;
     /** Seconds left in full mode; 0 in private mode */
     remainingSeconds: number;
-    fullDurationMinutes: number;
-    durationOptions: readonly number[];
     isUnlocking: boolean;
 }
 

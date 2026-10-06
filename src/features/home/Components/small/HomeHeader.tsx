@@ -7,10 +7,10 @@ import { fmtCountdown, fmtDayMonth } from "../../utils/homeFormat.utils";
 
 const WARN_SECONDS = 30;
 
-/** Title + refresh, tabs, privacy controls (unlock / countdown / duration / back to private). */
+/** Title + refresh, tabs, privacy controls (unlock / countdown / back to private). */
 export function HomeHeader() {
     const { privacy, status, view } = useHomeSelector();
-    const { loadPublic, togglePrivacy, extendFull, changeFullDuration, showView } = useHomeHelper();
+    const { loadPublic, togglePrivacy, extendFull, showView } = useHomeHelper();
     const isFull = privacy.mode === "full";
     const warn = privacy.remainingSeconds <= WARN_SECONDS;
     const updated = status.loadedAt ? new Date(status.loadedAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }) : "—";
@@ -75,23 +75,6 @@ export function HomeHeader() {
                             </span>
                             <span style={{ fontSize: 22, fontWeight: warn ? 700 : 600, minWidth: 52, textAlign: "left" }}>{fmtCountdown(privacy.remainingSeconds)}</span>
                         </button>
-                        <div style={{ display: "flex", gap: 6 }} title="Thời lượng xem đầy đủ">
-                            {privacy.durationOptions.map((m) => (
-                                <button
-                                    key={m}
-                                    type="button"
-                                    onClick={() => changeFullDuration(m)}
-                                    style={{
-                                        height: 40, padding: "0 14px", borderRadius: 999, font: "inherit", fontSize: 15, cursor: "pointer",
-                                        ...(privacy.fullDurationMinutes === m
-                                            ? { border: "1px solid transparent", background: "#f2f2f2", color: "#111" }
-                                            : { border: "1px solid rgba(255,255,255,.14)", background: "transparent", color: "#ededed" }),
-                                    }}
-                                >
-                                    {m} phút
-                                </button>
-                            ))}
-                        </div>
                         <button type="button" className="home-btn home-btn-outline" onClick={togglePrivacy} title="Về private" style={{ gap: 8, padding: "0 18px" }}>
                             <EyeOff size={17} />
                             Về private

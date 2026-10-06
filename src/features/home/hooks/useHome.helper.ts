@@ -35,9 +35,9 @@ export function useHomeHelper() {
         }
     };
 
-    /** Fetch sensitive data with the unlock token, then show it for `fullDurationMinutes`. Nothing sensitive is kept on failure. */
+    /** Fetch sensitive data with the unlock token, then show it for `fullModeMinutes`. Nothing sensitive is kept on failure. */
     const unlock = async () => {
-        const { unlockToken, todayKey, fullDurationMinutes, setSensitiveHabits, setFinance, setPsychDescription, setPrivacyMode, setFullUntil, setNowMs, setIsUnlocking, setError } = getHomeState();
+        const { unlockToken, todayKey, setSensitiveHabits, setFinance, setPsychDescription, setPrivacyMode, setFullUntil, setNowMs, setIsUnlocking, setError } = getHomeState();
         if (!unlockToken) return;
         const from = buildWeekKeys(todayKey, homeConstants.activityWeeks)[0];
         const toMonth = monthKey(todayKey);
@@ -56,7 +56,7 @@ export function useHomeHelper() {
             setFinance(finance.object ?? null);
             setPsychDescription(psychTask?.data?.[0]?.description ?? null);
             setNowMs(now);
-            setFullUntil(now + fullDurationMinutes * 60 * 1000);
+            setFullUntil(now + homeConstants.fullModeMinutes * 60 * 1000);
             setPrivacyMode("full");
             setError(null);
         } catch (e) {
@@ -154,16 +154,11 @@ export function useHomeHelper() {
 
     /** Restart the full-mode countdown (no refetch). */
     const extendFull = () => {
-        const { privacyMode, fullDurationMinutes, setFullUntil, setNowMs } = getHomeState();
+        const { privacyMode, setFullUntil, setNowMs } = getHomeState();
         if (privacyMode !== "full") return;
         const now = Date.now();
         setNowMs(now);
-        setFullUntil(now + fullDurationMinutes * 60 * 1000);
-    };
-
-    const changeFullDuration = (minutes: number) => {
-        getHomeState().setFullDurationMinutes(minutes);
-        extendFull();
+        setFullUntil(now + homeConstants.fullModeMinutes * 60 * 1000);
     };
 
     /** Called every countdown tick: advance the clock and lock when time is up. */
@@ -195,5 +190,5 @@ export function useHomeHelper() {
 
     const showView = (view: HomeView) => getHomeState().setView(view);
 
-    return { loadPublic, unlock, lock, togglePrivacy, openTotp, closeTotp, submitTotpCode, extendFull, changeFullDuration, tick, refreshIfNeeded, toggleView, showView };
+    return { loadPublic, unlock, lock, togglePrivacy, openTotp, closeTotp, submitTotpCode, extendFull, tick, refreshIfNeeded, toggleView, showView };
 }
