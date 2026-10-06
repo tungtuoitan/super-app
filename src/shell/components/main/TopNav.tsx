@@ -4,8 +4,6 @@ import { envConfig } from "config/env.config";
 import { useDeviceStore, useAuthStore } from "@/shared";
 import { CommandPalette } from "@/shell/commandPallete/CommandPalette";
 import { useActivityBarStore } from "@/shell/store/ActivityBar.store";
-import { useEditorTabBarHelper } from "@/shell/hooks/useEditorTabBar.helper";
-import { shellConstants } from "@/shell/shell.constants";
 import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { useKRepoSyncStore, KRepoSyncService } from "@/features/K";
 
@@ -101,14 +99,11 @@ function HamburgerIcon() {
  */
 export function TopNav() {
     const showDevBadge = envConfig.REACT_APP_ENVIRONMENT?.toLowerCase() !== constants.environments.production.toLowerCase();
-    const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
+    const { isSideBarVisible, setIsSideBarVisible, isHomeOpen, setIsHomeOpen } = useActivityBarStore();
     const { isMobile } = useDeviceStore();
-    const { openSingletonTab } = useEditorTabBarHelper();
 
-    /** Logo = go home (progress dashboard, TungRoot #1481): one pinned Home tab, first in the bar. */
-    const handleOpenHome = () => {
-        openSingletonTab(shellConstants.vscode.tab.tabTypes.home, { title: "Home", tabId: "home-tab", isPinned: true }, undefined, { position: "first" });
-    };
+    /** Logo = homepage over the whole workbench (TungRoot #1481); click again to go back to work. */
+    const handleToggleHome = () => setIsHomeOpen((open) => !open);
 
     const handleToggleSidebar = () => {
         setIsSideBarVisible(!isSideBarVisible);
@@ -120,7 +115,7 @@ export function TopNav() {
 
             <div className="top-navigation w-full bg-black h-[36px] sticky top-0 z-50">
                 <nav className="bg-[#1B1D23] h-[36px] flex items-center px-4 gap-2 w-full">
-                    <button type="button" onClick={handleOpenHome} className="flex items-center cursor-pointer" title="Home" aria-label="Home">
+                    <button type="button" onClick={handleToggleHome} className="flex items-center cursor-pointer" title={isHomeOpen ? "Về chỗ làm việc" : "Trang chủ"} aria-label="Home">
                         <img src="/logo-32x32-web.png" alt="Logo" className="w-4 h-4 mr-1 rounded-sm filter invert" />
                         <span className="text-white text-[10px] text-white/80 uppercase tracking-wide">S  u  p  e  r   A  p  p</span>
                     </button>

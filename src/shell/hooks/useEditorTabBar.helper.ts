@@ -1,8 +1,12 @@
 import { useEditorTabBarStore } from "../store/EditorTab.store";
+import { useActivityBarStore } from "../store/ActivityBar.store";
 import { moduleRegistry } from "../moduleRegistry";
 import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import { BaseTab, TabOpenMeta, TabType } from "../types/tab.types";
 import { shellConstants } from "../shell.constants";
+
+/** True right after a real click/keypress (transient user activation); browsers without the API → true. */
+const isUserGesture = () => (navigator as Navigator & { userActivation?: { isActive: boolean } }).userActivation?.isActive ?? true;
 
 // ── Module-level helpers (pure, no hooks) ─────────────────────────────────────
 
@@ -22,6 +26,7 @@ function inferTabTitle(data: unknown, meta: TabOpenMeta): string {
 
 export const useEditorTabBarHelper = () => {
     const { openTabs, setOpenTabs, activeTabId, setActiveTabId, isLoadingTab, setIsLoadingTab } = useEditorTabBarStore();
+    const { setIsHomeOpen } = useActivityBarStore();
 
     // ── Breadcrumb ────────────────────────────────────────────────────────────
 
@@ -55,6 +60,9 @@ export const useEditorTabBarHelper = () => {
      */
     const updateActiveTab = (newActiveTabId: string | null, tabs?: BaseTab[]) => {
         const tabsToSearch = tabs ?? openTabs;
+        // The user opening/activating a tab means they want to work → leave the homepage.
+        // Tabs opened by startup code (no click/key just before) must not close it.
+        if (newActiveTabId && isUserGesture()) setIsHomeOpen(false);
         setActiveTabIdSilently(newActiveTabId);
         const activeTab = newActiveTabId
             ? (tabsToSearch.find((t: BaseTab) => t.id === newActiveTabId) ?? null)

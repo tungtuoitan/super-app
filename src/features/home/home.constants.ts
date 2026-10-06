@@ -11,7 +11,6 @@ import type { ActivityGroupConfig, HomeView, TrackerConfig } from "./types/home.
 
 export const homeConstants = {
     moduleId: "Home",
-    color: "#7F77DD",
 
     /** Weeks shown on the activity streamgraph and the weekly tracker bars (incl. current week) */
     activityWeeks: 30,

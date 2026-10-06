@@ -19,6 +19,9 @@ export interface ActivityBarContextData {
     setIsSideBarVisible: Dispatch<SetStateAction<boolean>>;
     isPanelVisible: boolean;
     setIsPanelVisible: Dispatch<SetStateAction<boolean>>;
+    /** Homepage covering the workbench (desktop). Open at startup; the logo toggles it. */
+    isHomeOpen: boolean;
+    setIsHomeOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export const activityBarContextDefaultValue: ActivityBarContextData = {
@@ -33,6 +36,8 @@ export const activityBarContextDefaultValue: ActivityBarContextData = {
     setIsSideBarVisible: () => {},
     isPanelVisible: true,
     setIsPanelVisible: () => {},
+    isHomeOpen: false,
+    setIsHomeOpen: () => {},
 };
 
 const ActivityBarContext = createContext<ActivityBarContextData>(activityBarContextDefaultValue);
@@ -53,6 +58,7 @@ export const ActivityBarProvider: React.FC<React.PropsWithChildren<unknown>> = (
     // Layout states
     const [isSideBarVisible, setIsSideBarVisible] = useState(true);
     const [isPanelVisible, setIsPanelVisible] = useState(true);
+    const [isHomeOpen, setIsHomeOpen] = useState(true);
 
     return (
         <ActivityBarContext.Provider
@@ -68,6 +74,8 @@ export const ActivityBarProvider: React.FC<React.PropsWithChildren<unknown>> = (
                 setIsSideBarVisible,
                 isPanelVisible,
                 setIsPanelVisible,
+                isHomeOpen,
+                setIsHomeOpen,
             }}
         >
             {children}

@@ -221,6 +221,14 @@ export interface ModuleDefinition {
     /** Component rendered inside the sidebar when this module is active */
     SidebarView: ComponentType;
 
+    // ── Homepage ─────────────────────────────────────────────────────────────
+    /**
+     * Full-workbench homepage (TungRoot #1481): covers sidebar, tabs and bottom panel — only the top
+     * bar and the activity bar stay. Toggled by the app logo; closes when a tab is activated or an
+     * activity-bar module is clicked. Only one module should provide it.
+     */
+    HomeView?: ComponentType;
+
     // ── VSEditorArea ─────────────────────────────────────────────────────────
     /** Map of tab.type → EditorPanel component */
     editorPanels: Partial<Record<string, ComponentType<{ tab: BaseTab }>>>;

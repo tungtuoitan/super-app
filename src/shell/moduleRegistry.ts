@@ -35,6 +35,11 @@ export const moduleRegistry = {
         return _registry.find((m) => m.id === id);
     },
 
+    /** The full-workbench homepage view, if a module provides one */
+    getHomeView(): ComponentType | null {
+        return _registry.find((m) => m.HomeView)?.HomeView ?? null;
+    },
+
     /** Returns the EditorPanel component for a given tab type, searching all modules */
     getEditorPanel(tabType: string): ComponentType<{ tab: BaseTab }> | null {
         for (const m of _registry) {

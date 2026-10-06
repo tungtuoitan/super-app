@@ -8,7 +8,7 @@ import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { moduleRegistry } from "@/shell/moduleRegistry";
 import { shellConstants } from "@/shell/shell.constants";
 import { BaseTab } from "@/shell/types/tab.types";
-import { ErrorBoundary, EditorAreaErrorFallback, TabPanelErrorFallback } from "@/shared";
+import { ErrorBoundary, EditorAreaErrorFallback, TabPanelErrorFallback, useDeviceStore } from "@/shared";
 
 /**
  * VSEditorArea - main editor area.
@@ -96,15 +96,17 @@ function ActivePanel({ tab }: { tab: BaseTab }) {
     );
 }
 
-/** No tab open → the homepage (progress dashboard, TungRoot #1481) if registered, else a plain welcome. */
-const HOME_TAB: BaseTab = { id: "home-empty", type: shellConstants.vscode.tab.tabTypes.home, data: null, data0: null, title: "Home", hasUnsavedChanges: false };
-
+/**
+ * No tab open. Desktop: the homepage is an overlay over the whole workbench (VSCodeLayout), so a
+ * plain welcome here. Mobile has no logo → show the homepage inline (TungRoot #1481).
+ */
 function WelcomeState() {
-    const HomePanel = moduleRegistry.getEditorPanel(shellConstants.vscode.tab.tabTypes.home);
-    if (HomePanel) {
+    const { isMobile } = useDeviceStore();
+    const HomeView = moduleRegistry.getHomeView();
+    if (isMobile && HomeView) {
         return (
             <ErrorBoundary FallbackComponent={TabPanelErrorFallback} resetKeys={["home-empty"]}>
-                <HomePanel tab={HOME_TAB} />
+                <HomeView />
             </ErrorBoundary>
         );
     }

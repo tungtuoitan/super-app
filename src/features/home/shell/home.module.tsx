@@ -1,20 +1,13 @@
 import { Home } from "lucide-react";
-import { shellConstants } from "@/shell";
-import type { ModuleDefinition, TabMeta } from "@/shell";
+import type { ModuleDefinition } from "@/shell";
 import { HomePanel } from "../Components/HomePanel";
 import { homeConstants } from "../home.constants";
 
-const HomeEditorPanel = () => <HomePanel />;
 const HomeSidebar = () => null;
 
-const getHomeTabMeta = (): TabMeta => ({
-    icon: <Home className="w-4 h-4" style={{ color: homeConstants.color }} />,
-    color: homeConstants.color,
-});
-
 /**
- * Homepage — progress dashboard (TungRoot #1481). Not in the activity bar: opened by clicking the
- * app logo, and shown by the editor area whenever no tab is open.
+ * Homepage — progress dashboard (TungRoot #1481). Not a tab and not in the activity bar: shown over
+ * the whole workbench (HomeView) at startup and when the app logo is clicked.
  */
 export const homeModule: ModuleDefinition = {
     id: homeConstants.moduleId,
@@ -23,9 +16,7 @@ export const homeModule: ModuleDefinition = {
     hideFromActivityBar: true,
     hideRightSideBarFilter: true,
     SidebarView: HomeSidebar,
-    editorPanels: {
-        [shellConstants.vscode.tab.tabTypes.home]: HomeEditorPanel,
-    },
-    getTabMeta: getHomeTabMeta,
+    HomeView: HomePanel,
+    editorPanels: {},
     filterViewKey: null,
 };

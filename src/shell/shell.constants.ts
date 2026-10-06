@@ -48,7 +48,6 @@ export const shellConstants = {
                 kNode: "k-node",
                 kDailyReview: "k-daily-review",
                 wikiInfo: "wiki-info",
-                home: "home",
             } as const,
         },
         viewTypes: {

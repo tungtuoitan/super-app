@@ -22,7 +22,8 @@ interface VSCodeLayoutProps {
 export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const location = useLocation();
     const { isMobile } = useDeviceStore();
-    const { setIsPanelVisible } = useActivityBarStore();
+    const { setIsPanelVisible, isHomeOpen } = useActivityBarStore();
+    const HomeView = moduleRegistry.getHomeView();
     const mobileEditorRef = useRef<ImperativePanelHandle>(null);
     const { moduleName } = useSideBarStore();
     useDetectDevice()
@@ -133,6 +134,13 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
             <div className="flex-1 flex overflow-hidden">
                 <ActivityBar />
 
+                {/* Workbench stays mounted under the homepage so tabs/sidebar keep their state */}
+                <div className="relative flex-1 flex overflow-hidden">
+                {isHomeOpen && HomeView && (
+                    <div className="absolute inset-0 z-30">
+                        <HomeView />
+                    </div>
+                )}
                 <PanelGroup direction="horizontal" autoSaveId="notes-layout-horizontal" className="flex-1">
                     <>
                         <VSSideBar moduleName={moduleName} />
@@ -149,6 +157,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
                         </PanelGroup>
                     </Panel>
                 </PanelGroup>
+                </div>
             </div>
         </div>
         </>

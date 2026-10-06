@@ -10,7 +10,7 @@ export interface UseActivityBarHelperReturn {
 }
 
 export const useActivityBarHelper = (): UseActivityBarHelperReturn => {
-    const { isSideBarVisible, setIsSideBarVisible } = useActivityBarStore();
+    const { isSideBarVisible, setIsSideBarVisible, setIsHomeOpen } = useActivityBarStore();
     const { setModuleName, moduleName } = useSideBarStore();
 
     // Collect pre-switch guards from all modules (e.g. workspace saves unsaved notes)
@@ -25,6 +25,9 @@ export const useActivityBarHelper = (): UseActivityBarHelperReturn => {
     };
 
     const handleActivityClick = (view: string) => {
+        // Any module click leaves the homepage (even the module already active)
+        setIsHomeOpen(false);
+
         // Do nothing if clicking the already active view
         if (moduleName === view) {
             return;
