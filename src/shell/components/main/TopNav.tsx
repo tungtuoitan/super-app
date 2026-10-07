@@ -4,7 +4,8 @@ import { envConfig } from "config/env.config";
 import { useDeviceStore, useAuthStore } from "@/shared";
 import { CommandPalette } from "@/shell/commandPallete/CommandPalette";
 import { useActivityBarStore } from "@/shell/store/ActivityBar.store";
-import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { AlertCircle, AlertTriangle, Loader2, Search } from "lucide-react";
+import { useCommandPaletteStore } from "@/shell/commandPallete/useCommandPalette.store";
 import { useKRepoSyncStore, KRepoSyncService } from "@/features/K";
 
 // ── KRepoSyncIndicator ────────────────────────────────────────────────────────
@@ -101,6 +102,7 @@ export function TopNav() {
     const showDevBadge = envConfig.REACT_APP_ENVIRONMENT?.toLowerCase() !== constants.environments.production.toLowerCase();
     const { isSideBarVisible, setIsSideBarVisible, isHomeOpen, setIsHomeOpen } = useActivityBarStore();
     const { isMobile } = useDeviceStore();
+    const { setIsOpen: setIsCommandPaletteOpen } = useCommandPaletteStore();
 
     /** Logo = homepage over the whole workbench (TungRoot #1481); click again to go back to work. */
     const handleToggleHome = () => setIsHomeOpen((open) => !open);
@@ -131,7 +133,21 @@ export function TopNav() {
                         </button>
                     )}
 
-                    <div className="flex-1"></div>
+                    <div className="flex-1 flex justify-center">
+                        {/* Mouse entry to the command palette — same as Ctrl+P (#1514) */}
+                        {!isMobile && (
+                            <button
+                                type="button"
+                                onClick={() => setIsCommandPaletteOpen(true)}
+                                className="flex h-6 w-full max-w-[320px] items-center gap-2 rounded-md border border-sa-border bg-background/40 px-2 text-[12px] text-muted-foreground transition-colors duration-100 hover:border-sa-border-strong hover:text-foreground"
+                                title="Search keywords (Ctrl+P)"
+                            >
+                                <Search className="h-3 w-3 shrink-0" />
+                                <span className="flex-1 text-left">Search…</span>
+                                <kbd className="font-mono text-[10px] text-muted-foreground/80">Ctrl P</kbd>
+                            </button>
+                        )}
+                    </div>
                     <KRepoSyncIndicator />
                     {showDevBadge && <div className="rounded-md border border-sa-danger/40 px-1.5 font-mono text-[10px] font-medium uppercase leading-4 text-sa-danger">DEV</div>}
                 </nav>
