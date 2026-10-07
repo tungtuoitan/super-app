@@ -3,22 +3,28 @@
  * Status colors, priorities, filter defaults
  */
 
+import { taskVisualConstants } from "@/shared";
+
+// Status/priority colors come from the shared Linear-style palette (#1514)
+const S = taskVisualConstants.status;
+const P = taskVisualConstants.priority;
+
 export const projectConstants = {
     // Project statuses coi là "đang sống" — mặc định filter + chọn sẵn ở multi-project
     liveStatuses: ["open", "in_progress", "background_progress"] as readonly string[],
-    // Status and Priority colors (GitHub-style)
+    // Status and Priority colors — Linear-style palette (#1514); timeline* = Gantt bar fills
     optionColor: {
         projectStatus: {
             colors: {
                 // Cùng màu với status task tương ứng (dropped = cancelled)
-                open: { bg: "#1f6f43", text: "#ffffff" },
-                in_progress: { bg: "#FCCC3E", text: "#1a1a1a" },
-                background_progress: { bg: "#534514", text: "#ffffff" },
-                paused: { bg: "#575757", text: "#ffffff" },
-                completed: { bg: "#6f42c1", text: "#ffffff" },
-                dropped: { bg: "#78716c", text: "#ffffff" },
+                open: { bg: S.open.color, text: S.open.ink },
+                in_progress: { bg: S.in_progress.color, text: S.in_progress.ink },
+                background_progress: { bg: S.background_progress.color, text: S.background_progress.ink },
+                paused: { bg: S.paused.color, text: S.paused.ink },
+                completed: { bg: S.completed.color, text: S.completed.ink },
+                dropped: { bg: S.dropped.color, text: S.dropped.ink },
             } as Record<string, { bg: string; text: string }>,
-            default: { bg: "#57606a", text: "#ffffff" },
+            default: { bg: taskVisualConstants.statusDefault.color, text: taskVisualConstants.statusDefault.ink },
         } as const,
         timelinePro: {
             colors: {
@@ -34,16 +40,16 @@ export const projectConstants = {
         } as const,
         taskStatus: {
             colors: {
-                open: { bg: "#1f6f43", text: "#ffffff" },
-                in_progress: { bg: "#FCCC3E", text: "#1a1a1a" },
-                background_progress: { bg: "#534514", text: "#ffffff" },
-                paused: { bg: "#575757", text: "#ffffff" },
-                completed: { bg: "#6f42c1", text: "#ffffff" },
-                on_hold: { bg: "#475363", text: "#ffffff" },
-                cancelled: { bg: "#78716c", text: "#ffffff" },
-                failed: { bg: "#a63636", text: "#ffffff" },
+                open: { bg: S.open.color, text: S.open.ink },
+                in_progress: { bg: S.in_progress.color, text: S.in_progress.ink },
+                background_progress: { bg: S.background_progress.color, text: S.background_progress.ink },
+                paused: { bg: S.paused.color, text: S.paused.ink },
+                completed: { bg: S.completed.color, text: S.completed.ink },
+                on_hold: { bg: S.on_hold.color, text: S.on_hold.ink },
+                cancelled: { bg: S.cancelled.color, text: S.cancelled.ink },
+                failed: { bg: S.failed.color, text: S.failed.ink },
             } as Record<string, { bg: string; text: string }>,
-            default: { bg: "#4b5563", text: "#ffffff" },
+            default: { bg: taskVisualConstants.statusDefault.color, text: taskVisualConstants.statusDefault.ink },
         } as const,
         timelineTask: {
             colors: {
@@ -60,12 +66,12 @@ export const projectConstants = {
         } as const,
         taskPriority: {
             colors: {
-                low: { bg: "#6e7681", text: "#ffffff" },
-                medium: { bg: "#d29922", text: "#ffffff" },
-                high: { bg: "#da3633", text: "#ffffff" },
-                urgent: { bg: "rgb(255, 0, 0)", text: "#ffffff" },
+                low: { bg: P.low.color, text: P.low.ink },
+                medium: { bg: P.medium.color, text: P.medium.ink },
+                high: { bg: P.high.color, text: P.high.ink },
+                urgent: { bg: P.urgent.color, text: P.urgent.ink },
             } as Record<string, { bg: string; text: string }>,
-            default: { bg: "#6e7681", text: "#ffffff" },
+            default: { bg: taskVisualConstants.priorityDefault.color, text: taskVisualConstants.priorityDefault.ink },
         } as const,
     },
     optionOrder: {

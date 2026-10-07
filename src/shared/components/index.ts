@@ -55,6 +55,13 @@ export { ErrorBoundary, useErrorBoundary, withErrorBoundary } from "react-error-
 export type { FallbackProps } from "react-error-boundary";
 export { RootErrorFallback, EditorAreaErrorFallback, TabPanelErrorFallback } from "./ErrorBoundary/ErrorFallback";
 
+// ── task visual (#1514): Linear-style status/priority icons + palette ─────
+export { TaskStatusIcon, type TaskStatusIconProps } from "./taskVisual/small/TaskStatusIcon";
+export { TaskPriorityIcon, type TaskPriorityIconProps } from "./taskVisual/small/TaskPriorityIcon";
+export { taskVisualConstants } from "./taskVisual/taskVisual.constants";
+export { getTaskStatusVisual, getTaskPriorityVisual, formatCompactDateRange, getDateTone } from "./taskVisual/taskVisual.utils";
+export type { TaskStatusShape, TaskStatusVisual, TaskPriorityVisual, DateTone } from "./taskVisual/taskVisual.type";
+
 // ── Misc Components ───────────────────────────────────────────────────────
 export { HighlightedText } from "./HighlightedText";
 export { HighlightText } from "./HighlightText";

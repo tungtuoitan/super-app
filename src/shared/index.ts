@@ -83,6 +83,13 @@ export { ErrorBoundary, useErrorBoundary, withErrorBoundary } from "react-error-
 export type { FallbackProps } from "react-error-boundary";
 export { RootErrorFallback, EditorAreaErrorFallback, TabPanelErrorFallback } from "./components/ErrorBoundary/ErrorFallback";
 
+// ── task visual (#1514): Linear-style status/priority icons + palette ─────
+export { TaskStatusIcon, type TaskStatusIconProps } from "./components/taskVisual/small/TaskStatusIcon";
+export { TaskPriorityIcon, type TaskPriorityIconProps } from "./components/taskVisual/small/TaskPriorityIcon";
+export { taskVisualConstants } from "./components/taskVisual/taskVisual.constants";
+export { getTaskStatusVisual, getTaskPriorityVisual, formatCompactDateRange, getDateTone } from "./components/taskVisual/taskVisual.utils";
+export type { TaskStatusShape, TaskStatusVisual, TaskPriorityVisual, DateTone } from "./components/taskVisual/taskVisual.type";
+
 // ── confirmPopover ────────────────────────────────────────────────────────
 export { useConfirmationPopoverHelper } from "./confirmPopover/useConfirmationPopover.helper";
 export { ConfirmationPopoverProvider } from "./confirmPopover/ConfirmationPopover.store";
