@@ -42,7 +42,7 @@ export function GridContainer({ children, className, style, ref, id, noBackgroun
         <div
             ref={ref}
             id={id}
-            className={cn("w-full h-full flex flex-col overflow-x-auto overflow-y-hidden", !noBackground && "bg-[rgb(246,246,246)]", className)}
+            className={cn("w-full h-full flex flex-col overflow-x-auto overflow-y-hidden", !noBackground && "bg-sa-surface", className)}
             style={style}
             {...props}
         >

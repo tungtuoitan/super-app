@@ -44,9 +44,9 @@ export const GenericTextField = forwardRef<HTMLInputElement | HTMLTextAreaElemen
         const [inputId] = useState(() => id || `input-${Math.random().toString(36).slice(2)}`);
 
         const inputClassName = cn(
-            "w-full rounded",
-            size === "tiny" && "h-8 text-xs py-1.5",
-            size === "small" && "h-9 text-sm",
+            "w-full rounded-lg",
+            size === "tiny" && "h-7 text-xs py-1",
+            size === "small" && "h-8 text-[13px]",
             error && "border-destructive focus-visible:ring-destructive",
             className,
         );
@@ -74,7 +74,7 @@ export const GenericTextField = forwardRef<HTMLInputElement | HTMLTextAreaElemen
                         ref={ref as any}
                         rows={rows}
                         className={cn(
-                            "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none",
+                            "flex w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-[13px] leading-relaxed transition-colors duration-100 placeholder:text-muted-foreground hover:border-sa-border-strong focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none",
                             size === "tiny" && "text-xs py-1.5 px-2",
                             error && "border-destructive focus-visible:ring-destructive",
                             className,

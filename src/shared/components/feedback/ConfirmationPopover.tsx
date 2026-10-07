@@ -10,7 +10,6 @@
 import React, { useEffect, useRef } from "react";
 import { Button } from "@/shared";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/contexts/ThemeContext";
 
  interface ConfirmationPopoverProps {
     /** Whether the popover is open */
@@ -68,7 +67,6 @@ export function ConfirmationPopover({
     onThirdButton,
     onClose,
 }: ConfirmationPopoverProps) {
-    const { theme } = useTheme();
     const popoverRef = useRef<HTMLDivElement>(null);
     const [position, setPosition] = React.useState<{ top: number; left: number } | null>(null);
     const [isConfirming, setIsConfirming] = React.useState(false);
@@ -163,9 +161,8 @@ export function ConfirmationPopover({
                 <div
                     ref={popoverRef}
                     className={cn(
-                        "fixed rounded-lg shadow-lg border",
+                        "sa-shadow-pop fixed rounded-xl border border-sa-border-strong bg-popover text-popover-foreground",
                         "px-4 py-3",
-                        theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-200 text-gray-900",
                     )}
                     style={{
                         top: position.top,
@@ -174,16 +171,16 @@ export function ConfirmationPopover({
                         zIndex,
                     }}
                 >
-                    <h3 className="text-sm font-semibold mb-2">{title}</h3>
+                    <h3 className="text-[13px] font-medium mb-1.5">{title}</h3>
                     {subtitle && <p className="text-xs mb-3 whitespace-pre-line text-muted-foreground">{subtitle}</p>}
-                    <hr className={cn("mb-3", theme === "dark" ? "border-gray-700" : "border-gray-200")} />
+                    <hr className="mb-3 border-sa-border" />
                     <div className="flex justify-end gap-2">
                         <Button 
                             size="sm" 
                             variant={buttonVariant || confirmColor} 
                             onClick={handleConfirm} 
                             disabled={isConfirming}
-                            className="h-8 text-xs"
+                            className="h-7 text-xs"
                         >
                             {isConfirming ? "Saving..." : confirmText}
                         </Button>
@@ -193,7 +190,7 @@ export function ConfirmationPopover({
                                 variant={thirdButtonColor} 
                                 onClick={handleThirdButton} 
                                 disabled={isConfirming}
-                                className="h-8 text-xs"
+                                className="h-7 text-xs"
                             >
                                 {thirdButtonText}
                             </Button>
@@ -203,7 +200,7 @@ export function ConfirmationPopover({
                             variant={cancelColor} 
                             onClick={handleCancel} 
                             disabled={isConfirming}
-                            className="h-8 text-xs"
+                            className="h-7 text-xs"
                         >
                             {cancelText}
                         </Button>
@@ -216,9 +213,8 @@ export function ConfirmationPopover({
                 <div
                     ref={popoverRef}
                     className={cn(
-                        "fixed rounded-lg shadow-lg border",
+                        "sa-shadow-pop fixed rounded-xl border border-sa-border-strong bg-popover text-popover-foreground",
                         "px-4 py-3 invisible",
-                        theme === "dark" ? "bg-gray-800 border-gray-700 text-white" : "bg-white border-gray-200 text-gray-900",
                     )}
                     style={{
                         top: 0,
@@ -227,9 +223,9 @@ export function ConfirmationPopover({
                         zIndex: -1,
                     }}
                 >
-                    <h3 className="text-sm font-semibold mb-2">{title}</h3>
+                    <h3 className="text-[13px] font-medium mb-1.5">{title}</h3>
                     {subtitle && <p className="text-xs mb-3 whitespace-pre-line text-muted-foreground">{subtitle}</p>}
-                    <hr className={cn("mb-3", theme === "dark" ? "border-gray-700" : "border-gray-200")} />
+                    <hr className="mb-3 border-sa-border" />
                     <div className="flex justify-end gap-2">
                         <Button size="sm" className="normal-case">
                             {confirmText}

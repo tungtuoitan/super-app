@@ -97,8 +97,8 @@ export const GenericDrawingDate = forwardRef<HTMLDivElement, GenericDrawingDateP
                 };
             }
             return {
-                button: "h-10 text-sm",
-                label: "text-sm",
+                button: "h-8 text-[13px]",
+                label: "text-[13px]",
                 popover: "w-auto p-0",
             };
         };
@@ -132,9 +132,9 @@ export const GenericDrawingDate = forwardRef<HTMLDivElement, GenericDrawingDateP
                                 error && "border-destructive focus-visible:ring-destructive",
                             )}
                         >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            <CalendarIcon className="mr-1.5 h-4 w-4 text-muted-foreground" />
                             <span className="flex-1 text-left truncate">{displayValue || "Pick a date"}</span>
-                            {clearable && value && !disabled && <X className="h-4 w-4 hover:bg-accent rounded-sm p-0.5" onClick={handleClear} />}
+                            {clearable && value && !disabled && <X className="h-4 w-4 hover:bg-sa-hover-strong rounded-sm p-0.5" onClick={handleClear} />}
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className={sizeClasses.popover} align="start">

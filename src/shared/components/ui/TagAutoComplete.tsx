@@ -77,15 +77,15 @@ export function GenericTagAutoComplete({
         onChange(idsString);
     };
 
-    const sizeClasses = size === "small" ? "h-9 text-sm" : "h-10 text-base";
+    const sizeClasses = size === "small" ? "h-8 text-[13px]" : "h-9 text-sm";
 
     return (
         <div className={cn("w-full space-y-2", className)} data-testid={testId}>
-            {label && <Label className="block text-left text-sm font-medium">{label}</Label>}
+            {label && <Label className="block text-left text-[13px] font-medium">{label}</Label>}
 
             {/* Selected tags display */}
             {selectedOptions.length > 0 && (
-                <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-background min-h-[40px]">
+                <div className="flex flex-wrap gap-1.5 p-1.5 border border-input rounded-lg bg-transparent min-h-[32px]">
                     {selectedOptions.map((option) => (
                         <Badge key={option.id} variant="secondary" className="gap-1 pl-2 pr-1">
                             <span>{option.label || option.desc}</span>
@@ -96,7 +96,7 @@ export function GenericTagAutoComplete({
                                         e.stopPropagation();
                                         handleRemove(option.id);
                                     }}
-                                    className="hover:bg-muted rounded-sm p-0.5 ml-1"
+                                    className="hover:bg-sa-hover-strong rounded-sm p-0.5 ml-0.5"
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
@@ -114,11 +114,11 @@ export function GenericTagAutoComplete({
                         role="combobox"
                         aria-expanded={open}
                         disabled={disabled || availableOptions.length === 0}
-                        className={cn("w-full justify-between", sizeClasses, !selectedOptions.length && "text-muted-foreground")}
+                        className={cn("w-full justify-between px-2.5 font-normal", sizeClasses, !selectedOptions.length && "text-muted-foreground")}
                         data-testid={testId ? `${testId}-trigger` : undefined}
                     >
                         <span className="truncate">{selectedOptions.length === 0 ? placeholder : `${selectedOptions.length} selected`}</span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronsUpDown className="ml-1 h-3.5 w-3.5 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[300px] p-0" align="start">

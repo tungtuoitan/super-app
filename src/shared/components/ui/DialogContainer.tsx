@@ -144,9 +144,9 @@ export function DialogContainer({
             >
                 {/* Header with title and close button */}
                 {(title || showCloseButton || toolbarContent) && (
-                    <div className="flex items-center justify-between border-b bg-background px-4 py-3 min-h-[56px]">
+                    <div className="flex items-center justify-between border-b border-sa-border px-4 py-2.5 min-h-[48px]">
                         {/* Title section */}
-                        <h2 className="text-lg font-medium flex-grow">{title}</h2>
+                        <h2 className="text-[15px] font-medium flex-grow">{title}</h2>
 
                         {/* Custom toolbar content */}
                         {toolbarContent && <div className="flex items-center mr-2">{toolbarContent}</div>}
@@ -160,7 +160,7 @@ export function DialogContainer({
                                             variant="ghost"
                                             size="icon"
                                             onClick={handleCloseClick}
-                                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                            className="h-7 w-7 text-muted-foreground hover:text-foreground"
                                             aria-label="close"
                                         >
                                             <X className="h-4 w-4" />
@@ -176,7 +176,7 @@ export function DialogContainer({
                 )}
 
                 {/* Dialog content */}
-                <div className={cn("flex-1 overflow-auto p-6 min-h-[200px] flex flex-col", dialogContentProps?.className)} style={dialogContentProps?.style}>
+                <div className={cn("flex-1 overflow-auto p-5 min-h-[200px] flex flex-col", dialogContentProps?.className)} style={dialogContentProps?.style}>
                     {dialogContentProps?.children || children}
                 </div>
             </DialogContent>

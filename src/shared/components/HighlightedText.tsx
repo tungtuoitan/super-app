@@ -12,7 +12,7 @@ interface HighlightedTextProps {
     highlightClassName?: string;
 }
 
-export function HighlightedText({ text, matchIndices, className = "", highlightClassName = "text-blue-400 font-semibold" }: HighlightedTextProps) {
+export function HighlightedText({ text, matchIndices, className = "", highlightClassName = "text-sa-amber-ink font-semibold" }: HighlightedTextProps) {
     if (matchIndices.length === 0) {
         return <span className={className}>{text}</span>;
     }

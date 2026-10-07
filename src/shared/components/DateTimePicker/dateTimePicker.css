@@ -1,0 +1,148 @@
+/*
+ * DateTimePicker / DateRangePicker calendar markers (#1514) — token based.
+ * Moved out of inline <style> blocks; selectors unchanged.
+ * Start = good (green), end = danger (red), today = amber dot.
+ */
+
+/* ── DateRangePicker ─────────────────────────────────────────────── */
+
+/* Reset any default selected styles that might override our colors */
+.calendar-green-red-range [aria-selected="true"] {
+    background-color: transparent;
+}
+
+/* Start date — always "good", highest priority */
+.calendar-green-red-range .range-start,
+.calendar-green-red-range .range-start[aria-selected="true"],
+.calendar-green-red-range .range-start[data-selected="true"],
+.calendar-green-red-range button.range-start {
+    background-color: hsl(var(--sa-good)) !important;
+    color: hsl(var(--background)) !important;
+    border-radius: 6px !important;
+}
+
+/* End date — always "danger", highest priority */
+.calendar-green-red-range .range-end,
+.calendar-green-red-range .range-end[aria-selected="true"],
+.calendar-green-red-range .range-end[data-selected="true"],
+.calendar-green-red-range button.range-end {
+    background-color: hsl(var(--sa-danger)) !important;
+    color: hsl(var(--background)) !important;
+    border-radius: 6px !important;
+}
+
+.calendar-green-red-range .range-start:hover,
+.calendar-green-red-range .range-end:hover {
+    filter: brightness(0.92);
+}
+
+/* Start and end on the same date — split diagonally */
+.calendar-green-red-range .range-start.range-end,
+.calendar-green-red-range .range-start.range-end[aria-selected="true"],
+.calendar-green-red-range button.range-start.range-end {
+    background: linear-gradient(135deg, hsl(var(--sa-good)) 50%, hsl(var(--sa-danger)) 50%) !important;
+    color: hsl(var(--background)) !important;
+}
+
+/* Range middle — quiet tint */
+.calendar-green-red-range .range-middle {
+    background-color: var(--sa-hover-strong) !important;
+    color: hsl(var(--foreground)) !important;
+    border-radius: 0 !important;
+}
+
+/* Today marker — amber dot at the bottom, always visible */
+.calendar-green-red-range .today-marker {
+    position: relative;
+}
+.calendar-green-red-range .today-marker::after {
+    content: "";
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: hsl(var(--sa-accent-amber));
+    z-index: 10;
+}
+
+/* Limit start / end (project/parent boundary) — arrow below the date */
+.calendar-green-red-range .limit-start,
+.calendar-green-red-range .limit-end {
+    position: relative;
+}
+.calendar-green-red-range .limit-start::before,
+.calendar-green-red-range .limit-end::before {
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: hsl(var(--sa-amber-ink));
+    pointer-events: none;
+    z-index: 10;
+    line-height: 1;
+}
+.calendar-green-red-range .limit-start::before {
+    content: ">>";
+}
+.calendar-green-red-range .limit-end::before {
+    content: "<<";
+}
+
+/* Today marker and limit on the same date — hide the today dot */
+.calendar-green-red-range .today-marker.limit-start::after,
+.calendar-green-red-range .today-marker.limit-end::after {
+    display: none;
+}
+
+/* Limit start and end on the same date — show both arrows */
+.calendar-green-red-range .limit-start.limit-end::before {
+    content: "><";
+    font-size: 10px;
+}
+
+/* ── DateTimePicker ──────────────────────────────────────────────── */
+
+.calendar-with-indicators .constraint-start-date,
+.calendar-with-indicators .constraint-end-date {
+    position: relative;
+}
+.calendar-with-indicators .constraint-start-date::before,
+.calendar-with-indicators .constraint-end-date::after {
+    content: "";
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    z-index: 10;
+}
+.calendar-with-indicators .constraint-start-date::before {
+    background-color: hsl(var(--sa-good));
+}
+.calendar-with-indicators .constraint-end-date::after {
+    background-color: hsl(var(--sa-danger));
+}
+/* Both start and end on the same date */
+.calendar-with-indicators .constraint-start-date.constraint-end-date::before {
+    left: calc(50% - 4px);
+}
+.calendar-with-indicators .constraint-start-date.constraint-end-date::after {
+    left: calc(50% + 4px);
+}
+
+/* Today highlight (only when not selected) — amber tint */
+.calendar-with-indicators .today-highlight {
+    background-color: hsl(var(--sa-accent-amber) / 0.16) !important;
+    color: hsl(var(--sa-amber-ink)) !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+}
+.calendar-with-indicators .today-highlight:hover {
+    background-color: hsl(var(--sa-accent-amber) / 0.26) !important;
+}

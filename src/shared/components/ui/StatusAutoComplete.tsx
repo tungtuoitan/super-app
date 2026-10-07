@@ -1,6 +1,8 @@
 /**
  * StatusAutoComplete Component
- * A specialized autocomplete for status selection with color-coded options (GitHub-style)
+ * A specialized autocomplete for status/priority selection (Linear-style, #1514):
+ * known task/project status codes render TaskStatusIcon, priority codes render
+ * TaskPriorityIcon, anything else a small dot in the option's bgColor.
  * Fully controlled — no internal state, derives display value from props.
  */
 
@@ -11,6 +13,7 @@ import { Button } from "@/shared";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/shared";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared";
 import { Label } from "@/shared";
+import { TaskStatusIcon, TaskPriorityIcon, taskVisualConstants } from "@/shared";
 
 /**
  * Interface for status option items with color support
@@ -120,40 +123,38 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
     const getSizeClasses = () => {
         if (size === "tiny") {
             return {
-                button: "h-8 text-xs",
+                button: "h-7 text-xs",
                 popover: "p-0",
                 command: "text-xs",
                 item: "text-xs py-1.5",
-                badge: "px-2 py-0.5 text-xs",
+                badge: "text-xs",
             };
         }
         return {
-            button: "h-10",
+            button: "h-8",
             popover: "p-0",
             command: "",
-            item: "py-2",
-            badge: "px-2.5 py-1 text-sm",
+            item: "py-1.5",
+            badge: "text-[13px]",
         };
     };
 
     const sizeClasses = getSizeClasses();
 
-    // Render status badge (no icon, solid color background, white text)
-    const renderStatusBadge = (option: IStatusOption) => {
-        const badgeStyle: CSSProperties = {
-            backgroundColor: option.bgColor || "#6e7681",
-            color: option.textColor || "#ffffff",
-        };
-
-        return (
-            <span
-                className={cn("inline-flex items-center font-medium rounded-md h-6", sizeClasses.badge)}
-                style={badgeStyle}
-            >
-                {option.label}
-            </span>
-        );
+    // Status glyph: Linear-style icon for known codes, otherwise a small dot in bgColor
+    const renderStatusIcon = (option: IStatusOption) => {
+        if (taskVisualConstants.status[option.code]) return <TaskStatusIcon status={option.code} title={option.label} />;
+        if (taskVisualConstants.priority[option.code]) return <TaskPriorityIcon priority={option.code} title={option.label} className="text-muted-foreground" />;
+        return <span className="h-2 w-2 shrink-0 rounded-full bg-muted-foreground" style={option.bgColor ? { backgroundColor: option.bgColor } : undefined} />;
     };
+
+    // Render status label: icon + text (no filled block)
+    const renderStatusBadge = (option: IStatusOption) => (
+        <span className={cn("inline-flex min-w-0 items-center gap-1.5 font-medium text-foreground", sizeClasses.badge)}>
+            {renderStatusIcon(option)}
+            <span className="truncate">{option.label}</span>
+        </span>
+    );
 
     // Container width style
     const containerStyle: CSSProperties = {
@@ -186,7 +187,7 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
                         aria-expanded={open}
                         disabled={disabled}
                         className={cn(
-                            "justify-between gap-2 flex px-2 w-full bg-[#22252A70]",
+                            "justify-between gap-2 flex px-2 w-full bg-transparent font-normal",
                             sizeClasses.button,
                             !selectedValue && "text-muted-foreground",
                             inputProps.error && "border-destructive focus-visible:ring-destructive"
@@ -197,7 +198,7 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
                         ) : (
                             <span className="text-muted-foreground">{placeholder}</span>
                         )}
-                        <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className={cn("w-[180px]", sizeClasses.popover)} align="start">
@@ -222,7 +223,7 @@ export function StatusAutoComplete(props: StatusAutoCompleteProps) {
                                     >
                                         <Check
                                             className={cn(
-                                                "mr-2 h-4 w-4 shrink-0",
+                                                "mr-0.5 h-3.5 w-3.5 shrink-0",
                                                 isSelected ? "opacity-100" : "opacity-0"
                                             )}
                                         />

@@ -36,8 +36,8 @@ export function HighlightText({ text, highlight, className = "" }: HighlightText
         parts.push(
             <mark
                 key={matchIdx}
-                className="bg-yellow-400/80 text-black rounded-sm px-0.5"
-                style={{ backgroundColor: "rgb(250 204 21 / 0.8)" }}
+                className="bg-sa-amber/35 text-foreground rounded-sm px-0.5"
+                style={{ backgroundColor: "hsl(var(--sa-accent-amber) / 0.35)" }}
             >
                 {nfcText.slice(matchIdx, matchIdx + normalizedQuery.length)}
             </mark>,

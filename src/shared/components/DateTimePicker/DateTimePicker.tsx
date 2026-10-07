@@ -13,6 +13,7 @@ import { Calendar } from "@/shared";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared";
 import { Label } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
+import "./dateTimePicker.css";
 import type { Matcher } from "react-day-picker";
 
 interface DateTimePickerProps {
@@ -266,7 +267,7 @@ export function DateTimePicker({
     return (
         <div className={cn("space-y-2", className)}>
             {label && (
-                <Label className="text-sm font-medium flex items-center gap-2">
+                <Label className="text-[13px] font-medium flex items-center gap-2">
                     <CalendarIcon className="h-4 w-4" />
                     {label}
                 </Label>
@@ -282,12 +283,12 @@ export function DateTimePicker({
                                         variant="outline"
                                         disabled={isConstraintDisabled}
                                         className={cn(
-                                            "w-full justify-start text-left font-normal h-10",
+                                            "w-full justify-start text-left font-normal h-8 px-2.5",
                                             !value && "text-muted-foreground"
                                         )}
                                     >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        <span className={cn(smartDate?.isToday && "text-yellow-500 font-medium")}>
+                                        <CalendarIcon className="mr-1.5 h-4 w-4 text-muted-foreground" />
+                                        <span className={cn(smartDate?.isToday && "text-sa-amber-ink font-medium")}>
                                             {smartDate?.text || placeholder}
                                         </span>
                                         {value && !isConstraintDisabled && (
@@ -311,79 +312,26 @@ export function DateTimePicker({
                 <PopoverContent className="w-auto p-0" align="start">
                     <div className="flex">
                         {/* Quick options sidebar */}
-                        <div className="border-r p-2 space-y-1">
-                            <p className="text-xs font-medium text-muted-foreground px-2 py-1">
-                                Quick select
-                            </p>
+                        <div className="border-r border-sa-border p-1.5 space-y-0.5">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-2 py-1">Quick select</p>
                             {filteredQuickOptions.map((option) => (
                                 <Button
                                     key={option.label}
                                     variant="ghost"
                                     size="sm"
-                                    className="w-full justify-start text-xs h-7"
+                                    className="w-full justify-start text-xs font-normal h-7"
                                     onClick={() => handleQuickOption(option.getValue)}
                                 >
                                     {option.label}
                                 </Button>
                             ))}
                             {filteredQuickOptions.length === 0 && (
-                                <p className="text-xs text-muted-foreground px-2 py-1 italic">
-                                    No quick options available
-                                </p>
+                                <p className="text-xs text-muted-foreground px-2 py-1 italic">No quick options available</p>
                             )}
                         </div>
 
                         {/* Calendar */}
                         <div className="calendar-with-indicators">
-                            <style>{`
-                                .calendar-with-indicators .constraint-start-date {
-                                    position: relative;
-                                }
-                                .calendar-with-indicators .constraint-start-date::before {
-                                    content: '';
-                                    position: absolute;
-                                    bottom: 2px;
-                                    left: 50%;
-                                    transform: translateX(-50%);
-                                    width: 4px;
-                                    height: 4px;
-                                    border-radius: 50%;
-                                    background-color: #22c55e;
-                                    z-index: 10;
-                                }
-                                .calendar-with-indicators .constraint-end-date {
-                                    position: relative;
-                                }
-                                .calendar-with-indicators .constraint-end-date::after {
-                                    content: '';
-                                    position: absolute;
-                                    bottom: 2px;
-                                    left: 50%;
-                                    transform: translateX(-50%);
-                                    width: 4px;
-                                    height: 4px;
-                                    border-radius: 50%;
-                                    background-color: #ef4444;
-                                    z-index: 10;
-                                }
-                                /* When both start and end are on same date */
-                                .calendar-with-indicators .constraint-start-date.constraint-end-date::before {
-                                    left: calc(50% - 4px);
-                                }
-                                .calendar-with-indicators .constraint-start-date.constraint-end-date::after {
-                                    left: calc(50% + 4px);
-                                }
-                                /* Today highlight - yellow circle (only when not selected) */
-                                .calendar-with-indicators .today-highlight {
-                                    background-color: #fef08a !important;
-                                    color: #854d0e !important;
-                                    border-radius: 9999px !important;
-                                    font-weight: 600 !important;
-                                }
-                                .calendar-with-indicators .today-highlight:hover {
-                                    background-color: #fde047 !important;
-                                }
-                            `}</style>
                             <Calendar
                                 mode="single"
                                 selected={selectedDate}
@@ -392,7 +340,7 @@ export function DateTimePicker({
                                 modifiers={calendarModifiers}
                                 modifiersClassNames={modifiersClassNames}
                                 classNames={{
-                                    today: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 font-semibold rounded-md",
+                                    today: "bg-sa-amber/15 text-sa-amber-ink font-semibold rounded-md",
                                 }}
                                 initialFocus
                             />
@@ -401,13 +349,13 @@ export function DateTimePicker({
                                 <div className="flex items-center justify-center gap-4 px-3 pb-2 text-[10px] text-muted-foreground border-t pt-2">
                                     {minDate && (
                                         <div className="flex items-center gap-1">
-                                            <div className="w-2 h-2 rounded-full bg-green-500" />
+                                            <div className="w-1.5 h-1.5 rounded-full bg-sa-good" />
                                             <span>Start bound</span>
                                         </div>
                                     )}
                                     {maxDate && (
                                         <div className="flex items-center gap-1">
-                                            <div className="w-2 h-2 rounded-full bg-red-500" />
+                                            <div className="w-1.5 h-1.5 rounded-full bg-sa-danger" />
                                             <span>End bound</span>
                                         </div>
                                     )}
@@ -419,7 +367,7 @@ export function DateTimePicker({
                                 <div className="border-t p-3">
                                     <div className="flex items-center gap-2">
                                         <Clock className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-sm text-muted-foreground">Time:</span>
+                                        <span className="text-[13px] text-muted-foreground">Time:</span>
                                         <div className="flex items-center gap-1">
                                             <input
                                                 type="number"
@@ -427,7 +375,7 @@ export function DateTimePicker({
                                                 max={23}
                                                 value={hours}
                                                 onChange={(e) => handleTimeChange("hours", e.target.value)}
-                                                className="w-12 h-8 text-center text-sm border rounded-md bg-background"
+                                                className="w-12 h-7 text-center text-[13px] font-mono border border-input rounded-md bg-transparent focus:outline-none focus:border-ring"
                                             />
                                             <span className="text-muted-foreground">:</span>
                                             <input
@@ -436,7 +384,7 @@ export function DateTimePicker({
                                                 max={59}
                                                 value={minutes}
                                                 onChange={(e) => handleTimeChange("minutes", e.target.value)}
-                                                className="w-12 h-8 text-center text-sm border rounded-md bg-background"
+                                                className="w-12 h-7 text-center text-[13px] font-mono border border-input rounded-md bg-transparent focus:outline-none focus:border-ring"
                                             />
                                         </div>
                                     </div>

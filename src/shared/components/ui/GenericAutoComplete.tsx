@@ -159,14 +159,14 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
     const getSizeClasses = () => {
         if (size === "tiny") {
             return {
-                button: "h-8 text-xs",
+                button: "h-7 text-xs",
                 popover: "w-[200px] p-0",
                 command: "text-xs",
                 item: "text-xs py-1",
             };
         }
         return {
-            button: "h-10",
+            button: "h-8",
             popover: "w-[340px] p-0",
             command: "",
             item: "",
@@ -183,7 +183,7 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
     return (
         <div className={cn("w-full", className)} style={style}>
             {inputProps.label && (
-                <Label htmlFor={id} className={cn("block text-left mb-2", size === "tiny" ? "text-xs" : "text-sm", inputProps.error && "text-destructive")}>
+                <Label htmlFor={id} className={cn("block text-left mb-1.5", size === "tiny" ? "text-xs" : "text-[13px]", inputProps.error && "text-destructive")}>
                     {inputProps.label}
                     {inputProps.required && <span className="text-destructive ml-1">*</span>}
                 </Label>
@@ -198,7 +198,7 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                         aria-expanded={open}
                         disabled={disabled}
                         className={cn(
-                            "w-full justify-between",
+                            "w-full justify-between px-2.5 font-normal",
                             sizeClasses.button,
                             !displayValue && "text-muted-foreground",
                             inputProps.error && "border-destructive focus-visible:ring-destructive",
@@ -232,12 +232,12 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                                         e.stopPropagation();
                                         handleClear();
                                     }}
-                                    className="hover:bg-accent rounded-sm p-0.5"
+                                    className="hover:bg-sa-hover-strong rounded-sm p-0.5"
                                 >
                                     <Check className="h-3 w-3" />
                                 </span>
                             )}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            <ChevronsUpDown className="ml-1 h-3.5 w-3.5 shrink-0 opacity-50" />
                         </div>
                     </Button>
                 </PopoverTrigger>
@@ -263,7 +263,7 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                                         disabled={isDisabled}
                                         className={cn(sizeClasses.item, isDisabled && "opacity-50 cursor-not-allowed")}
                                     >
-                                        <Check className={cn("mr-2 h-4 w-4 flex-shrink-0", isSelected ? "opacity-100" : "opacity-0")} />
+                                        <Check className={cn("mr-1 h-3.5 w-3.5 flex-shrink-0", isSelected ? "opacity-100" : "opacity-0")} />
                                         {option.imageUrl && (
                                             <img src={option.imageUrl} alt="" className="w-6 h-6 rounded object-cover flex-shrink-0 mr-2" />
                                         )}

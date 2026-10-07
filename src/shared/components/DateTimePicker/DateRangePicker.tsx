@@ -2,7 +2,7 @@
  * DateRangePicker Component
  * A date range picker combining start and end date into a single field
  * Click on Start/End in the field to toggle selection mode
- * Calendar always shows range with green (start) and red (end) colors
+ * Calendar always shows range with good/green (start) and danger/red (end) tokens
  */
 
 import React, { useState, useEffect, useMemo } from "react";
@@ -14,6 +14,7 @@ import { Calendar } from "@/shared";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared";
 import { Label } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
+import "./dateTimePicker.css";
 import type { Matcher, DateRange } from "react-day-picker";
 
 /**
@@ -484,7 +485,7 @@ export function DateRangePicker({
     return (
         <div className={cn("space-y-2", className)}>
             {label && (
-                <Label className="text-sm font-medium flex items-center gap-2">
+                <Label className="text-[13px] font-medium flex items-center gap-2">
                     {/* <CalendarIcon className="h-4 w-4" /> */}
                     {label}
                 </Label>
@@ -512,7 +513,7 @@ export function DateRangePicker({
                                         disabled={isConstraintDisabled}
                                         onClick={handleButtonClick}
                                         className={cn(
-                                            "w-full justify-start text-left font-normal h-10 px-3",
+                                            "w-full justify-start text-left font-normal h-8 px-2.5",
                                             !startDate && !endDate && "text-muted-foreground"
                                         )}
                                     >
@@ -523,14 +524,14 @@ export function DateRangePicker({
                                                     <span className="mr-2 flex-shrink-0 cursor-help" onClick={(e) => e.stopPropagation()}>
                                                         <CalendarIcon className={cn(
                                                             "h-4 w-4",
-                                                            dateWarning.hasWarning ? "text-orange-500" : ""
+                                                            dateWarning.hasWarning ? "text-sa-amber-ink" : "text-muted-foreground"
                                                         )} />
                                                     </span>
                                                 </TooltipTrigger>
                                                 <TooltipContent>
                                                     {dateWarning.hasWarning ? (
                                                         <div className="space-y-1">
-                                                            <p className="text-orange-500 font-medium">{dateWarning.warningMessage}</p>
+                                                            <p className="text-sa-amber-ink font-medium">{dateWarning.warningMessage}</p>
                                                             <p className="text-xs text-muted-foreground">{formatTaskDuration(dateWarning.taskDurationDays)}</p>
                                                         </div>
                                                     ) : (
@@ -546,10 +547,10 @@ export function DateRangePicker({
                                             <span
                                                 onClick={handleStartClick}
                                                 className={cn(
-                                                    "px-1.5 py-0.5 rounded cursor-pointer transition-colors truncate",
-                                                    "hover:bg-green-500/20",
-                                                    selectionMode === "start" && open && "bg-green-500/20 ring-1 ring-green-500",
-                                                    isStartToday && "text-yellow-500 font-medium"
+                                                    "px-1.5 py-0.5 rounded-md cursor-pointer transition-colors duration-100 truncate tabular-nums",
+                                                    "hover:bg-sa-good/15",
+                                                    selectionMode === "start" && open && "bg-sa-good/15 ring-1 ring-sa-good/70",
+                                                    isStartToday && "text-sa-amber-ink font-medium"
                                                 )}
                                             >
                                                 {startDisplayStr || "_"}
@@ -561,10 +562,10 @@ export function DateRangePicker({
                                             <span
                                                 onClick={handleEndClick}
                                                 className={cn(
-                                                    "px-1.5 py-0.5 rounded cursor-pointer transition-colors truncate",
-                                                    "hover:bg-red-500/20",
-                                                    selectionMode === "end" && open && "bg-red-500/20 ring-1 ring-red-500",
-                                                    isEndToday && "text-yellow-500 font-medium"
+                                                    "px-1.5 py-0.5 rounded-md cursor-pointer transition-colors duration-100 truncate tabular-nums",
+                                                    "hover:bg-sa-danger/15",
+                                                    selectionMode === "end" && open && "bg-sa-danger/15 ring-1 ring-sa-danger/70",
+                                                    isEndToday && "text-sa-amber-ink font-medium"
                                                 )}
                                             >
                                                 {endDisplayStr || "_"}
@@ -624,8 +625,8 @@ export function DateRangePicker({
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Quick options sidebar */}
-                        <div className="border-r p-2 space-y-1 min-w-[100px]">
-                            <p className="text-xs font-medium text-muted-foreground px-2 py-1">
+                        <div className="border-r border-sa-border p-1.5 space-y-0.5 min-w-[104px]">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-2 py-1">
                                 Quick select
                             </p>
                             {filteredQuickDateOptions.map((option) => (
@@ -633,7 +634,7 @@ export function DateRangePicker({
                                     key={option.label}
                                     variant="ghost"
                                     size="sm"
-                                    className="w-full justify-start text-xs h-7"
+                                    className="w-full justify-start text-xs font-normal h-7"
                                     onClick={() => handleQuickDateOption(option.getValue)}
                                 >
                                     {option.label}
@@ -648,116 +649,6 @@ export function DateRangePicker({
 
                         {/* Calendar */}
                         <div className="calendar-green-red-range">
-                            <style>{`
-                                /* Reset any default selected styles that might override our colors */
-                                .calendar-green-red-range [aria-selected="true"] {
-                                    background-color: transparent;
-                                }
-
-                                /* Start date = green - ALWAYS green, highest priority */
-                                .calendar-green-red-range .range-start,
-                                .calendar-green-red-range .range-start[aria-selected="true"],
-                                .calendar-green-red-range .range-start[data-selected="true"],
-                                .calendar-green-red-range button.range-start {
-                                    background-color: #22c55e !important;
-                                    color: white !important;
-                                    border-radius: 6px !important;
-                                }
-                                .calendar-green-red-range .range-start:hover {
-                                    background-color: #16a34a !important;
-                                }
-
-                                /* End date = red - ALWAYS red, highest priority */
-                                .calendar-green-red-range .range-end,
-                                .calendar-green-red-range .range-end[aria-selected="true"],
-                                .calendar-green-red-range .range-end[data-selected="true"],
-                                .calendar-green-red-range button.range-end {
-                                    background-color: #ef4444 !important;
-                                    color: white !important;
-                                    border-radius: 6px !important;
-                                }
-                                .calendar-green-red-range .range-end:hover {
-                                    background-color: #dc2626 !important;
-                                }
-
-                                /* When start and end are same date - show gradient */
-                                .calendar-green-red-range .range-start.range-end,
-                                .calendar-green-red-range .range-start.range-end[aria-selected="true"],
-                                .calendar-green-red-range button.range-start.range-end {
-                                    background: linear-gradient(135deg, #22c55e 50%, #ef4444 50%) !important;
-                                    color: white !important;
-                                }
-
-                                /* Range middle = accent color */
-                                .calendar-green-red-range .range-middle {
-                                    background-color: hsl(var(--accent)) !important;
-                                    color: hsl(var(--accent-foreground)) !important;
-                                    border-radius: 0 !important;
-                                }
-
-                                /* Today marker - yellow dot at bottom, always visible */
-                                .calendar-green-red-range .today-marker {
-                                    position: relative;
-                                }
-                                .calendar-green-red-range .today-marker::after {
-                                    content: '';
-                                    position: absolute;
-                                    bottom: 2px;
-                                    left: 50%;
-                                    transform: translateX(-50%);
-                                    width: 5px;
-                                    height: 5px;
-                                    border-radius: 50%;
-                                    background-color: #eab308;
-                                    z-index: 10;
-                                }
-
-                                /* Limit start date = arrow indicator below date (project/parent boundary) */
-                                .calendar-green-red-range .limit-start {
-                                    position: relative;
-                                }
-                                .calendar-green-red-range .limit-start::before {
-                                    content: '>>';
-                                    position: absolute;
-                                    bottom: -1px;
-                                    left: 50%;
-                                    transform: translateX(-50%);
-                                    font-size: 12px;
-                                    color: #f97316;
-                                    pointer-events: none;
-                                    z-index: 10;
-                                    line-height: 1;
-                                }
-
-                                /* Limit end date = arrow indicator below date (project/parent boundary) */
-                                .calendar-green-red-range .limit-end {
-                                    position: relative;
-                                }
-                                .calendar-green-red-range .limit-end::before {
-                                    content: '<<';
-                                    position: absolute;
-                                    bottom: -1px;
-                                    left: 50%;
-                                    transform: translateX(-50%);
-                                    font-size: 12px;
-                                    color: #f97316;
-                                    pointer-events: none;
-                                    z-index: 10;
-                                    line-height: 1;
-                                }
-
-                                /* When today marker and limit are on same date, hide today marker */
-                                .calendar-green-red-range .today-marker.limit-start::after,
-                                .calendar-green-red-range .today-marker.limit-end::after {
-                                    display: none;
-                                }
-
-                                /* When limit start and end are on same date, show both arrows */
-                                .calendar-green-red-range .limit-start.limit-end::before {
-                                    content: '><';
-                                    font-size: 10px;
-                                }
-                            `}</style>
 
                             <div
                                 onMouseDown=
@@ -789,11 +680,11 @@ export function DateRangePicker({
 
                             {/* Time pickers for start and end */}
                             {showTime && (
-                                <div className="border-t p-3 space-y-3">
+                                <div className="border-t border-sa-border p-3 space-y-2.5">
                                     {/* Start time */}
                                     <div className="flex items-center gap-2">
-                                        <Clock className="h-4 w-4 text-green-500" />
-                                        <span className="text-sm text-muted-foreground w-12">Start:</span>
+                                        <Clock className="h-3.5 w-3.5 text-sa-good" />
+                                        <span className="text-[13px] text-muted-foreground w-12">Start:</span>
                                         <div className="flex items-center gap-1">
                                             <input
                                                 type="number"
@@ -802,7 +693,7 @@ export function DateRangePicker({
                                                 value={startHours}
                                                 onChange={(e) => handleStartTimeChange("hours", e.target.value)}
                                                 disabled={!selectedRange?.from}
-                                                className="w-12 h-8 text-center text-sm border rounded-md bg-background disabled:opacity-50"
+                                                className="w-12 h-7 text-center text-[13px] font-mono border border-input rounded-md bg-transparent focus:outline-none focus:border-ring disabled:opacity-50"
                                             />
                                             <span className="text-muted-foreground">:</span>
                                             <input
@@ -812,14 +703,14 @@ export function DateRangePicker({
                                                 value={startMinutes}
                                                 onChange={(e) => handleStartTimeChange("minutes", e.target.value)}
                                                 disabled={!selectedRange?.from}
-                                                className="w-12 h-8 text-center text-sm border rounded-md bg-background disabled:opacity-50"
+                                                className="w-12 h-7 text-center text-[13px] font-mono border border-input rounded-md bg-transparent focus:outline-none focus:border-ring disabled:opacity-50"
                                             />
                                         </div>
                                     </div>
                                     {/* End time */}
                                     <div className="flex items-center gap-2">
-                                        <Clock className="h-4 w-4 text-red-500" />
-                                        <span className="text-sm text-muted-foreground w-12">End:</span>
+                                        <Clock className="h-3.5 w-3.5 text-sa-danger" />
+                                        <span className="text-[13px] text-muted-foreground w-12">End:</span>
                                         <div className="flex items-center gap-1">
                                             <input
                                                 type="number"
@@ -828,7 +719,7 @@ export function DateRangePicker({
                                                 value={endHours}
                                                 onChange={(e) => handleEndTimeChange("hours", e.target.value)}
                                                 disabled={!selectedRange?.to}
-                                                className="w-12 h-8 text-center text-sm border rounded-md bg-background disabled:opacity-50"
+                                                className="w-12 h-7 text-center text-[13px] font-mono border border-input rounded-md bg-transparent focus:outline-none focus:border-ring disabled:opacity-50"
                                             />
                                             <span className="text-muted-foreground">:</span>
                                             <input
@@ -838,7 +729,7 @@ export function DateRangePicker({
                                                 value={endMinutes}
                                                 onChange={(e) => handleEndTimeChange("minutes", e.target.value)}
                                                 disabled={!selectedRange?.to}
-                                                className="w-12 h-8 text-center text-sm border rounded-md bg-background disabled:opacity-50"
+                                                className="w-12 h-7 text-center text-[13px] font-mono border border-input rounded-md bg-transparent focus:outline-none focus:border-ring disabled:opacity-50"
                                             />
                                         </div>
                                     </div>
