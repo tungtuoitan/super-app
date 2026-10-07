@@ -18,17 +18,17 @@ interface ConfirmCloseDialogProps {
 export function ConfirmCloseDialog({ open, tabTitle, onConfirm, onCancel }: ConfirmCloseDialogProps) {
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-            <DialogContent className="bg-card text-foreground border sm:max-w-md">
+            <DialogContent className="text-foreground sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                        <AlertTriangle className="w-4 h-4 text-sa-amber" />
                         <span>Unsaved Changes</span>
                     </DialogTitle>
                     <DialogDescription className="text-left">
-                        <p className="text-base text-foreground">
+                        <p className="text-sm text-foreground">
                             Do you want to close <strong>"{tabTitle}"</strong> without saving changes?
                         </p>
-                        <p className="mt-2 text-sm text-muted-foreground">Your changes will be lost if you don't save them.</p>
+                        <p className="mt-2 text-[13px] text-muted-foreground">Your changes will be lost if you don't save them.</p>
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="gap-2">

@@ -51,7 +51,7 @@ export function AccountsDialog() {
                     {!isAuthenticated ? (
                         // Not authenticated - show sign in options
                         <div className="space-y-4">
-                            <Button onClick={() => initiateGoogleLogin()} variant="outline" className="w-full justify-start gap-3 h-12">
+                            <Button onClick={() => initiateGoogleLogin()} variant="outline" className="w-full justify-start gap-3 h-10">
                                 <Chrome className="h-5 w-5" />
                                 <span>Sign in with Google</span>
                             </Button>
@@ -70,7 +70,7 @@ export function AccountsDialog() {
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
                                         placeholder="Username"
-                                        className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full h-8 px-2.5 rounded-lg border border-input bg-transparent text-[13px] placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
                                     />
                                     <input
                                         type="password"
@@ -78,10 +78,10 @@ export function AccountsDialog() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Password"
-                                        className="w-full px-3 py-2 rounded-md border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full h-8 px-2.5 rounded-lg border border-input bg-transparent text-[13px] placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
                                     />
                                     {loginError && (
-                                        <p className="text-xs text-red-500">{loginError}</p>
+                                        <p className="text-xs text-sa-danger">{loginError}</p>
                                     )}
                                     <Button type="submit" disabled={loginLoading || !username || !password} className="w-full">
                                         {loginLoading ? "Signing in..." : "Sign in"}
@@ -94,12 +94,12 @@ export function AccountsDialog() {
                     ) : (
                         // Authenticated - show user info
                         <div className="space-y-4">
-                            <div className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                            <div className="flex items-center gap-3 p-3 rounded-xl border border-sa-border bg-card">
                                 {$user.picture ? (
                                     <img src={$user.picture} alt={$user.userName} className="h-10 w-10 rounded-full" />
                                 ) : (
-                                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                        <User className="h-5 w-5 text-primary" />
+                                    <div className="h-10 w-10 rounded-full bg-sa-hover-strong flex items-center justify-center">
+                                        <User className="h-5 w-5 text-muted-foreground" />
                                     </div>
                                 )}
                                 <div className="flex-1 min-w-0">

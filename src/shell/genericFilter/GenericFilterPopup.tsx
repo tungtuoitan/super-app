@@ -25,8 +25,8 @@ interface FilterFieldErrorProps {
 function FilterFieldHeader({ label, error }: FilterFieldErrorProps) {
     return (
         <div className="flex items-center justify-between">
-            <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
-            {error && <span className="text-xs text-red-500 font-medium">{error}</span>}
+            <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</Label>
+            {error && <span className="text-xs text-sa-danger font-medium">{error}</span>}
         </div>
     );
 }
@@ -59,7 +59,7 @@ function FilterStandardRegistryField({ group, options, error, isValueActive, onT
                             />
                             <label
                                 htmlFor={`${group.key}-${option.code}`}
-                                className={`text-sm font-normal cursor-pointer ${isChecked ? "text-foreground" : "text-gray-400"}`}
+                                className={`text-[13px] font-normal cursor-pointer ${isChecked ? "text-foreground" : "text-muted-foreground"}`}
                             >
                                 {option.description || option.code}
                             </label>
@@ -92,7 +92,7 @@ function FilterDeletedAtRadio({ group, currentValue, error, onChange }: FilterDe
                     <RadioGroupItem value="null" id="deletedAt-null" />
                     <label
                         htmlFor="deletedAt-null"
-                        className={`text-sm font-normal cursor-pointer ${currentValue === "null" ? "text-foreground" : "text-gray-400"}`}
+                        className={`text-[13px] font-normal cursor-pointer ${currentValue === "null" ? "text-foreground" : "text-muted-foreground"}`}
                     >
                         Existing
                     </label>
@@ -101,7 +101,7 @@ function FilterDeletedAtRadio({ group, currentValue, error, onChange }: FilterDe
                     <RadioGroupItem value="notNull" id="deletedAt-notNull" />
                     <label
                         htmlFor="deletedAt-notNull"
-                        className={`text-sm font-normal cursor-pointer ${currentValue === "notNull" ? "text-foreground" : "text-gray-400"}`}
+                        className={`text-[13px] font-normal cursor-pointer ${currentValue === "notNull" ? "text-foreground" : "text-muted-foreground"}`}
                     >
                         Deleted
                     </label>
@@ -137,8 +137,8 @@ function FilterDeletedAtCheckbox({ group, error, isValueActive, onToggle }: Filt
                     />
                     <label
                         htmlFor="deletedAt-null"
-                        className={`text-sm font-normal cursor-pointer ${
-                            isValueActive("deletedAt", "null") ? "text-foreground" : "text-gray-400"
+                        className={`text-[13px] font-normal cursor-pointer ${
+                            isValueActive("deletedAt", "null") ? "text-foreground" : "text-muted-foreground"
                         }`}
                     >
                         Existing
@@ -152,8 +152,8 @@ function FilterDeletedAtCheckbox({ group, error, isValueActive, onToggle }: Filt
                     />
                     <label
                         htmlFor="deletedAt-notNull"
-                        className={`text-sm font-normal cursor-pointer ${
-                            isValueActive("deletedAt", "notNull") ? "text-foreground" : "text-gray-400"
+                        className={`text-[13px] font-normal cursor-pointer ${
+                            isValueActive("deletedAt", "notNull") ? "text-foreground" : "text-muted-foreground"
                         }`}
                     >
                         Deleted
@@ -270,7 +270,7 @@ export function GenericFilterPopup() {
             <PopoverTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 relative">
                     <Filter className="h-4 w-4" />
-                    {hasDiff && <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />}
+                    {hasDiff && <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-sa-amber" />}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-3" align="end">
@@ -279,7 +279,7 @@ export function GenericFilterPopup() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Filter className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-medium text-sm">Filter {moduleName}</h4>
+                            <h4 className="font-medium text-[13px]">Filter {moduleName}</h4>
                         </div>
                         <div className="flex items-center gap-1">
                             <Button
@@ -297,7 +297,7 @@ export function GenericFilterPopup() {
                                 size="sm"
                                 onClick={() => applyFilter()}
                                 disabled={applyDisabled}
-                                className="h-6 px-2 text-xs bg-white/80 hover:bg-white pb-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="h-6 px-2 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Apply
                             </Button>

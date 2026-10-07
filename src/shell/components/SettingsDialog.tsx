@@ -31,10 +31,10 @@ function SyncStatusChip({ status, direction }: { status: KSyncStatus; direction:
     })();
 
     const cls = (() => {
-        if (status === "pushing" || status === "pulling") return "bg-blue-500/15 text-blue-400 border-blue-500/30";
-        if (status === "behind")   return "bg-amber-500/15 text-amber-400 border-amber-500/30";
-        if (status === "conflict" || status === "error") return "bg-red-500/15 text-red-400 border-red-500/30";
-        if (status === "synced")   return "bg-green-500/15 text-green-400 border-green-500/30";
+        if (status === "pushing" || status === "pulling") return "bg-sa-hover text-muted-foreground border-sa-border-strong";
+        if (status === "behind")   return "bg-sa-amber/10 text-sa-amber-ink border-sa-amber/30";
+        if (status === "conflict" || status === "error") return "bg-sa-danger/10 text-sa-danger border-sa-danger/30";
+        if (status === "synced")   return "bg-sa-good/10 text-sa-good border-sa-good/30";
         return "bg-muted text-muted-foreground border-border";
     })();
 
@@ -225,38 +225,38 @@ export function SettingsDialog() {
                         <div className="space-y-6">
                             {/* Theme */}
                             <div className="space-y-3">
-                                <Label className="text-sm font-medium">Theme</Label>
+                                <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Theme</Label>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setTheme("light")}
                                         className={`
-                                            flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 transition-all
-                                            ${theme === "light" ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50 hover:bg-accent"}
+                                            flex-1 flex items-center justify-center gap-2 h-9 px-3 rounded-lg border transition-colors duration-100
+                                            ${theme === "light" ? "border-sa-amber/70 bg-sa-surface-2 text-foreground" : "border-sa-border-strong text-muted-foreground hover:text-foreground hover:bg-sa-hover"}
                                         `}
                                     >
                                         <Sun className="w-4 h-4" />
-                                        <span className="font-medium text-sm">Light</span>
+                                        <span className="font-medium text-[13px]">Light</span>
                                     </button>
                                     <button
                                         onClick={() => setTheme("dark")}
                                         className={`
-                                            flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 transition-all
-                                            ${theme === "dark" ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50 hover:bg-accent"}
+                                            flex-1 flex items-center justify-center gap-2 h-9 px-3 rounded-lg border transition-colors duration-100
+                                            ${theme === "dark" ? "border-sa-amber/70 bg-sa-surface-2 text-foreground" : "border-sa-border-strong text-muted-foreground hover:text-foreground hover:bg-sa-hover"}
                                         `}
                                     >
                                         <Moon className="w-4 h-4" />
-                                        <span className="font-medium text-sm">Dark</span>
+                                        <span className="font-medium text-[13px]">Dark</span>
                                     </button>
                                 </div>
                             </div>
 
                             {/* Keywords */}
                             <div className="space-y-3">
-                                <Label className="text-sm font-medium">Keywords</Label>
+                                <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Keywords</Label>
                                 <button
                                     onClick={handleSync}
                                     disabled={isSyncing}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm w-full justify-center"
+                                    className="flex items-center gap-2 h-8 px-3 rounded-lg border border-sa-border-strong hover:bg-sa-hover-strong transition-colors duration-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm w-full justify-center"
                                 >
                                     {isSyncing
                                         ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -285,22 +285,22 @@ export function SettingsDialog() {
                                             <span className="font-medium">{syncReport.hardDeletedCount}</span>
 
                                             <span className="text-muted-foreground">Name fix</span>
-                                            <span className={`font-medium ${syncReport.nameMismatchCount > 0 ? "text-yellow-500" : ""}`}>
+                                            <span className={`font-medium ${syncReport.nameMismatchCount > 0 ? "text-sa-amber-ink" : ""}`}>
                                                 {syncReport.nameMismatchCount}
                                             </span>
 
                                             <span className="text-muted-foreground">Link fix</span>
-                                            <span className={`font-medium ${syncReport.linkMismatchCount > 0 ? "text-yellow-500" : ""}`}>
+                                            <span className={`font-medium ${syncReport.linkMismatchCount > 0 ? "text-sa-amber-ink" : ""}`}>
                                                 {syncReport.linkMismatchCount}
                                             </span>
 
                                             <span className="text-muted-foreground">Updated</span>
-                                            <span className={`font-medium ${syncReport.updatedCount > 0 ? "text-green-500" : ""}`}>
+                                            <span className={`font-medium ${syncReport.updatedCount > 0 ? "text-sa-good" : ""}`}>
                                                 {syncReport.updatedCount}
                                             </span>
 
                                             <span className="text-muted-foreground">Created</span>
-                                            <span className={`font-medium ${syncReport.createdCount > 0 ? "text-blue-500" : ""}`}>
+                                            <span className={`font-medium ${syncReport.createdCount > 0 ? "text-muted-foreground" : ""}`}>
                                                 {syncReport.createdCount}
                                             </span>
                                         </div>
@@ -319,7 +319,7 @@ export function SettingsDialog() {
                                         )}
 
                                         {syncReport.updates.length === 0 && syncReport.created.length === 0 && (
-                                            <div className="flex items-center gap-1.5 text-xs text-green-500">
+                                            <div className="flex items-center gap-1.5 text-xs text-sa-good">
                                                 <CheckCircle2 className="w-3.5 h-3.5" />
                                                 All keywords are up to date
                                             </div>
@@ -330,7 +330,7 @@ export function SettingsDialog() {
 
                             {/* Extension Token */}
                             <div className="space-y-2">
-                                <Label className="text-sm font-medium">Extension Token</Label>
+                                <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Extension Token</Label>
                                 <p className="text-xs text-muted-foreground">
                                     Copy your JWT to paste into the SuperApp Chrome extension.
                                 </p>
@@ -341,10 +341,10 @@ export function SettingsDialog() {
                                         setTokenCopied(true);
                                         setTimeout(() => setTokenCopied(false), 2000);
                                     }}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-accent transition-all text-sm w-full justify-center"
+                                    className="flex items-center gap-2 h-8 px-3 rounded-lg border border-sa-border-strong hover:bg-sa-hover-strong transition-colors duration-100 text-sm w-full justify-center"
                                 >
                                     {tokenCopied
-                                        ? <><Check className="w-4 h-4 text-green-500" /><span className="text-green-500">Copied!</span></>
+                                        ? <><Check className="w-4 h-4 text-sa-good" /><span className="text-sa-good">Copied!</span></>
                                         : <><Copy className="w-4 h-4" />Copy Token</>
                                     }
                                 </button>
@@ -353,7 +353,7 @@ export function SettingsDialog() {
 
                         {/* ── Right: K Repo Sync ── */}
                         <div className="space-y-3">
-                            <Label className="text-sm font-medium flex items-center gap-1.5">
+                            <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
                                 <GitBranch className="w-3.5 h-3.5" />
                                 K Repo Sync
                             </Label>
@@ -378,7 +378,7 @@ export function SettingsDialog() {
                                     value={repoUrlInput}
                                     onChange={(e) => { setRepoUrlInput(e.target.value); setConfigSaved(false); }}
                                     placeholder="https://github.com/user/repo.git"
-                                    className="w-full px-2.5 py-1.5 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                                    className="w-full h-8 px-2.5 rounded-lg border border-input bg-transparent text-[13px] focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
                                 />
                             </div>
 
@@ -390,7 +390,7 @@ export function SettingsDialog() {
                                         value={branchInput}
                                         onChange={(e) => { setBranchInput(e.target.value); setConfigSaved(false); }}
                                         placeholder="K"
-                                        className="w-full px-2.5 py-1.5 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                                        className="w-full h-8 px-2.5 rounded-lg border border-input bg-transparent text-[13px] focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
                                     />
                                 </div>
                                 <div className="space-y-1">
@@ -400,7 +400,7 @@ export function SettingsDialog() {
                                         value={patInput}
                                         onChange={(e) => { setPatInput(e.target.value); setConfigSaved(false); }}
                                         placeholder={repoUrl ? "Leave blank to keep" : "ghp_..."}
-                                        className="w-full px-2.5 py-1.5 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                                        className="w-full h-8 px-2.5 rounded-lg border border-input bg-transparent text-[13px] focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
                                     />
                                 </div>
                             </div>
@@ -412,7 +412,7 @@ export function SettingsDialog() {
                                 </div>
                             )}
                             {configSaved && (
-                                <div className="flex items-center gap-1.5 text-xs text-green-500">
+                                <div className="flex items-center gap-1.5 text-xs text-sa-good">
                                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                                     Configuration saved
                                 </div>
@@ -421,7 +421,7 @@ export function SettingsDialog() {
                             <button
                                 onClick={handleSaveConfig}
                                 disabled={isSavingConfig || !repoUrlInput}
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm w-full justify-center"
+                                className="flex items-center gap-2 h-8 px-3 rounded-lg border border-sa-border-strong hover:bg-sa-hover-strong transition-colors duration-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm w-full justify-center"
                             >
                                 {isSavingConfig ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                                 Save config
@@ -438,7 +438,7 @@ export function SettingsDialog() {
                                         {isComparing ? (
                                             <><Loader2 className="w-3 h-3 animate-spin" /> Comparing repo vs DB…</>
                                         ) : compareDiff && !hasAnyDiff ? (
-                                            <><CheckCircle2 className="w-3 h-3 text-green-500" /> Repo and DB are in sync · next check in {secondsToRefresh}s</>
+                                            <><CheckCircle2 className="w-3 h-3 text-sa-good" /> Repo and DB are in sync · next check in {secondsToRefresh}s</>
                                         ) : (
                                             <><RefreshCw className="w-3 h-3" /> Next check in {secondsToRefresh}s</>
                                         )}
@@ -487,10 +487,10 @@ export function SettingsDialog() {
                                                             {u.type}
                                                         </span>
                                                         {u.nameChanged && (
-                                                            <span className="text-[10px] text-yellow-500 font-medium">name</span>
+                                                            <span className="text-[10px] text-sa-amber-ink font-medium">name</span>
                                                         )}
                                                         {u.linkChanged && (
-                                                            <span className="text-[10px] text-blue-500 font-medium">link</span>
+                                                            <span className="text-[10px] text-muted-foreground font-medium">link</span>
                                                         )}
                                                     </div>
                                                     {u.nameChanged && (
@@ -523,9 +523,9 @@ export function SettingsDialog() {
                                     <ScrollArea className="h-72 rounded-md border">
                                         <div className="p-2 space-y-1">
                                             {syncReport.created.map((c, i) => (
-                                                <div key={`${c.type}-${i}`} className="rounded-md bg-blue-500/5 border border-blue-500/20 p-2 space-y-1">
+                                                <div key={`${c.type}-${i}`} className="rounded-lg bg-sa-surface border border-sa-border p-2 space-y-1">
                                                     <div className="flex items-center gap-1.5 min-w-0">
-                                                        <span className="px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-500 text-[10px] font-medium shrink-0">
+                                                        <span className="px-1.5 py-0.5 rounded-md border border-sa-border-strong text-muted-foreground text-[10px] font-medium shrink-0">
                                                             {c.type}
                                                         </span>
                                                         <span className="text-xs font-medium truncate">{c.newName}</span>

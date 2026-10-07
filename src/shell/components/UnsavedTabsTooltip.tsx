@@ -48,7 +48,7 @@ export function UnsavedTabsTooltip({
                     </TooltipTrigger>
                     <TooltipContent side={side} className="max-w-xs py-2 px-4">
                         <p className="font-medium mb-1">⚠️ {actionText}</p>
-                        <p className="text-sm text-gray-500">Please save unsaved files first</p>
+                        <p className="text-xs text-muted-foreground">Please save unsaved files first</p>
                         {/* <ul className="text-sm mt-1 list-disc list-inside text-gray-500">
                             {unsavedTabTitles.map((title, idx) => (
                                 <li key={idx}>{title.length > 20 ? title.slice(0, 20) + "..." : title}</li>
