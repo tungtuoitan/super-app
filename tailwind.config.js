@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 module.exports = {
     darkMode: ["class"],
     content: ["./src/**/*.{js,jsx,ts,tsx}"],
@@ -11,6 +13,10 @@ module.exports = {
             },
         },
         extend: {
+            fontFamily: {
+                sans: ["Geist", ...defaultTheme.fontFamily.sans],
+                mono: ["Geist Mono", ...defaultTheme.fontFamily.mono],
+            },
             colors: {
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
@@ -55,6 +61,27 @@ module.exports = {
                 "editor-hover": "hsl(var(--editor-hover))",
                 "editor-hover-light": "hsl(var(--editor-hover-light))",
                 "editor-active": "hsl(var(--editor-active-border))",
+                // SuperApp design tokens (#1514) — see src/index.css
+                "sa-bg": "hsl(var(--sa-bg) / <alpha-value>)",
+                "sa-surface": "hsl(var(--sa-surface) / <alpha-value>)",
+                "sa-surface-2": "hsl(var(--sa-surface-2) / <alpha-value>)",
+                "sa-border": "hsl(var(--sa-border) / <alpha-value>)",
+                "sa-border-strong": "hsl(var(--sa-border-strong) / <alpha-value>)",
+                "sa-text": "hsl(var(--sa-text) / <alpha-value>)",
+                "sa-muted": "hsl(var(--sa-muted) / <alpha-value>)",
+                "sa-amber": "hsl(var(--sa-accent-amber) / <alpha-value>)",
+                "sa-amber-ink": "hsl(var(--sa-amber-ink) / <alpha-value>)",
+                "sa-good": "hsl(var(--sa-good) / <alpha-value>)",
+                "sa-danger": "hsl(var(--sa-danger) / <alpha-value>)",
+                "sa-focus": "hsl(var(--sa-focus) / <alpha-value>)",
+                "sa-hover": "var(--sa-hover)",
+                "sa-hover-strong": "var(--sa-hover-strong)",
+            },
+            boxShadow: {
+                "sa-pop": "var(--sa-shadow-pop)",
+            },
+            transitionDuration: {
+                DEFAULT: "120ms",
             },
             borderRadius: {
                 lg: "var(--radius)",

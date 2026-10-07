@@ -1,11 +1,176 @@
+/* Geist (UI) + Geist Mono (ids, numbers, code) — app-wide font (#1514) */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Global Scrollbar (VS Code-style) */
+/*
+ * Design tokens (#1514) — Linear-style, derived from the Home dashboard
+ * (src/features/home/Components/home.css).
+ * - shadcn tokens are HSL triplets (used as hsl(var(--x))).
+ * - --sa-* tokens: app-specific. Triplets unless the name ends with a state
+ *   (hover/...) which hold full colors so they can carry alpha.
+ * Dark is the app default (ThemeContext puts .dark on <html>).
+ */
+@layer base {
+    :root {
+        /* ── shadcn/ui (Light) ── */
+        --background: 0 0% 100%;
+        --foreground: 240 6% 10%;
+
+        --card: 0 0% 98.5%;
+        --card-foreground: 240 6% 10%;
+
+        --popover: 0 0% 100%;
+        --popover-foreground: 240 6% 10%;
+
+        --primary: 240 6% 10%;
+        --primary-foreground: 0 0% 98%;
+
+        --secondary: 240 5% 95%;
+        --secondary-foreground: 240 6% 10%;
+
+        --muted: 240 5% 96%;
+        --muted-foreground: 240 4% 44%;
+
+        --accent: 240 5% 94%;
+        --accent-foreground: 240 6% 10%;
+
+        --destructive: 0 72% 51%;
+        --destructive-foreground: 0 0% 100%;
+
+        --border: 240 6% 91%;
+        --input: 240 6% 87%;
+        --ring: 217 91% 60%;
+
+        --radius: 0.5rem; /* 8px → rounded-lg; md = 6px; sm = 4px */
+
+        /* ── SuperApp tokens (Light) ── */
+        --sa-bg: 0 0% 100%;
+        --sa-surface: 0 0% 98.5%;
+        --sa-surface-2: 240 5% 96%;
+        --sa-border: 240 6% 91%;
+        --sa-border-strong: 240 5% 84%;
+        --sa-text: 240 6% 10%;
+        --sa-muted: 240 4% 44%;
+        --sa-accent-amber: 38 87% 62%;
+        --sa-amber-ink: 33 80% 36%; /* amber readable as text on white */
+        --sa-good: 142 71% 38%;
+        --sa-danger: 0 72% 51%;
+        --sa-focus: 217 91% 60%;
+        --sa-hover: rgba(0, 0, 0, 0.04);
+        --sa-hover-strong: rgba(0, 0, 0, 0.07);
+        --sa-shadow-pop: 0 8px 24px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --sa-scrollbar: rgba(0, 0, 0, 0.14);
+        --sa-scrollbar-hover: rgba(0, 0, 0, 0.26);
+
+        /* ── Editor shell (Light) — skin only, mapped onto the tokens above ── */
+        --editor-background: 0 0% 100%;
+        --editor-foreground: 240 6% 10%;
+        --editor-sidebar: 0 0% 98.5%;
+        --editor-panel: 0 0% 98.5%;
+        --editor-activitybar: 0 0% 97%;
+        --editor-border: 240 6% 91%;
+        --editor-hover: 240 5% 94%;
+        --editor-hover-light: 240 5% 96%;
+        --editor-active-border: 38 87% 62%;
+    }
+
+    .dark {
+        /* ── shadcn/ui (Dark) — Home palette ── */
+        --background: 240 4% 5%; /* #0c0c0d */
+        --foreground: 0 0% 93%; /* #ededed */
+
+        --card: 240 2% 9%; /* #161617 */
+        --card-foreground: 0 0% 93%;
+
+        --popover: 240 3% 12.5%; /* #1f1f21 */
+        --popover-foreground: 0 0% 93%;
+
+        --primary: 0 0% 93%;
+        --primary-foreground: 240 4% 5%;
+
+        --secondary: 240 3% 12.5%;
+        --secondary-foreground: 0 0% 93%;
+
+        --muted: 240 2% 9%;
+        --muted-foreground: 240 1% 57%; /* ≈ rgba(255,255,255,.55) on bg */
+
+        --accent: 240 3% 16%;
+        --accent-foreground: 0 0% 93%;
+
+        --destructive: 0 91% 71%; /* #f87171 */
+        --destructive-foreground: 240 4% 5%;
+
+        --border: 240 3% 13%; /* ≈ rgba(255,255,255,.06–.08) */
+        --input: 240 2% 18%;
+        --ring: 218 100% 78%; /* #8fb8ff */
+
+        /* ── SuperApp tokens (Dark) ── */
+        --sa-bg: 240 4% 5%; /* #0c0c0d */
+        --sa-surface: 240 2% 9%; /* #161617 */
+        --sa-surface-2: 240 3% 12.5%; /* #1f1f21 */
+        --sa-border: 240 3% 13%;
+        --sa-border-strong: 240 2% 19%; /* ≈ rgba(255,255,255,.12) */
+        --sa-text: 0 0% 93%;
+        --sa-muted: 240 1% 57%;
+        --sa-accent-amber: 38 87% 62%; /* #f2b54b */
+        --sa-amber-ink: 38 87% 62%;
+        --sa-good: 142 69% 58%; /* #4ade80 */
+        --sa-danger: 0 91% 71%; /* #f87171 */
+        --sa-focus: 218 100% 78%; /* #8fb8ff */
+        --sa-hover: rgba(255, 255, 255, 0.045);
+        --sa-hover-strong: rgba(255, 255, 255, 0.08);
+        --sa-shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5);
+        --sa-scrollbar: rgba(255, 255, 255, 0.1);
+        --sa-scrollbar-hover: rgba(255, 255, 255, 0.2);
+
+        /* ── Editor shell (Dark) ── */
+        --editor-background: 240 4% 5%;
+        --editor-foreground: 0 0% 93%;
+        --editor-sidebar: 240 3% 7%;
+        --editor-panel: 240 3% 7%;
+        --editor-activitybar: 240 4% 5%;
+        --editor-border: 240 3% 13%;
+        --editor-hover: 240 3% 14%;
+        --editor-hover-light: 240 3% 11%;
+        --editor-active-border: 38 87% 62%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground font-sans;
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        font-variant-numeric: tabular-nums;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    /* "html " prefix: App.css (frozen) also sets body/code font-family */
+    html body {
+        @apply font-sans;
+    }
+    html code,
+    html kbd,
+    html samp,
+    html pre {
+        @apply font-mono;
+    }
+    ::selection {
+        background-color: hsl(var(--sa-accent-amber) / 0.28);
+    }
+}
+
+/* Global Scrollbar — thin, quiet */
 * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(121, 121, 121, 0.4) transparent;
+    scrollbar-color: var(--sa-scrollbar) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -18,137 +183,22 @@
 }
 
 *::-webkit-scrollbar-thumb {
-    background-color: rgba(121, 121, 121, 0.4);
+    background-color: var(--sa-scrollbar);
     border-radius: 10px;
     border: 2px solid transparent;
     background-clip: content-box;
 }
 
-*::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(100, 100, 100, 0.7);
-}
-
+*::-webkit-scrollbar-thumb:hover,
 *::-webkit-scrollbar-thumb:active {
-    background-color: rgba(85, 85, 85, 0.8);
+    background-color: var(--sa-scrollbar-hover);
 }
 
 *::-webkit-scrollbar-corner {
     background: transparent;
 }
 
-/* Dark mode adjustments */
-.dark *::-webkit-scrollbar-thumb {
-    background-color: rgba(121, 121, 121, 0.4);
-}
-
-.dark *::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(100, 100, 100, 0.7);
-}
-
-.dark *::-webkit-scrollbar-thumb:active {
-    background-color: rgba(191, 191, 191, 1);
-}
-
-@layer base {
-    :root {
-        /* shadcn/ui - Zinc Theme (Light Mode) */
-        --background: 0 0% 100%;
-        --foreground: 240 10% 3.9%;
-
-        --card: 0 0% 100%;
-        --card-foreground: 240 10% 3.9%;
-
-        --popover: 0 0% 100%;
-        --popover-foreground: 240 10% 3.9%;
-
-        --primary: 240 5.9% 10%;
-        --primary-foreground: 0 0% 98%;
-
-        --secondary: 240 4.8% 95.9%;
-        --secondary-foreground: 240 5.9% 10%;
-
-        --muted: 240 4.8% 95.9%;
-        --muted-foreground: 240 3.8% 46.1%;
-
-        --accent: 240 4.8% 95.9%;
-        --accent-foreground: 240 5.9% 10%;
-
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-
-        --border: 240 5.9% 90%;
-        --input: 240 5.9% 90%;
-        --ring: 240 5.9% 10%;
-
-        --radius: 0.5rem;
-
-        /* VS Code-style Editor Colors (Light Mode) */
-        --editor-background: 0 0% 100%;
-        --editor-foreground: 240 10% 3.9%;
-        --editor-sidebar: 0 0% 96%;
-        --editor-panel: 0 0% 98%;
-        --editor-border: 240 5.9% 90%;
-        --editor-hover: 240 4.8% 95.9%;
-        --editor-hover-light: 240 4.8% 98%;
-    }
-
-    .dark {
-        /* shadcn/ui - Zinc Theme (Dark Mode) */
-        --background: 240 10% 3.9%;
-        --foreground: 0 0% 98%;
-
-        --card: 240 10% 3.9%;
-        --card-foreground: 0 0% 98%;
-
-        --popover: 240 10% 3.9%;
-        --popover-foreground: 0 0% 98%;
-
-        --primary: 0 0% 98%;
-        --primary-foreground: 240 5.9% 10%;
-
-        --secondary: 240 3.7% 15.9%;
-        --secondary-foreground: 0 0% 98%;
-
-        --muted: 240 3.7% 15.9%;
-        --muted-foreground: 240 5% 64.9%;
-
-        --accent: 240 3.7% 15.9%;
-        --accent-foreground: 0 0% 98%;
-
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-
-        --border: 240 3.7% 15.9%;
-        --input: 240 3.7% 15.9%;
-        --ring: 240 4.9% 83.9%;
-
-        /* VS Code-style Editor Colors (Dark Mode) */
-        --editor-background: 220 13% 12%; /* rgb(30,30,30) ≈ #1E1E1E */
-        --editor-foreground: 0 0% 80%; /* #CCCCCC */
-        --editor-sidebar: 218 11% 15%; /* rgb(37,37,38) ≈ #252526 */
-        --editor-panel: 220 13% 12%; /* rgb(30,30,30) */
-        --editor-activitybar: 0 0% 20%; /* rgb(51,51,51) ≈ #333333 */
-        --editor-border: 0 0% 100% / 0.1; /* rgba(255,255,255,0.1) */
-        --editor-hover: 0 0% 100% / 0.1;
-        --editor-hover-light: 0 0% 100% / 0.05;
-        --editor-active-border: 195 100% 42%; /* #007acc - VS Code blue */
-    }
-}
-
-@layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
-}
-
-/* VS Code-style Scrollbar */
+/* VS Code-style Scrollbar (class kept for existing consumers) */
 .vscode-scrollbar::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -159,37 +209,20 @@
 }
 
 .vscode-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(121, 121, 121, 0.4);
+    background-color: var(--sa-scrollbar);
     border-radius: 10px;
     border: 2px solid transparent;
     background-clip: content-box;
 }
 
-.vscode-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(100, 100, 100, 0.7);
-}
-
+.vscode-scrollbar::-webkit-scrollbar-thumb:hover,
 .vscode-scrollbar::-webkit-scrollbar-thumb:active {
-    background-color: rgba(85, 85, 85, 0.8);
+    background-color: var(--sa-scrollbar-hover);
 }
 
 .vscode-scrollbar::-webkit-scrollbar-corner {
     background: transparent;
 }
-
-/* Dark mode adjustments */
-.dark .vscode-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(121, 121, 121, 0.4);
-}
-
-.dark .vscode-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(100, 100, 100, 0.7);
-}
-
-.dark .vscode-scrollbar::-webkit-scrollbar-thumb:active {
-    background-color: rgba(191, 191, 191, 1);
-}
-
 /* Hide scrollbar for react-arborist tree inner div */
 /* [role="tree"] > div {
     overflow: hidden !important;
@@ -227,23 +260,28 @@ div[data-workspace-tree="true"] {
     border: 1px solid yellow !important;
 }
 
-/* Context Menu Theming */
+/* Context Menu Theming (@szhsin/react-menu) */
 .szh-menu {
     background-color: hsl(var(--popover)) !important;
-    border: 1px solid hsl(var(--border)) !important;
+    border: 1px solid hsl(var(--sa-border-strong)) !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
     color: hsl(var(--popover-foreground)) !important;
-    box-shadow:
-        0 4px 6px -1px rgb(0 0 0 / 0.1),
-        0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+    font-size: 13px !important;
+    box-shadow: var(--sa-shadow-pop) !important;
     z-index: 10200 !important;
 }
 
 .szh-menu__item {
     color: hsl(var(--popover-foreground)) !important;
+    border-radius: 6px !important;
+    padding: 6px 8px !important;
+    transition: background-color 0.1s ease;
 }
 
-.szh-menu__item:hover {
-    background-color: hsl(var(--accent)) !important;
+.szh-menu__item:hover,
+.szh-menu__item--hover {
+    background-color: var(--sa-hover-strong) !important;
     color: hsl(var(--accent-foreground)) !important;
 }
 
@@ -254,42 +292,26 @@ div[data-workspace-tree="true"] {
 
 .szh-menu__divider {
     background-color: hsl(var(--border)) !important;
+    margin: 4px 0 !important;
 }
 
-/* Hard Delete Menu Item - Destructive Red Style */
+/* Hard Delete Menu Item - Destructive Style */
 .szh-menu__item.text-red-600 {
-    color: rgb(220, 38, 38) !important;
+    color: hsl(var(--sa-danger)) !important;
 }
 
 .szh-menu__item.text-red-600:hover {
-    background-color: rgb(254, 242, 242) !important;
-    color: rgb(220, 38, 38) !important;
-}
-
-.dark .szh-menu__item.text-red-600 {
-    color: rgb(248, 113, 113) !important;
-}
-
-.dark .szh-menu__item.text-red-600:hover {
-    background-color: rgb(127, 29, 29) !important;
-    color: rgb(248, 113, 113) !important;
+    background-color: hsl(var(--sa-danger) / 0.1) !important;
+    color: hsl(var(--sa-danger)) !important;
 }
 
 /* Select Popup Styling */
-[data-radix-select-content] {
-    background-color: white !important;
-}
-
+[data-radix-select-content],
 [data-radix-select-viewport] {
-    background-color: white !important;
-}
-
-.dark [data-radix-select-content],
-.dark [data-radix-select-viewport] {
     background-color: hsl(var(--popover)) !important;
 }
 
-/* Select Popup Scrollbar - VS Code style */
+/* Select Popup Scrollbar */
 [data-radix-select-viewport]::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -300,18 +322,15 @@ div[data-workspace-tree="true"] {
 }
 
 [data-radix-select-viewport]::-webkit-scrollbar-thumb {
-    background-color: rgba(121, 121, 121, 0.4);
+    background-color: var(--sa-scrollbar);
     border-radius: 10px;
     border: 2px solid transparent;
     background-clip: content-box;
 }
 
-[data-radix-select-viewport]::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(100, 100, 100, 0.7);
-}
-
+[data-radix-select-viewport]::-webkit-scrollbar-thumb:hover,
 [data-radix-select-viewport]::-webkit-scrollbar-thumb:active {
-    background-color: rgba(85, 85, 85, 0.8);
+    background-color: var(--sa-scrollbar-hover);
 }
 
 [data-radix-select-viewport]::-webkit-scrollbar-corner {
@@ -321,21 +340,14 @@ div[data-workspace-tree="true"] {
 /* Select Item Hover Style */
 [data-radix-select-item] {
     background-color: transparent !important;
-    transition: background-color 0.15s ease;
+    transition: background-color 0.1s ease;
 }
 
-[data-radix-select-item]:hover {
-    background-color: rgb(248, 250, 252) !important; /* slate-50 - xám nhạt hơn */
+[data-radix-select-item]:hover,
+[data-radix-select-item][data-highlighted] {
+    background-color: var(--sa-hover-strong) !important;
 }
 
 [data-radix-select-item][data-state="checked"] {
-    background-color: rgb(241, 245, 249) !important; /* slate-100 */
-}
-
-.dark [data-radix-select-item]:hover {
-    background-color: hsl(var(--accent)) !important;
-}
-
-.dark [data-radix-select-item][data-state="checked"] {
-    background-color: hsl(var(--accent)) !important;
+    background-color: var(--sa-hover) !important;
 }
