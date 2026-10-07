@@ -7,7 +7,7 @@ import React, { useMemo, useCallback, useRef, useState, useEffect } from "react"
 import { formatTaskLabel, useMenuContextHelper, MENU_CONTEXT_TYPES } from "@/shared";
 import { CornerDownRight, Diamond } from "lucide-react";
 import type { Task } from "@/features/taskDetail";
-import { getTaskStatusColors, getTaskBarColors, isStatusNonDraggable, TIMELINE_ROW_HEIGHT, TIMELINE_TASK_BAR_HEIGHT, TIMELINE_MIN_BAR_WIDTH, TIMELINE_SUBTASK_BAR_HEIGHT } from "@/features/taskDetail";
+import { getTaskStatusColors, isStatusNonDraggable, TIMELINE_ROW_HEIGHT, TIMELINE_TASK_BAR_HEIGHT, TIMELINE_MIN_BAR_WIDTH, TIMELINE_SUBTASK_BAR_HEIGHT } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
 
 export interface TaskBarProps {
@@ -163,15 +163,15 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
         return () => { document.removeEventListener("mousemove", handleMouseMove); document.removeEventListener("mouseup", handleMouseUp); };
     }, [isDragging, dragStartX, originalLeft, originalWidth, left, width, task, dayWidth, constraints, isSubtask, allTasks]);
 
-    const taskBarColors = getTaskBarColors(task.status);
     const barHeight = isSubtask ? TIMELINE_SUBTASK_BAR_HEIGHT : TIMELINE_TASK_BAR_HEIGHT;
-    const barColor = isSubtask ? `${taskBarColors.bg}cc` : taskBarColors.bg;
+    // #1514: soft tint of the status colour (works in dark + light), solid status edge on the left
+    const barColor = isSubtask ? `${statusColors.bg}1f` : `${statusColors.bg}33`;
 
     if (!hasValidDates) {
         return (
             <div className={cn("absolute flex items-center px-2 text-muted-foreground italic cursor-pointer hover:text-foreground", isSubtask ? "h-[20px] text-[10px]" : "h-[28px] text-xs")} style={{ top: 4, left: isSubtask ? 20 : 4 }} onClick={() => onTaskClick(task)} onContextMenu={openStatusMenu}>
                 {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 flex-shrink-0" />}
-                {task.isMilestone && <Diamond className="h-2.5 w-2.5 mr-1 text-amber-500 fill-amber-500 flex-shrink-0" aria-label="Milestone" />}
+                {task.isMilestone && <Diamond className="h-2.5 w-2.5 mr-1 text-sa-amber fill-sa-amber flex-shrink-0" aria-label="Milestone" />}
                 <span className="truncate">{formatTaskLabel(task)}</span>
                 <span className="ml-1 text-muted-foreground/60">(no dates)</span>
             </div>
@@ -179,15 +179,15 @@ export function TaskBar({ task, timelineStart, dayWidth, onDateChange, onTaskCli
     }
 
     return (
-        <div ref={barRef} className={cn("absolute flex items-center rounded-md transition-shadow group", isDragDisabled ? "cursor-default" : "cursor-pointer", isDragging && "shadow-lg z-10", (task.deletedAt || isDragDisabled) && "opacity-60")} style={{ left: currentLeft, width: currentWidth, height: barHeight, top: (TIMELINE_ROW_HEIGHT - barHeight) / 2, backgroundColor: barColor, borderLeft: `3px solid ${statusColors.bg}` }} onContextMenu={openStatusMenu}>
-            {!isDragDisabled && <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20" onMouseDown={(e) => handleMouseDown(e, "resize-left")} />}
-            {task.priority === "high" && <div className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-red-500 z-10 pointer-events-none" />}
+        <div ref={barRef} className={cn("absolute flex items-center rounded-md transition-shadow group", isDragDisabled ? "cursor-default" : "cursor-pointer", isDragging && "ring-1 ring-sa-amber/60 z-10", (task.deletedAt || isDragDisabled) && "opacity-60")} style={{ left: currentLeft, width: currentWidth, height: barHeight, top: (TIMELINE_ROW_HEIGHT - barHeight) / 2, backgroundColor: barColor, borderLeft: `3px solid ${statusColors.bg}` }} onContextMenu={openStatusMenu}>
+            {!isDragDisabled && <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-foreground/15" onMouseDown={(e) => handleMouseDown(e, "resize-left")} />}
+            {task.priority === "high" && <div className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-sa-amber z-10 pointer-events-none" />}
             <div className={cn("flex-1 flex items-center px-2 overflow-visible", !isDragDisabled && "cursor-grab active:cursor-grabbing")} onMouseDown={(e) => handleMouseDown(e, "move")}>
-                {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 flex-shrink-0" style={{ color: `${taskBarColors.text}b3` }} />}
-                {task.isMilestone && <Diamond className="h-2.5 w-2.5 mr-1 fill-current flex-shrink-0" style={{ color: "#f59e0b" }} aria-label="Milestone" />}
-                <span className={cn("font-medium whitespace-nowrap", isSubtask ? "text-[10px]" : "text-xs")} style={{ color: taskBarColors.text, textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>{formatTaskLabel(task)}</span>
+                {isSubtask && <CornerDownRight className="h-2.5 w-2.5 mr-1 flex-shrink-0 text-muted-foreground" />}
+                {task.isMilestone && <Diamond className="h-2.5 w-2.5 mr-1 fill-current flex-shrink-0 text-sa-amber" aria-label="Milestone" />}
+                <span className={cn("font-medium whitespace-nowrap text-foreground", isSubtask ? "text-[10px]" : "text-xs")}>{formatTaskLabel(task)}</span>
             </div>
-            {!isDragDisabled && <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20" onMouseDown={(e) => handleMouseDown(e, "resize-right")} />}
+            {!isDragDisabled && <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-foreground/15" onMouseDown={(e) => handleMouseDown(e, "resize-right")} />}
         </div>
     );
 }

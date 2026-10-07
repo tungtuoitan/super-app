@@ -74,10 +74,10 @@ export function ProjectImagePicker({ value, onChange }: ProjectImagePickerProps)
         <div
             tabIndex={0}
             className={cn(
-                "relative flex items-center gap-3 rounded-lg h-[70px] border-2 border-dashed px-3 py-3 cursor-pointer transition-colors outline-none focus:border-primary/50",
+                "relative flex items-center gap-3 rounded-xl h-[64px] border border-dashed px-3 py-3 cursor-pointer transition-colors duration-100 outline-none focus-visible:border-ring",
                 dragging
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50 hover:bg-muted/20"
+                    ? "border-sa-amber bg-sa-amber/10"
+                    : "border-sa-border-strong hover:bg-sa-hover"
             )}
             onClick={(e) => {
                 if (e.shiftKey) return;
@@ -119,7 +119,7 @@ export function ProjectImagePicker({ value, onChange }: ProjectImagePickerProps)
                     <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                        className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                        className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors"
                         title="Replace image"
                     >
                         <Upload className="w-3.5 h-3.5" />
@@ -127,7 +127,7 @@ export function ProjectImagePicker({ value, onChange }: ProjectImagePickerProps)
                     <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); onChange(""); }}
-                        className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-muted/50 transition-colors"
+                        className="p-1 rounded text-muted-foreground hover:text-sa-danger hover:bg-sa-hover-strong transition-colors"
                         title="Remove image"
                     >
                         <X className="w-3.5 h-3.5" />

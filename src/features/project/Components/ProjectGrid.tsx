@@ -22,7 +22,7 @@ import { useProjectGridHelper } from "../hooks/useProjectGrid.helper";
 import { useProjectTabHelper } from "../hooks/useProjectTab.helper";
 import { useProjectGridSelector } from "../Selectors/useProjectGrid.selector";
 import { useProjectGridHeadless } from "../hooks/useProjectGrid.headless";
-import { ProjectStatusBadge } from "./ProjectStatusBadge";
+import { TaskStatusIcon } from "@/shared";
 import {Project} from "../types/project.types";
 
 /**
@@ -57,23 +57,30 @@ export function ProjectGrid() {
     const columns = useMemo<ColumnDef<Project>[]>(() => {
         return [
             {
-                accessorKey: "id",
-                header: () => <div className="text-left text-sm font-semibold ml-2">ID</div>,
-                size: 20,
-                cell: ({ getValue }) => <div className="text-left text-sm font-medium ml-3">{getValue() as number}</div>,
+                accessorKey: "status",
+                header: () => null,
+                size: 32,
+                cell: ({ getValue }) => {
+                    const status = getValue() as string;
+                    return (
+                        <div className="flex items-center justify-center">
+                            <TaskStatusIcon status={status} title={status ? getStatusLabel(status) : "No status"} />
+                        </div>
+                    );
+                },
             },
             {
                 accessorKey: "image",
                 header: () => null,
-                size: 40,
+                size: 28,
                 cell: ({ getValue }) => {
                     const img = getValue() as string | null | undefined;
                     return (
-                        <div className="flex items-center justify-center px-1">
+                        <div className="flex items-center justify-center">
                             {img?.startsWith("data:image") ? (
-                                <img src={img} alt="" className="w-7 h-7 rounded object-cover" />
+                                <img src={img} alt="" className="h-5 w-5 rounded-md object-cover" />
                             ) : (
-                                <FolderOpen className="w-4 h-4 text-muted-foreground/50" />
+                                <FolderOpen className="h-3.5 w-3.5 text-muted-foreground/60" />
                             )}
                         </div>
                     );
@@ -81,27 +88,18 @@ export function ProjectGrid() {
             },
             {
                 accessorKey: "name",
-                header: () => <div className="text-left text-sm font-semibold">PROJECT NAME</div>,
-                size: 200,
+                header: () => null,
                 cell: ({ getValue }) => (
-                    <div className="text-sm font-semibold text-primary text-left cursor-pointer hover:text-primary/80 px-2 uppercase tracking-wide">
+                    <div className="truncate px-1.5 text-left text-[13px] text-foreground">
                         {(getValue() as string) || "—"}
                     </div>
                 ),
             },
             {
-                accessorKey: "status",
-                header: () => <div className="text-left text-sm">Status</div>,
-                size: 120,
-                cell: ({ getValue }) => {
-                    const status = getValue() as string;
-                    if (!status) return <div className="px-2">—</div>;
-                    return (
-                        <div className="px-2">
-                            <ProjectStatusBadge status={status} label={getStatusLabel(status)} size="sm" />
-                        </div>
-                    );
-                },
+                accessorKey: "id",
+                header: () => null,
+                size: 44,
+                cell: ({ getValue }) => <div className="pr-3 text-right font-mono text-[11px] text-muted-foreground/80">#{getValue() as number}</div>,
             },
         ];
     }, [getStatusLabel]);
@@ -129,8 +127,8 @@ export function ProjectGrid() {
         <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
             {/* Loading Overlay */}
             {projectGridIsLoading && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <div className="absolute inset-0 bg-background/70 flex items-center justify-center z-10">
+                    <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
                 </div>
             )}
 
@@ -145,7 +143,7 @@ export function ProjectGrid() {
 
             {/* Table */}
             <div
-                className="flex-1 overflow-auto rounded-md border"
+                className="flex-1 overflow-auto py-1"
                 onContextMenu={(e) => {
                     const target = e.target as HTMLElement;
                     const isClickedOnRow = target.closest("tr[data-row]");
@@ -154,30 +152,18 @@ export function ProjectGrid() {
                     }
                 }}
             >
-                <table className="w-full">
-                    <thead className="bg-muted/50 sticky top-0 z-10">
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id} className="border-b">
-                                {headerGroup.headers.map((header) => (
-                                    <th
-                                        key={header.id}
-                                        className="h-[44px] px-1 text-left align-middle font-semibold text-muted-foreground uppercase tracking-wider text-xs"
-                                        style={{ width: header.getSize() }}
-                                    >
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(header.column.columnDef.header, header.getContext())}
-                                    </th>
-                                ))}
-                            </tr>
+                <table className="w-full" style={{ tableLayout: "fixed" }}>
+                    <colgroup>
+                        {table.getAllLeafColumns().map((column) => (
+                            <col key={column.id} style={{ width: column.id === "name" ? undefined : column.getSize() }} />
                         ))}
-                    </thead>
+                    </colgroup>
                     <tbody>
                         {table.getRowModel().rows.map((row) => (
                             <tr
                                 key={row.id}
                                 data-row
-                                className={`border-b h-[48px] cursor-pointer hover:bg-muted/50 transition-colors ${
+                                className={`h-9 cursor-pointer hover:bg-sa-hover transition-colors duration-100 ${
                                     row.original.deletedAt ? "opacity-60" : ""
                                 }`}
                                 onClick={() => openProjectTab(row.original)}
@@ -187,7 +173,7 @@ export function ProjectGrid() {
                                 }}
                             >
                                 {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id} className="text-left">
+                                    <td key={cell.id} className="overflow-hidden text-left">
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>
                                 ))}
@@ -198,57 +184,57 @@ export function ProjectGrid() {
             </div>
 
             {/* Pagination - Project style */}
-            <div className="flex items-center justify-between px-4 py-2 bg-background border-t-2 border-primary/20">
-                <div className="flex-1 text-xs text-left text-muted-foreground font-semibold uppercase tracking-wide">
-                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({totalCount} Projects)
+            <div className="flex h-9 items-center justify-between gap-2 px-3 bg-background border-t border-sa-border">
+                <div className="flex-1 truncate text-[12px] text-left text-muted-foreground">
+                    {totalCount} project{totalCount !== 1 ? "s" : ""}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-0.5">
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
                         onClick={() => table.setPageIndex(0)}
                         disabled={!table.getCanPreviousPage()}
-                        className="h-8 w-8"
+                        className="h-7 w-7 text-muted-foreground"
                         title="First page"
                     >
-                        <ChevronsLeft className="h-4 w-4" />
+                        <ChevronsLeft className="h-3.5 w-3.5" />
                     </Button>
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
-                        className="h-8 w-8"
+                        className="h-7 w-7 text-muted-foreground"
                         title="Previous page"
                     >
-                        <ChevronLeft className="h-4 w-4" />
+                        <ChevronLeft className="h-3.5 w-3.5" />
                     </Button>
 
-                    <div className="flex items-center gap-1 px-2">
-                        <span className="text-sm font-medium">{table.getState().pagination.pageIndex + 1}</span>
-                        <span className="text-sm text-muted-foreground">/ {table.getPageCount()}</span>
+                    <div className="flex items-center gap-1 px-1.5 font-mono text-[12px]">
+                        <span className="text-foreground">{table.getState().pagination.pageIndex + 1}</span>
+                        <span className="text-muted-foreground">/ {table.getPageCount()}</span>
                     </div>
 
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
-                        className="h-8 w-8"
+                        className="h-7 w-7 text-muted-foreground"
                         title="Next page"
                     >
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-3.5 w-3.5" />
                     </Button>
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
                         onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                         disabled={!table.getCanNextPage()}
-                        className="h-8 w-8"
+                        className="h-7 w-7 text-muted-foreground"
                         title="Last page"
                     >
-                        <ChevronsRight className="h-4 w-4" />
+                        <ChevronsRight className="h-3.5 w-3.5" />
                     </Button>
                 </div>
             </div>

@@ -48,8 +48,8 @@ function TaskTimelineViewInner() {
 
             {/* Loading Overlay */}
             {taskGridIsLoading && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-20">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <div className="absolute inset-0 bg-background/70 flex items-center justify-center z-20">
+                    <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
                 </div>
             )}
 
@@ -65,10 +65,10 @@ function TaskTimelineViewInner() {
             {/* Timeline Content */}
             <div className="flex-1 overflow-hidden flex">
                 {/* Task List (Left Panel) */}
-                <div className="w-[200px] flex-shrink-0 border-r bg-muted/30">
+                <div className="w-[200px] flex-shrink-0 border-r border-sa-border bg-sa-surface">
                     {/* Header */}
                     <div
-                        className="border-b bg-muted/50 flex items-center px-3 font-medium text-sm"
+                        className="border-b border-sa-border flex items-center px-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
                         style={{ height: TIMELINE_HEADER_HEIGHT }}
                     >
                         Tasks
@@ -83,8 +83,8 @@ function TaskTimelineViewInner() {
                                     key={task.id}
                                     className={cn(
                                         "flex items-center cursor-pointer border-b border-transparent",
-                                        hoveredTaskId === task.id && "bg-muted/50",
-                                        isSubtask ? "px-2 bg-muted/10" : "px-3"
+                                        hoveredTaskId === task.id && "bg-sa-hover",
+                                        isSubtask ? "px-2" : "px-3"
                                     )}
                                     style={{ height: TIMELINE_ROW_HEIGHT }}
                                     onClick={() => openTaskTab(task)}
@@ -93,7 +93,7 @@ function TaskTimelineViewInner() {
                                     onMouseLeave={() => setHoveredTaskId(null)}
                                 >
                                     {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground mr-1 flex-shrink-0" />}
-                                    <span className={cn("truncate", isSubtask ? "text-xs" : "text-sm")}>
+                                    <span className={cn("truncate text-foreground", isSubtask ? "text-xs" : "text-[13px]")}>
                                         {formatTaskLabel(task)}
                                     </span>
                                 </div>
@@ -116,7 +116,7 @@ function TaskTimelineViewInner() {
                     <div style={{ width: timelineWidth, minHeight: "100%" }} className="relative">
                         {/* Today line - full height */}
                         <div
-                            className="absolute w-[1px] bg-red-500 z-[5] pointer-events-none"
+                            className="absolute w-[1px] bg-sa-amber z-[5] pointer-events-none"
                             style={{
                                 left: todayPosition,
                                 top: 0,
@@ -130,19 +130,19 @@ function TaskTimelineViewInner() {
                                 style={{
                                     borderLeft: '6px solid transparent',
                                     borderRight: '6px solid transparent',
-                                    borderTop: '8px solid rgb(239 68 68)',
+                                    borderTop: '8px solid hsl(var(--sa-accent-amber))',
                                 }}
                             />
                         </div>
 
                         {/* Timeline Header */}
-                        <div className="sticky top-0 z-10 bg-background border-b" style={{ height: TIMELINE_HEADER_HEIGHT }}>
+                        <div className="sticky top-0 z-10 bg-background border-b border-sa-border" style={{ height: TIMELINE_HEADER_HEIGHT }}>
                             {/* Month row */}
-                            <div className="flex border-b" style={{ height: 30 }}>
+                            <div className="flex border-b border-sa-border" style={{ height: 30 }}>
                                 {monthGroups.map((group, index) => (
                                     <div
                                         key={index}
-                                        className="flex items-center px-2 text-xs font-medium border-r bg-muted/50"
+                                        className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface"
                                         style={{ width: group.days * dayWidth }}
                                     >
                                         {group.month}
@@ -156,9 +156,8 @@ function TaskTimelineViewInner() {
                                     <div
                                         key={index}
                                         className={cn(
-                                            "flex items-center justify-center text-xs",
-                                            isWeekend(date) && "text-muted-foreground",
-                                            isToday(date) && "font-bold text-red-500",
+                                            "flex items-center justify-center text-[11px] text-muted-foreground",
+                                            isToday(date) && "font-semibold text-sa-amber-ink",
                                             isFirstDayOfMonth(date) ? "border-r border-border" : "border-r border-dashed border-border/50"
                                         )}
                                         style={{
@@ -204,8 +203,7 @@ function TaskTimelineViewInner() {
                                         key={task.id}
                                         className={cn(
                                             "relative",
-                                            hoveredTaskId === task.id && "bg-muted/40",
-                                            isSubtask && "bg-muted/10"
+                                            hoveredTaskId === task.id && "bg-sa-hover"
                                         )}
                                         style={{ height: TIMELINE_ROW_HEIGHT }}
                                         onMouseEnter={() => setHoveredTaskId(task.id)}
@@ -239,8 +237,8 @@ function TaskTimelineViewInner() {
             </div>
 
             {/* Footer with count and controls */}
-            <div className="flex items-center justify-between px-4 py-1 bg-background border-t">
-                <div className="text-sm text-muted-foreground">
+            <div className="flex h-9 items-center justify-between px-3 bg-background border-t border-sa-border">
+                <div className="text-[12px] text-muted-foreground">
                     {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}
                 </div>
 

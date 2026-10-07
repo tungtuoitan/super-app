@@ -20,13 +20,13 @@ export function ProjectLinks() {
 
     return (
         <div className="space-y-1 text-left">
-            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+            <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-2">
                 Links
                 {isLoadingProjectLinks && <Loader2 className="h-3 w-3 animate-spin" />}
                 {canEdit && (
                     <button
                         onClick={() => addProjectLink(selectedProject.id)}
-                        className="ml-auto p-0.5 rounded hover:bg-muted transition-colors normal-case"
+                        className="ml-auto p-0.5 rounded-md hover:bg-sa-hover-strong hover:text-foreground transition-colors normal-case"
                         title="Add link (URL, GitHub, Drive…)"
                     >
                         <Plus className="h-3.5 w-3.5" />
@@ -39,19 +39,19 @@ export function ProjectLinks() {
                     {projectLinks.map((link) => (
                         <div
                             key={link.workspaceItemId}
-                            className="group flex items-center gap-2 px-2 py-1.5 rounded-md text-sm bg-muted/50 hover:bg-muted cursor-pointer"
+                            className="group flex h-8 items-center gap-2 px-2 rounded-md text-[13px] hover:bg-sa-hover cursor-pointer"
                             onClick={() => openProjectLink(link)}
                             title={link.url ?? link.name}
                         >
-                            <LinkKindIcon url={link.url} className="h-3.5 w-3.5 text-sky-500 shrink-0" />
-                            <span className="flex-1 truncate hover:text-primary hover:underline">{link.name}</span>
+                            <LinkKindIcon url={link.url} className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <span className="flex-1 truncate text-foreground hover:underline">{link.name}</span>
                             {_isGithubRepoUrl(link.url) && (
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         _openLocalUrl(link.url);
                                     }}
-                                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-background transition-opacity"
+                                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-sa-hover-strong transition-opacity"
                                     title="Open local (VS Code)"
                                 >
                                     <Laptop className="h-3 w-3" />
@@ -64,7 +64,7 @@ export function ProjectLinks() {
                                             e.stopPropagation();
                                             editProjectLink(selectedProject.id, link);
                                         }}
-                                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-background transition-opacity"
+                                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-sa-hover-strong transition-opacity"
                                         title="Edit link"
                                     >
                                         <Pencil className="h-3 w-3" />
@@ -74,7 +74,7 @@ export function ProjectLinks() {
                                             e.stopPropagation();
                                             removeProjectLink(e, selectedProject.id, link);
                                         }}
-                                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-opacity"
+                                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-sa-danger/10 hover:text-sa-danger transition-opacity"
                                         title="Remove link"
                                     >
                                         <X className="h-3 w-3" />

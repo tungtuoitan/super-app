@@ -42,9 +42,9 @@ const MultiProjectEditorPanelAdapter = () => <MultiProjectEditorPanel />;
 const TaskEditorPanelAdapter = () => <TaskEditorPanel />;
 
 const TAB_COLORS: Record<string, string> = {
-    [shellConstants.vscode.tab.tabTypes.project]: "#f97316",
-    [shellConstants.vscode.tab.tabTypes.multiProject]: "#f97316",
-    [shellConstants.vscode.tab.tabTypes.task]: "#10b981",
+    [shellConstants.vscode.tab.tabTypes.project]: "hsl(var(--sa-accent-amber))",
+    [shellConstants.vscode.tab.tabTypes.multiProject]: "hsl(var(--sa-accent-amber))",
+    [shellConstants.vscode.tab.tabTypes.task]: "hsl(var(--sa-good))",
 };
 
 export const projectModule: ModuleDefinition = {
@@ -123,7 +123,7 @@ export const projectModule: ModuleDefinition = {
     },
 
     getTabMeta: (tab) => {
-        const color = TAB_COLORS[tab.type] ?? "#9ca3af";
+        const color = TAB_COLORS[tab.type] ?? "hsl(var(--muted-foreground))";
         const Icon =
             tab.type === shellConstants.vscode.tab.tabTypes.task ? CheckSquare :
             tab.type === shellConstants.vscode.tab.tabTypes.multiProject ? Layers : Cuboid;

@@ -44,14 +44,14 @@ export function ProjectGeneral() {
 
     return (
         <ScrollArea className="h-full w-full">
-            <div className="px-6 py-2 mx-auto h-full pt-4">
-                {/* Project Header - Large uppercase name */}
-                <div className="mb-6 pb-4 border-b border-primary/20">
-                    <h1 className="text-2xl font-bold uppercase tracking-wide text-primary">
+            <div className="px-6 py-2 mx-auto h-full pt-5">
+                {/* Project Header */}
+                <div className="mb-5 pb-4 border-b border-sa-border">
+                    <h1 className="text-[22px] font-medium leading-tight text-foreground">
                         {selectedProject.name || "Untitled Project"}
                     </h1>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">
-                        Project ID: {selectedProject.id > 0 ? selectedProject.id : "New"}
+                    <p className="mt-1 font-mono text-[12px] text-muted-foreground">
+                        {selectedProject.id > 0 ? `#${selectedProject.id}` : "New project"}
                     </p>
                 </div>
 
@@ -71,7 +71,7 @@ export function ProjectGeneral() {
                                 <div className="flex-[2]">
                                     <GenericTextField
                                         ref={projectNameRef}
-                                        label="PROJECT NAME"
+                                        label="Project name"
                                         value={selectedProject.name}
                                         onChange={(e) => handleNameChange(e.target.value, setNameError)}
                                         placeholder="Enter project name..."
@@ -80,14 +80,13 @@ export function ProjectGeneral() {
                                         error={!!nameError}
                                         helperText={nameError || `${selectedProject.name?.length || 0}/50`}
                                         maxLength={50}
-                                        className="uppercase"
                                     />
                                 </div>
 
                                 {/* Due Date */}
                                 <div className="flex-1">
                                     <DateRangePicker
-                                        label="DUE DATE"
+                                        label="Due date"
                                         startDate={selectedProject.startDate}
                                         endDate={selectedProject.endDate}
                                         onStartDateChange={handleStartDateChange}
@@ -101,11 +100,11 @@ export function ProjectGeneral() {
                             {/* Description - RichText Editor */}
                             <div className="space-y-2 text-left">
                                 <div className="flex items-center justify-between">
-                                    <label className="text-xs text-left font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <label className="text-[11px] text-left font-medium uppercase tracking-wide text-muted-foreground">
                                         Description
                                     </label>
                                 </div>
-                                <div className="border rounded-md overflow-hidden">
+                                <div className="border border-sa-border rounded-xl overflow-hidden">
                                     <RichTextEditor
                                         key={`description-${projectKey}`}
                                         value={selectedProject.description || ""}
@@ -139,7 +138,7 @@ export function ProjectGeneral() {
                             />
                                 {/* Project Image */}
                                 <div className="space-y-1 text-left mt-[-16px]">
-                                    <label className="text-xs text-left font-semibold uppercase tracking-wider text-muted-foreground">
+                                    <label className="text-[11px] text-left font-medium uppercase tracking-wide text-muted-foreground">
                                         Image
                                     </label>
                                     <ProjectImagePicker
