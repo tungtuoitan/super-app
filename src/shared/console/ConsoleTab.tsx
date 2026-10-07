@@ -10,7 +10,7 @@ export function ConsoleTab() {
     return (
         <div className="h-full flex flex-col">
             <div className="flex items-center justify-between px-3 py-2 border-b border-editor-border">
-                <span className="text-sm font-semibold text-editor-fg">Console Messages</span>
+                <span className="text-[13px] font-medium text-editor-fg">Console Messages</span>
                 {messages.length > 0 && (
                     <button
                         onClick={clearMessages}

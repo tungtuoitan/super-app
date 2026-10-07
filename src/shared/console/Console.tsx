@@ -62,11 +62,11 @@ function ConsoleMessage({ id, type, message, timestamp, onRemove }: ConsoleMessa
     const getTypeStyles = (type: ConsoleMessageType) => {
         switch (type) {
             case "error":
-                return "text-red-400";
+                return "text-sa-danger";
             case "warning":
-                return "text-yellow-400/80";
+                return "text-sa-amber-ink";
             case "special-success":
-                return "text-green-400";
+                return "text-sa-good";
             // case "info":
             //     return "text-blue-400/80";
             // case "success":
@@ -112,7 +112,7 @@ function ConsoleMessage({ id, type, message, timestamp, onRemove }: ConsoleMessa
             ${isRecent(timestamp) ? "opacity-100" : "opacity-50"}
         `}
         >
-            <span className="flex-shrink-0 text-muted-foreground text-xs pr-2">{formatTime(timestamp)}</span>
+            <span className="flex-shrink-0 font-mono text-[11px] text-muted-foreground pr-2">{formatTime(timestamp)}</span>
             <span className={`flex-1 ${getTypeStyles(type)} break-all text-left`}>{message}</span>
         </div>
     );

@@ -3,10 +3,10 @@ export function ConsoleMessage({ id, type, message, timestamp, onRemove }: {
     id: string; type: string; message: string; timestamp: Date; onRemove: (id: string) => void;
 }) {
     const typeStyles: Record<string, string> = {
-        error: "text-red-400/80",
-        warning: "text-yellow-400/80",
-        info: "text-blue-400/80",
-        success: "text-green-400/80",
+        error: "text-sa-danger",
+        warning: "text-sa-amber-ink",
+        info: "text-muted-foreground",
+        success: "text-sa-good",
     };
     const typeIcons: Record<string, string> = {
         error: "✕", warning: "⚠", info: "ℹ", success: "✓",
