@@ -75,44 +75,44 @@ export function CommandPalette() {
     return (
         <>
             {/* Backdrop */}
-            <div className="fixed inset-0 bg-black/50 z-[100]" onClick={close} />
+            <div className="fixed inset-0 bg-black/30 z-[100]" onClick={close} />
 
             {/* Command Palette */}
             <div className="fixed top-[100px] left-1/2 -translate-x-1/2 w-[90%] max-w-[640px] z-[100000001]">
-                <div className="bg-[#252526] rounded-lg shadow-2xl border border-[#3E3E42] overflow-hidden">
+                <div className="sa-shadow-pop bg-popover text-popover-foreground rounded-xl border border-sa-border-strong overflow-hidden">
                     {/* Search Input */}
-                    <div className="h-[54px] flex items-center px-4 py-4 border-b border-[#3E3E42]">
-                        <Search className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+                    <div className="h-12 flex items-center px-4 border-b border-sa-border">
+                        <Search className="w-4 h-4 text-muted-foreground mr-2 flex-shrink-0" />
                         <input
                             ref={inputRef}
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={isLinkMode ? "Search keyword to link..." : "Search keywords (workspace, folder, note, heading, external)..."}
-                            className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-500"
+                            className="flex-1 bg-transparent text-foreground text-sm outline-none placeholder:text-muted-foreground"
                         />
                         {searchQuery && (
-                            <button onClick={() => setSearchQuery("")} className="text-gray-400 hover:text-white">
+                            <button onClick={() => setSearchQuery("")} className="text-muted-foreground hover:text-foreground">
                                 ✕
                             </button>
                         )}
                         {isLinkMode && (
-                            <span className="ml-3 text-xs text-blue-400 border border-blue-400/50 rounded px-2 py-0.5">Link mode</span>
+                            <span className="ml-3 text-[11px] text-sa-amber-ink border border-sa-amber/40 rounded-md px-1.5 py-0.5">Link mode</span>
                         )}
                     </div>
 
                     {/* Type Filter Bar */}
                     {activeTypes.length > 0 && (
-                        <div className="flex items-center gap-1.5 px-3 py-2 border-b border-[#3E3E42] flex-wrap">
+                        <div className="flex items-center gap-1.5 px-3 py-2 border-b border-sa-border flex-wrap">
                             {activeTypes.map((type) => (
                                 <button
                                     key={type}
                                     onClick={() => setSelectedType(selectedType === type ? null : type)}
                                     className={`
-                                        flex items-center gap-1 px-2 py-0.5 rounded text-xs transition-colors
+                                        flex items-center gap-1 h-6 px-2 rounded-full text-xs transition-colors duration-100
                                         ${selectedType === type
-                                            ? "bg-blue-500/20 text-blue-300 border border-blue-500/50"
-                                            : "text-gray-400 border border-[#3E3E42] hover:border-gray-500 hover:text-gray-200"}
+                                            ? "bg-sa-surface-2 text-foreground border border-sa-amber/60"
+                                            : "text-muted-foreground border border-sa-border-strong hover:text-foreground hover:bg-sa-hover"}
                                     `}
                                 >
                                     <KeywordIconRenderer
@@ -126,9 +126,9 @@ export function CommandPalette() {
                     )}
 
                     {/* Results List */}
-                    <div ref={listRef} className="max-h-[400px] overflow-y-auto">
+                    <div ref={listRef} className="max-h-[400px] overflow-y-auto py-1.5">
                         {filteredKeywords.length === 0 ? (
-                            <div className="px-4 py-8 text-center text-gray-500">No keywords found</div>
+                            <div className="px-4 py-8 text-center text-[13px] text-muted-foreground">No keywords found</div>
                         ) : (
                             filteredKeywords.map((match, index) => {
                                 const keyword = match.keyword;
@@ -141,8 +141,8 @@ export function CommandPalette() {
                                         data-index={index}
                                         onClick={() => !isDisabled && !isLinkMode && handleSelectKeyword(keyword)}
                                         className={`
-                                            group px-4 py-1.5 cursor-pointer flex items-center gap-3
-                                            ${isSelected ? "bg-[#44475A] hover:bg-[#44475A]" : "hover:bg-[#2A2D2E]"}
+                                            group mx-1.5 rounded-md px-2.5 py-1.5 cursor-pointer flex items-center gap-3
+                                            ${isSelected ? "bg-sa-hover-strong hover:bg-sa-hover-strong" : "hover:bg-sa-hover"}
                                             ${isDisabled ? "opacity-40 cursor-not-allowed" : ""}
                                             ${isAlreadyLinked ? "opacity-40 cursor-not-allowed" : ""}
                                             ${isLinkMode ? "cursor-default" : ""}
@@ -153,7 +153,7 @@ export function CommandPalette() {
                                             type={keyword.type}
                                             icon={keyword.icon}
                                             color={keyword.color}
-                                            className="w-4 h-4 text-gray-400 flex-shrink-0"
+                                            className="w-4 h-4 text-muted-foreground flex-shrink-0"
                                         />
 
                                         {/* Name Column */}
@@ -164,24 +164,24 @@ export function CommandPalette() {
                                             <HighlightedText
                                                 text={keyword.name}
                                                 matchIndices={match.matchedIndices.name}
-                                                className="text-gray-200 text-sm truncate"
-                                                highlightClassName="text-blue-400 font-bold"
+                                                className="text-foreground text-[13px] truncate"
+                                                highlightClassName="text-sa-amber-ink font-semibold"
                                             />
                                             {match.displayLink && (
                                                 <HighlightedText
                                                     text={match.displayLink}
                                                     matchIndices={match.matchedIndices.link}
-                                                    className="text-xs text-gray-500 truncate"
-                                                    highlightClassName="text-blue-300"
+                                                    className="font-mono text-[11px] text-muted-foreground truncate"
+                                                    highlightClassName="text-sa-amber-ink"
                                                 />
                                             )}
-                                            {isDisabled && <span className="text-xs text-red-400 bg-red-900/30 px-2 py-0.5 rounded flex-shrink-0">Deleted</span>}
-                                            {isAlreadyLinked && <span className="text-xs text-green-400 bg-green-900/30 px-2 py-0.5 rounded flex-shrink-0">Linked</span>}
+                                            {isDisabled && <span className="text-[11px] text-sa-danger border border-sa-danger/35 px-1.5 rounded-md flex-shrink-0">Deleted</span>}
+                                            {isAlreadyLinked && <span className="text-[11px] text-sa-good border border-sa-good/35 px-1.5 rounded-md flex-shrink-0">Linked</span>}
                                         </div>
                                         </TooltipTrigger>
                                         <TooltipContent side="bottom" align="start" className="text-left max-w-[360px] space-y-1 text-xs">
-                                            <p className="font-semibold text-white">Name: {keyword.name}</p>
-                                            {keyword.description && <p className="text-gray-300">Description: {keyword.description}</p>}
+                                            <p className="font-medium text-foreground">Name: {keyword.name}</p>
+                                            {keyword.description && <p className="text-muted-foreground">Description: {keyword.description}</p>}
                                         </TooltipContent>
                                         </Tooltip>
                                         </TooltipProvider>
@@ -198,7 +198,7 @@ export function CommandPalette() {
                                                         close();
                                                     }
                                                 }}
-                                                className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded text-xs text-blue-400 border border-blue-400/40 hover:bg-blue-400/10 transition-colors opacity-0 group-hover:opacity-100"
+                                                className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-md text-xs text-sa-amber-ink border border-sa-amber/40 hover:bg-sa-amber/10 transition-colors opacity-0 group-hover:opacity-100"
                                                 title="Link this keyword (Shift+Click to keep open)"
                                             >
                                                 <Link2 className="w-3 h-3" />
@@ -212,7 +212,7 @@ export function CommandPalette() {
                     </div>
 
                     {/* Footer */}
-                    <div className="px-4 py-2 bg-[#1E1E1E] border-t border-[#3E3E42] flex items-center justify-between text-xs text-gray-500">
+                    <div className="px-4 py-2 bg-sa-surface border-t border-sa-border flex items-center justify-between text-[11px] text-muted-foreground">
                         <div className="flex items-center gap-4">
                             <span>↑↓ Navigate</span>
                             {isLinkMode ? <span>Click Link button to link</span> : <span>Enter Select</span>}
