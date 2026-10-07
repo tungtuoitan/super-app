@@ -18,7 +18,7 @@ import { useTaskTabHelper } from "@/features/taskDetail";
 import { cn } from "@/lib/utils";
 import { useTaskKanbanSelector } from "../Selectors/TaskKanbanSelector";
 import { useTaskKanbanHelper } from "../hooks/taskKanban/useTaskKanban.helper";
-import { getTaskStatusColorsWithBorder, getTaskPriorityDotColor } from "@/features/taskDetail";
+import { TaskStatusIcon, TaskPriorityIcon, formatCompactDateRange, getDateTone } from "@/shared";
 import {usePTaskStore} from "../../store/usePTask.store";
 
 // Drag item type
@@ -41,7 +41,6 @@ interface DraggableTaskCardProps {
 
 function DraggableTaskCard({ task, onClick, isSubtask = false }: DraggableTaskCardProps) {
     const ref = useRef<HTMLDivElement>(null);
-    const priorityColors = getTaskPriorityDotColor(task.priority);
 
     const [{ isDragging }, drag] = useDrag<DragItem, void, { isDragging: boolean }>({
         type: KANBAN_TASK,
@@ -57,10 +56,10 @@ function DraggableTaskCard({ task, onClick, isSubtask = false }: DraggableTaskCa
         <div
             ref={ref}
             className={cn(
-                "group bg-card border rounded-md cursor-grab hover:border-primary/50 transition-all",
-                isDragging && "opacity-50 shadow-lg cursor-grabbing",
+                "group rounded-xl border border-sa-border bg-card cursor-grab transition-colors duration-100 hover:border-sa-border-strong",
+                isDragging && "opacity-50 cursor-grabbing",
                 task.deletedAt && "opacity-60",
-                isSubtask ? "p-2 opacity-80 ml-3 border-l-2 border-l-muted-foreground/30" : "p-3"
+                isSubtask ? "ml-3 p-2.5" : "p-3"
             )}
             onClick={onClick}
         >
@@ -68,31 +67,25 @@ function DraggableTaskCard({ task, onClick, isSubtask = false }: DraggableTaskCa
                 {/* Title */}
                 <div className="flex items-center gap-1">
                     {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />}
-                    {task.isMilestone && <Diamond className="h-3 w-3 text-amber-500 fill-amber-500 flex-shrink-0" aria-label="Milestone" />}
-                    <p className={cn("font-medium text-left truncate", isSubtask ? "text-xs" : "text-sm")}>
+                    {task.isMilestone && <Diamond className="h-3 w-3 text-sa-amber fill-sa-amber flex-shrink-0" aria-label="Milestone" />}
+                    <p className={cn("text-left truncate text-foreground", isSubtask ? "text-[12px]" : "text-[13px] font-medium")}>
                         {task.title || "Untitled"}
                     </p>
                 </div>
 
                 {/* Meta row */}
-                <div className="flex items-center gap-2 mt-1">
-                    {/* Priority dot */}
-                    <span
-                        className={cn("rounded-full flex-shrink-0", isSubtask ? "w-1.5 h-1.5" : "w-2 h-2")}
-                        style={{ backgroundColor: priorityColors.dot }}
-                        title={task.priority}
-                    />
+                <div className="flex items-center gap-2 mt-1.5">
+                    {/* Priority */}
+                    <TaskPriorityIcon priority={task.priority} size={12} className="text-muted-foreground" />
 
                     {/* Task ID */}
-                    <span className={cn("text-muted-foreground", isSubtask ? "text-[10px]" : "text-xs")}>#{task.id}</span>
+                    <span className="font-mono text-[11px] text-muted-foreground">#{task.id}</span>
 
-                    {/* Due date if exists */}
-                    {task.endDate && (
-                        <span className={cn("text-muted-foreground ml-auto", isSubtask ? "text-[10px]" : "text-xs")}>
-                            {new Intl.DateTimeFormat("en-US", {
-                                month: "short",
-                                day: "numeric",
-                            }).format(task.endDate)}
+                    {/* Dates if any — red when overdue, amber dot when ending today */}
+                    {(task.startDate || task.endDate) && (
+                        <span className={cn("ml-auto inline-flex items-center gap-1 text-[11px]", getDateTone(task.endDate, task.status) === "overdue" ? "text-sa-danger" : "text-muted-foreground")}>
+                            {getDateTone(task.endDate, task.status) === "today" && <span className="h-1.5 w-1.5 rounded-full bg-sa-amber" />}
+                            {formatCompactDateRange(task.startDate, task.endDate)}
                         </span>
                     )}
                 </div>
@@ -116,7 +109,6 @@ interface KanbanColumnProps {
 
 function KanbanColumn({ status, tasks, allTasks, showSubtasks, onTaskClick, onDropTask, canDropToColumn }: KanbanColumnProps) {
     const ref = useRef<HTMLDivElement>(null);
-    const statusColors = getTaskStatusColorsWithBorder(status.code);
 
     const [{ isOver, canDrop }, drop] = useDrop<DragItem, void, { isOver: boolean; canDrop: boolean }>({
         accept: KANBAN_TASK,
@@ -142,21 +134,16 @@ function KanbanColumn({ status, tasks, allTasks, showSubtasks, onTaskClick, onDr
         <div
             ref={ref}
             className={cn(
-                "flex flex-col min-w-[280px] max-w-[320px] h-full bg-muted/30 rounded-lg transition-colors",
-                isOver && canDrop && "bg-primary/10 ring-2 ring-primary/50",
-                isOver && !canDrop && "bg-muted/50"
+                "flex flex-col min-w-[280px] max-w-[320px] h-full rounded-xl border border-sa-border bg-sa-surface/60 transition-colors duration-100",
+                isOver && canDrop && "border-sa-amber/60 bg-sa-amber/5",
+                isOver && !canDrop && "bg-sa-hover"
             )}
         >
             {/* Column Header */}
-            <div className="flex items-center gap-2 p-3 border-b">
-                <span
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: statusColors.bg }}
-                />
-                <span className="font-medium text-sm">{status.label}</span>
-                <span className="ml-auto text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                    {taskCount}
-                </span>
+            <div className="flex h-10 items-center gap-2 px-3 border-b border-sa-border">
+                <TaskStatusIcon status={status.code} title={status.label} />
+                <span className="font-medium text-[13px] text-foreground">{status.label}</span>
+                <span className="font-mono text-[12px] text-muted-foreground">{taskCount}</span>
             </div>
 
             {/* Column Content */}
@@ -165,7 +152,7 @@ function KanbanColumn({ status, tasks, allTasks, showSubtasks, onTaskClick, onDr
                     {displayTasks.length === 0 ? (
                         <div className={cn(
                             "text-center text-xs text-muted-foreground py-8",
-                            isOver && canDrop && "border-primary text-primary"
+                            isOver && canDrop && "text-sa-amber-ink"
                         )}>
                         </div>
                     ) : (
@@ -202,8 +189,8 @@ export function TaskKanbanView() {
         <div className="w-full h-full flex flex-col relative">
             {/* Loading Overlay */}
             {taskGridIsLoading && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <div className="absolute inset-0 bg-background/70 flex items-center justify-center z-10">
+                    <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
                 </div>
             )}
 
@@ -217,8 +204,8 @@ export function TaskKanbanView() {
             )}
 
             {/* Kanban Board */}
-            <div className="flex-1 overflow-x-auto p-4">
-                <div className="flex gap-4 h-full">
+            <div className="flex-1 overflow-x-auto p-3">
+                <div className="flex gap-3 h-full">
                     {statusOptions.map((status:any) => (
                         <KanbanColumn
                             key={status.code}
@@ -235,8 +222,8 @@ export function TaskKanbanView() {
             </div>
 
             {/* Footer with count and controls */}
-            <div className="flex items-center justify-between px-4 py-1 bg-background border-t">
-                <div className="text-sm text-muted-foreground">
+            <div className="flex h-9 items-center justify-between px-3 bg-background border-t border-sa-border">
+                <div className="text-[12px] text-muted-foreground">
                     {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}
                 </div>
                 <div className="flex items-center gap-2">
