@@ -18,7 +18,7 @@ function KRepoSyncIndicator() {
 
     if (syncStatus === "pushing" || syncStatus === "pulling" || syncStatus === "checking") {
         return (
-            <div className="flex items-center gap-1.5 text-blue-400 text-[11px]">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-[11px]">
                 <Loader2 className="w-3 h-3 animate-spin shrink-0" />
                 <span className="hidden sm:block truncate max-w-[180px]">
                     {statusMessage ?? (syncStatus === "pushing" ? "Pushing DB → repo..." : syncStatus === "pulling" ? "Pulling repo → DB..." : "Checking...")}
@@ -31,7 +31,7 @@ function KRepoSyncIndicator() {
         return (
             <button
                 onClick={() => setIsDiffModalOpen(true)}
-                className="flex items-center gap-1.5 text-amber-400 text-[11px] hover:text-amber-300 transition-colors"
+                className="flex items-center gap-1.5 text-sa-amber-ink text-[11px] hover:opacity-80 transition-opacity"
                 title="Remote changes available — click to view diff"
             >
                 <AlertCircle className="w-3 h-3 shrink-0" />
@@ -49,7 +49,7 @@ function KRepoSyncIndicator() {
                     finally { setIsRetrying(false); }
                 }}
                 disabled={isRetrying}
-                className="flex items-center gap-1.5 text-red-400 text-[11px] hover:text-red-300 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 text-sa-danger text-[11px] hover:opacity-80 transition-opacity disabled:opacity-50"
                 title="Conflict — resolve in git then click to retry"
             >
                 {isRetrying ? <Loader2 className="w-3 h-3 animate-spin shrink-0" /> : <AlertTriangle className="w-3 h-3 shrink-0" />}
@@ -60,7 +60,7 @@ function KRepoSyncIndicator() {
 
     if (syncStatus === "error") {
         return (
-            <div className="flex items-center gap-1.5 text-red-400 text-[11px]" title={statusMessage ?? "Sync error"}>
+            <div className="flex items-center gap-1.5 text-sa-danger text-[11px]" title={statusMessage ?? "Sync error"}>
                 <AlertCircle className="w-3 h-3 shrink-0" />
                 <span className="hidden sm:block">Sync error</span>
             </div>
@@ -113,17 +113,17 @@ export function TopNav() {
         <>
             <CommandPalette />
 
-            <div className="top-navigation w-full bg-black h-[36px] sticky top-0 z-50">
-                <nav className="bg-[#1B1D23] h-[36px] flex items-center px-4 gap-2 w-full">
+            <div className="top-navigation w-full bg-editor-bg h-[36px] sticky top-0 z-50">
+                <nav className="bg-editor-sidebar border-b border-editor-border h-[36px] flex items-center px-4 gap-2 w-full">
                     <button type="button" onClick={handleToggleHome} className="flex items-center cursor-pointer" title={isHomeOpen ? "Về chỗ làm việc" : "Trang chủ"} aria-label="Home">
-                        <img src="/logo-32x32-web.png" alt="Logo" className="w-4 h-4 mr-1 rounded-sm filter invert" />
-                        <span className="text-white text-[10px] text-white/80 uppercase tracking-wide">S  u  p  e  r   A  p  p</span>
+                        <img src="/logo-32x32-web.png" alt="Logo" className="w-4 h-4 mr-1 rounded-sm dark:invert" />
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wide">S  u  p  e  r   A  p  p</span>
                     </button>
 
                     {isMobile && (
                         <button
                             onClick={handleToggleSidebar}
-                            className="p-1 rounded text-gray-300 transition-colors"
+                            className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
                             title={isSideBarVisible ? "Hide sidebar" : "Show sidebar"}
                             aria-label={isSideBarVisible ? "Hide sidebar" : "Show sidebar"}
                         >
@@ -133,7 +133,7 @@ export function TopNav() {
 
                     <div className="flex-1"></div>
                     <KRepoSyncIndicator />
-                    {showDevBadge && <div className="text-red-500 font-bold text-sm uppercase">DEV</div>}
+                    {showDevBadge && <div className="rounded-md border border-sa-danger/40 px-1.5 font-mono text-[10px] font-medium uppercase leading-4 text-sa-danger">DEV</div>}
                 </nav>
             </div>
         </>

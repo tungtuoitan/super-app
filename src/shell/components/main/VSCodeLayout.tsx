@@ -88,8 +88,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
             <>
                 <GlobalModuleInit />
                 <div
-                    className={`w-full h-full flex flex-col overflow-hidden ${className || ""}`}
-                    style={{ backgroundColor: "rgb(30, 30, 30)", color: "#cccccc" }}
+                    className={`w-full h-full flex flex-col overflow-hidden bg-editor-bg text-editor-fg ${className || ""}`}
                 >
                     <ActivityBar horizontal />
 
@@ -128,8 +127,7 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
         <>
         <GlobalModuleInit />
         <div
-            className={`w-full h-full flex flex-col overflow-hidden ${className || ""}`}
-            style={{ backgroundColor: "rgb(30, 30, 30)", color: "#cccccc" }}
+            className={`w-full h-full flex flex-col overflow-hidden bg-editor-bg text-editor-fg ${className || ""}`}
         >
             <div className="flex-1 flex overflow-hidden">
                 <ActivityBar />

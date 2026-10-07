@@ -29,20 +29,20 @@ function ModuleButton({ module, isActive, horizontal, onClick }: {
                 <TooltipTrigger asChild>
                     <button
                         onClick={onClick}
-                        className={`relative w-12 h-12 rounded-none transition-colors border-transparent ${
+                        className={`relative w-12 h-12 rounded-none transition-colors duration-100 border-transparent ${
                             isActive
-                                ? "text-editor-white border-editor-active"
-                                : "cursor-pointer text-[#6a6a6a] hover:text-white hover:bg-transparent"
+                                ? `text-foreground ${horizontal ? "shadow-[inset_0_-2px_0_hsl(var(--sa-accent-amber))]" : "shadow-[inset_2px_0_0_hsl(var(--sa-accent-amber))]"}`
+                                : "cursor-pointer text-muted-foreground/70 hover:text-foreground hover:bg-transparent"
                         }`}
                     >
-                        <Icon className="w-6 h-6 mx-auto" />
+                        <Icon className="w-5 h-5 mx-auto" strokeWidth={1.75} />
                         {statusDot ? (
                             <span
                                 className="absolute top-2 right-2 w-2 h-2 rounded-full"
                                 style={{ backgroundColor: statusDot.color }}
                             />
                         ) : badge > 0 ? (
-                            <span className="absolute top-1.5 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-blue-600 text-white text-[9px] font-bold px-1 leading-none">
+                            <span className="absolute top-1.5 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-sa-amber text-sa-on-amber font-mono text-[9px] font-semibold px-1 leading-none">
                                 {badge > 99 ? "99+" : badge}
                             </span>
                         ) : null}
@@ -103,11 +103,11 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
                 <TooltipTrigger asChild>
                     <button
                         onClick={() => setAccountsOpen(true)}
-                        className={`w-12 h-12 rounded-none hover:text-white hover:bg-transparent transition-colors ${
-                            isAuthenticated ? "text-[#6a6a6a]" : "text-red-500"
+                        className={`w-12 h-12 rounded-none hover:text-foreground hover:bg-transparent transition-colors duration-100 ${
+                            isAuthenticated ? "text-muted-foreground/70" : "text-sa-danger"
                         }`}
                     >
-                        <UserCircle className="w-6 h-6 mx-auto" />
+                        <UserCircle className="w-5 h-5 mx-auto" strokeWidth={1.75} />
                     </button>
                 </TooltipTrigger>
                 <TooltipContent side={horizontal ? "bottom" : "right"}>
@@ -123,9 +123,9 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
                 <TooltipTrigger asChild>
                     <button
                         onClick={() => setSettingsOpen(true)}
-                        className="w-12 h-12 rounded-none text-[#6a6a6a] hover:text-white hover:bg-transparent transition-colors"
+                        className="w-12 h-12 rounded-none text-muted-foreground/70 hover:text-foreground hover:bg-transparent transition-colors duration-100"
                     >
-                        <Settings className="w-6 h-6 mx-auto" />
+                        <Settings className="w-5 h-5 mx-auto" strokeWidth={1.75} />
                     </button>
                 </TooltipTrigger>
                 <TooltipContent side={horizontal ? "bottom" : "right"}>

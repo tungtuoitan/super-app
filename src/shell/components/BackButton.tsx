@@ -25,14 +25,15 @@ function getTypeFromLink(link: string): "project" | "task" | "note" | "workspace
     return "unknown";
 }
 
+// #1514: icons follow the button's (muted) text color — no per-type rainbow
 const TYPE_COLORS: Record<string, string> = {
-    project: "#4FC3F7",
-    task:    "#81C784",
-    note:    "#75beff",
-    workspace: "#FFB74D",
-    log:     "#CE93D8",
-    track:   "#F48FB1",
-    unknown: "#888",
+    project: "currentColor",
+    task:    "currentColor",
+    note:    "currentColor",
+    workspace: "currentColor",
+    log:     "currentColor",
+    track:   "currentColor",
+    unknown: "currentColor",
 };
 
 function BackIcon({ type, className }: { type: string; className: string }) {
@@ -65,7 +66,7 @@ export function BackButton({ openedBy }: BackButtonProps) {
         <button
             onClick={handleBack}
             title={`Back to ${openedBy.label}`}
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors flex-shrink-0"
         >
             <BackIcon type={type} className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="truncate max-w-[160px]">{openedBy.label}</span>

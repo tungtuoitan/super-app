@@ -93,7 +93,7 @@ export function EditorToolbar() {
     });
 
     return (
-        <div className="h-6 flex items-center justify-between px-4 bg-black border-b border-white/5 gap-2">
+        <div className="h-6 flex items-center justify-between px-4 bg-editor-bg border-b border-editor-border gap-2">
             {/* Left: Back button + Breadcrumb */}
             <div className="flex items-center gap-2 flex-1 min-w-0">
                 {effectiveOpenedBy && (
@@ -116,7 +116,7 @@ export function EditorToolbar() {
                                         size="icon"
                                         onClick={upsertOrchestrator}
                                         disabled={isSaving}
-                                        className="h-8 w-8 text-green-500 hover:bg-green-500/10 disabled:text-white/20"
+                                        className="h-8 w-8 text-sa-good hover:bg-sa-good/10 disabled:text-muted-foreground/40"
                                     >
                                         <Undo2 className="h-[18px] w-[18px]" />
                                     </Button>
@@ -127,7 +127,7 @@ export function EditorToolbar() {
                             </TooltipContent>
                         </Tooltip>
                     ) : isPermanentlyDeleted ? (
-                        <span className="text-xs text-red-500 flex items-center px-2">Permanently deleted - cannot restore</span>
+                        <span className="text-xs text-sa-danger flex items-center px-2">Permanently deleted - cannot restore</span>
                     ) : (
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -137,7 +137,7 @@ export function EditorToolbar() {
                                         size="icon"
                                         onClick={upsertOrchestrator}
                                         disabled={!activeTab?.hasUnsavedChanges || isSaving}
-                                        className={`h-8 w-8 ${activeTab?.hasUnsavedChanges ? "text-[#4FC3F7] hover:bg-[#4FC3F7]/10" : "text-white/40"} disabled:text-white/20`}
+                                        className={`h-8 w-8 ${activeTab?.hasUnsavedChanges ? "text-sa-amber hover:bg-sa-amber/10" : "text-muted-foreground"} disabled:text-muted-foreground/40`}
                                     >
                                         <Save className="h-[18px] w-[18px]" />
                                     </Button>
@@ -158,7 +158,7 @@ export function EditorToolbar() {
                                         size="icon"
                                         onClick={commonCancel}
                                         disabled={!activeTab?.hasUnsavedChanges || isDeleted}
-                                        className="h-8 w-8 text-white/60 hover:bg-white/10 disabled:text-white/20"
+                                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong disabled:text-muted-foreground/40"
                                     >
                                         <RotateCcw className="h-[18px] w-[18px]" />
                                     </Button>

@@ -113,8 +113,8 @@ function WelcomeState() {
     return (
         <div className="flex-1 flex items-center justify-center text-muted-foreground/70">
             <div className="text-center">
-                <h2 className="text-xl font-semibold mb-1">Welcome to {shellConstants.appName}</h2>
-                <p className="text-sm">Select an item from the sidebar to get started</p>
+                <h2 className="text-lg font-medium mb-1 text-foreground">Welcome to {shellConstants.appName}</h2>
+                <p className="text-[13px]">Select an item from the sidebar to get started</p>
             </div>
         </div>
     );

@@ -52,7 +52,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                                 flex items-center gap-1.5 px-1.5 py-0.5 rounded
                                 ${isDisabled
                                     ? "cursor-default"
-                                    : "cursor-pointer hover:underline decoration-white/60 hover:text-white"
+                                    : "cursor-pointer hover:underline decoration-muted-foreground/60 hover:text-foreground"
                                 }
                                 transition-colors
                                 `}
@@ -74,7 +74,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                             {item.type === "note" && (
                                 <NoteIcon
                                     className="w-3.5 h-3.5"
-                                    style={{ color: item.isNew ? "#a78bfa" : (item.color || (isDisabled ? "#4FC3F7" : "#75beff")) }}
+                                    style={{ color: item.isNew ? "hsl(var(--sa-amber-ink))" : (item.color || (isDisabled ? "#4FC3F7" : "#75beff")) }}
                                 />
                             )}
 
@@ -82,7 +82,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                             <span
                                 className={`text-xs truncate max-w-[200px] ${
                                     item.isNew
-                                        ? "text-purple-400"
+                                        ? "text-sa-amber-ink"
                                         : (isDisabled ? "text-editor-fg" : "text-muted-foreground")
                                 }`}
                             >
@@ -92,7 +92,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
 
                         {/* Separator */}
                         {!isLast && (
-                            <span className="text-white/30">/</span>
+                            <span className="text-muted-foreground/50">/</span>
                         )}
                     </React.Fragment>
                 );

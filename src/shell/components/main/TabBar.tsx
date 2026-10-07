@@ -37,14 +37,14 @@ function TabIcon({ tab, isDeleted, isActive }: { tab: BaseTab; isDeleted: boolea
     const className = `w-4 h-4 ${isActive ? "opacity-100" : "opacity-50"}`;
 
     if (!meta) {
-        return <FileText className={className} style={{ color: "#9ca3af" }} />;
+        return <FileText className={className} style={{ color: "hsl(var(--muted-foreground))" }} />;
     }
 
     // Clone the icon element from meta with updated className/opacity
     const icon = meta.icon as React.ReactElement;
     return React.cloneElement(icon, {
         className,
-        style: { color: isDeleted ? "#9ca3af" : meta.color },
+        style: { color: isDeleted ? "hsl(var(--muted-foreground))" : meta.color },
     });
 }
 
@@ -110,19 +110,19 @@ function TabButton({
             onContextMenu={onContextMenu}
             className={`
                 group h-[35px] pl-3 pr-1.5 flex items-center gap-2
-                border-r border-b relative transition-all duration-150
+                border-r border-b border-editor-border relative transition-colors duration-100
                 ${isDragging ? "opacity-50" : ""}
                 ${isActive
-                    ? `bg-editor-bg text-editor-fg border-b-transparent border-t-2 ${isInCurrentModule ? "border-t-blue-500" : "border-t-gray-400"}`
-                    : "bg-transparent text-muted-foreground border-t border-t-transparent text-gray-600"
+                    ? `bg-editor-bg text-foreground border-b-transparent border-t border-t-transparent ${isInCurrentModule ? "shadow-[inset_0_-2px_0_hsl(var(--sa-accent-amber))]" : "shadow-[inset_0_-2px_0_hsl(var(--muted-foreground)/0.6)]"}`
+                    : "bg-transparent text-muted-foreground border-t border-t-transparent hover:bg-sa-hover hover:text-foreground"
                 }
             `}
         >
             {isDropTarget && dragOverPosition === "left" && (
-                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />
+                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-sa-amber z-10" />
             )}
             {isDropTarget && dragOverPosition === "right" && (
-                <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10" />
+                <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-sa-amber z-10" />
             )}
 
             <TabIcon tab={tab} isDeleted={isDeleted} isActive={isActive} />
@@ -133,7 +133,7 @@ function TabButton({
 
             <button
                 onClick={onClose}
-                className={`relative pl-0.5 py-0.5 hover:bg-gray-500/20 rounded transition-opacity duration-150 group/close w-5 h-5 ${
+                className={`relative pl-0.5 py-0.5 text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong rounded transition-opacity duration-100 group/close w-5 h-5 ${
                     isPinned || tab.hasUnsavedChanges ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                 }`}
             >
@@ -143,7 +143,7 @@ function TabButton({
                     </div>
                 ) : tab.hasUnsavedChanges ? (
                     <>
-                        <div className="w-1.5 h-1.5 ml-1 rounded-full bg-white group-hover/close:hidden" />
+                        <div className="w-1.5 h-1.5 ml-1 rounded-full bg-foreground group-hover/close:hidden" />
                         <X className="w-4 h-4 hidden group-hover/close:block absolute inset-0 m-auto" />
                     </>
                 ) : (
@@ -246,12 +246,12 @@ export function TabBar() {
     // ── Render ─────────────────────────────────────────────────────────────────
 
     return (
-        <div className={`min-h-[35px] flex items-start border-b ${isMobile ? "bg-black" : "bg-editor-sidebar"}`}>
+        <div className={`min-h-[35px] flex items-start border-b border-editor-border ${isMobile ? "bg-editor-bg" : "bg-editor-sidebar"}`}>
             {isLoadingTabs ? (
                 <div className="px-4 w-full h-[35px] flex items-center gap-2">
-                    <div className="h-4 w-24 bg-muted/20 animate-pulse rounded" />
-                    <div className="h-4 w-32 bg-muted/20 animate-pulse rounded" />
-                    <div className="h-4 w-20 bg-muted/20 animate-pulse rounded" />
+                    <div className="h-4 w-24 bg-sa-hover-strong animate-pulse rounded" />
+                    <div className="h-4 w-32 bg-sa-hover-strong animate-pulse rounded" />
+                    <div className="h-4 w-20 bg-sa-hover-strong animate-pulse rounded" />
                 </div>
             ) : openTabs.length > 0 ? (
                 <div className="flex-1 flex flex-wrap">
@@ -265,14 +265,14 @@ export function TabBar() {
                         if (group && group.children.length > 0) {
                             return (
                                 <div key={tab.id} className="flex items-stretch">
-                                    <div className="w-0.5 bg-emerald-500/40 flex-shrink-0" />
+                                    <div className="w-0.5 bg-sa-amber/40 flex-shrink-0" />
                                     <div className="flex flex-wrap">
                                         <TabButton key={tab.id} {...makeTabProps(tab, isPinned)} />
                                         {group.children.map((child) => (
                                             <TabButton key={child.id} {...makeTabProps(child, !!child.isPinned)} />
                                         ))}
                                     </div>
-                                    <div className="w-0.5 bg-emerald-500/20 flex-shrink-0" />
+                                    <div className="w-0.5 bg-sa-amber/15 flex-shrink-0" />
                                 </div>
                             );
                         }

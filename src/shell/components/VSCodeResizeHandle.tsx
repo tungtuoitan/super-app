@@ -17,14 +17,14 @@ export function VSCodeResizeHandle({ direction, id }: VSCodeResizeHandleProps) {
                 <div
                     role="separator"
                     aria-orientation="horizontal"
-                    className="group relative w-full h-3 flex items-center justify-center cursor-row-resize bg-black active:bg-[#007acc]/20"
+                    className="group relative w-full h-3 flex items-center justify-center cursor-row-resize bg-editor-bg active:bg-sa-amber/15"
                 >
                     <div className="flex gap-1">
-                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40 group-active:bg-[#007acc]" />
-                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40 group-active:bg-[#007acc]" />
-                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40 group-active:bg-[#007acc]" />
-                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40 group-active:bg-[#007acc]" />
-                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40 group-active:bg-[#007acc]" />
+                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40 group-active:bg-sa-amber" />
+                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40 group-active:bg-sa-amber" />
+                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40 group-active:bg-sa-amber" />
+                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40 group-active:bg-sa-amber" />
+                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40 group-active:bg-sa-amber" />
                     </div>
                 </div>
             </PanelResizeHandle>
@@ -41,7 +41,7 @@ export function VSCodeResizeHandle({ direction, id }: VSCodeResizeHandleProps) {
                 <div
                     className={
                         `${isHorizontal ? "absolute inset-y-0 left-1/2 -translate-x-1/2 w-px" : "absolute inset-x-0 top-1/2 -translate-y-1/2 h-px"}` +
-                        " bg-[hsl(var(--editor-border))] transition-colors duration-100 group-hover:bg-[#007acc] data-[resize-handle-active]:bg-[#007acc]"
+                        " bg-editor-border transition-colors duration-100 group-hover:bg-sa-amber/60 data-[resize-handle-active]:bg-sa-amber"
                     }
                 />
             </div>
@@ -52,8 +52,8 @@ export function VSCodeResizeHandle({ direction, id }: VSCodeResizeHandleProps) {
 /**
  * VS Code resize handle styles for reference:
  * - Default: transparent background
- * - Hover: #007acc (VS Code blue)
- * - Active (dragging): #007acc
+ * - Hover: amber 60% (#1514 token --sa-accent-amber)
+ * - Active (dragging): amber
  * - Width: 4px visual, 8px hit area
  * - Cursor: col-resize (horizontal) or row-resize (vertical)
  */

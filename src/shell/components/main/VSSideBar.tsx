@@ -41,7 +41,7 @@ export function VSSideBar({ moduleName }: VSSideBarProps) {
                     <Panel defaultSize={70} minSize={20}>
                         <div className="h-full bg-editor-sidebar border-r border-editor-border flex flex-col overflow-hidden">
                             {/* Header */}
-                            <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-semibold uppercase text-muted-foreground flex-shrink-0">
+                            <div className="h-[35px] flex items-center justify-between px-3 border-b border-editor-border text-[11px] font-medium uppercase tracking-wide text-muted-foreground flex-shrink-0">
                                 <span>{viewTitle}</span>
                                 <RightSideBar hideFilter={module?.hideRightSideBarFilter ?? false} />
                             </div>
