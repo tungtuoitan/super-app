@@ -49,7 +49,7 @@ export function TaskSearchInput({ value, onSearch }: TaskSearchInputProps = {}) 
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="!outline-none !ring-0 h-7 w-[160px] pl-7 pr-7 text-xs bg-editor-bg ring-0 focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none"
+                className="!outline-none !ring-0 h-7 w-[180px] rounded-lg pl-7 pr-7 text-[13px] bg-transparent ring-0 focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none"
                 style={{ outline: "none" }}
             />
             {inputValue && (

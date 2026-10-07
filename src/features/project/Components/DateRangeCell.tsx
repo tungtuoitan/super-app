@@ -6,7 +6,7 @@
 import React, { useRef } from "react";
 import { Row, flexRender } from "@tanstack/react-table";
 import type { Task, TaskDragItem } from "@/features/taskDetail";
-import { DateRangePicker } from "@/shared";
+import { DateRangePicker, getDateTone } from "@/shared";
 
 interface DraggableRowProps {
     row: Row<Task>;
@@ -29,6 +29,7 @@ export const DateRangeCell = function DateRangeCell({
 }) {
     return (
         <div className="px-1" onClick={(e) => e.stopPropagation()}>
+            {/* compact (#1514): "07–08 Oct", red when overdue & not done, amber dot when ending today */}
             <DateRangePicker
                 startDate={task.startDate}
                 endDate={task.endDate}
@@ -39,6 +40,8 @@ export const DateRangeCell = function DateRangeCell({
                 showTime={false}
                 limitStartDate={task.parentTaskId ? task.parentStartDate : task.projectStartDate}
                 limitEndDate={task.parentTaskId ? task.parentEndDate : task.projectEndDate}
+                compact
+                compactTone={getDateTone(task.endDate, task.status)}
             />
         </div>
     );

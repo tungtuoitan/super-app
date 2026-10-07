@@ -83,9 +83,9 @@ export function TaskFilterPopup() {
     return (
         <Popover open={open} onOpenChange={handleOpen}>
             <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 relative">
-                    <Filter className="h-4 w-4" />
-                    {hasSavedDiff && <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />}
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 relative text-muted-foreground hover:text-foreground">
+                    <Filter className="h-3.5 w-3.5" />
+                    {hasSavedDiff && <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-sa-amber" />}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-72 p-3" align="end">
@@ -94,7 +94,7 @@ export function TaskFilterPopup() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Filter className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-medium text-sm">Filter Tasks</h4>
+                            <h4 className="font-medium text-[13px]">Filter Tasks</h4>
                         </div>
                         <div className="flex items-center gap-1">
                             <Button
@@ -112,7 +112,7 @@ export function TaskFilterPopup() {
                                 size="sm"
                                 onClick={handleApply}
                                 disabled={isPendingEmpty}
-                                className="h-6 px-2 text-xs bg-white/80 hover:bg-white pb-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="h-6 px-2 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Apply
                             </Button>

@@ -25,7 +25,6 @@ interface DraggableRowProps {
 export function DraggableRow({ row, allTasks, onDrop, onRowClick, onContextMenu, showError }: DraggableRowProps) {
     const ref = useRef<HTMLTableRowElement>(null);
     const task = row.original;
-    const isSubtask = !!task.parentTaskId;
 
     const [{ isDragging }, drag] = useDrag<TaskDragItem, void, { isDragging: boolean }>({
         type: TASK_ROW,
@@ -62,13 +61,12 @@ export function DraggableRow({ row, allTasks, onDrop, onRowClick, onContextMenu,
             ref={ref}
             data-row
             className={cn(
-                "border-b h-[40px] cursor-grab transition-colors",
+                "group/row h-9 cursor-grab border-b border-sa-border/60 transition-colors duration-100",
                 task.deletedAt && "opacity-60",
-                isSubtask && "bg-muted/20",
                 isDragging && "opacity-50 cursor-grabbing",
-                isOver && canDrop && "bg-emerald-500/15 outline outline-2 outline-dashed outline-emerald-500 -outline-offset-2",
-                isOver && !canDrop && "bg-destructive/10",
-                !isDragging && !isOver && "hover:bg-muted/50",
+                isOver && canDrop && "bg-sa-amber/10 outline outline-1 outline-dashed outline-sa-amber -outline-offset-1",
+                isOver && !canDrop && "bg-sa-danger/10",
+                !isDragging && !isOver && (row.getIsSelected() ? "bg-sa-hover-strong" : "hover:bg-sa-hover"),
             )}
             onClick={() => onRowClick(task)}
             onContextMenu={(e) => {
@@ -77,7 +75,7 @@ export function DraggableRow({ row, allTasks, onDrop, onRowClick, onContextMenu,
             }}
         >
             {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="text-left overflow-hidden" style={{ width: cell.column.getSize() }}>
+                <td key={cell.id} className="text-left overflow-hidden" style={{ width: cell.column.id === "title" ? undefined : cell.column.getSize() }}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
             ))}

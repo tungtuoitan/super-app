@@ -18,8 +18,8 @@ export function TaskFilterGroup({ group, pending, isChecked, toggle }: any) {
     return (
         <div key={group.key} className="space-y-2">
             <div className="flex items-center justify-between">
-                <Label className="text-xs font-medium text-muted-foreground">{group.label}</Label>
-                {isEmpty && <span className="text-xs text-red-500 font-medium">Required</span>}
+                <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{group.label}</Label>
+                {isEmpty && <span className="text-xs text-sa-danger font-medium">Required</span>}
             </div>
             <div className="space-y-1.5">
                 {options
@@ -33,7 +33,7 @@ export function TaskFilterGroup({ group, pending, isChecked, toggle }: any) {
                         return (
                             <div key={option.code} className="flex items-center space-x-2">
                                 <Checkbox id={`${group.key}-${option.code}`} checked={checked} onCheckedChange={() => toggle(group.key, option.code)} />
-                                <label htmlFor={`${group.key}-${option.code}`} className={`text-sm font-normal cursor-pointer ${checked ? "text-foreground" : "text-gray-400"}`}>
+                                <label htmlFor={`${group.key}-${option.code}`} className={`text-[13px] font-normal cursor-pointer ${checked ? "text-foreground" : "text-muted-foreground"}`}>
                                     {option.description || option.code}
                                 </label>
                             </div>

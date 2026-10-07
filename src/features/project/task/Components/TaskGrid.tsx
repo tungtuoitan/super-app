@@ -1,15 +1,16 @@
 /**
- * TaskGrid - Task Grid Component
- * VSCode-style dark theme table for tasks
- * Shows tasks for a specific project
- * Supports inline status/priority editing and drag & drop for subtask management
+ * TaskGrid - Task list for a single project (Linear-style, #1514)
+ * Summary card + tasks grouped by status (collapsible, sticky headers) + 36px rows.
+ * Supports inline status/priority editing, date editing, row selection, context menu
+ * and drag & drop for subtask management.
  *
  * Pure UI — logic lives in useTaskListSelector, useTaskGridUpdateHelper, useTaskListHeadless
  */
 
-import React from "react";
-import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
+import React, { useState } from "react";
+import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef } from "@tanstack/react-table";
 import { Loader2, CornerDownRight, Diamond } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Checkbox } from "@/shared";
 import { Alert, AlertDescription } from "@/shared";
 import type { Task } from "@/features/taskDetail";
@@ -20,91 +21,14 @@ import { useTaskGridUpdateHelper } from "../hooks/taskList/useTaskGridUpdate.hel
 import { useTaskListHeadless } from "../hooks/taskList/useTaskList.headless";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { MakeIndependentDropZone } from "@/features/taskDetail";
-import {DraggableRow} from "../../Components/DraggableRow";
-import {StatusCell} from "../../Components/StatusCell";
-import {PriorityCell} from "../../Components/PriorityCell";
-import {DateRangeCell} from "../../Components/DateRangeCell";
-import {usePTaskStore} from "../../store/usePTask.store";
+import { DateRangeCell } from "../../Components/DateRangeCell";
+import { usePTaskStore } from "../../store/usePTask.store";
+import { TaskOptionPicker } from "./small/TaskOptionPicker";
+import { TaskGroupedTable } from "./small/TaskGroupedTable";
+import { TaskListSummary } from "./small/TaskListSummary";
+import { groupByStatus, initialCollapsedGroups } from "../utils/taskGroup.utils";
+import { taskGroupConstants } from "../taskGroup.constants";
 
-
-type TaskTableProps = {
-  table: ReturnType<typeof useReactTable<Task>>;
-  columns: ColumnDef<Task>[];
-  filteredTasks: Task[];
-  handleContextMenu: (e: React.MouseEvent, row?: any) => void;
-  handleDropTaskOntoTask: any;
-  handleMakeIndependent: any;
-  openTaskTab: (task: Task) => void;
-  showDropError: (message: string) => void;
-};
-
-function TaskTable({
-  table,
-  columns,
-  filteredTasks,
-  handleContextMenu,
-  handleDropTaskOntoTask,
-  handleMakeIndependent,
-  openTaskTab,
-  showDropError,
-}: TaskTableProps) {
-  return (
-        <div
-        className="flex-1 overflow-auto rounded-md border"
-        onContextMenu={(e) => {
-            const target = e.target as HTMLElement;
-            const isClickedOnRow = target.closest("tr[data-row]");
-            if (!isClickedOnRow) {
-                handleContextMenu(e);
-            }
-        }}
-    >
-
-      <table className="w-full" style={{ tableLayout: "fixed" }}>
-        <thead className="bg-muted/50 sticky top-0 z-10">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b">
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground"
-                  style={{ width: header.getSize() }}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-
-        <tbody>
-          {table.getRowModel().rows.length === 0 ? (
-            <tr>
-              <td colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                {/* Empty state */}
-              </td>
-            </tr>
-          ) : (
-            table.getRowModel().rows.map((row) => (
-              <DraggableRow
-                key={row.id}
-                row={row}
-                allTasks={filteredTasks}
-                onDrop={handleDropTaskOntoTask}
-                onMakeIndependent={handleMakeIndependent}
-                onRowClick={openTaskTab}
-                onContextMenu={handleContextMenu}
-                showError={showDropError}
-              />
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 /**
  * TaskGrid - task grid with table display
  */
@@ -125,7 +49,8 @@ export function TaskGrid() {
     const { projectId } = useProjectDetailStore();
     const { openTaskContextMenu } = useTaskGridHelper();
     const { openTaskTab } = useTaskTabHelper();
-    const { statusOptions, priorityOptions, filteredTasks, sortedTasks } = useTaskListSelector();
+    const { currentProject, statusOptions, priorityOptions, filteredTasks, sortedTasks } = useTaskListSelector();
+    const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(initialCollapsedGroups);
     const { handleInlineUpdate, handleInlineDateUpdate, handleDropTaskOntoTask, handleMakeIndependent, showDropError } = useTaskGridUpdateHelper();
 
     // Handle context menu
@@ -140,67 +65,61 @@ export function TaskGrid() {
     const columns: ColumnDef<Task>[] = [
         {
             id: "select",
-            header: ({ table }) => (
-                <div className="flex items-center justify-center">
-                    <Checkbox
-                        checked={table.getIsAllPageRowsSelected()}
-                        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                        aria-label="Select all"
-                    />
-                </div>
-            ),
-            cell: ({ row }) => (
-                <div className="flex items-center justify-center">
+            header: () => null,
+            cell: ({ row, table }) => (
+                <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                         checked={row.getIsSelected()}
                         onCheckedChange={(value) => row.toggleSelected(!!value)}
                         aria-label="Select row"
-                        onClick={(e) => e.stopPropagation()}
+                        className={cn(
+                            "transition-opacity duration-100",
+                            row.getIsSelected() || table.getIsSomeRowsSelected() ? "opacity-100" : "opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100",
+                        )}
                     />
                 </div>
             ),
-            size: 40,
+            size: 32,
             enableSorting: false,
             enableHiding: false,
         },
         {
+            accessorKey: "status",
+            header: () => null,
+            size: 32,
+            cell: ({ row }) => <TaskOptionPicker task={row.original} field="status" options={statusOptions} onUpdate={handleInlineUpdate} />,
+        },
+        {
             accessorKey: "id",
-            header: () => <div className="text-left text-sm">ID</div>,
+            header: () => null,
             size: 60,
-            cell: ({ getValue }) => <div className="text-left text-sm px-2">{getValue() as number}</div>,
+            cell: ({ getValue }) => <div className="truncate px-1 font-mono text-[12px] text-muted-foreground/80">#{getValue() as number}</div>,
         },
         {
             accessorKey: "title",
-            header: () => <div className="text-left text-sm">Title</div>,
-            size: 300,
+            header: () => null,
             cell: ({ row }) => {
                 const task = row.original;
                 const isSubtask = !!task.parentTaskId;
                 return (
-                    <div className={`text-sm text-primary text-left cursor-pointer hover:text-primary/80 px-2 truncate flex items-center gap-1 ${isSubtask ? "pl-6" : ""}`}>
-                        {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />}
-                        {task.isMilestone && <Diamond className="h-3 w-3 text-amber-500 fill-amber-500 flex-shrink-0" aria-label="Milestone" />}
+                    <div className={cn("flex min-w-0 items-center gap-1.5 pr-2 text-foreground", isSubtask && "pl-5", task.deletedAt && "line-through text-muted-foreground")}>
+                        {isSubtask && <CornerDownRight className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />}
+                        {task.isMilestone && <Diamond className="h-3 w-3 flex-shrink-0 fill-sa-amber text-sa-amber" aria-label="Milestone" />}
                         <span className="truncate">{task.title || "—"}</span>
                     </div>
                 );
             },
         },
         {
-            accessorKey: "status",
-            header: () => <div className="text-left text-sm">Status</div>,
-            size: 120,
-            cell: ({ row }) => <StatusCell task={row.original} statusOptions={statusOptions} onUpdate={handleInlineUpdate} />,
-        },
-        {
             accessorKey: "priority",
-            header: () => <div className="text-left text-sm">Priority</div>,
-            size: 120,
-            cell: ({ row }) => <PriorityCell task={row.original} priorityOptions={priorityOptions} onUpdate={handleInlineUpdate} />,
+            header: () => null,
+            size: 36,
+            cell: ({ row }) => <TaskOptionPicker task={row.original} field="priority" options={priorityOptions} onUpdate={handleInlineUpdate} />,
         },
         {
             id: "dateRange",
-            header: () => <div className="text-left text-sm">Date Range</div>,
-            size: 200,
+            header: () => null,
+            size: 156,
             cell: ({ row }) => (
                 <DateRangeCell
                     task={row.original}
@@ -230,44 +149,68 @@ export function TaskGrid() {
         enableRowSelection: true,
     });
 
-    return (
-        <div ref={taskContainerRef} className="w-full h-full bg-background flex flex-col relative">
+    // Grouping is presentation only: same rows, same order, split by status (#1514)
+    const rowGroups = groupByStatus(table.getRowModel().rows, (row) => row.original.status);
+    const summaryGroups = groupByStatus(filteredTasks, (task) => task.status);
+    const doneCount = filteredTasks.filter((task) => task.status === taskGroupConstants.doneStatus).length;
+    const labelOf = (status: string) => statusOptions.find((option) => option.code === status)?.label ?? (status || "No status");
+    const toggleGroup = (status: string) => setCollapsedGroups((prev) => ({ ...prev, [status]: !prev[status] }));
+    const selectedCount = Object.keys(taskGridRowSelection).filter((id) => taskGridRowSelection[id]).length;
 
+    return (
+        <div ref={taskContainerRef} className="relative flex h-full w-full flex-col bg-background">
             {/* Loading Overlay */}
             {taskGridIsLoading && (
-                <div className="absolute inset-0 bg-background backdrop-blur-sm flex items-center justify-center z-10">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/70">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
             )}
 
             {/* Error Overlay */}
             {taskGridError && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60">
                     <Alert variant="destructive" className="max-w-md">
                         <AlertDescription>Failed to load tasks</AlertDescription>
                     </Alert>
                 </div>
             )}
 
-            <TaskTable
+            <TaskListSummary
+                projectName={currentProject?.name ?? ""}
+                groups={summaryGroups}
+                total={filteredTasks.length}
+                doneCount={doneCount}
+                labelOf={labelOf}
+            />
+
+            <TaskGroupedTable
                 table={table}
-                columns={columns}
+                groups={rowGroups}
+                collapsed={collapsedGroups}
+                onToggleGroup={toggleGroup}
+                labelOf={labelOf}
                 filteredTasks={filteredTasks}
                 handleContextMenu={handleContextMenu}
                 handleDropTaskOntoTask={handleDropTaskOntoTask}
                 handleMakeIndependent={handleMakeIndependent}
                 openTaskTab={openTaskTab}
                 showDropError={showDropError}
-                />
+            />
 
             {/* Make Independent Drop Zone */}
             <MakeIndependentDropZone onDrop={handleMakeIndependent} showError={showDropError} />
 
-            {/* Footer with count */}
-            <div className="flex items-center px-4 py-1 bg-background border-t">
-                <div className="text-sm text-muted-foreground">
+            {/* Footer: select all + count */}
+            <div className="flex h-9 items-center gap-2 border-t border-sa-border bg-background px-3 text-[12px] text-muted-foreground">
+                <Checkbox
+                    checked={table.getIsAllPageRowsSelected()}
+                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                    aria-label="Select all"
+                />
+                <span>
                     {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}
-                </div>
+                    {selectedCount > 0 && <span className="text-foreground"> · {selectedCount} selected</span>}
+                </span>
             </div>
         </div>
     );
