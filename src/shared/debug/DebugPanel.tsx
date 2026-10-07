@@ -36,14 +36,14 @@ export function DebugPanel() {
 
     return (
         <div
-            className="fixed bottom-0 right-0 z-[9999] bg-black/90 text-white border border-gray-600 rounded-t-lg max-w-96 max-h-96"
+            className="fixed bottom-0 right-0 z-[9999] sa-shadow-pop bg-popover text-popover-foreground border border-sa-border-strong rounded-t-lg font-mono text-[11px] max-w-96 max-h-96"
             style={{
                 fontFamily: "monospace",
                 fontSize: "11px",
             }}
         >
             {/* Header */}
-            <div className="flex items-center justify-between bg-gray-800 p-2 border-b border-gray-600 rounded-t-lg cursor-pointer" onClick={() => setIsCollapsed(!isCollapsed)}>
+            <div className="flex items-center justify-between bg-sa-surface-2 p-2 border-b border-sa-border rounded-t-lg cursor-pointer" onClick={() => setIsCollapsed(!isCollapsed)}>
                 <div className="flex items-center gap-2">
                     <span className="font-bold">🐛 DEBUG LOG ({recentLogs.length})</span>
                 </div>
@@ -54,22 +54,22 @@ export function DebugPanel() {
 
             {/* Logs Container */}
             {!isCollapsed && (
-                <div className="overflow-auto max-h-80 p-2 bg-black/80">
+                <div className="overflow-auto max-h-80 p-2 bg-popover">
                     {recentLogs.length === 0 ? (
-                        <div className="text-gray-500">Waiting for logs...</div>
+                        <div className="text-muted-foreground">Waiting for logs...</div>
                     ) : (
                         recentLogs.map((log: any, index: number) => (
-                            <div key={index} className="mb-1 pb-1 border-b border-gray-900">
+                            <div key={index} className="mb-1 pb-1 border-b border-sa-border">
                                 {/* Timestamp + Component + Level */}
-                                <div className={`text-gray-400`}>
-                                    <span className="text-yellow-400">[{log.timestamp}]</span>
-                                    <span className="text-blue-400"> {log.component}</span>
+                                <div className={`text-muted-foreground`}>
+                                    <span className="text-sa-amber-ink">[{log.timestamp}]</span>
+                                    <span className="text-foreground"> {log.component}</span>
                                     <span
                                         className={`
-                                            ${log.level === "error" ? "text-red-400" : ""}
-                                            ${log.level === "warn" ? "text-orange-400" : ""}
-                                            ${log.level === "log" ? "text-green-400" : ""}
-                                            ${log.level === "debug" ? "text-gray-500" : ""}
+                                            ${log.level === "error" ? "text-sa-danger" : ""}
+                                            ${log.level === "warn" ? "text-sa-amber-ink" : ""}
+                                            ${log.level === "log" ? "text-sa-good" : ""}
+                                            ${log.level === "debug" ? "text-muted-foreground" : ""}
                                         `}
                                     >
                                         {" "}
@@ -78,11 +78,11 @@ export function DebugPanel() {
                                 </div>
 
                                 {/* Message */}
-                                <div className="text-white ml-2">{log.message}</div>
+                                <div className="text-foreground ml-2">{log.message}</div>
 
                                 {/* Data */}
                                 {log.data && (
-                                    <div className="text-gray-300 ml-4 bg-gray-900 p-1 rounded mt-1 max-h-32 overflow-auto">
+                                    <div className="text-muted-foreground ml-4 bg-sa-surface p-1 rounded mt-1 max-h-32 overflow-auto">
                                         <pre>{JSON.stringify(log.data, null, 2)}</pre>
                                     </div>
                                 )}
@@ -94,11 +94,11 @@ export function DebugPanel() {
 
             {/* Footer */}
             {!isCollapsed && (
-                <div className="flex gap-2 p-2 border-t border-gray-600 bg-gray-800 text-xs">
+                <div className="flex gap-2 p-2 border-t border-sa-border bg-sa-surface-2 text-xs">
                     <button
                         onClick={handleCopyAll}
-                        className={`px-2 py-1 rounded text-white flex items-center gap-1 ${
-                            isCopied ? "bg-green-600" : "bg-blue-600 hover:bg-blue-700"
+                        className={`px-2 py-1 rounded-md border flex items-center gap-1 ${
+                            isCopied ? "border-sa-good/40 text-sa-good" : "border-sa-border-strong hover:bg-sa-hover-strong"
                         }`}
                     >
                         {isCopied ? (
@@ -113,13 +113,13 @@ export function DebugPanel() {
                     </button>
                     <button
                         onClick={clearLogs}
-                        className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-white"
+                        className="px-2 py-1 rounded-md border border-sa-danger/40 text-sa-danger hover:bg-sa-danger/10"
                     >
                         Clear
                     </button>
                     <button
                         onClick={() => setIsEnabled(false)}
-                        className="px-2 py-1 bg-gray-600 hover:bg-gray-700 rounded text-white"
+                        className="px-2 py-1 rounded-md border border-sa-border-strong hover:bg-sa-hover-strong"
                     >
                         Close
                     </button>
