@@ -27,7 +27,7 @@ export function TaskStatusIcon({ status, size = 14, className, title }: TaskStat
             {isDisc ? (
                 <circle cx="7" cy="7" r="6.25" fill={color} />
             ) : (
-                <circle cx="7" cy="7" r="5.5" stroke={color} strokeWidth="1.5" strokeDasharray={shape === "dashed" ? "1.8 1.45" : undefined} />
+                <circle cx="7" cy="7" r="5.5" stroke={color} strokeWidth="1.5" strokeDasharray={shape === "dashed" ? "1.73 1.15" : undefined} />
             )}
             {shape === "half" && <path d="M7 3.5 A3.5 3.5 0 0 1 7 10.5 Z" fill={color} />}
             {shape === "dot" && <circle cx="7" cy="7" r="2" fill={color} />}
