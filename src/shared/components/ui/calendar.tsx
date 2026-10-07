@@ -74,7 +74,7 @@ function Calendar({
                 range_start: cn("bg-accent rounded-l-md", defaultClassNames.range_start),
                 range_middle: cn("rounded-none", defaultClassNames.range_middle),
                 range_end: cn("bg-accent rounded-r-md", defaultClassNames.range_end),
-                today: cn("bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none", defaultClassNames.today),
+                today: cn("rounded-md text-sa-amber-ink [&_button]:font-medium data-[selected=true]:rounded-none", defaultClassNames.today),
                 outside: cn("text-muted-foreground aria-selected:text-muted-foreground", defaultClassNames.outside),
                 disabled: cn("text-muted-foreground opacity-50", defaultClassNames.disabled),
                 hidden: cn("invisible", defaultClassNames.hidden),

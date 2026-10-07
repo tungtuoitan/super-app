@@ -55,6 +55,7 @@
         --sa-text: 240 6% 10%;
         --sa-muted: 240 4% 44%;
         --sa-accent-amber: 38 87% 62%;
+        --sa-on-amber: 240 4% 5%; /* text/glyph on an amber fill */
         --sa-amber-ink: 33 80% 36%; /* amber readable as text on white */
         --sa-good: 142 71% 38%;
         --sa-danger: 0 72% 51%;
@@ -116,6 +117,7 @@
         --sa-text: 0 0% 93%;
         --sa-muted: 240 1% 57%;
         --sa-accent-amber: 38 87% 62%; /* #f2b54b */
+        --sa-on-amber: 240 4% 5%;
         --sa-amber-ink: 38 87% 62%;
         --sa-good: 142 69% 58%; /* #4ade80 */
         --sa-danger: 0 91% 71%; /* #f87171 */
@@ -164,6 +166,14 @@
     }
     ::selection {
         background-color: hsl(var(--sa-accent-amber) / 0.28);
+    }
+}
+
+/* Components layer: utilities (e.g. shadow-none) passed via className still win */
+@layer components {
+    /* Popover / menu / dialog elevation — the only places with a shadow */
+    .sa-shadow-pop {
+        box-shadow: var(--sa-shadow-pop);
     }
 }
 

@@ -70,15 +70,13 @@ module.exports = {
                 "sa-text": "hsl(var(--sa-text) / <alpha-value>)",
                 "sa-muted": "hsl(var(--sa-muted) / <alpha-value>)",
                 "sa-amber": "hsl(var(--sa-accent-amber) / <alpha-value>)",
+                "sa-on-amber": "hsl(var(--sa-on-amber) / <alpha-value>)",
                 "sa-amber-ink": "hsl(var(--sa-amber-ink) / <alpha-value>)",
                 "sa-good": "hsl(var(--sa-good) / <alpha-value>)",
                 "sa-danger": "hsl(var(--sa-danger) / <alpha-value>)",
                 "sa-focus": "hsl(var(--sa-focus) / <alpha-value>)",
                 "sa-hover": "var(--sa-hover)",
                 "sa-hover-strong": "var(--sa-hover-strong)",
-            },
-            boxShadow: {
-                "sa-pop": "var(--sa-shadow-pop)",
             },
             transitionDuration: {
                 DEFAULT: "120ms",
