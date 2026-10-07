@@ -49,8 +49,8 @@ export function MultiProjectKanbanView() {
     return (
         <div className="w-full h-full flex flex-col relative" onContextMenu={handleContextMenu}>
             {taskGridIsLoading && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <div className="absolute inset-0 bg-background/70 flex items-center justify-center z-10">
+                    <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
                 </div>
             )}
 
@@ -62,8 +62,8 @@ export function MultiProjectKanbanView() {
                 </div>
             )}
 
-            <div className="flex-1 overflow-x-auto p-4">
-                <div className="flex gap-4 h-full">
+            <div className="flex-1 overflow-x-auto p-3">
+                <div className="flex gap-3 h-full">
                     {statusOptions.map((status:any) => (
                         <KanbanColumn
                             key={status.code}
@@ -79,8 +79,8 @@ export function MultiProjectKanbanView() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between px-4 py-1 bg-background border-t">
-                <div className="text-sm text-muted-foreground">
+            <div className="flex h-9 items-center justify-between px-3 bg-background border-t border-sa-border">
+                <div className="text-[12px] text-muted-foreground">
                     {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""} from {projects.length} project
                     {projects.length !== 1 ? "s" : ""}
                 </div>

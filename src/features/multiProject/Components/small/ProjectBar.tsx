@@ -116,12 +116,12 @@ export function ProjectBar({ project, timelineStart, timelineEnd, dayWidth, onDa
     }
 
     return (
-        <div ref={barRef} title={span ? describeTimelineSpan(span) : undefined} className={cn("absolute flex items-center rounded-lg transition-shadow group cursor-pointer", isDragging && "shadow-lg z-10")} style={{ left: currentLeft, width: currentWidth, height: PRO_BAR_HEIGHT, top: (PRO_ROW_HEIGHT - PRO_BAR_HEIGHT) / 2, backgroundColor: `${statusColors.bg}30`, border: `2px solid ${statusColors.bg}`, borderLeft: `4px solid ${statusColors.bg}`, ...(span?.isOpenEnded && { borderRight: "none", borderTopRightRadius: 0, borderBottomRightRadius: 0, maskImage: OPEN_END_MASK, WebkitMaskImage: OPEN_END_MASK }), ...(span?.isStartEstimated && { borderLeftStyle: "dashed" as const }) }}>
-            <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20" onMouseDown={(e) => handleMouseDown(e, "resize-left")} />
+        <div ref={barRef} title={span ? describeTimelineSpan(span) : undefined} className={cn("absolute flex items-center rounded-lg transition-shadow group cursor-pointer", isDragging && "ring-1 ring-sa-amber/60 z-10")} style={{ left: currentLeft, width: currentWidth, height: PRO_BAR_HEIGHT, top: (PRO_ROW_HEIGHT - PRO_BAR_HEIGHT) / 2, backgroundColor: `${statusColors.bg}30`, border: `1px solid ${statusColors.bg}80`, borderLeft: `4px solid ${statusColors.bg}`, ...(span?.isOpenEnded && { borderRight: "none", borderTopRightRadius: 0, borderBottomRightRadius: 0, maskImage: OPEN_END_MASK, WebkitMaskImage: OPEN_END_MASK }), ...(span?.isStartEstimated && { borderLeftStyle: "dashed" as const }) }}>
+            <div className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-foreground/15" onMouseDown={(e) => handleMouseDown(e, "resize-left")} />
             <div className="flex-1 flex items-center px-3 overflow-visible cursor-grab active:cursor-grabbing" onMouseDown={(e) => handleMouseDown(e, "move")}>
-                <span className="sticky left-3 font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: statusColors.bg }}>{project.name || "Untitled"}</span>
+                <span className="sticky left-3 font-medium text-xs whitespace-nowrap text-foreground">{project.name || "Untitled"}</span>
             </div>
-            <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/20" onMouseDown={(e) => handleMouseDown(e, "resize-right")} />
+            <div className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-foreground/15" onMouseDown={(e) => handleMouseDown(e, "resize-right")} />
         </div>
     );
 }

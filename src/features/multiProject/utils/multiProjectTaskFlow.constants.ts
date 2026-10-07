@@ -4,8 +4,8 @@
  */
 
 export const TASK_FLOW_CSS = `
-/* Canvas background — matches Q Flow (dark zinc) */
-.react-flow { background-color: #09090b !important; }
+/* Canvas background — app background token (#1514) */
+.react-flow { background-color: hsl(var(--background)) !important; }
 .react-flow__pane { background-color: transparent !important; }
 
 .react-flow__connection-line { stroke: hsl(var(--primary)); stroke-width: 1.5; }
@@ -27,16 +27,16 @@ export const TASK_FLOW_CSS = `
 }
 .react-flow__edge.selected .react-flow__edgeanchor:hover { r: 7; }
 
-/* MiniMap viewport indicator — yellow border around current view */
+/* MiniMap viewport indicator — amber border around current view */
 .minimap-yellow-frame .react-flow__minimap-mask {
-    stroke: #facc15 !important;
+    stroke: hsl(var(--sa-accent-amber)) !important;
     stroke-width: 2px !important;
 }
 
 /* Multi-selection bounding box (drag-select & ctrl+click) */
 .react-flow__nodesselection-rect {
-    background: rgba(59, 130, 246, 0.06) !important;
-    border: 1.5px solid rgba(59, 130, 246, 0.4) !important;
+    background: hsl(var(--sa-accent-amber) / 0.06) !important;
+    border: 1.5px solid hsl(var(--sa-accent-amber) / 0.4) !important;
     border-radius: 12px !important;
     pointer-events: all !important;
     cursor: grab !important;
@@ -44,8 +44,8 @@ export const TASK_FLOW_CSS = `
 .react-flow__nodesselection-rect:active { cursor: grabbing !important; }
 /* Drag selection rectangle */
 .react-flow__selection {
-    background: rgba(59, 130, 246, 0.06) !important;
-    border: 1.5px solid rgba(59, 130, 246, 0.4) !important;
+    background: hsl(var(--sa-accent-amber) / 0.06) !important;
+    border: 1.5px solid hsl(var(--sa-accent-amber) / 0.4) !important;
     border-radius: 4px !important;
 }
 
@@ -70,7 +70,7 @@ export const TASK_FLOW_CSS = `
     background: conic-gradient(
         from var(--angle),
         transparent 0%,
-        rgba(250, 204, 21, 0.6) 10%,
+        hsl(var(--sa-accent-amber) / 0.6) 10%,
         transparent 20%
     );
     animation: taskflow-rotate 3s linear infinite;
@@ -93,7 +93,7 @@ export const TASK_FLOW_CSS = `
     background: conic-gradient(
         from var(--angle),
         transparent 0%,
-        rgba(56, 189, 248, 0.55) 10%,
+        hsl(var(--sa-accent-amber) / 0.3) 10%,
         transparent 20%
     );
     animation: taskflow-rotate 5s linear infinite;

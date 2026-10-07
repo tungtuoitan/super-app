@@ -6,7 +6,7 @@
 import React, { useRef } from "react";
 import { useDrop, DropTargetMonitor } from "react-dnd";
 import { ScrollArea } from "@/shared";
-import { getTaskStatusColors } from "@/features/taskDetail";
+import { TaskStatusIcon } from "@/shared";
 import { cn } from "@/lib/utils";
 import { KANBAN_TASK } from "@/features/multiProject/utils/multiProjectDetail.constants";
 import type { DragItem, KanbanColumnProps } from "@/features/multiProject/types/multiProjectKanban.type";
@@ -14,7 +14,6 @@ import { DraggableTaskCard } from "./MultiProjectKanbanCard";
 
 export function KanbanColumn({ status, tasks, allTasks, showSubtasks, onTaskClick, onDropTask, canDropToColumn }: KanbanColumnProps) {
     const ref = useRef<HTMLDivElement>(null);
-    const statusColors = getTaskStatusColors(status.code);
 
     const [{ isOver, canDrop }, drop] = useDrop<DragItem, void, { isOver: boolean; canDrop: boolean }>({
         accept: KANBAN_TASK,
@@ -40,21 +39,21 @@ export function KanbanColumn({ status, tasks, allTasks, showSubtasks, onTaskClic
         <div
             ref={ref}
             className={cn(
-                "flex flex-col min-w-[280px] max-w-[320px] h-full bg-muted/30 rounded-lg transition-colors",
-                isOver && canDrop && "bg-primary/10 ring-2 ring-primary/50",
-                isOver && !canDrop && "bg-muted/50"
+                "flex flex-col min-w-[280px] max-w-[320px] h-full rounded-xl border border-sa-border bg-sa-surface/60 transition-colors duration-100",
+                isOver && canDrop && "border-sa-amber/60 bg-sa-amber/5",
+                isOver && !canDrop && "bg-sa-hover"
             )}
         >
-            <div className="flex items-center gap-2 p-3 border-b">
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: statusColors.bg }} />
-                <span className="font-medium text-sm">{status.label}</span>
-                <span className="ml-auto text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{taskCount}</span>
+            <div className="flex h-10 items-center gap-2 px-3 border-b border-sa-border">
+                <TaskStatusIcon status={status.code} title={status.label} />
+                <span className="font-medium text-[13px] text-foreground">{status.label}</span>
+                <span className="font-mono text-[12px] text-muted-foreground">{taskCount}</span>
             </div>
 
             <ScrollArea className="flex-1 p-2">
                 <div className="space-y-2 min-h-[100px]">
                     {displayTasks.length === 0 ? (
-                        <div className={cn("text-center text-xs text-muted-foreground py-8", isOver && canDrop && "border-primary text-primary")}></div>
+                        <div className={cn("text-center text-xs text-muted-foreground py-8", isOver && canDrop && "text-sa-amber-ink")}></div>
                     ) : (
                         displayTasks.map((task) => (
                             <DraggableTaskCard

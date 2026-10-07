@@ -1,7 +1,7 @@
 import React from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getProjectStatusColors } from "@/features/project";
+import { TaskStatusIcon } from "@/shared";
 
 interface ProjectChipProps {
     project: { id: number; name?: string; status?: string };
@@ -10,21 +10,20 @@ interface ProjectChipProps {
 }
 
 export function ProjectChip({ project, isSelected, onToggle }: ProjectChipProps) {
-    const statusColors = getProjectStatusColors(project.status || "");
     return (
         <button
             onClick={() => onToggle(project.id)}
             className={cn(
-                "inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-xs font-semibold transition-all uppercase tracking-wide",
-                "border-2 cursor-pointer whitespace-nowrap",
+                "inline-flex h-7 items-center gap-1.5 px-2.5 rounded-full text-[13px] transition-colors duration-100",
+                "border cursor-pointer whitespace-nowrap",
                 isSelected
-                    ? "bg-primary/15 border-primary text-primary"
-                    : "bg-muted/50 border-transparent text-muted-foreground hover:bg-muted hover:border-muted-foreground/30"
+                    ? "bg-sa-surface-2 border-sa-border-strong text-foreground"
+                    : "border-transparent text-muted-foreground hover:bg-sa-hover hover:text-foreground"
             )}
         >
-            <span className="w-1 h-4 rounded-sm flex-shrink-0" style={{ backgroundColor: statusColors.bg }} />
+            <TaskStatusIcon status={project.status} size={12} />
             <span className="truncate max-w-[150px]">{project.name}</span>
-            {isSelected && <X className="h-3.5 w-3.5 flex-shrink-0 opacity-60 hover:opacity-100" />}
+            {isSelected && <X className="h-3 w-3 flex-shrink-0 opacity-50 hover:opacity-100" />}
         </button>
     );
 }

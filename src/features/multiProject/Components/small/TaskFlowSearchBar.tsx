@@ -41,7 +41,7 @@ export function TaskFlowSearchBar() {
 
     return (
         <Panel position="top-left" className="!m-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-card border border-border rounded-lg shadow-lg min-w-[240px]">
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 sa-shadow-pop bg-popover border border-sa-border-strong rounded-lg min-w-[240px]">
                 <Search className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                 <input
                     ref={inputRef}
@@ -69,7 +69,7 @@ export function TaskFlowSearchBar() {
                     <button
                         onClick={handlePrev}
                         disabled={!hasResults}
-                        className="p-0.5 rounded hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        className="p-0.5 rounded hover:bg-sa-hover-strong disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         title="Previous match (Shift+Enter)"
                     >
                         <ChevronUp className="h-3.5 w-3.5" />
@@ -77,7 +77,7 @@ export function TaskFlowSearchBar() {
                     <button
                         onClick={handleNext}
                         disabled={!hasResults}
-                        className="p-0.5 rounded hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        className="p-0.5 rounded hover:bg-sa-hover-strong disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         title="Next match (Enter)"
                     >
                         <ChevronDown className="h-3.5 w-3.5" />
@@ -85,7 +85,7 @@ export function TaskFlowSearchBar() {
                 </div>
                 <button
                     onClick={handleClose}
-                    className="p-0.5 rounded hover:bg-muted flex-shrink-0 transition-colors"
+                    className="p-0.5 rounded hover:bg-sa-hover-strong flex-shrink-0 transition-colors"
                     title="Close (Escape)"
                 >
                     <X className="h-3.5 w-3.5 text-muted-foreground" />

@@ -102,7 +102,7 @@ export function TaskFlowProcessPopup({ nodeId }: { nodeId: string }) {
                         }
                     }}
                 >
-                    <div ref={popupScrollRef} className="bg-card/95 backdrop-blur-sm border border-border text-left rounded-lg shadow-xl py-1.5 px-2 space-y-0.5 min-w-[220px] max-w-[300px] max-h-[280px] overflow-y-auto">
+                    <div ref={popupScrollRef} className="sa-shadow-pop bg-popover border border-sa-border-strong text-left rounded-lg py-1.5 px-2 space-y-0.5 min-w-[220px] max-w-[300px] max-h-[280px] overflow-y-auto">
                         {parsedProcess.groups.map((group, gi) => {
                             const level = group.level ?? 1;
                             const collapsed = collapsedGroups.has(group.name);
@@ -149,13 +149,13 @@ export function TaskFlowProcessPopup({ nodeId }: { nodeId: string }) {
                                                     itemIndent,
                                                     !canToggleProcess ? "opacity-50 cursor-default"
                                                         : isLocked ? "opacity-35"
-                                                        : "hover:bg-muted/40 cursor-pointer",
+                                                        : "hover:bg-sa-hover-strong/40 cursor-pointer",
                                                 )}
                                                 onClick={() => canToggleProcess && !isLocked && handleToggleProcess(nodeId, gi, ii)}
                                             >
                                                 <span className="mt-0.5 shrink-0">
                                                     {s.isChecked
-                                                        ? <CheckSquare2 className="h-3 w-3 text-amber-500" />
+                                                        ? <CheckSquare2 className="h-3 w-3 text-sa-amber" />
                                                         : <Square className="h-3 w-3 text-muted-foreground" />}
                                                 </span>
                                                 <span

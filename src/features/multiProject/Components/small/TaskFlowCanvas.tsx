@@ -196,11 +196,11 @@ export function TaskFlowCanvas() {
     const handleMoveEnd = (_: unknown, viewport: Viewport) => { storageService.set(STORAGE_KEYS.TASK_FLOW_VIEWPORT, viewport); };
 
     return (
-        <div ref={containerRef} className="h-full w-full relative bg-zinc-950">
+        <div ref={containerRef} className="h-full w-full relative bg-background">
             <style>{TASK_FLOW_CSS}</style>
 
             <ReactFlow
-                style={{ backgroundColor: "#09090b" }}
+                style={{ backgroundColor: "hsl(var(--background))" }}
                 nodes={flowNodes}
                 edges={flowEdges}
                 onNodesChange={handleNodesChange}
@@ -247,7 +247,7 @@ export function TaskFlowCanvas() {
                 panOnScroll={false}
                 proOptions={{ hideAttribution: true }}
             >
-                <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgba(113,113,122,0.2)" />
+                <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="hsl(var(--muted-foreground) / 0.25)" />
                 <TaskFlowSearchBar />
 
                 {showMiniMap && (
@@ -255,19 +255,19 @@ export function TaskFlowCanvas() {
                         position="bottom-right"
                         pannable
                         zoomable
-                        maskColor="rgba(0,0,0,0.6)"
-                        className="!rounded-lg !shadow-lg minimap-yellow-frame"
+                        maskColor="hsl(var(--background) / 0.6)"
+                        className="!rounded-lg border border-sa-border minimap-yellow-frame"
                         style={{
-                            background: "rgba(24,24,27,0.9)",
+                            background: "hsl(var(--card))",
                             width: isMobile ? 110 : 180,
                             height: isMobile ? 70 : 120,
                         }}
                         nodeColor={(node) => {
                             const status = (node.data as { task?: { status: string } })?.task?.status;
-                            if (status === "in_progress") return "hsl(var(--primary))";
-                            if (status === "background_progress") return "#38bdf8";
-                            if (status === "completed" || status === "cancelled" || status === "failed") return "rgba(113,113,122,0.4)";
-                            return "rgba(99,102,241,0.4)";
+                            if (status === "in_progress") return "hsl(var(--sa-accent-amber))";
+                            if (status === "background_progress") return "hsl(var(--sa-accent-amber) / 0.5)";
+                            if (status === "completed" || status === "cancelled" || status === "failed") return "hsl(var(--muted-foreground) / 0.3)";
+                            return "hsl(var(--muted-foreground) / 0.6)";
                         }}
                     />
                 )}
@@ -276,27 +276,27 @@ export function TaskFlowCanvas() {
                     <button
                         onClick={handleF1Toggle}
                         className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md shadow-sm transition-colors",
-                            viewMode === "focusClose" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:bg-muted",
+                            "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md transition-colors duration-100",
+                            viewMode === "focusClose" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:bg-sa-hover-strong",
                         )}
                         title="Toggle view: Focus In-Progress ↔ Bird's Eye (F1)"
                     >
                         {viewMode === "focusClose" ? <Focus className="h-3.5 w-3.5" /> : <Scan className="h-3.5 w-3.5" />}
                     </button>
-                    <button onClick={handleBackToCenter} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground" title="Center on in-progress task (F2)">
+                    <button onClick={handleBackToCenter} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md hover:bg-sa-hover-strong transition-colors text-foreground" title="Center on in-progress task (F2)">
                         <Crosshair className="h-3.5 w-3.5" />
                     </button>
                     {!isMobile && (
                         <>
                             <div className="w-px h-5 bg-border" />
-                            <button onClick={handleAutoLayout} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold border rounded-md shadow-sm transition-colors bg-card border-border text-foreground hover:bg-muted" title="Gather orphan nodes into a tidy group">
+                            <button onClick={handleAutoLayout} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold border rounded-md transition-colors duration-100 bg-card border-border text-foreground hover:bg-sa-hover-strong" title="Gather orphan nodes into a tidy group">
                                 <Wand2 className="h-3.5 w-3.5" />
                                 Tidy Up
                             </button>
                         </>
                     )}
                     <div className="w-px h-5 bg-border" />
-                    <button onClick={() => loadTaskFlowTasks()} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md shadow-sm hover:bg-muted transition-colors text-foreground" title="Refresh tasks from server">
+                    <button onClick={() => loadTaskFlowTasks()} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-card border border-border rounded-md hover:bg-sa-hover-strong transition-colors text-foreground" title="Refresh tasks from server">
                         <RefreshCw className="h-3.5 w-3.5" />
                     </button>
                     {!isMobile && (
@@ -305,12 +305,12 @@ export function TaskFlowCanvas() {
                             <button
                                 onClick={handleToggleLock}
                                 className={cn(
-                                    "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md shadow-sm transition-colors",
-                                    lockOldNodes ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border border-red-500 text-foreground hover:bg-muted",
+                                    "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md transition-colors duration-100",
+                                    lockOldNodes ? "bg-primary text-primary-foreground border-primary" : "bg-card border-sa-danger/50 text-foreground hover:bg-sa-hover-strong",
                                 )}
                                 title={lockOldNodes ? "Unlock completed/cancelled tasks" : "Lock completed/cancelled tasks"}
                             >
-                                {lockOldNodes ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5 text-red-500" />}
+                                {lockOldNodes ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5 text-sa-danger" />}
                             </button>
                         </>
                     )}
@@ -318,8 +318,8 @@ export function TaskFlowCanvas() {
                     <button
                         onClick={() => setShowMiniMap((v) => !v)}
                         className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md shadow-sm transition-colors",
-                            showMiniMap ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:bg-muted",
+                            "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border rounded-md transition-colors duration-100",
+                            showMiniMap ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:bg-sa-hover-strong",
                         )}
                         title="Toggle MiniMap (F3)"
                     >

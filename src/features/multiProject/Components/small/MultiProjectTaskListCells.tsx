@@ -143,9 +143,9 @@ export const ProjectCell = function ProjectCell({
                 disabled={!!task.deletedAt}
                 onClick={() => setOpen((v) => !v)}
                 className={cn(
-                    "w-full flex items-center justify-between gap-1 px-2 py-1 rounded text-xs transition-colors",
-                    "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    open && "bg-muted text-foreground",
+                    "w-full flex h-7 items-center justify-between gap-1 px-2 rounded-md text-[12px] transition-colors duration-100",
+                    "text-muted-foreground hover:bg-sa-hover-strong hover:text-foreground",
+                    open && "bg-sa-hover-strong text-foreground",
                     task.deletedAt && "opacity-50 cursor-not-allowed",
                 )}
                 title={currentName}
@@ -164,7 +164,7 @@ export const ProjectCell = function ProjectCell({
                         width: coords.width,
                         zIndex: 9999,
                     }}
-                    className="max-h-[400px] overflow-y-auto bg-card border border-border rounded-lg shadow-lg py-1"
+                    className="sa-shadow-pop max-h-[400px] overflow-y-auto bg-popover border border-sa-border-strong rounded-lg p-1"
                     onWheel={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -184,18 +184,18 @@ export const ProjectCell = function ProjectCell({
                                     setOpen(false);
                                 }}
                                 className={cn(
-                                    "w-full flex items-center gap-2 px-2.5 py-1.5 text-left text-xs transition-colors",
+                                    "w-full flex h-8 items-center gap-2 px-2 rounded-md text-left text-[13px] transition-colors duration-100",
                                     isDeleted
                                         ? "opacity-40 cursor-not-allowed text-muted-foreground"
                                         : isCurrent
-                                            ? "bg-primary/10 text-foreground font-semibold"
-                                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                                            ? "bg-sa-hover-strong text-foreground font-medium"
+                                            : "text-muted-foreground hover:bg-sa-hover-strong hover:text-foreground",
                                 )}
                             >
                                 <Circle
                                     className={cn(
                                         "w-2 h-2 shrink-0",
-                                        isActive && !isDeleted ? "fill-emerald-500 text-emerald-500" : "fill-muted-foreground/30 text-muted-foreground/30",
+                                        isActive && !isDeleted ? "fill-sa-good text-sa-good" : "fill-muted-foreground/30 text-muted-foreground/30",
                                     )}
                                 />
                                 <span className="truncate">{p.name}</span>

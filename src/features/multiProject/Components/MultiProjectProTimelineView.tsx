@@ -13,7 +13,8 @@ import { ZoomIn, ZoomOut, Calendar } from "lucide-react";
 import { ScrollArea } from "@/shared";
 import { Button } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
-import { useProjectTabHelper, getProjectStatusColors } from "@/features/project";
+import { useProjectTabHelper } from "@/features/project";
+import { TaskStatusIcon } from "@/shared";
 import { cn } from "@/lib/utils";
 import { TIMELINE_HEADER_HEIGHT } from "@/features/taskDetail";
 import { useMultiTimelineStore, WEEK_WIDTH_STORAGE_KEY } from "@/features/multiProject/store/useMultiTimeline.store";
@@ -51,24 +52,23 @@ export function MultiProjectProTimelineView() {
         <div className="w-full h-full flex flex-col relative">
             <div className="flex-1 overflow-hidden flex">
                 {/* Project List (Left Panel) */}
-                <div className="w-[280px] flex-shrink-0 border-r bg-muted/30">
-                    <div className="border-b bg-muted/50 flex items-center px-3 font-bold text-xs uppercase tracking-wider" style={{ height: TIMELINE_HEADER_HEIGHT }}>
+                <div className="w-[280px] flex-shrink-0 border-r border-sa-border bg-sa-surface">
+                    <div className="border-b border-sa-border flex items-center px-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground" style={{ height: TIMELINE_HEADER_HEIGHT }}>
                         Projects
                     </div>
                     <ScrollArea className="h-[calc(100%-60px)]">
                         {filteredProjects.map((project) => {
-                            const statusColors = getProjectStatusColors(project.status || "");
                             return (
                                 <div
                                     key={project.id}
-                                    className={cn("flex items-center gap-3 cursor-pointer border-b border-transparent px-3", hoveredItemId === project.id && "bg-muted/50")}
+                                    className={cn("flex items-center gap-3 cursor-pointer border-b border-transparent px-3", hoveredItemId === project.id && "bg-sa-hover")}
                                     style={{ height: PRO_ROW_HEIGHT }}
                                     onClick={() => openProjectTab(project)}
                                     onMouseEnter={() => setHoveredItemId(project.id)}
                                     onMouseLeave={() => setHoveredItemId(null)}
                                 >
-                                    <span className="w-1 h-6 rounded-sm flex-shrink-0" style={{ backgroundColor: statusColors.bg }} />
-                                    <span className="truncate text-sm font-semibold uppercase tracking-wide">{project.name || "Untitled"}</span>
+                                    <TaskStatusIcon status={project.status} />
+                                    <span className="truncate text-[13px] text-foreground">{project.name || "Untitled"}</span>
                                 </div>
                             );
                         })}
@@ -80,19 +80,19 @@ export function MultiProjectProTimelineView() {
                 <div ref={timelineScrollRef} className="flex-1 overflow-auto" onScroll={handleScroll}>
                     <div style={{ width: timelineWidth, minHeight: "100%" }} className="relative">
                         <div
-                            className="absolute w-[1px] bg-red-500 z-[5] pointer-events-none"
+                            className="absolute w-[1px] bg-sa-amber z-[5] pointer-events-none"
                             style={{ left: todayPosition, top: 0, bottom: 0, height: TIMELINE_HEADER_HEIGHT + totalHeight }}
                         >
                             <div
                                 className="absolute -top-0 -left-[5px] w-0 h-0"
-                                style={{ borderLeft: "6px solid transparent", borderRight: "6px solid transparent", borderTop: "8px solid rgb(239 68 68)" }}
+                                style={{ borderLeft: "6px solid transparent", borderRight: "6px solid transparent", borderTop: "8px solid hsl(var(--sa-accent-amber))" }}
                             />
                         </div>
 
                         <div className="sticky top-0 z-10 bg-background border-b" style={{ height: TIMELINE_HEADER_HEIGHT }}>
                             <div className="flex border-b" style={{ height: 30 }}>
                                 {weekMonthGroups.map((g, i) => (
-                                    <div key={i} className="flex items-center px-2 text-xs font-medium border-r bg-muted/50 overflow-hidden whitespace-nowrap" style={{ width: g.weeks * weekWidth }}>
+                                    <div key={i} className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface overflow-hidden whitespace-nowrap" style={{ width: g.weeks * weekWidth }}>
                                         {g.month}
                                     </div>
                                 ))}
@@ -104,7 +104,7 @@ export function MultiProjectProTimelineView() {
                                         title={week.title}
                                         className={cn(
                                             "flex items-center justify-center text-xs overflow-hidden whitespace-nowrap",
-                                            week.isCurrent && "font-bold text-red-500 bg-red-500/5",
+                                            week.isCurrent && "font-bold text-sa-amber-ink bg-sa-amber/5",
                                             week.isMonthEnd ? "border-r border-border" : "border-r border-dashed border-border/50",
                                         )}
                                         style={{ width: weekWidth }}
@@ -119,7 +119,7 @@ export function MultiProjectProTimelineView() {
                             {weeks.map((week, i) => (
                                 <div
                                     key={i}
-                                    className={cn("h-full", week.isCurrent && "bg-red-500/5")}
+                                    className={cn("h-full", week.isCurrent && "bg-sa-amber/5")}
                                     style={{
                                         width: weekWidth,
                                         borderRight: week.isMonthEnd ? "1px solid hsl(var(--border))" : "1px dashed hsl(var(--border) / 0.5)",
@@ -132,7 +132,7 @@ export function MultiProjectProTimelineView() {
                             {filteredProjects.map((project) => (
                                 <div
                                     key={project.id}
-                                    className={cn("relative", hoveredItemId === project.id && "bg-muted/40")}
+                                    className={cn("relative", hoveredItemId === project.id && "bg-sa-hover")}
                                     style={{ height: PRO_ROW_HEIGHT }}
                                     onMouseEnter={() => setHoveredItemId(project.id)}
                                     onMouseLeave={() => setHoveredItemId(null)}
@@ -154,8 +154,8 @@ export function MultiProjectProTimelineView() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-4 py-2 bg-background border-t-2 border-primary/20">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="flex h-9 items-center justify-between px-3 bg-background border-t border-sa-border">
+                <div className="text-[12px] text-muted-foreground">
                     {filteredProjects.length} Project{filteredProjects.length !== 1 ? "s" : ""}
                 </div>
                 <div className="flex items-center gap-2">

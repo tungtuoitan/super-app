@@ -7,7 +7,7 @@ import React, { useRef } from "react";
 import { useDrag, DragSourceMonitor } from "react-dnd";
 import { CornerDownRight, Diamond } from "lucide-react";
 import type { Task } from "@/features/taskDetail";
-import { getTaskPriorityColors } from "@/features/taskDetail";
+import { TaskPriorityIcon, formatCompactDateRange, getDateTone } from "@/shared";
 import { cn } from "@/lib/utils";
 import { KANBAN_TASK } from "@/features/multiProject/utils/multiProjectDetail.constants";
 import type { DragItem } from "@/features/multiProject/types/multiProjectKanban.type";
@@ -20,7 +20,6 @@ interface DraggableTaskCardProps {
 
 export function DraggableTaskCard({ task, onClick, isSubtask = false }: DraggableTaskCardProps) {
     const ref = useRef<HTMLDivElement>(null);
-    const priorityColors = getTaskPriorityColors(task.priority);
 
     const [{ isDragging }, drag] = useDrag<DragItem, void, { isDragging: boolean }>({
         type: KANBAN_TASK,
@@ -36,10 +35,10 @@ export function DraggableTaskCard({ task, onClick, isSubtask = false }: Draggabl
         <div
             ref={ref}
             className={cn(
-                "group bg-card border rounded-md cursor-grab hover:border-primary/50 transition-all",
-                isDragging && "opacity-50 shadow-lg cursor-grabbing",
+                "group rounded-xl border border-sa-border bg-card cursor-grab transition-colors duration-100 hover:border-sa-border-strong",
+                isDragging && "opacity-50 cursor-grabbing",
                 task.deletedAt && "opacity-60",
-                isSubtask ? "p-2 opacity-80 ml-8 border-l-2 border-l-muted-foreground/30" : "p-3"
+                isSubtask ? "ml-3 p-2.5" : "p-3"
             )}
             onClick={onClick}
         >
@@ -47,26 +46,20 @@ export function DraggableTaskCard({ task, onClick, isSubtask = false }: Draggabl
                 {/* Title */}
                 <div className="flex items-center gap-1">
                     {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />}
-                    {task.isMilestone && <Diamond className="h-3 w-3 text-amber-500 fill-amber-500 flex-shrink-0" aria-label="Milestone" />}
-                    <p className={cn("font-medium text-left truncate", isSubtask ? "text-xs" : "text-sm")}>
+                    {task.isMilestone && <Diamond className="h-3 w-3 text-sa-amber fill-sa-amber flex-shrink-0" aria-label="Milestone" />}
+                    <p className={cn("text-left truncate text-foreground", isSubtask ? "text-[12px]" : "text-[13px] font-medium")}>
                         {task.title || "Untitled"}
                     </p>
                 </div>
 
                 {/* Meta row */}
-                <div className="flex items-center gap-2 mt-1">
-                    <span
-                        className={cn("rounded-full flex-shrink-0", isSubtask ? "w-1.5 h-1.5" : "w-2 h-2")}
-                        style={{ backgroundColor: priorityColors.bg }}
-                        title={task.priority}
-                    />
-                    <span className={cn("text-muted-foreground", isSubtask ? "text-[10px]" : "text-xs")}>#{task.id}</span>
-                    {task.endDate && (
-                        <span className={cn("text-muted-foreground ml-auto", isSubtask ? "text-[10px]" : "text-xs")}>
-                            {new Intl.DateTimeFormat("en-US", {
-                                month: "short",
-                                day: "numeric",
-                            }).format(task.endDate)}
+                <div className="flex items-center gap-2 mt-1.5">
+                    <TaskPriorityIcon priority={task.priority} size={12} className="text-muted-foreground" />
+                    <span className="font-mono text-[11px] text-muted-foreground">#{task.id}</span>
+                    {(task.startDate || task.endDate) && (
+                        <span className={cn("ml-auto inline-flex items-center gap-1 text-[11px]", getDateTone(task.endDate, task.status) === "overdue" ? "text-sa-danger" : "text-muted-foreground")}>
+                            {getDateTone(task.endDate, task.status) === "today" && <span className="h-1.5 w-1.5 rounded-full bg-sa-amber" />}
+                            {formatCompactDateRange(task.startDate, task.endDate)}
                         </span>
                     )}
                 </div>

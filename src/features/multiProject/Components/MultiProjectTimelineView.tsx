@@ -61,25 +61,25 @@ export function MultiProjectTimelineView() {
     return (
         <div className="w-full h-full flex flex-col relative" onContextMenu={handleContextMenu}>
             {taskGridIsLoading && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-20">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <div className="absolute inset-0 bg-background/70 flex items-center justify-center z-20">
+                    <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
                 </div>
             )}
             {taskGridError && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-20">
+                <div className="absolute inset-0 bg-background/70 flex items-center justify-center z-20">
                     <Alert variant="destructive" className="max-w-md"><AlertDescription>Failed to load tasks</AlertDescription></Alert>
                 </div>
             )}
 
             <div className="flex-1 overflow-hidden flex">
                 {/* Task List (Left Panel) */}
-                <div className="w-[250px] flex-shrink-0 border-r bg-muted/30">
-                    <div className="border-b bg-muted/50 flex items-center px-3 font-medium text-sm" style={{ height: TIMELINE_HEADER_HEIGHT }}>Tasks</div>
+                <div className="w-[250px] flex-shrink-0 border-r border-sa-border bg-sa-surface">
+                    <div className="border-b border-sa-border flex items-center px-3 text-[11px] font-medium uppercase tracking-wide text-muted-foreground" style={{ height: TIMELINE_HEADER_HEIGHT }}>Tasks</div>
                     <ScrollArea className="h-[calc(100%-60px)]">
                         {filteredTasks.map((task) => {
                             const isSubtask = !!task.parentTaskId;
                             return (
-                                <div key={task.id} className={cn("flex items-center cursor-pointer border-b border-transparent", hoveredItemId === task.id && "bg-muted/50", isSubtask ? "px-2 bg-muted/10" : "px-3")} style={{ height: TIMELINE_ROW_HEIGHT }} onClick={() => openTaskTab(task)} onContextMenu={(e) => showContextMenu(e, MENU_CONTEXT_TYPES.taskTimeline, { taskId: task.id })} onMouseEnter={() => setHoveredItemId(task.id)} onMouseLeave={() => setHoveredItemId(null)}>
+                                <div key={task.id} className={cn("flex items-center cursor-pointer border-b border-transparent", hoveredItemId === task.id && "bg-sa-hover", isSubtask ? "px-2" : "px-3")} style={{ height: TIMELINE_ROW_HEIGHT }} onClick={() => openTaskTab(task)} onContextMenu={(e) => showContextMenu(e, MENU_CONTEXT_TYPES.taskTimeline, { taskId: task.id })} onMouseEnter={() => setHoveredItemId(task.id)} onMouseLeave={() => setHoveredItemId(null)}>
                                     {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground mr-1 flex-shrink-0" />}
                                     <span className={cn("truncate", isSubtask ? "text-xs" : "text-sm")}>{formatTaskLabel(task)}</span>
                                 </div>
@@ -92,17 +92,17 @@ export function MultiProjectTimelineView() {
                 {/* Timeline Grid */}
                 <div ref={timelineScrollRef} className="flex-1 overflow-auto" onScroll={handleScroll}>
                     <div style={{ width: timelineWidth, minHeight: "100%" }} className="relative">
-                        <div className="absolute w-[1px] bg-red-500 z-[5] pointer-events-none" style={{ left: todayPosition, top: 0, bottom: 0, height: TIMELINE_HEADER_HEIGHT + totalHeight }}>
-                            <div className="absolute -top-0 -left-[5px] w-0 h-0" style={{ borderLeft: "6px solid transparent", borderRight: "6px solid transparent", borderTop: "8px solid rgb(239 68 68)" }} />
+                        <div className="absolute w-[1px] bg-sa-amber z-[5] pointer-events-none" style={{ left: todayPosition, top: 0, bottom: 0, height: TIMELINE_HEADER_HEIGHT + totalHeight }}>
+                            <div className="absolute -top-0 -left-[5px] w-0 h-0" style={{ borderLeft: "6px solid transparent", borderRight: "6px solid transparent", borderTop: "8px solid hsl(var(--sa-accent-amber))" }} />
                         </div>
 
                         <div className="sticky top-0 z-10 bg-background border-b" style={{ height: TIMELINE_HEADER_HEIGHT }}>
                             <div className="flex border-b" style={{ height: 30 }}>
-                                {monthGroups.map((g, i) => <div key={i} className="flex items-center px-2 text-xs font-medium border-r bg-muted/50" style={{ width: g.days * dayWidth }}>{g.month}</div>)}
+                                {monthGroups.map((g, i) => <div key={i} className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface" style={{ width: g.days * dayWidth }}>{g.month}</div>)}
                             </div>
                             <div className="flex" style={{ height: 30 }}>
                                 {dates.map((date, i) => (
-                                    <div key={i} className={cn("flex items-center justify-center text-xs", isWeekend(date) && "text-muted-foreground", isToday(date) && "font-bold text-red-500", isFirstDayOfMonth(date) ? "border-r border-border" : "border-r border-dashed border-border/50")} style={{ width: dayWidth, background: isWeekend(date) && !isToday(date) ? WEEKEND_STRIPE_BG : undefined }}>
+                                    <div key={i} className={cn("flex items-center justify-center text-[11px] text-muted-foreground", isToday(date) && "font-semibold text-sa-amber-ink", isFirstDayOfMonth(date) ? "border-r border-border" : "border-r border-dashed border-border/50")} style={{ width: dayWidth, background: isWeekend(date) && !isToday(date) ? WEEKEND_STRIPE_BG : undefined }}>
                                         {formatDateHeader(date)}
                                     </div>
                                 ))}
@@ -119,7 +119,7 @@ export function MultiProjectTimelineView() {
                                 const parentTask = isSubtask ? filteredTasks.find((t) => t.id === task.parentTaskId) || null : null;
                                 const taskProject = projects.find((p) => p.id === task.projectId) || null;
                                 return (
-                                    <div key={task.id} className={cn("relative", hoveredItemId === task.id && "bg-muted/40", isSubtask && "bg-muted/10")} style={{ height: TIMELINE_ROW_HEIGHT }} onMouseEnter={() => setHoveredItemId(task.id)} onMouseLeave={() => setHoveredItemId(null)}>
+                                    <div key={task.id} className={cn("relative", hoveredItemId === task.id && "bg-sa-hover")} style={{ height: TIMELINE_ROW_HEIGHT }} onMouseEnter={() => setHoveredItemId(task.id)} onMouseLeave={() => setHoveredItemId(null)}>
                                         <TaskBar task={task} timelineStart={timelineStart} timelineEnd={timelineEnd} dayWidth={dayWidth} onDateChange={handleTaskDateChange} onTaskClick={openTaskTab} isSubtask={isSubtask} parentTask={parentTask} project={taskProject} allTasks={filteredTasks} onValidationError={(msg) => _console.warning(msg)} />
                                     </div>
                                 );
@@ -131,8 +131,8 @@ export function MultiProjectTimelineView() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-4 py-1 bg-background border-t">
-                <div className="text-sm text-muted-foreground">{filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""} from {projects.length} project{projects.length !== 1 ? "s" : ""}</div>
+            <div className="flex h-9 items-center justify-between px-3 bg-background border-t border-sa-border">
+                <div className="text-[12px] text-muted-foreground">{filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""} from {projects.length} project{projects.length !== 1 ? "s" : ""}</div>
                 <div className="flex items-center gap-2">
                     {!isTodayVisible && (
                         <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="sm" onClick={scrollToToday} className="h-7 px-2 text-xs"><Calendar className="h-3.5 w-3.5 mr-1" />Today</Button></TooltipTrigger><TooltipContent>Go to today</TooltipContent></Tooltip></TooltipProvider>

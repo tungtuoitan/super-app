@@ -24,7 +24,7 @@ import { useGetStandardRegistry, HighlightText, useGlobalShortcut } from "@/shar
 import type { StandardRegistry } from "@/shared";
 import { TaskFlowProcessPopup } from "./TaskFlowProcessPopup";
 
-const HANDLE_BASE = "!rounded-full !border-[1.5px] !border-primary !bg-primary/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150";
+const HANDLE_BASE = "!rounded-full !border-[1.5px] !border-muted-foreground !bg-muted-foreground/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150";
 
 export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNodeData>>) {
     const { editingNodeId, draggingNodeId, flowNodes, flowEdges, connectingSourceId, searchMatchIds, searchActiveIndex, searchQuery } = useMultiTaskFlowStore();
@@ -166,11 +166,11 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
             {/* Node body */}
             <div
                 className={cn(
-                    "relative rounded-xl border shadow-sm transition-shadow duration-150 select-none",
-                    selected ? "shadow-lg ring-1 ring-blue-500/50" : "hover:shadow-md",
-                    isEditing && "ring-2 ring-blue-500",
-                    isActiveMatch && "ring-2 ring-amber-400 shadow-[0_0_10px_2px] shadow-amber-400/40",
-                    isSearchMatch && !isActiveMatch && "ring-2 ring-amber-400/50",
+                    "relative rounded-xl border transition-colors duration-100 select-none",
+                    selected ? "ring-1 ring-sa-amber/70" : "hover:border-sa-border-strong",
+                    isEditing && "ring-2 ring-ring",
+                    isActiveMatch && "ring-2 ring-sa-amber",
+                    isSearchMatch && !isActiveMatch && "ring-2 ring-sa-amber/50",
                     isInProgress && !selected && "taskflow-inprogress",
                     isBgProgress && !selected && "taskflow-bgprogress",
                 )}
@@ -196,7 +196,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
 
                 <div className="px-3 py-3 flex flex-col items-center gap-1.5">
                     {isHighPriority && (
-                        <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-500/50" title={data.task.priority} />
+                        <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-sa-amber" title={data.task.priority} />
                     )}
 
                     {isEditing ? (
@@ -231,7 +231,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
             {/* FigJam-style minibar — absolute below node, counter-scaled to ignore zoom */}
             {selected && !isTempNode && !isDragging && !multiSelected && (
                 <div
-                    className="absolute left-1/2 origin-top flex items-center gap-1 px-1 py-0.5 bg-card/90 border border-border rounded-lg shadow-sm nodrag nopan whitespace-nowrap"
+                    className="absolute left-1/2 origin-top flex items-center gap-1 px-1 py-0.5 bg-popover/95 border border-sa-border rounded-lg nodrag nopan whitespace-nowrap"
                     style={{ top: "100%", marginTop: 6, transform: `translateX(-50%) scale(${1 / zoom})` }}
                 >
                     {/* Status pills from registry */}
@@ -248,7 +248,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                                     "flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] transition-colors",
                                     isActive
                                         ? "bg-primary/15 text-foreground font-semibold"
-                                        : "text-muted-foreground hover:bg-muted",
+                                        : "text-muted-foreground hover:bg-sa-hover-strong",
                                 )}
                             >
                                 <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
@@ -265,7 +265,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                         type="button"
                         onClick={() => openTaskTab(data.task)}
                         title="Open task detail"
-                        className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] text-muted-foreground hover:bg-sa-hover-strong hover:text-foreground transition-colors"
                     >
                         <ExternalLink className="w-2.5 h-2.5" />
                         Detail
@@ -279,7 +279,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                         <button
                             type="button"
                             onClick={() => setProjectPickerOpen((v) => !v)}
-                            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors max-w-[100px]"
+                            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] text-muted-foreground hover:bg-sa-hover-strong hover:text-foreground transition-colors max-w-[100px]"
                             title="Change project"
                         >
                             <span className="truncate">{currentProject?.name ?? "Project"}</span>
@@ -288,7 +288,7 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
 
                         {projectPickerOpen && (
                             <div
-                                className="absolute bottom-full left-0 mb-1 w-44 max-h-52 overflow-y-auto bg-card border border-border rounded-lg shadow-lg py-1 z-50 nowheel"
+                                className="absolute bottom-full left-0 mb-1 w-44 max-h-52 overflow-y-auto sa-shadow-pop bg-popover border border-sa-border-strong rounded-lg py-1 z-50 nowheel"
                                 onWheel={(e) => e.stopPropagation()}
                             >
                                 {allProjects.map((p) => {
@@ -307,13 +307,13 @@ export function TaskFlowNode({ id, data, selected }: NodeProps<Node<TaskFlowNode
                                                     ? "opacity-40 cursor-not-allowed text-muted-foreground"
                                                     : isCurrent
                                                         ? "bg-primary/10 text-foreground font-semibold"
-                                                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                                                        : "text-muted-foreground hover:bg-sa-hover-strong hover:text-foreground",
                                             )}
                                         >
                                             <Circle
                                                 className={cn(
                                                     "w-2 h-2 shrink-0",
-                                                    isActive && !isDeleted ? "fill-emerald-500 text-emerald-500" : "fill-muted-foreground/30 text-muted-foreground/30",
+                                                    isActive && !isDeleted ? "fill-sa-good text-sa-good" : "fill-muted-foreground/30 text-muted-foreground/30",
                                                 )}
                                             />
                                             <span className="truncate">{p.name}</span>

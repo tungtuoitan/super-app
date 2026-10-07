@@ -95,7 +95,7 @@ export function FlowEdgeWithNote({
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [selected, isEditing, edgeLocked, id]);
 
-    const strokeColor = selected ? "hsl(var(--primary))" : isDimmed ? "#6b728040" : "#6b7280cc";
+    const strokeColor = selected ? "hsl(var(--sa-accent-amber))" : isDimmed ? "hsl(var(--muted-foreground) / 0.25)" : "hsl(var(--muted-foreground) / 0.8)";
     const strokeWidth = selected ? 2.2 : 1.8;
 
     // Flow animation: dashes move along the path to indicate direction
@@ -202,7 +202,7 @@ export function FlowEdgeWithNote({
                             type="button"
                             onClick={handleToggleArrow}
                             title={`Direction: ${currentArrow} — click to cycle`}
-                            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-primary text-primary-foreground shadow-lg hover:bg-primary/80 active:scale-95 transition-all border border-primary/30 whitespace-nowrap"
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/80 active:scale-95 transition-all border border-primary/30 whitespace-nowrap"
                         >
                             <span className="text-sm leading-none">{ARROW_SYMBOL[currentArrow]}</span>
                             <span className="opacity-80">{ARROW_LABEL[currentArrow]}</span>
@@ -228,7 +228,7 @@ export function FlowEdgeWithNote({
                                 placeholder="Add note..."
                                 rows={1}
                                 style={editSize ? { width: editSize.width, minHeight: editSize.height } : undefined}
-                                className="max-w-[220px] min-w-[100px] px-2.5 py-1.5 bg-card border-2 border-primary rounded-xl outline-none text-foreground placeholder:text-muted-foreground resize-none overflow-hidden text-xs font-medium shadow-xl"
+                                className="max-w-[220px] min-w-[100px] px-2.5 py-1.5 bg-card border border-sa-amber/70 rounded-xl outline-none text-foreground placeholder:text-muted-foreground resize-none overflow-hidden text-xs font-medium shadow-xl"
                             />
                         ) : (
                             <button
@@ -238,7 +238,7 @@ export function FlowEdgeWithNote({
                                 className={cn(
                                     "flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium text-left whitespace-pre-wrap break-words max-w-[200px] transition-all shadow-md backdrop-blur-sm",
                                     hasNote
-                                        ? "bg-card border-border text-foreground hover:bg-muted"
+                                        ? "bg-card border-border text-foreground hover:bg-sa-hover-strong"
                                         : "bg-card/90 border-dashed border-muted-foreground/60 text-muted-foreground hover:border-primary/60 hover:text-foreground",
                                 )}
                                 title={hasNote ? "Edit note" : "Add note to connection"}

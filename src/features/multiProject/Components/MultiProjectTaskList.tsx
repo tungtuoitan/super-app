@@ -87,13 +87,13 @@ export function MultiProjectTaskList() {
         },
         {
             accessorKey: "id",
-            header: () => <div className="text-left text-sm">ID</div>,
+            header: () => <div className="text-left">ID</div>,
             size: 60,
-            cell: ({ getValue }) => <div className="text-left text-sm px-2">{getValue() as number}</div>,
+            cell: ({ getValue }) => <div className="text-left px-2 font-mono text-[12px] text-muted-foreground/80">#{getValue() as number}</div>,
         },
         {
             accessorKey: "projectId",
-            header: () => <div className="text-left text-sm">Project</div>,
+            header: () => <div className="text-left">Project</div>,
             size: 180,
             cell: ({ row }) => (
                 <ProjectCell
@@ -105,15 +105,15 @@ export function MultiProjectTaskList() {
         },
         {
             accessorKey: "title",
-            header: () => <div className="text-left text-sm">Title</div>,
+            header: () => <div className="text-left">Title</div>,
             size: 250,
             cell: ({ row }) => {
                 const task = row.original;
                 const isSubtask = !!task.parentTaskId;
                 return (
-                    <div className={`text-sm text-primary text-left cursor-pointer hover:text-primary/80 px-2 truncate flex items-center gap-1 ${isSubtask ? "pl-6" : ""}`}>
+                    <div className={`text-[13px] text-foreground text-left cursor-pointer px-2 truncate flex items-center gap-1.5 ${isSubtask ? "pl-6" : ""}`}>
                         {isSubtask && <CornerDownRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />}
-                        {task.isMilestone && <Diamond className="h-3 w-3 text-amber-500 fill-amber-500 flex-shrink-0" aria-label="Milestone" />}
+                        {task.isMilestone && <Diamond className="h-3 w-3 text-sa-amber fill-sa-amber flex-shrink-0" aria-label="Milestone" />}
                         <span className="truncate">{task.title || "—"}</span>
                     </div>
                 );
@@ -121,19 +121,19 @@ export function MultiProjectTaskList() {
         },
         {
             accessorKey: "status",
-            header: () => <div className="text-left text-sm">Status</div>,
+            header: () => <div className="text-left">Status</div>,
             size: 120,
             cell: ({ row }) => <StatusCell task={row.original} statusOptions={statusOptions} onUpdate={handleInlineUpdate} />,
         },
         {
             accessorKey: "priority",
-            header: () => <div className="text-left text-sm">Priority</div>,
+            header: () => <div className="text-left">Priority</div>,
             size: 120,
             cell: ({ row }) => <PriorityCell task={row.original} priorityOptions={priorityOptions} onUpdate={handleInlineUpdate} />,
         },
         {
             id: "dateRange",
-            header: () => <div className="text-left text-sm">Date Range</div>,
+            header: () => <div className="text-left">Date range</div>,
             size: 200,
             cell: ({ row }) => (
                 <DateRangeCell
@@ -168,8 +168,8 @@ export function MultiProjectTaskList() {
         <div ref={taskContainerRef} className="w-full h-full bg-background flex flex-col relative">
             {/* Loading Overlay */}
             {taskGridIsLoading && (
-                <div className="absolute inset-0 bg-background backdrop-blur-sm flex items-center justify-center z-10">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <div className="absolute inset-0 bg-background/70 flex items-center justify-center z-10">
+                    <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
                 </div>
             )}
 
@@ -184,7 +184,7 @@ export function MultiProjectTaskList() {
 
             {/* Table */}
             <div
-                className="flex-1 overflow-auto rounded-md border"
+                className="flex-1 overflow-auto"
                 onContextMenu={(e) => {
                     const target = e.target as HTMLElement;
                     const isClickedOnRow = target.closest("tr[data-row]");
@@ -194,13 +194,13 @@ export function MultiProjectTaskList() {
                 }}
             >
                 <table className="w-full" style={{ tableLayout: "fixed" }}>
-                    <thead className="bg-muted/50 sticky top-0 z-10">
+                    <thead className="bg-background sticky top-0 z-10">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id} className="border-b">
+                            <tr key={headerGroup.id} className="border-b border-sa-border">
                                 {headerGroup.headers.map((header) => (
                                     <th
                                         key={header.id}
-                                        className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground"
+                                        className="h-8 px-1 text-left align-middle text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
                                         style={{ width: header.getSize() }}
                                     >
                                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -239,8 +239,8 @@ export function MultiProjectTaskList() {
             <MakeIndependentDropZone onDrop={handleMakeIndependent} showError={showDropError} />
 
             {/* Footer with count */}
-            <div className="flex items-center px-4 py-1 bg-background border-t">
-                <div className="text-sm text-muted-foreground">
+            <div className="flex h-9 items-center px-3 bg-background border-t border-sa-border">
+                <div className="text-[12px] text-muted-foreground">
                     {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""} from {projects.length} project
                     {projects.length !== 1 ? "s" : ""}
                 </div>

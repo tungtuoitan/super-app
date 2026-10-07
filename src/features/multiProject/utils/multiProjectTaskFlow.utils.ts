@@ -59,18 +59,9 @@ export function getStatusBorderColor(status: string): string {
     return (colors ?? projectConstants.optionColor.taskStatus.default).bg;
 }
 
-/** Very muted background for node body based on status */
+/** Very muted background for node body based on status — ~10% tint of the shared status colour (#1514) */
 export function getStatusNodeBackground(status: string): string {
-    const map: Record<string, string> = {
-        open:                "rgba(31, 111, 67, 0.10)",
-        in_progress:         "rgba(252, 204, 62, 0.12)",
-        background_progress: "rgba(180, 130, 50, 0.12)",
-        paused:              "rgba(87, 87, 87, 0.09)",
-        completed:           "rgba(111, 66, 193, 0.10)",
-        on_hold:             "rgba(71, 83, 99, 0.09)",
-        cancelled:           "rgba(166, 54, 54, 0.09)",
-    };
-    return map[status] ?? "rgba(75, 85, 99, 0.08)";
+    return `${getStatusBorderColor(status)}1a`;
 }
 
 export function getPriorityStyle(priority: string): { bg: string; text: string } {
