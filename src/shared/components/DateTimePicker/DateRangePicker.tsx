@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from "react";
-import { format, isToday, isTomorrow, isSameWeek, addWeeks, isSameYear, startOfWeek, endOfWeek, isBefore, isAfter, startOfDay, isSameDay, differenceInDays } from "date-fns";
+import { format, isToday, isBefore, isAfter, startOfDay, isSameDay } from "date-fns";
 import { Calendar as CalendarIcon, Clock, X, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared";
@@ -14,65 +14,13 @@ import { Calendar } from "@/shared";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared";
 import { Label } from "@/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
+import { formatCompactDateRange } from "@/shared";
+import type { DateTone } from "@/shared";
 import "./dateTimePicker.css";
 import type { Matcher, DateRange } from "react-day-picker";
-
-/**
- * Date warning result for limit checking
- */
-interface DateWarningResult {
-    hasWarning: boolean;
-    warningMessage: string | null;
-    taskDurationDays: number | null;
-}
-
-/**
- * Check if dates exceed limits
- */
-function checkDateWarning(
-    startDate: Date | null | undefined,
-    endDate: Date | null | undefined,
-    limitStartDate: Date | null | undefined,
-    limitEndDate: Date | null | undefined
-): DateWarningResult {
-    const result: DateWarningResult = {
-        hasWarning: false,
-        warningMessage: null,
-        taskDurationDays: null,
-    };
-
-    // Calculate duration
-    if (startDate && endDate) {
-        result.taskDurationDays = differenceInDays(endDate, startDate) + 1;
-    }
-
-    const issues: string[] = [];
-
-    if (limitStartDate && startDate && startDate < limitStartDate) {
-        issues.push("starts before limit");
-    }
-    if (limitEndDate && endDate && endDate > limitEndDate) {
-        issues.push("ends after limit");
-    }
-
-    if (issues.length > 0) {
-        result.hasWarning = true;
-        result.warningMessage = `Date ${issues.join(" and ")}`;
-    }
-
-    return result;
-}
-
-/**
- * Format task duration for display
- */
-function formatTaskDuration(days: number | null): string {
-    if (days === null) return "No dates set";
-    if (days === 1) return "1 day";
-    return `${days} days`;
-}
-
-type SelectionMode = "start" | "end";
+import type { SelectionMode } from "./dateRangePicker.type";
+import { checkDateWarning, formatTaskDuration, formatSmartDate } from "./dateRangePicker.utils";
+import { QUICK_DATE_OPTIONS } from "./dateRangePicker.constants";
 
 export interface DateRangePickerProps {
     startDate: Date | null | undefined;
@@ -91,73 +39,12 @@ export interface DateRangePickerProps {
     limitStartDate?: Date | null;
     /** Limit end date to highlight as visual reference (project/parent end) */
     limitEndDate?: Date | null;
+    /** Compact trigger for dense lists: "07–08 Oct" text, no icon/arrows (#1514) */
+    compact?: boolean;
+    /** Tone of the compact label (overdue → red, today → amber dot) */
+    compactTone?: DateTone;
 }
 
-/**
- * Format date to smart relative display (same as DateTimePicker)
- */
-function formatSmartDate(date: Date, hasTime: boolean): string {
-    const now = new Date();
-    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-    let dateStr = "";
-
-    if (isToday(date)) {
-        dateStr = "Today";
-    } else if (isTomorrow(date)) {
-        dateStr = "Tomorrow";
-    } else if (isSameWeek(date, now, { weekStartsOn: 1 })) {
-        dateStr = dayNames[date.getDay()];
-    } else {
-        const nextWeekStart = startOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
-        const nextWeekEnd = endOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
-
-        if (date >= nextWeekStart && date <= nextWeekEnd) {
-            dateStr = `Next ${dayNames[date.getDay()]}`;
-        } else if (isSameYear(date, now)) {
-            dateStr = `${date.getDate()}/${date.getMonth() + 1}`;
-        } else {
-            dateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-        }
-    }
-
-    if (hasTime) {
-        const timeStr = format(date, "H:mm");
-        dateStr = `${dateStr}, ${timeStr}`;
-    }
-
-    return dateStr;
-}
-
-// Quick date options for single date selection
-const QUICK_DATE_OPTIONS = [
-    { label: "Today", getValue: () => new Date() },
-    { label: "Tomorrow", getValue: () => {
-        const d = new Date();
-        d.setDate(d.getDate() + 1);
-        return d;
-    }},
-    { label: "In 3 days", getValue: () => {
-        const d = new Date();
-        d.setDate(d.getDate() + 3);
-        return d;
-    }},
-    { label: "In 1 week", getValue: () => {
-        const d = new Date();
-        d.setDate(d.getDate() + 7);
-        return d;
-    }},
-    { label: "In 2 weeks", getValue: () => {
-        const d = new Date();
-        d.setDate(d.getDate() + 14);
-        return d;
-    }},
-    { label: "In 1 month", getValue: () => {
-        const d = new Date();
-        d.setMonth(d.getMonth() + 1);
-        return d;
-    }},
-];
 
 export function DateRangePicker({
     startDate,
@@ -174,6 +61,8 @@ export function DateRangePicker({
     disabledReason,
     limitStartDate,
     limitEndDate,
+    compact = false,
+    compactTone = "normal",
 }: DateRangePickerProps) {
     const [open, setOpenState] = useState(false);
     const [selectionMode, setSelectionMode] = useState<SelectionMode>("start");
@@ -183,9 +72,7 @@ export function DateRangePicker({
 
     // Debug wrapper for setOpen
     const setOpen = (value: boolean) => {
-        // console.log("[DateRangePicker] setOpen called:", value, "keepOpenRef:", keepOpenRef.current);
         if (!value && keepOpenRef.current) {
-            // console.log("[DateRangePicker] Blocked close due to keepOpenRef");
             return; // Block close if we're in the middle of selecting
         }
         setOpenState(value);
@@ -263,7 +150,6 @@ export function DateRangePicker({
     // Handle single date selection from calendar - we control the logic
     // Popup stays open, only closes when user clicks outside
     const handleDateSelect = (date: Date | undefined) => {
-        // console.log("[DateRangePicker] handleDateSelect called:", date);
         if (!date) return;
 
         // Keep popup open during selection
@@ -494,7 +380,6 @@ export function DateRangePicker({
             <Popover
                 open={open}
                 onOpenChange={(newOpen) => {
-                    // console.log("[DateRangePicker] Popover onOpenChange:", newOpen, "keepOpenRef:", keepOpenRef.current);
                     if (newOpen) {
                         setOpen(true);
                     } else if (!keepOpenRef.current) {
@@ -508,6 +393,20 @@ export function DateRangePicker({
                         <TooltipTrigger asChild>
                             <span className="w-full">
                                 <PopoverTrigger asChild>
+                                    {compact ? (
+                                    <Button
+                                        variant="ghost"
+                                        disabled={isConstraintDisabled}
+                                        onClick={handleButtonClick}
+                                        className={cn("group/date w-full justify-end gap-1.5 h-7 px-1.5 text-[13px] font-normal tabular-nums", compactTone === "overdue" ? "text-sa-danger" : "text-muted-foreground")}
+                                    >
+                                        {compactTone === "today" && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-sa-amber" />}
+                                        <span className="truncate">{formatCompactDateRange(startDate, endDate) || placeholder}</span>
+                                        {(startDate || endDate) && !isConstraintDisabled && (
+                                            <X className="h-3 w-3 shrink-0 opacity-0 group-hover/date:opacity-60 hover:!opacity-100" onClick={handleClear} />
+                                        )}
+                                    </Button>
+                                    ) : (
                                     <Button
                                         variant="outline"
                                         disabled={isConstraintDisabled}
@@ -580,6 +479,7 @@ export function DateRangePicker({
                                             />
                                         )}
                                     </Button>
+                                    )}
                                 </PopoverTrigger>
                             </span>
                         </TooltipTrigger>
@@ -595,27 +495,21 @@ export function DateRangePicker({
                     className="w-auto p-0"
                     align="start"
                     onCloseAutoFocus={(e) => {
-                        // console.log("[DateRangePicker] onCloseAutoFocus");
                         e.preventDefault();
                     }}
                     onOpenAutoFocus={(e) => {
-                        // console.log("[DateRangePicker] onOpenAutoFocus");
                         e.preventDefault();
                     }}
                     onFocusOutside={(e) => {
-                        // console.log("[DateRangePicker] onFocusOutside", e);
                         e.preventDefault();
                     }}
                     onPointerDownOutside={(e) => {
-                        // console.log("[DateRangePicker] onPointerDownOutside", e);
                         setOpen(false);
                     }}
                     onInteractOutside={(e) => {
-                        // console.log("[DateRangePicker] onInteractOutside", e);
                         e.preventDefault();
                     }}
                     onEscapeKeyDown={() => {
-                        // console.log("[DateRangePicker] onEscapeKeyDown");
                         setOpen(false);
                     }}
                 >
