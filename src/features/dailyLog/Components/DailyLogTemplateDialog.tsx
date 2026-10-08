@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { X, Trash2, Plus, GripVertical } from "lucide-react";
+import { ShadcnButton } from "@/shared";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import type { DragSourceMonitor, DropTargetMonitor } from "react-dnd";
@@ -59,12 +60,12 @@ function FieldRow({ field, draftIdx, visibleIdx, onPatch, onDelete, onMove }: Fi
 
     preview(drop(ref));
 
-    const rowInput = "w-full bg-transparent text-sm border-0 border-b border-transparent hover:border-border focus:border-primary/60 focus:outline-none focus:ring-0 px-0 py-1 transition-colors";
+    const rowInput = "w-full bg-transparent text-sm border-0 border-b border-transparent hover:border-sa-border-strong focus:border-sa-amber/60 focus:outline-none focus:ring-0 px-0 py-1 transition-colors duration-100";
 
     return (
         <li
             ref={ref}
-            className={`group py-2 transition-colors ${isDragging ? "opacity-40" : ""} ${isOver ? "bg-primary/5 rounded" : ""}`}
+            className={`group py-2 transition-colors ${isDragging ? "opacity-40" : ""} ${isOver ? "bg-sa-amber/5 rounded-md" : ""}`}
         >
             <div className="flex items-center gap-2">
                 <span
@@ -90,7 +91,7 @@ function FieldRow({ field, draftIdx, visibleIdx, onPatch, onDelete, onMove }: Fi
                         }
                         onPatch(draftIdx, patch);
                     }}
-                    className="bg-background text-xs text-muted-foreground/80 border border-border/60 rounded focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer hover:text-foreground py-1 px-1.5 shrink-0"
+                    className="bg-background text-[13px] text-muted-foreground border border-sa-border-strong rounded-md focus:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer hover:text-foreground py-1 px-1.5 shrink-0"
                 >
                     {dailyLogConstants.fieldTypes.map((t) => (
                         <option key={t} value={t} className="bg-background text-foreground">
@@ -106,7 +107,7 @@ function FieldRow({ field, draftIdx, visibleIdx, onPatch, onDelete, onMove }: Fi
                         value={field.groupOrder ?? ""}
                         onChange={(e) => onPatch(draftIdx, { groupOrder: e.target.value === "" ? null : Number(e.target.value) })}
                         placeholder="—"
-                        className="w-8 bg-transparent border-0 border-b border-transparent hover:border-border focus:border-primary/60 focus:outline-none focus:ring-0 px-0 py-0 text-center text-[11px] transition-colors"
+                        className="w-8 bg-transparent border-0 border-b border-transparent hover:border-sa-border-strong focus:border-sa-amber/60 focus:outline-none focus:ring-0 px-0 py-0 text-center text-[11px] font-mono transition-colors duration-100"
                         title="Group order"
                     />
                 </span>
@@ -118,19 +119,19 @@ function FieldRow({ field, draftIdx, visibleIdx, onPatch, onDelete, onMove }: Fi
                         value={field.lineOrder ?? ""}
                         onChange={(e) => onPatch(draftIdx, { lineOrder: e.target.value === "" ? null : Number(e.target.value) })}
                         placeholder="—"
-                        className="w-8 bg-transparent border-0 border-b border-transparent hover:border-border focus:border-primary/60 focus:outline-none focus:ring-0 px-0 py-0 text-center text-[11px] transition-colors"
+                        className="w-8 bg-transparent border-0 border-b border-transparent hover:border-sa-border-strong focus:border-sa-amber/60 focus:outline-none focus:ring-0 px-0 py-0 text-center text-[11px] font-mono transition-colors duration-100"
                         title="Line order"
                     />
                 </span>
                 <button
                     onClick={() => onDelete(draftIdx)}
-                    className="p-1 rounded opacity-0 group-hover:opacity-100 text-muted-foreground/50 hover:text-destructive transition-opacity shrink-0"
+                    className="p-1 rounded-md opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-sa-danger hover:bg-sa-hover transition-opacity duration-100 shrink-0"
                 >
                     <Trash2 className="w-3.5 h-3.5" />
                 </button>
             </div>
             {field.fieldType === "range" && (
-                <div className="flex items-center gap-4 pl-5 pt-1 text-xs text-muted-foreground/70">
+                <div className="flex items-center gap-4 pl-5 pt-1 text-[13px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1.5">
                         <span>min</span>
                         <input
@@ -186,10 +187,10 @@ function TrashZone({ section, onDrop }: TrashZoneProps) {
     return (
         <div
             ref={ref}
-            className={`mt-1 flex items-center justify-center gap-1.5 rounded border border-dashed px-2 py-1.5 text-[11px] transition-colors ${
+            className={`mt-1 flex items-center justify-center gap-1.5 rounded-lg border border-dashed px-2 py-1.5 text-[13px] transition-colors duration-100 ${
                 isOver
-                    ? "border-destructive bg-destructive/10 text-destructive"
-                    : "border-border/40 text-muted-foreground/30"
+                    ? "border-sa-danger/50 bg-sa-danger/10 text-sa-danger"
+                    : "border-sa-border text-muted-foreground/50"
             }`}
         >
             <Trash2 className="w-3 h-3" />
@@ -206,7 +207,7 @@ function PreviewField({ field }: { field: DraftField }) {
     if (field.fieldType === "checkbox") {
         return (
             <div className="flex items-center gap-2 py-1">
-                <input type="checkbox" disabled className="accent-primary w-3.5 h-3.5 shrink-0" />
+                <input type="checkbox" disabled className="accent-sa-amber w-3.5 h-3.5 shrink-0" />
                 <span className="text-sm text-foreground/85">{field.label}</span>
             </div>
         );
@@ -226,10 +227,10 @@ function PreviewField({ field }: { field: DraftField }) {
             )}
             {field.fieldType === "range" && (
                 <div className="flex items-center gap-3 py-1">
-                    <input type="range" disabled min={field.rangeMin ?? 0} max={field.rangeMax ?? 10} defaultValue={field.rangeMin ?? 0} className="flex-1 accent-primary h-1" />
-                    <div className="min-w-[3rem] text-right text-xs">
+                    <input type="range" disabled min={field.rangeMin ?? 0} max={field.rangeMax ?? 10} defaultValue={field.rangeMin ?? 0} className="flex-1 accent-sa-amber h-1" />
+                    <div className="min-w-[3rem] text-right text-[13px] font-mono">
                         <span className="font-medium text-foreground">{field.rangeMin ?? 0}</span>
-                        <span className="text-muted-foreground/50 ml-1">/{field.rangeMax ?? 10}</span>
+                        <span className="text-muted-foreground ml-1">/{field.rangeMax ?? 10}</span>
                     </div>
                 </div>
             )}
@@ -278,7 +279,7 @@ function PreviewSection({ fields }: { fields: DraftField[] }) {
                 return (
                     <div key={String(gKey)}>
                         {groupLabel && (
-                            <div className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/50 mb-2">{groupLabel}</div>
+                            <div className="text-[13px] font-medium text-muted-foreground mb-2">{groupLabel}</div>
                         )}
                         <div className="space-y-4">
                             {sortedLines.map(([lKey, lineFields]) => {
@@ -409,15 +410,15 @@ function DialogContent({ onClose }: DailyLogTemplateDialogProps) {
     return (
         <div className="fixed inset-0 z-[10010] flex items-center justify-center" onClick={onClose}>
             {/* Backdrop — dark enough to clearly separate dialog from app */}
-            <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
+            <div className="absolute inset-0 bg-background/80" />
             <div
-                className="relative bg-[#1c1c1e] border border-white/12 ring-1 ring-white/6 rounded-xl shadow-[0_32px_80px_rgba(0,0,0,0.8)] w-[96vw] h-[94vh] flex flex-col"
+                className="relative bg-popover border border-sa-border-strong rounded-xl sa-shadow-pop w-[96vw] h-[94vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 pt-5 pb-3 shrink-0">
-                    <h3 className="text-sm font-semibold tracking-tight">Form template</h3>
-                    <button onClick={onClose} className="p-1 hover:bg-muted rounded text-muted-foreground/70 hover:text-foreground">
+                    <h3 className="text-sm font-medium text-foreground">Form template</h3>
+                    <button onClick={onClose} className="p-1 rounded-md text-muted-foreground hover:bg-sa-hover hover:text-foreground transition-colors duration-100">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
@@ -425,18 +426,18 @@ function DialogContent({ onClose }: DailyLogTemplateDialogProps) {
                 {/* Body — 2 columns */}
                 <div className="flex flex-1 min-h-0 overflow-hidden">
                     {/* Left: Editor */}
-                    <div className="w-80 shrink-0 overflow-y-auto px-4 pb-4 space-y-5 border-r border-border/40">
+                    <div className="w-80 shrink-0 overflow-y-auto px-4 pb-4 space-y-5 border-r border-sa-border">
                         {dailyLogConstants.sections.map((section) => {
                             const visible = getVisible(section);
                             return (
                                 <div key={section}>
                                     <div className="flex items-center justify-between mb-1.5">
-                                        <h4 className="text-[10px] uppercase font-semibold tracking-[0.12em] text-muted-foreground/70">
+                                        <h4 className="text-[11px] uppercase font-medium tracking-wide text-muted-foreground">
                                             {dailyLogConstants.sectionLabels[section]}
                                         </h4>
                                         <button
                                             onClick={() => addField(section)}
-                                            className="text-[11px] flex items-center gap-1 px-1.5 py-0.5 hover:bg-muted rounded text-muted-foreground/70 hover:text-foreground transition-colors"
+                                            className="text-[13px] flex items-center gap-1 px-1.5 h-6 hover:bg-sa-hover rounded-md text-muted-foreground hover:text-foreground transition-colors duration-100"
                                         >
                                             <Plus className="w-3 h-3" /> Add
                                         </button>
@@ -473,13 +474,13 @@ function DialogContent({ onClose }: DailyLogTemplateDialogProps) {
                                 return (
                                     <div
                                         key={section}
-                                        className={`min-h-0 overflow-y-auto px-6 py-4 text-left ${i === 0 ? "border-r border-border/40" : ""}`}
+                                        className={`min-h-0 overflow-y-auto px-6 py-4 text-left ${i === 0 ? "border-r border-sa-border" : ""}`}
                                     >
-                                        <h3 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70 mb-4">
+                                        <h3 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-4">
                                             {dailyLogConstants.sectionLabels[section]}
                                         </h3>
                         {visible.length === 0 ? (
-                                            <div className="text-xs italic text-muted-foreground/50">No fields</div>
+                                            <div className="text-[13px] text-muted-foreground/70">No fields</div>
                                         ) : (
                                             <PreviewSection fields={visible.map(x => x.d)} />
                                         )}
@@ -491,15 +492,11 @@ function DialogContent({ onClose }: DailyLogTemplateDialogProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-3 flex items-center justify-end gap-1 border-t border-border/40 shrink-0">
-                    <button onClick={onClose} className="text-xs px-3 py-1.5 rounded hover:bg-muted text-muted-foreground/80 hover:text-foreground transition-colors">Cancel</button>
-                    <button
-                        onClick={save}
-                        disabled={isSaving}
-                        className="text-xs px-3 py-1.5 rounded bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-                    >
+                <div className="px-6 py-3 flex items-center justify-end gap-2 border-t border-sa-border shrink-0">
+                    <ShadcnButton variant="ghost" size="sm" onClick={onClose}>Cancel</ShadcnButton>
+                    <ShadcnButton size="sm" onClick={save} disabled={isSaving}>
                         {isSaving ? "Saving…" : "Save"}
-                    </button>
+                    </ShadcnButton>
                 </div>
             </div>
         </div>
