@@ -76,7 +76,7 @@ export const noteModule: ModuleDefinition = {
 
     getTabMeta: (tab) => ({
         icon: getNoteTabIcon(tab),
-        color: (tab.data0 as Note | undefined)?.color ?? "#60a5fa",
+        color: (tab.data0 as Note | undefined)?.color ?? "hsl(var(--muted-foreground))",
     }),
 
     filterViewKey: "noteGrid",

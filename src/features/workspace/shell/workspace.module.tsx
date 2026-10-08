@@ -25,8 +25,8 @@ import {
 const MovingTabAdapter = () => <MovingTab />;
 
 const TAB_COLORS: Record<string, string> = {
-    [shellConstants.vscode.tab.tabTypes.workspace]: "#a78bfa",
-    [shellConstants.vscode.tab.tabTypes.trackingGraph]: "#22c55e",
+    [shellConstants.vscode.tab.tabTypes.workspace]: "hsl(var(--muted-foreground))",
+    [shellConstants.vscode.tab.tabTypes.trackingGraph]: "hsl(var(--sa-good))",
 };
 
 const _transformWs = (dto: WsDTO): Ws => ({
@@ -134,7 +134,7 @@ export const workspaceModule: ModuleDefinition = {
     },
 
     getTabMeta: (tab) => {
-        const color = TAB_COLORS[tab.type] ?? "#9ca3af";
+        const color = TAB_COLORS[tab.type] ?? "hsl(var(--muted-foreground))";
         const Icon = tab.type === shellConstants.vscode.tab.tabTypes.trackingGraph ? BarChart3 : Box;
         return { icon: <Icon className="w-4 h-4" style={{ color }} />, color };
     },

@@ -6,7 +6,7 @@ import type { BaseTab } from "@/shell";
 import WikiGraphView from "../Components/WikiGraphView/WikiGraphView";
 import WikiInfoPanel from "../Components/WikiInfoPanel/WikiInfoPanel";
 
-const WIKI_COLOR = "#8b5cf6";
+const WIKI_COLOR = "hsl(var(--muted-foreground))";
 
 const WikiInfoPanelAdapter = ({ tab }: { tab: BaseTab }) => (
     <WikiInfoPanel tab={tab} />
