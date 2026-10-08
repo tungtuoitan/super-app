@@ -15,14 +15,14 @@ import { TaskCustomTab } from "./TaskCustomTab";
 import { CommentFilterDropdown } from "./small/CommentFilterDropdown";
 import { CustomTabButton } from "./small/CustomTabButton";
 import { useTaskSectionHeadless } from "../hooks/taskSection/useTaskSection.headless";
-import { RichTextEditor } from "@/shared";
-import { BUILTIN_TABS, TAB_COLORS } from "../task.constants";
+import { RichTextEditor, ShadcnButton } from "@/shared";
+import { BUILTIN_TABS } from "../task.constants";
 import {TaskProcessProvider} from "../store/useTaskProcess.store";
 import {TaskCommentProvider} from "../store/useTaskComment.store";
 
 function  NewTaskPlaceholder() {
   return (
-    <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
+    <div className="flex h-[200px] items-center justify-center text-[13px] text-muted-foreground">
       Save the task first (Ctrl+S) to use this section.
     </div>
   );
@@ -40,10 +40,10 @@ function SectionNameList({ activeKey, onTabClick } : {activeKey: string, onTabCl
             key={tab.key}
             onClick={() => onTabClick(tab.key)}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
+              "flex h-7 items-center gap-1.5 rounded-md px-2 text-[13px] font-medium transition-colors duration-100",
               isActive
-                ? TAB_COLORS[tab.key].active
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "bg-sa-hover-strong text-foreground"
+                : "text-muted-foreground hover:bg-sa-hover hover:text-foreground"
             )}
           >
             <Icon className="h-3.5 w-3.5" />
@@ -64,20 +64,14 @@ function SaveAndDiscard({
 
 }) {
   return (
-    <div className="absolute right-0 flex items-center gap-1.5 pr-1 shrink-0 py-1 bg-background">
-      <button
-        onClick={onSave}
-        className="flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-      >
-        <Save className="h-3 w-3" /> Save
-      </button>
+    <div className="absolute right-0 flex shrink-0 items-center gap-1 bg-background pl-2">
+      <ShadcnButton size="sm" onClick={onSave} className="[&_svg]:size-3.5">
+        <Save /> Save
+      </ShadcnButton>
 
-      <button
-        onClick={onDiscard}
-        className="flex items-center gap-1 text-xs px-2 py-1 rounded hover:bg-muted transition-colors text-muted-foreground"
-      >
-        <X className="h-3 w-3" /> Discard
-      </button>
+      <ShadcnButton size="sm" variant="ghost" onClick={onDiscard} className="text-muted-foreground [&_svg]:size-3.5">
+        <X /> Discard
+      </ShadcnButton>
     </div>
   );
 }
@@ -100,8 +94,8 @@ export function TaskDetailSection() {
         <div className="flex flex-col h-full">
 
             {/* ── Tab Bar ── */}
-            <div className="flex items-start shrink-0 gap-1 relative">
-                <div className="flex flex-wrap items-center min-w-0 flex-1">
+            <div className="relative flex shrink-0 items-start gap-1 pb-2">
+                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
                     <SectionNameList
                         activeKey={activeSection}
                         onTabClick={handleTabClick}
@@ -113,7 +107,7 @@ export function TaskDetailSection() {
                     {!isDisabled && !isNewTask && (
                         <button
                             onClick={handleAddCustomTab}
-                            className="flex items-center gap-1 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors duration-100 hover:bg-sa-hover hover:text-foreground"
                             title="Add custom tab"
                         >
                             <Plus className="h-3.5 w-3.5" />
@@ -130,7 +124,7 @@ export function TaskDetailSection() {
                 )}
 
                 {activeSection === "comment" && !isSectionDirty && (
-                    <div className="shrink-0 py-1">
+                    <div className="flex h-7 shrink-0 items-center">
                         <CommentFilterDropdown
                             value={commentFilter}
                             onChange={setCommentFilter}
@@ -153,8 +147,8 @@ export function TaskDetailSection() {
                         {isNewTask ? <NewTaskPlaceholder /> : <TaskChecklist />}
                     </div>
                 </TaskChecklistProvider>
-                <div className={cn("h-full pt-2.5", activeSection !== "desc" && "hidden")}>
-                    <div className="h-full overflow-y-auto border rounded-md">
+                <div className={cn("h-full", activeSection !== "desc" && "hidden")}>
+                    <div className="h-full overflow-y-auto rounded-xl border border-sa-border">
                         <RichTextEditor
                             key={`note-${descKey}`}
                             value={descContent}
@@ -170,7 +164,7 @@ export function TaskDetailSection() {
                     </div>
                 </div>
                 <TaskCommentProvider>
-                    <div className={cn("h-full mt-2.5 border-t pt-4", activeSection !== "comment" && "hidden")}>
+                    <div className={cn("h-full pt-1", activeSection !== "comment" && "hidden")}>
                         {isNewTask ? <NewTaskPlaceholder /> : <TaskComment />}
                     </div>
                 </TaskCommentProvider>
