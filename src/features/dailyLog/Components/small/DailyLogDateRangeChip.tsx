@@ -33,10 +33,10 @@ export function DailyLogDateRangeChip() {
                         key={p.key}
                         onClick={() => range && setDateRange(range)}
                         className={
-                            "text-[11px] px-2.5 py-1 rounded-full border transition-colors shrink-0 " +
+                            "text-[13px] px-2.5 h-7 rounded-md border transition-colors duration-100 shrink-0 " +
                             (active
-                                ? "bg-primary text-primary-foreground border-primary"
-                                : "bg-transparent text-muted-foreground border-border hover:bg-muted")
+                                ? "bg-sa-surface-2 text-foreground border-sa-border-strong"
+                                : "bg-transparent text-muted-foreground border-sa-border hover:bg-sa-hover hover:text-foreground")
                         }
                     >
                         {p.label}

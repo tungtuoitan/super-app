@@ -76,11 +76,11 @@ export function DailyLogEditorPanel() {
         <div className="w-full h-full flex flex-col overflow-hidden bg-background">
             <div className="flex items-center justify-between px-6 pt-5 pb-3">
                 <div className="flex items-center gap-2">
-                    <div className="text-base font-semibold text-foreground tracking-tight">
+                    <div className="text-lg font-medium text-foreground">
                         {displayHeader(selectedDate)}
                     </div>
                     {readOnly && (
-                        <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground/70">
+                        <span className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md border border-sa-border-strong text-muted-foreground">
                             <Lock className="w-3 h-3" /> read-only
                         </span>
                     )}
@@ -94,10 +94,10 @@ export function DailyLogEditorPanel() {
                             }}
                             disabled={!isDirty || isSaving}
                             className={
-                                "text-[11px] px-3 py-1 rounded-md transition-colors " +
+                                "text-[13px] px-3 h-7 rounded-lg transition-colors duration-100 " +
                                 (isDirty && !isSaving
-                                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                                    : "text-muted-foreground/50 cursor-default")
+                                    ? "bg-sa-amber text-sa-on-amber hover:bg-sa-amber/90"
+                                    : "text-muted-foreground cursor-default")
                             }
                         >
                             {isSaving ? "Saving…" : isDirty ? "Save" : "Saved"}
@@ -113,7 +113,7 @@ export function DailyLogEditorPanel() {
                             key={section}
                             className={
                                 "min-h-0 overflow-y-auto px-6 py-4 " +
-                                (i === 0 ? "border-r border-border/40" : "")
+                                (i === 0 ? "border-r border-sa-border" : "")
                             }
                         >
                             <DailyLogSection

@@ -29,23 +29,23 @@ export function DailyLogHistoryDialog({ field, onClose }: DailyLogHistoryDialogP
     }, [field.id]);
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-card rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="fixed inset-0 z-50 bg-background/70 flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-popover border border-sa-border rounded-xl sa-shadow-pop w-full max-w-2xl max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between px-4 py-3 border-b border-sa-border">
                     <div>
-                        <h3 className="text-sm font-semibold">{field.label} · history</h3>
+                        <h3 className="text-sm font-medium text-foreground">{field.label} · history</h3>
                         <p className="text-[11px] text-muted-foreground">
                             {dailyLogConstants.sectionLabels[field.section]} · last {dailyLogConstants.historyDefaultDays} days
                         </p>
                     </div>
-                    <button onClick={onClose} className="p-1 hover:bg-muted rounded">
+                    <button onClick={onClose} className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors duration-100">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
                 <div className="flex-1 overflow-y-auto p-4">
-                    {isLoading && <div className="text-xs text-muted-foreground">Loading…</div>}
+                    {isLoading && <div className="text-[13px] text-muted-foreground">Loading…</div>}
                     {!isLoading && points.length === 0 && (
-                        <div className="text-xs italic text-muted-foreground">No history recorded for this field.</div>
+                        <div className="text-[13px] text-muted-foreground">No history recorded for this field.</div>
                     )}
                     {!isLoading && points.length > 0 && (
                         <>

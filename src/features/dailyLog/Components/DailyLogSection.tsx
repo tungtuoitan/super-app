@@ -27,17 +27,17 @@ export function DailyLogSection({ section: _section, label, fields, readOnly }: 
 
     return (
         <section>
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70 mb-4">
+            <h3 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-4">
                 {label}
             </h3>
             <div className="space-y-5">
                 {fields.length === 0 && (
-                    <div className="text-xs italic text-muted-foreground/50">No fields</div>
+                    <div className="text-[13px] text-muted-foreground/70">No fields</div>
                 )}
                 {groups.map((g, gi) => (
                     <div key={gi}>
                         {g.groupLabel && (
-                            <div className="text-left text-[11px] font-medium text-muted-foreground/60 mb-2 mt-1">
+                            <div className="text-left text-[13px] font-medium text-muted-foreground mb-2 mt-1">
                                 {g.groupLabel}
                             </div>
                         )}

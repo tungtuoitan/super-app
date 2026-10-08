@@ -33,7 +33,7 @@ export function DailyLogHistoryHeatmap({ points, days }: Props) {
                     <div
                         key={c.date.getTime()}
                         title={`${formatDayMonth(c.date)}: ${c.active ? "true" : "false"}`}
-                        className={"aspect-square rounded-[2px] " + (c.active ? "bg-emerald-500/80" : "bg-muted/60")}
+                        className={"aspect-square rounded-[3px] " + (c.active ? "bg-sa-good/70" : "bg-sa-surface-2")}
                     />
                 ))}
             </div>

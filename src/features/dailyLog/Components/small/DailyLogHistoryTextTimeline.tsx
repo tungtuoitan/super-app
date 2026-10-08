@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Input } from "@/shared";
 import type { DailyLogHistoryPoint } from "../../types/dailyLog.types";
 import { formatDayMonth } from "../../utils/dailyLog.utils";
 
@@ -18,7 +19,7 @@ export function DailyLogHistoryTextTimeline({ points }: Props) {
         return (
             <>
                 {text.slice(0, idx)}
-                <mark className="bg-yellow-500/30 text-inherit">{text.slice(idx, idx + q.length)}</mark>
+                <mark className="bg-sa-amber/30 text-inherit rounded-sm">{text.slice(idx, idx + q.length)}</mark>
                 {text.slice(idx + q.length)}
             </>
         );
@@ -28,15 +29,15 @@ export function DailyLogHistoryTextTimeline({ points }: Props) {
 
     return (
         <div>
-            <input
+            <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search value…"
-                className="w-full px-2 py-1.5 mb-3 text-sm rounded border border-border bg-background"
+                className="mb-3 h-8 text-[13px]"
             />
             <div className="space-y-2">
                 {sorted.map((p, i) => (
-                    <div key={i} className="flex gap-3 text-sm">
+                    <div key={i} className="flex gap-3 text-[13px]">
                         <div className="w-16 shrink-0 text-[11px] font-mono text-muted-foreground pt-0.5">
                             {formatDayMonth(p.logDate)}
                         </div>

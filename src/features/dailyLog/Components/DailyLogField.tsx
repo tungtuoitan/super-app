@@ -24,8 +24,8 @@ export function DailyLogField({ field, readOnly }: DailyLogFieldProps) {
     const readOnlyTail = readOnly ? " disabled:cursor-default disabled:hover:border-transparent" : "";
     const inlineCls =
         "w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 " +
-        "border-0 border-b border-transparent hover:border-border focus:border-primary/60 " +
-        "focus:outline-none focus:ring-0 px-0 py-1 transition-colors" +
+        "border-0 border-b border-transparent hover:border-sa-border-strong focus:border-sa-amber/60 " +
+        "focus:outline-none focus:ring-0 px-0 py-1 transition-colors duration-100" +
         readOnlyTail;
 
     // Checkbox: label + input INLINE, no top label. Everything else: top label + control.
@@ -35,12 +35,12 @@ export function DailyLogField({ field, readOnly }: DailyLogFieldProps) {
         <div className="group">
             {!isCheckbox && (
                 <div className="flex items-center justify-between mb-1">
-                    <label className="text-[11px] font-medium text-muted-foreground/80 tracking-wide">
+                    <label className="text-[13px] font-medium text-muted-foreground">
                         {field.label}
                     </label>
                     <button
                         onClick={() => setHistoryOpen(true)}
-                        className="p-0.5 text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-foreground rounded transition-opacity"
+                        className="p-1 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-foreground hover:bg-sa-hover rounded-md transition-opacity duration-100"
                         title="Show history"
                     >
                         <LineChart className="w-3 h-3" />
@@ -78,8 +78,8 @@ export function DailyLogField({ field, readOnly }: DailyLogFieldProps) {
                     placeholder="—"
                     className={
                         "w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 " +
-                        "border-0 border-b border-transparent hover:border-border focus:border-primary/60 " +
-                        "focus:outline-none focus:ring-0 px-0 py-1 resize-none leading-relaxed overflow-hidden transition-colors" +
+                        "border-0 border-b border-transparent hover:border-sa-border-strong focus:border-sa-amber/60 " +
+                        "focus:outline-none focus:ring-0 px-0 py-1 resize-none leading-relaxed overflow-hidden transition-colors duration-100" +
                         readOnlyTail
                     }
                 />
@@ -93,13 +93,13 @@ export function DailyLogField({ field, readOnly }: DailyLogFieldProps) {
                             checked={value as boolean}
                             onChange={(e) => patchDraftValue(path, e.target.checked)}
                             disabled={readOnly}
-                            className="w-3.5 h-3.5 accent-primary"
+                            className="w-3.5 h-3.5 accent-sa-amber"
                         />
                         <span className="text-sm text-foreground/85">{field.label}</span>
                     </label>
                     <button
                         onClick={() => setHistoryOpen(true)}
-                        className="p-0.5 text-muted-foreground/40 opacity-0 group-hover:opacity-100 hover:text-foreground rounded transition-opacity"
+                        className="p-1 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-foreground hover:bg-sa-hover rounded-md transition-opacity duration-100"
                         title="Show history"
                     >
                         <LineChart className="w-3 h-3" />
@@ -132,11 +132,11 @@ export function DailyLogField({ field, readOnly }: DailyLogFieldProps) {
                             value={value as number}
                             onChange={(e) => patchDraftValue(path, Number(e.target.value))}
                             disabled={readOnly}
-                            className="flex-1 accent-primary h-1"
+                            className="flex-1 accent-sa-amber h-1"
                         />
-                        <div className="min-w-[3rem] text-right text-xs">
+                        <div className="min-w-[3rem] text-right text-[13px] font-mono">
                             <span className="font-medium text-foreground">{value as number}</span>
-                            <span className="text-muted-foreground/50 ml-1">/{max}</span>
+                            <span className="text-muted-foreground ml-1">/{max}</span>
                         </div>
                     </div>
                 );

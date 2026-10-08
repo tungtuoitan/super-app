@@ -35,7 +35,7 @@ export function DailyLogHistoryLineChart({ points, height = 220 }: Props) {
 
     const values = points.map((p) => Number(p.value)).filter((n) => Number.isFinite(n));
     if (values.length === 0) {
-        return <div className="text-xs italic text-muted-foreground">No numeric values recorded.</div>;
+        return <div className="text-[13px] text-muted-foreground">No numeric values recorded.</div>;
     }
     const min = Math.min(...values);
     const max = Math.max(...values);
@@ -59,7 +59,7 @@ export function DailyLogHistoryLineChart({ points, height = 220 }: Props) {
                         <line x1={PAD.left} y1={toY(v)} x2={PAD.left + PLOT_W} y2={toY(v)}
                             stroke="currentColor" strokeOpacity={0.06} />
                         <text x={PAD.left - 6} y={toY(v) + 3} textAnchor="end"
-                            fontSize={9} className="fill-muted-foreground/50">{v.toFixed(1)}</text>
+                            fontSize={10} className="fill-muted-foreground font-mono">{v.toFixed(1)}</text>
                     </g>
                 ))}
 
@@ -67,7 +67,7 @@ export function DailyLogHistoryLineChart({ points, height = 220 }: Props) {
                     if (i % labelInterval !== 0 && i !== points.length - 1) return null;
                     return (
                         <text key={i} x={toX(i)} y={height - 6} textAnchor="middle"
-                            fontSize={9} className="fill-muted-foreground/50">
+                            fontSize={10} className="fill-muted-foreground">
                             {formatDayMonth(p.logDate)}
                         </text>
                     );
@@ -92,10 +92,10 @@ export function DailyLogHistoryLineChart({ points, height = 220 }: Props) {
             </svg>
 
             {hovered != null && (
-                <div className="absolute pointer-events-none text-[11px] rounded-md shadow-lg px-2.5 py-2 bg-popover border border-border"
+                <div className="absolute pointer-events-none text-[11px] rounded-lg sa-shadow-pop px-2.5 py-2 bg-popover border border-sa-border"
                     style={{ left: Math.min(toX(hovered) + 8, W - 130), top: 4, minWidth: 100 }}>
-                    <div className="text-[10px] text-muted-foreground mb-0.5">{formatDayMonth(points[hovered].logDate)}</div>
-                    <div className="font-semibold text-[#0071e3]">{points[hovered].value}</div>
+                    <div className="text-[11px] text-muted-foreground mb-0.5">{formatDayMonth(points[hovered].logDate)}</div>
+                    <div className="font-medium font-mono text-[#0071e3]">{points[hovered].value}</div>
                 </div>
             )}
         </div>
