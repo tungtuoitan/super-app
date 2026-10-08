@@ -47,8 +47,8 @@ export function NoteGrid({ source = "Note", disabledRowIds }: { source?: string;
     return (
         <div ref={containerRef} className="w-full h-full bg-background flex flex-col relative">
             {noteGridIsLoading && (
-                <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <div className="absolute inset-0 bg-background/70 flex items-center justify-center z-10">
+                    <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
                 </div>
             )}
 
@@ -61,7 +61,7 @@ export function NoteGrid({ source = "Note", disabledRowIds }: { source?: string;
             )}
 
             <div
-                className="flex-1 overflow-auto rounded-md border"
+                className="flex-1 overflow-auto"
                 onContextMenu={(e) => {
                     const target = e.target as HTMLElement;
                     const isClickedOnRow = target.closest("tr[data-row]");
@@ -71,11 +71,11 @@ export function NoteGrid({ source = "Note", disabledRowIds }: { source?: string;
                 }}
             >
                 <table className="w-full">
-                    <thead className="bg-muted/50 sticky top-0 z-10">
+                    <thead className="bg-background sticky top-0 z-10">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id} className="border-b bg-[rgb(37,37,38)]">
+                            <tr key={headerGroup.id} className="border-b border-sa-border">
                                 {headerGroup.headers.map((header) => (
-                                    <th key={header.id} className="h-[36px] px-1 text-left align-middle font-semibold text-muted-foreground" style={{ width: header.getSize() }}>
+                                    <th key={header.id} className="h-8 px-1 text-left align-middle text-[11px] font-medium uppercase tracking-wide text-muted-foreground" style={{ width: header.getSize() }}>
                                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                     </th>
                                 ))}
@@ -100,8 +100,8 @@ export function NoteGrid({ source = "Note", disabledRowIds }: { source?: string;
                                 <tr
                                     key={row.id}
                                     data-row
-                                    className={`border-b h-[36px] cursor-pointer hover:bg-muted/50 transition-colors ${row.original.deletedAt ? "opacity-60" : ""} ${
-                                        isSelected ? "bg-white/10" : ""
+                                    className={`h-9 cursor-pointer transition-colors duration-100 ${row.original.deletedAt ? "opacity-60" : ""} ${
+                                        isSelected || row.getIsSelected() ? "bg-sa-hover-strong" : "hover:bg-sa-hover"
                                     }`}
                                     onClick={handleRowClick}
                                     onContextMenu={(e) => {
@@ -121,36 +121,36 @@ export function NoteGrid({ source = "Note", disabledRowIds }: { source?: string;
                 </table>
             </div>
 
-            <div className="flex items-center justify-between px-4 py-1 bg-background">
-                <div className="flex-1 text-sm text-left text-muted-foreground">
+            <div className="flex h-9 items-center justify-between gap-2 px-3 bg-background border-t border-sa-border">
+                <div className="flex-1 truncate text-[12px] text-left text-muted-foreground">
                     Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({totalCount} total)
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()} className="h-8 w-8" title="First page">
-                        <ChevronsLeft className="h-4 w-4" />
+                <div className="flex items-center gap-0.5">
+                    <Button variant="ghost" size="icon" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()} className="h-7 w-7 text-muted-foreground" title="First page">
+                        <ChevronsLeft className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant="outline" size="icon" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="h-8 w-8" title="Previous page">
-                        <ChevronLeft className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="h-7 w-7 text-muted-foreground" title="Previous page">
+                        <ChevronLeft className="h-3.5 w-3.5" />
                     </Button>
 
-                    <div className="flex items-center gap-1 px-2">
-                        <span className="text-sm font-medium">{table.getState().pagination.pageIndex + 1}</span>
-                        <span className="text-sm text-muted-foreground">/ {table.getPageCount()}</span>
+                    <div className="flex items-center gap-1 px-1.5 font-mono text-[12px]">
+                        <span className="text-foreground">{table.getState().pagination.pageIndex + 1}</span>
+                        <span className="text-muted-foreground">/ {table.getPageCount()}</span>
                     </div>
 
-                    <Button variant="outline" size="icon" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="h-8 w-8" title="Next page">
-                        <ChevronRight className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="h-7 w-7 text-muted-foreground" title="Next page">
+                        <ChevronRight className="h-3.5 w-3.5" />
                     </Button>
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
                         onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                         disabled={!table.getCanNextPage()}
-                        className="h-8 w-8"
+                        className="h-7 w-7 text-muted-foreground"
                         title="Last page"
                     >
-                        <ChevronsRight className="h-4 w-4" />
+                        <ChevronsRight className="h-3.5 w-3.5" />
                     </Button>
                 </div>
             </div>

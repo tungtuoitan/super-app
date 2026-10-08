@@ -28,16 +28,16 @@ export function WorkspaceLinksCell({ source, count, links, onWorkspaceClick, too
     return (
         <div className="relative inline-flex items-center justify-center cursor-pointer pl-2" onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
             <div className="flex items-center gap-1 text-center">
-                <span className="text-sm text-gray-400">{count}</span>
+                <span className="font-mono text-[12px] text-muted-foreground">{count}</span>
             </div>
 
             {showTooltip && (
                 <div
-                    className={`absolute ${isTop ? "bottom-full" : "top-[0px] mt-2"} right-[12px] bottom-[-50px] z-50 pointer-events-auto border border-gray-700 rounded`}
+                    className={`absolute ${isTop ? "bottom-full" : "top-[0px] mt-2"} right-[12px] bottom-[-50px] z-50 pointer-events-auto`}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="bg-gray-900 text-white text-xs py-4 px-5 rounded shadow-lg min-w-[200px]">
-                        <div className="font-semibold mb-2">Locations:</div>
+                    <div className="bg-popover text-popover-foreground border border-sa-border-strong sa-shadow-pop text-xs py-2.5 px-3 rounded-lg min-w-[200px]">
+                        <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Locations</div>
                         <div className="flex flex-col gap-1">
                             {links.map((link) => (
                                 <div
@@ -48,19 +48,13 @@ export function WorkspaceLinksCell({ source, count, links, onWorkspaceClick, too
                                             onWorkspaceClick?.(link.workspaceId, link.workspaceItemId);
                                         }
                                     }}
-                                    className={`${source === "Note" ? "text-blue-400 hover:underline cursor-pointer" : "text-gray-400"}`}
+                                    className={`${source === "Note" ? "text-foreground/90 hover:text-foreground hover:underline underline-offset-2 cursor-pointer" : "text-muted-foreground"}`}
                                 >
                                     • {link.workspaceName} {selectedWorkspaceId === link.workspaceId ? "(current)" : ""}
                                 </div>
                             ))}
                         </div>
-                        {source === "Note" && <div className="text-gray-400 text-xs mt-2 italic border-t border-gray-700 pt-1">Click to navigate to workspace</div>}
-                    </div>
-                    <div
-                        className={`absolute ${isTop ? "top-full -mt-[1px]" : "bottom-full -mb-[1px]"} right-3`}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className={`border-4 border-transparent ${isTop ? "border-t-gray-900" : "border-b-gray-900"}`} />
+                        {source === "Note" && <div className="text-muted-foreground text-[11px] mt-2 border-t border-sa-border pt-1.5">Click to navigate to workspace</div>}
                     </div>
                 </div>
             )}

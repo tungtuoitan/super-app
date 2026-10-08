@@ -52,7 +52,7 @@ export function NoteDetailContent() {
                     <MarkdownEditor />
                 ) : (
                     <div className="w-full h-full flex justify-center items-center">
-                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
                     </div>
                 )}
             </CardContent>

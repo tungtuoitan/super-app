@@ -26,7 +26,7 @@ export function WikiGraphNodeMenu() {
     };
 
     return (
-        <MenuItem onClick={handleDelete} className="text-red-500">
+        <MenuItem onClick={handleDelete} className="text-sa-danger">
             <Trash2 className="w-4 h-4 mr-2" />
             Delete "{name}"
         </MenuItem>

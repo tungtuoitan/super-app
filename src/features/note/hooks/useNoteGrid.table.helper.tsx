@@ -115,21 +115,21 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
             },
             {
                 accessorKey: "id",
-                header: () => <div className="text-left text-sm">ID</div>,
+                header: () => <div className="text-left">ID</div>,
                 size: 36,
                 minSize: 36,
                 maxSize: 36,
                 enableResizing: false,
-                cell: ({ getValue }) => <div className="text-left text-sm">{getValue() as number}</div>,
+                cell: ({ getValue }) => <div className="text-left font-mono text-[11px] text-muted-foreground/80">#{getValue() as number}</div>,
             },
             {
                 accessorKey: "name",
-                header: () => <div className="text-left text-sm">Note Name</div>,
+                header: () => <div className="text-left">Note Name</div>,
                 size: 280,
                 minSize: 280,
                 maxSize: 280,
                 enableResizing: false,
-                cell: ({ getValue }) => <div className="pl-1 text-sm text-primary text-left cursor-pointer hover:text-primary/80">{(getValue() as string) || "—"}</div>,
+                cell: ({ getValue }) => <div className="pl-1 truncate text-[13px] text-foreground text-left cursor-pointer">{(getValue() as string) || "—"}</div>,
             },
         ];
 
@@ -138,7 +138,7 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         if (showWorkspaceLinksColumn) {
             optionalColumns.push({
                 accessorKey: "workspaceLinks",
-                header: () => <div className="text-left text-sm">Location</div>,
+                header: () => <div className="text-left">Location</div>,
                 size: 40,
                 enableSorting: false,
                 cell: ({ row }) => {
@@ -162,11 +162,11 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         if (showStatusColumn) {
             optionalColumns.push({
                 accessorKey: "statusCode",
-                header: () => <div className="text-left text-sm">Status</div>,
+                header: () => <div className="text-left">Status</div>,
                 size: 80,
                 cell: ({ getValue }) => {
                     const statusCode = getValue() as string | undefined;
-                    return <div className="pl-1 text-sm text-zinc-400 text-left">{getStatusDescription(statusCode)}</div>;
+                    return <div className="pl-1 text-[12px] text-muted-foreground text-left">{getStatusDescription(statusCode)}</div>;
                 },
             });
         }
@@ -174,13 +174,13 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         if (showCreatedDateColumn) {
             optionalColumns.push({
                 accessorKey: "createdAt",
-                header: () => <div className="text-left text-sm">Created Date</div>,
+                header: () => <div className="text-left">Created Date</div>,
                 size: 110,
                 cell: ({ getValue }) => {
                     const createdAt = getValue() as Date;
                     const date = new Date(createdAt);
                     const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
-                    return <div className="text-sm text-zinc-400 text-left pl-2">{formattedDate}</div>;
+                    return <div className="font-mono text-[11px] text-muted-foreground text-left pl-2">{formattedDate}</div>;
                 },
             });
         }
@@ -188,7 +188,7 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
         if (showDeletedColumn) {
             optionalColumns.push({
                 accessorKey: "deletedAt",
-                header: () => <div className="text-left text-sm">Deleted</div>,
+                header: () => <div className="text-left">Deleted</div>,
                 size: 60,
                 enableSorting: true,
                 filterFn: (row, columnId, filterValue) => {
@@ -210,7 +210,7 @@ export function useNoteGridTableHelper(source?: string, disabledRowIds?: Set<num
 
                     return (
                         <div className="flex items-center justify-start pl-2" title="Deleted">
-                            <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                            <div className="w-1.5 h-1.5 rounded-full bg-sa-danger"></div>
                         </div>
                     );
                 },
