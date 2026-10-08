@@ -173,8 +173,9 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
                 marginLeft: `${node.level * -5}px`, // Reduced from default ~20-24px per level to 12px
             }}
             className={`
-                ${ treeType === "workspaceTree" && isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover-light"}
-                rounded
+                relative rounded-md transition-colors duration-100
+                ${treeType === "workspaceTree" && isSelected ? "bg-sa-hover-strong" : "bg-transparent hover:bg-sa-hover"}
+                ${treeType === "workspaceTree" && isSelected && lastSelectedItemId === workspaceItemId ? "before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[2px] before:rounded-full before:bg-sa-amber" : ""}
             `}
         >
             <div
@@ -191,10 +192,10 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
                 onClick={handleMainClick}
                 onContextMenu={handleRightClick}
                 className={`
-                    flex items-center h-full w-full py-1 pr-2 cursor-pointer
+                    flex items-center h-full w-full py-1 pr-2 cursor-pointer text-[13px]
                     ${isDragging ? "opacity-40" : _ITEMSTATUS.hasDeletedAncestor ? "opacity-60" : "opacity-100"}
-                    ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1 rounded" : ""}
-                    ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
+                    ${isDragging && isSelected ? "bg-sa-amber/10 outline outline-1 outline-sa-amber/50 -outline-offset-1 rounded-md" : ""}
+                    ${isDropTarget ? "bg-sa-amber/10 outline outline-1 outline-sa-amber/60 -outline-offset-1 rounded-md" : ""}
                 `}
             >
                 {/* Spacer for alignment with folder chevrons */}
@@ -203,9 +204,9 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
                 {/* File Icon */}
                 <div className="mr-2 flex items-center">
                     {isLink ? (
-                        <LinkKindIcon url={fileItem.data.url} className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-sky-400"}`} />
+                        <LinkKindIcon url={fileItem.data.url} className={`w-3.5 h-3.5 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-muted-foreground/50" : "text-muted-foreground"}`} />
                     ) : (
-                        <FileIcon className={`w-4 h-4 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-gray-400"}`} />
+                        <FileIcon className={`w-3.5 h-3.5 ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-muted-foreground/50" : "text-muted-foreground"}`} />
                     )}
                 </div>
 
@@ -214,9 +215,9 @@ export function FileNode({ node, style, dragHandle, treeData, treeType = "worksp
                     <HighlightText
                         text={fileItem.data.name}
                         highlight={treeType === "workspaceTree" ? searchQuery : ""}
-                        className={`text-sm truncate ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"} ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}
+                        className={`text-[13px] truncate ${_ITEMSTATUS.hasDeletedAncestor || _ITEMSTATUS.isDirectlyDeleted ? "text-muted-foreground/60" : "text-foreground"} ${_ITEMSTATUS.isDirectlyDeleted ? "line-through" : ""}`}
                     />
-                    {!isLink && fileItem.data.fileSizeFormatted && <span className="text-xs text-gray-500">{fileItem.data.fileSizeFormatted}</span>}
+                    {!isLink && fileItem.data.fileSizeFormatted && <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{fileItem.data.fileSizeFormatted}</span>}
                     <StatusDot
                         isUnsaved={isUnsaved}
                         isDuplicate={isDuplicate}
