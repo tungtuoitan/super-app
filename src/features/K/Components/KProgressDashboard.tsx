@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Brain, BookOpen, CalendarClock, TrendingUp } from "lucide-react";
+import { Brain, BookOpen, CalendarClock, Flame, TrendingUp } from "lucide-react";
 import { KQuizService } from "../service/kQuiz.service";
 import { KService } from "../service/k.service";
 import type { KRetentionSummary, KRetentionGraph, KDailyQueueItem, KQuestion, KQuestionStatusTimeline } from "../types/kQuiz.type";
@@ -9,7 +9,8 @@ import { KProgressMasteryChart } from "./small/KProgressMasteryChart";
 import { KProgressQuestionCountChart } from "./small/KProgressQuestionCountChart";
 import { toDateOnly } from "@/shared";
 
-const C = { high: "#30d158", mid: "#ff9f0a", low: "#8e8e93", blue: "#0071e3", orange: "#ff6b35" };
+// Chart/status palette on tokens: good = mastered/high, amber = primary series, grey = rest, danger = due/deleted
+const C = { high: "hsl(var(--sa-good))", mid: "hsl(var(--sa-accent-amber))", low: "hsl(var(--muted-foreground) / 0.6)", danger: "hsl(var(--sa-danger))" };
 
 type RetLevel = "high" | "mid" | "low";
 
@@ -20,13 +21,13 @@ function nodeLevel(avgRet: number): RetLevel {
 const RET_COLOR: Record<RetLevel, string> = { high: C.high, mid: C.mid, low: C.low };
 const RET_LABEL: Record<RetLevel, string> = { high: "High", mid: "Medium", low: "Low" };
 const RET_PILL: Record<RetLevel, string> = {
-    high: "bg-[rgba(48,209,88,0.12)]  text-[#1a7a32] dark:text-[#52e57a]",
-    mid:  "bg-[rgba(255,159,10,0.12)] text-[#9a5e00] dark:text-[#ffb340]",
-    low:  "bg-[rgba(142,142,147,0.12)] text-[#636366]",
+    high: "bg-sa-good",
+    mid:  "bg-sa-amber",
+    low:  "bg-muted-foreground/60",
 };
 
 function Pill({ cls, text }: { cls: string; text: string }) {
-    return <span className={`inline-flex items-center text-[11px] font-medium px-[9px] py-[3px] rounded-full tracking-[-0.01em] ${cls}`}>{text}</span>;
+    return <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cls}`} />{text}</span>;
 }
 
 function NodeRetentionDonut({ high, mid, low }: { high: number; mid: number; low: number }) {
@@ -60,7 +61,7 @@ function NodeRetentionDonut({ high, mid, low }: { high: number; mid: number; low
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
                 {total > 0
                     ? <>
-                        <span className="text-[22px] font-semibold tracking-[-0.03em] leading-none">{high}/{total}</span>
+                        <span className="font-mono text-[20px] font-medium tracking-[-0.02em] leading-none">{high}/{total}</span>
                         <span className="text-[11px] text-muted-foreground mt-[2px]">high ret.</span>
                       </>
                     : <span className="text-[11px] text-muted-foreground">no data</span>
@@ -80,8 +81,8 @@ interface DashboardData {
     statusTimeline: KQuestionStatusTimeline | null;
 }
 
-const CARD = "bg-card rounded-[18px] shadow-[0_2px_20px_rgba(0,0,0,0.06),0_1px_4px_rgba(0,0,0,0.04)] overflow-hidden";
-const CARD_LBL = "text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]";
+const CARD = "bg-card rounded-2xl border border-sa-border overflow-hidden";
+const CARD_LBL = "text-[11px] font-medium text-muted-foreground uppercase tracking-wide";
 
 interface KProgressDashboardProps { knowledgeId: number; }
 
@@ -118,7 +119,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
     }, [knowledgeId]);
 
     if (loading || !data) {
-        return <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">Loading…</div>;
+        return <div className="flex items-center justify-center h-32 text-muted-foreground text-[13px]">Loading…</div>;
     }
 
     const { questions, nodes, retention, retentionGraph, dailyQueue, statusTimeline } = data;
@@ -188,29 +189,29 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
         {
             lbl: "Active Questions", val: learningQs.length,
             pill: `across ${totalNodes} nodes`,
-            pillCls: "bg-[rgba(48,209,88,0.12)] text-[#1a7a32] dark:text-[#52e57a]",
-            iconBg: "rgba(48,209,88,0.12)", stroke: C.high,
+            pillCls: "bg-sa-good",
+            iconBg: "hsl(var(--sa-good) / 0.1)", stroke: C.high,
             icon: <Brain className="w-4 h-4" />,
         },
         {
             lbl: "Avg Retention", val: avgRetention,
             pill: `${highNodes} high · ${mediumNodes} mid · ${lowNodes} low`,
-            pillCls: "bg-[rgba(48,209,88,0.12)] text-[#1a7a32] dark:text-[#52e57a]",
-            iconBg: "rgba(48,209,88,0.12)", stroke: C.high,
+            pillCls: "bg-sa-amber",
+            iconBg: "hsl(var(--sa-accent-amber) / 0.12)", stroke: C.mid,
             icon: <TrendingUp className="w-4 h-4" />,
         },
         {
             lbl: "Due Today", val: dueToday,
             pill: `${newToday} new cards`,
-            pillCls: "bg-[rgba(255,107,53,0.12)] text-[#a83800] dark:text-[#ff8f6b]",
-            iconBg: "rgba(255,159,10,0.12)", stroke: C.mid,
+            pillCls: "bg-foreground/70",
+            iconBg: "hsl(var(--sa-danger) / 0.1)", stroke: C.danger,
             icon: <CalendarClock className="w-4 h-4" />,
         },
         {
             lbl: "Draft Questions", val: draftQs.length,
             pill: "excluded from review",
-            pillCls: "bg-[rgba(142,142,147,0.12)] text-[#636366]",
-            iconBg: "rgba(142,142,147,0.12)", stroke: C.low,
+            pillCls: "bg-muted-foreground/60",
+            iconBg: "hsl(var(--muted-foreground) / 0.12)", stroke: "hsl(var(--muted-foreground))",
             icon: <BookOpen className="w-4 h-4" />,
         },
     ];
@@ -221,16 +222,16 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
             {/* Stat grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {STATS.map(s => (
-                    <div key={s.lbl} className={`${CARD} p-3 sm:p-5 flex flex-col gap-3`}>
+                    <div key={s.lbl} className={`${CARD} p-3 sm:p-4 flex flex-col gap-3`}>
                         <div className="flex justify-between items-start">
-                            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0"
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                                 style={{ background: s.iconBg, color: s.stroke }}>
                                 {s.icon}
                             </div>
                         </div>
                         <div className="text-left">
-                            <div className="text-[12px] text-muted-foreground mb-[3px]">{s.lbl}</div>
-                            <div className="text-[28px] font-semibold tracking-[-0.03em] leading-none">{s.val}</div>
+                            <div className="text-[12px] text-muted-foreground mb-1">{s.lbl}</div>
+                            <div className="font-mono text-[26px] font-medium tracking-[-0.02em] leading-none">{s.val}</div>
                         </div>
                         <div className="text-left">
                             <Pill cls={s.pillCls} text={s.pill} />
@@ -243,19 +244,19 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
             <div className={`${CARD} px-4 py-2.5 flex items-center gap-3`}>
                 <div className={`${CARD_LBL} shrink-0`}>
                     Review streak
-                    {streak > 0 && <span className="ml-2 text-[11px] font-normal text-muted-foreground">🔥 {streak}-day</span>}
+                    {streak > 0 && <span className="ml-2 inline-flex items-center gap-1 text-[11px] font-normal normal-case tracking-normal text-muted-foreground"><Flame className="w-3 h-3 text-sa-amber" /><span className="font-mono text-foreground">{streak}</span>-day</span>}
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="grid gap-[5px]" style={{ gridTemplateColumns: "repeat(14, 1fr)" }}>
                         {streakDays.map(({ key, level, isToday }) => {
-                            const bg = level === 3 ? "#30d158"
-                                : level === 2 ? "rgba(48,209,88,0.5)"
-                                : level === 1 ? "rgba(48,209,88,0.2)"
+                            const bg = level === 3 ? "hsl(var(--sa-good))"
+                                : level === 2 ? "hsl(var(--sa-good) / 0.5)"
+                                : level === 1 ? "hsl(var(--sa-good) / 0.2)"
                                 : undefined;
                             return (
                                 <div key={key} title={isToday ? "Today" : key}
-                                    className={`rounded-[5px] cursor-default transition-transform duration-150 hover:scale-[1.15]${!bg ? " bg-muted" : ""}`}
-                                    style={{ aspectRatio: "1", background: bg, outline: isToday ? "1.5px solid #0071e3" : undefined }} />
+                                    className={`rounded-[4px] cursor-default transition-transform duration-100 hover:scale-[1.15]${!bg ? " bg-sa-surface-2" : ""}`}
+                                    style={{ aspectRatio: "1", background: bg, outline: isToday ? "1.5px solid hsl(var(--sa-accent-amber))" : undefined, outlineOffset: isToday ? 1 : undefined }} />
                             );
                         })}
                     </div>
@@ -268,7 +269,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                     <div className="flex items-center mb-4">
                         <span className={CARD_LBL}>Avg retention</span>
                         <div className="ml-auto flex items-center gap-1.5">
-                            <span className="w-[7px] h-[7px] rounded-[2px]" style={{ background: C.high }} />
+                            <span className="w-[7px] h-[7px] rounded-full" style={{ background: C.mid }} />
                             <span className="text-[11px] text-muted-foreground">Retention</span>
                         </div>
                     </div>
@@ -285,7 +286,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                         <div className="ml-auto flex items-center gap-[14px]">
                             {[{ c: C.high, l: "Strong" }, { c: C.mid, l: "Learning" }, { c: C.low, l: "Not started" }].map(({ c, l }) => (
                                 <div key={l} className="flex items-center gap-1.5">
-                                    <span className="w-[7px] h-[7px] rounded-[2px]" style={{ background: c }} />
+                                    <span className="w-[7px] h-[7px] rounded-full" style={{ background: c }} />
                                     <span className="text-[11px] text-muted-foreground">{l}</span>
                                 </div>
                             ))}
@@ -313,7 +314,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                         const mismatch = sum !== dbTotal;
                         return (
                             <span className="ml-2 text-[11px]"
-                                  style={{ color: mismatch ? "#ff453a" : undefined }}
+                                  style={{ color: mismatch ? C.danger : undefined }}
                                   title={mismatch ? `Sum of buckets = ${sum} ≠ DB total ${dbTotal}` : undefined}>
                                 · total {dbTotal}{mismatch && ` (sum ${sum})`}
                             </span>
@@ -321,13 +322,13 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                     })()}
                     <div className="ml-auto flex items-center gap-[14px]">
                         {[
-                            { c: "#30d158", l: "Master" },
-                            { c: "#0071e3", l: "Learning" },
-                            { c: "#8e8e93", l: "Draft" },
-                            { c: "#ff453a", l: "Deleted" },
+                            { c: C.high, l: "Master" },
+                            { c: C.mid, l: "Learning" },
+                            { c: C.low, l: "Draft" },
+                            { c: C.danger, l: "Deleted" },
                         ].map(({ c, l }) => (
                             <div key={l} className="flex items-center gap-1.5">
-                                <span className="w-[7px] h-[7px] rounded-[2px]" style={{ background: c }} />
+                                <span className="w-[7px] h-[7px] rounded-full" style={{ background: c }} />
                                 <span className="text-[11px] text-muted-foreground">{l}</span>
                             </div>
                         ))}
@@ -344,7 +345,7 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
             </div>
 
             {/* Retention per node */}
-            <div className={`${CARD} p-6`}>
+            <div className={`${CARD} p-5`}>
                 <div className={`${CARD_LBL} mb-4`}>Retention per node</div>
                 <div className="flex flex-col gap-6 sm:grid sm:items-start sm:[grid-template-columns:160px_1fr]">
                     <div>
@@ -371,14 +372,14 @@ export function KProgressDashboard({ knowledgeId }: KProgressDashboardProps) {
                                 <div className="flex justify-between items-center mb-1.5">
                                     <span className="text-[13px] font-medium truncate max-w-[55%]">{nodeName}</span>
                                     <div className="flex items-center gap-[10px] shrink-0">
-                                        <span className="text-[11px] text-muted-foreground">{qs.length} q</span>
+                                        <span className="text-[11px] text-muted-foreground"><span className="font-mono">{qs.length}</span> q</span>
                                         <Pill cls={RET_PILL[level]} text={RET_LABEL[level]} />
-                                        <span className="text-[12px] font-semibold w-9 text-right" style={{ color: RET_COLOR[level] }}>
+                                        <span className="font-mono text-[12px] font-medium w-9 text-right text-foreground">
                                             {avgRet}%
                                         </span>
                                     </div>
                                 </div>
-                                <div className="h-[3px] rounded-full bg-muted overflow-hidden">
+                                <div className="h-[3px] rounded-full bg-sa-surface-2 overflow-hidden">
                                     <div className="h-full rounded-full" style={{ width: `${avgRet}%`, background: RET_COLOR[level] }} />
                                 </div>
                             </div>

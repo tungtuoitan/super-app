@@ -12,10 +12,10 @@ const PLOT_W = W - PAD.left - PAD.right;
 
 type SeriesKey = "master" | "learning" | "draft" | "deleted";
 const SERIES: { key: SeriesKey; label: string; color: string; fillOpacity: number }[] = [
-    { key: "master",   label: "Master",   color: "#30d158", fillOpacity: 0.06 },
-    { key: "learning", label: "Learning", color: "#0071e3", fillOpacity: 0.05 },
-    { key: "draft",    label: "Draft",    color: "#8e8e93", fillOpacity: 0.04 },
-    { key: "deleted",  label: "Deleted",  color: "#ff453a", fillOpacity: 0.04 },
+    { key: "master",   label: "Master",   color: "hsl(var(--sa-good))", fillOpacity: 0.06 },
+    { key: "learning", label: "Learning", color: "hsl(var(--sa-accent-amber))", fillOpacity: 0.05 },
+    { key: "draft",    label: "Draft",    color: "hsl(var(--muted-foreground) / 0.6)", fillOpacity: 0.04 },
+    { key: "deleted",  label: "Deleted",  color: "hsl(var(--sa-danger))", fillOpacity: 0.04 },
 ];
 
 function smoothLinePath(pts: Array<{ x: number; y: number }>, tension = 0.4): string {
@@ -133,12 +133,12 @@ export function KProgressQuestionCountChart({ data, height = 160 }: KProgressQue
             </svg>
 
             {hovered != null && (
-                <div className="absolute z-10 pointer-events-none text-[11px] rounded-[8px] shadow-lg"
+                <div className="absolute z-10 pointer-events-none text-[11px] rounded-lg sa-shadow-pop"
                     style={{
                         left: Math.min(toX(hovered) + 8, W - 130),
                         top: 0,
-                        background: "var(--popover)",
-                        border: "1px solid rgba(0,0,0,0.08)",
+                        background: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--sa-border-strong))",
                         padding: "10px",
                         minWidth: 120,
                     }}>
@@ -147,7 +147,7 @@ export function KProgressQuestionCountChart({ data, height = 160 }: KProgressQue
                         <div key={s.key} className="flex items-center gap-1.5 leading-5">
                             <span className="w-[7px] h-[7px] rounded-full shrink-0" style={{ background: s.color }} />
                             <span className="text-foreground/70">{s.label}:</span>
-                            <span className="font-semibold ml-auto pl-2" style={{ color: s.color }}>
+                            <span className="font-mono font-medium ml-auto pl-2" style={{ color: s.color }}>
                                 {pointValue(days[hovered], s.key)}
                             </span>
                         </div>

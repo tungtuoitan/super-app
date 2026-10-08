@@ -11,9 +11,9 @@ const PAD = { top: 10, right: 8, bottom: 22, left: 24 };
 const PLOT_W = W - PAD.left - PAD.right;
 
 const SERIES = [
-    { key: "strong"     as const, label: "Strong",      color: "#30d158", fillOpacity: 0.05 },
-    { key: "learning"   as const, label: "Learning",    color: "#ff9f0a", fillOpacity: 0.04 },
-    { key: "notStarted" as const, label: "Not started", color: "#8e8e93", fillOpacity: 0.03 },
+    { key: "strong"     as const, label: "Strong",      color: "hsl(var(--sa-good))", fillOpacity: 0.05 },
+    { key: "learning"   as const, label: "Learning",    color: "hsl(var(--sa-accent-amber))", fillOpacity: 0.05 },
+    { key: "notStarted" as const, label: "Not started", color: "hsl(var(--muted-foreground) / 0.6)", fillOpacity: 0.03 },
 ];
 
 interface DayPoint { strong: number; learning: number; notStarted: number; }
@@ -140,12 +140,12 @@ export function KProgressMasteryChart({ data, height = 160 }: KProgressMasteryCh
 
             {/* Tooltip */}
             {hovered != null && (
-                <div className="absolute z-10 pointer-events-none text-[11px] rounded-[8px] shadow-lg"
+                <div className="absolute z-10 pointer-events-none text-[11px] rounded-lg sa-shadow-pop"
                     style={{
                         left: Math.min(toX(hovered) + 8, W - 115),
                         top: 0,
-                        background: "var(--popover)",
-                        border: "1px solid rgba(0,0,0,0.08)",
+                        background: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--sa-border-strong))",
                         padding: "10px",
                         minWidth: 100,
                     }}>
@@ -154,7 +154,7 @@ export function KProgressMasteryChart({ data, height = 160 }: KProgressMasteryCh
                         <div key={s.key} className="flex items-center gap-1.5 leading-5">
                             <span className="w-[7px] h-[7px] rounded-full shrink-0" style={{ background: s.color }} />
                             <span className="text-foreground/70">{s.label}:</span>
-                            <span className="font-semibold ml-auto pl-2" style={{ color: s.color }}>{pts[hovered][s.key]}</span>
+                            <span className="font-mono font-medium ml-auto pl-2" style={{ color: s.color }}>{pts[hovered][s.key]}</span>
                         </div>
                     ))}
                 </div>

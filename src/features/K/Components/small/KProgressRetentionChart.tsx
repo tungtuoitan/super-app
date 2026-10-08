@@ -70,7 +70,7 @@ export function KProgressRetentionChart({ data, height = 160 }: KProgressRetenti
                     );
                 })}
 
-                <path d={areaPath} fill="#30d158" fillOpacity={0.06} />
+                <path d={areaPath} fill="hsl(var(--sa-accent-amber))" fillOpacity={0.08} />
 
                 {days.map((_, i) => (
                     <rect key={i} x={toX(i) - xStep / 2} y={PAD.top}
@@ -83,29 +83,29 @@ export function KProgressRetentionChart({ data, height = 160 }: KProgressRetenti
                         stroke="currentColor" strokeOpacity={0.12} strokeDasharray="3,3" />
                 )}
 
-                <path d={linePath} fill="none" stroke="#30d158" strokeWidth={1.5} strokeLinejoin="round" />
+                <path d={linePath} fill="none" stroke="hsl(var(--sa-accent-amber))" strokeWidth={1.5} strokeLinejoin="round" />
 
                 {/* Dot — only on hover */}
                 {hovered != null && (
-                    <circle cx={toX(hovered)} cy={toY(days[hovered].average)} r={4} fill="#30d158" />
+                    <circle cx={toX(hovered)} cy={toY(days[hovered].average)} r={4} fill="hsl(var(--sa-accent-amber))" />
                 )}
                 {/* Always show dot at last point when not hovering */}
                 {hovered == null && (
-                    <circle cx={toX(showDay)} cy={toY(days[showDay].average)} r={3.5} fill="#30d158" />
+                    <circle cx={toX(showDay)} cy={toY(days[showDay].average)} r={3.5} fill="hsl(var(--sa-accent-amber))" />
                 )}
             </svg>
 
             {hovered != null && (
-                <div className="absolute z-10 pointer-events-none text-[11px] rounded-[8px] shadow-lg"
+                <div className="absolute z-10 pointer-events-none text-[11px] rounded-lg sa-shadow-pop"
                     style={{
                         left: Math.min(toX(hovered) + 8, W - 90),
                         top: 0,
-                        background: "var(--popover)",
-                        border: "1px solid rgba(0,0,0,0.08)",
+                        background: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--sa-border-strong))",
                         padding: "10px",
                     }}>
                     <div className="text-muted-foreground mb-1 text-[10px]">{days[hovered].date.slice(5)}</div>
-                    <div className="font-semibold" style={{ color: "#30d158" }}>
+                    <div className="font-mono font-medium text-sa-amber-ink">
                         {days[hovered].average}%
                     </div>
                 </div>
