@@ -1,5 +1,5 @@
 import { CSSProperties, useEffect, useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/shared";
@@ -75,6 +75,8 @@ export interface GenericAutoCompleteProps {
         label: string;
         /** Whether the field is required */
         required?: boolean;
+        /** Text shown in the trigger when nothing is selected */
+        placeholder?: string;
         /** Whether the field has an error state */
         error?: boolean;
     };
@@ -208,7 +210,7 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                             {selectedValue?.imageUrl && (
                                 <img src={selectedValue.imageUrl} alt="" className="w-5 h-5 rounded object-cover flex-shrink-0" />
                             )}
-                            <span className="truncate">{displayValue || "Select option..."}</span>
+                            <span className="truncate">{displayValue || inputProps.placeholder || "Select option..."}</span>
                             {displayValue && selectedValue?.badges && selectedValue.badges.length > 0 && (
                                 <div className="flex items-center gap-1 flex-shrink-0 opacity-50">
                                     {selectedValue.badges.map((badge, i) => (
@@ -234,7 +236,7 @@ export function GenericAutoComplete(props: GenericAutoCompleteProps) {
                                     }}
                                     className="hover:bg-sa-hover-strong rounded-sm p-0.5"
                                 >
-                                    <Check className="h-3 w-3" />
+                                    <X className="h-3 w-3" />
                                 </span>
                             )}
                             <ChevronsUpDown className="ml-1 h-3.5 w-3.5 shrink-0 opacity-50" />

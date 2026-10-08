@@ -106,7 +106,7 @@ export function TaskPropertyChips() {
                     value={currentProjectValue}
                     onChange={handleProjectChange}
                     allOptions={projectOptions}
-                    inputProps={{ name: "project", label: "" }}
+                    inputProps={{ name: "project", label: "", placeholder: "No project" }}
                     disabled={isDisabled || isLoadingProjects}
                     disableClearable
                     className="w-auto"
@@ -121,7 +121,7 @@ export function TaskPropertyChips() {
                     value={currentParentTaskValue}
                     onChange={handleParentTaskChange}
                     allOptions={parentTaskOptions}
-                    inputProps={{ name: "parentTask", label: "" }}
+                    inputProps={{ name: "parentTask", label: "", placeholder: "No parent" }}
                     disabled={isDisabled || isLoadingParentTasks || hasSubtasks}
                     className="w-auto"
                 />

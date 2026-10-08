@@ -37,14 +37,6 @@ export const BUILTIN_TABS: Array<{ key: BuiltinTab; label: string; icon: React.E
     { key: "comment", label: "Comment", icon: MessageSquare },
 ];
 
-export const TAB_COLORS: Record<string, { active: string }> = {
-    process: { active: "border-purple-500 text-purple-500" },
-    checklist: { active: "border-amber-500 text-amber-500" },
-    desc: { active: "border-emerald-500 text-emerald-500" },
-    comment: { active: "border-sky-500 text-sky-500" },
-    custom: { active: "border-cyan-500 text-cyan-500" },
-};
-
 // ── Version comment / collapsible ─────────────────────────────────────────────
 
 export const SECTION_META: Record<string, { label: string; icon: React.ElementType; color: string }> = {
