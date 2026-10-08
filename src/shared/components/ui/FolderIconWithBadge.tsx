@@ -1,5 +1,5 @@
 /**
- * FolderIconWithBadge - VS Code Material Icon Theme style folder icon
+ * FolderIconWithBadge - filled folder icon (calm neutral by default, user color when set)
  * Shows a filled folder icon with an optional badge icon at bottom-right
  */
 
@@ -19,7 +19,7 @@ export const FolderFilled: React.FC<FolderIconProps> = ({ className, color }) =>
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill={color}
+        style={{ fill: color }}
         className={className}
     >
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -34,7 +34,7 @@ export const FolderOpenFilled: React.FC<FolderIconProps> = ({ className, color }
         width="24"
         height="24"
         viewBox="0 0 24 24"
-        fill={color}
+        style={{ fill: color }}
         className={className}
     >
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -84,15 +84,15 @@ const sizeConfig = {
  */
 export function FolderIconWithBadge({
     iconType,
-    color = "#75beff",
+    color = "hsl(var(--muted-foreground) / 0.8)",
     isOpen = false,
     isDeleted = false,
     size = "md",
     className,
 }: FolderIconWithBadgeProps) {
     const config = sizeConfig[size];
-    const folderColor = isDeleted ? "#6b7280" : color;
-    const badgeColor = isDeleted ? "#9ca3af" : "#ffffff";
+    const folderColor = isDeleted ? "hsl(var(--muted-foreground) / 0.45)" : color;
+    const badgeColor = isDeleted ? "hsl(var(--muted-foreground))" : "hsl(var(--background))";
 
     // Check if we have a valid custom icon
     const hasCustomIcon = iconType && ICON_MAP[iconType as IconKey];
@@ -116,7 +116,7 @@ export function FolderIconWithBadge({
             ) : (
                 <FolderFilled className={`${config.folder} absolute inset-0`} color={folderColor} />
             )}
-            {/* Overlay: Custom icon at bottom-right, white color */}
+            {/* Overlay: Custom icon at bottom-right, punched out in background color */}
             <CustomIcon
                 className={`absolute ${config.badge}`}
                 style={{ color: badgeColor }}
