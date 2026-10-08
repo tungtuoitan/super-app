@@ -38,13 +38,13 @@ export function KGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps) {
     if (!knowledge) return null;
 
     return (
-        <div className="flex flex-col gap-0 p-4 w-full">
+        <div className="flex flex-col gap-0 p-6 w-full max-w-3xl">
             {/* Accent bar */}
-            <div className="h-1 rounded-full mb-4 bg-primary/40" />
+            <div className="h-0.5 w-8 rounded-full mb-5 bg-sa-amber" />
 
             {/* Name */}
             <div className="mb-4">
-                <Label className="text-[10px] text-left uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                <Label className="text-[11px] font-medium text-left uppercase tracking-wide text-muted-foreground mb-1.5 block">
                     Knowledge Name *
                 </Label>
                 <Input
@@ -58,7 +58,7 @@ export function KGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps) {
 
             {/* Description */}
             <div className="mb-4">
-                <Label className="text-[10px] text-left uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                <Label className="text-[11px] font-medium text-left uppercase tracking-wide text-muted-foreground mb-1.5 block">
                     Description
                 </Label>
                 <textarea
@@ -66,13 +66,13 @@ export function KGeneral({ knowledgeId, tabId }: KKnowledgeGeneralProps) {
                     onChange={(e) => handleFieldChange("description", e.target.value)}
                     placeholder="Short description..."
                     rows={12}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-muted-foreground"
+                    className="w-full rounded-lg border border-sa-border-strong bg-transparent px-3 py-2 text-[13px] leading-relaxed resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-muted-foreground/60"
                 />
             </div>
 
             {/* Image */}
             <div className="mb-6">
-                <Label className="text-[10px] text-left uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                <Label className="text-[11px] font-medium text-left uppercase tracking-wide text-muted-foreground mb-1.5 block">
                     Image
                 </Label>
                 <TrackIconPicker

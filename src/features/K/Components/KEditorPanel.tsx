@@ -25,11 +25,11 @@ import {KDailyReviewSession} from "./KDailyReviewSession/KDailyReviewSession";
 type KTab = "general" | "qflow" | "progress" | "markdown" | "qlist";
 
 const TABS: { id: KTab; label: string; icon: React.ReactNode }[] = [
-    { id: "general",  label: "GENERAL",    icon: <Settings className="h-4 w-4" /> },
-    { id: "progress", label: "K PROGRESS", icon: <BarChart2 className="h-4 w-4" /> },
-    { id: "qflow",    label: "Q FLOW",     icon: <GitBranch className="h-4 w-4" /> },
-    { id: "markdown", label: "MARKDOWN",   icon: <Hash className="h-4 w-4" /> },
-    { id: "qlist",    label: "Q LIST",     icon: <List className="h-4 w-4" /> },
+    { id: "general",  label: "General",    icon: <Settings className="h-3.5 w-3.5" /> },
+    { id: "progress", label: "K Progress", icon: <BarChart2 className="h-3.5 w-3.5" /> },
+    { id: "qflow",    label: "Q Flow",     icon: <GitBranch className="h-3.5 w-3.5" /> },
+    { id: "markdown", label: "Markdown",   icon: <Hash className="h-3.5 w-3.5" /> },
+    { id: "qlist",    label: "Q List",     icon: <List className="h-3.5 w-3.5" /> },
 ];
 
 export function KEditorPanel() {
@@ -279,19 +279,18 @@ export function KEditorPanel() {
     return (
         <CardContent className="relative flex flex-col flex-1 min-h-0 w-full p-0 h-full">
             {/* Tab bar */}
-            <div className="flex items-center border-b-2 border-primary/20 bg-muted/20 shrink-0">
-                <div className="flex flex-1">
+            <div className="flex items-center h-10 px-2 border-b border-sa-border shrink-0">
+                <div className="flex flex-1 items-center gap-1 min-w-0 overflow-x-auto">
                     {visibleTabs.map((t) => (
                         <button
                             key={t.id}
                             onClick={() => setActiveTab(t.id)}
                             disabled={t.id !== "general" && (isNew || (t.id === "progress" && selectedNodeId === null))}
                             className={cn(
-                                "relative flex items-center gap-2 px-5 py-3 text-xs font-bold transition-colors tracking-wider",
-                                "border-b-3 -mb-[2px]",
+                                "relative flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[13px] font-medium whitespace-nowrap transition-colors duration-100",
                                 activeTab === t.id
-                                    ? "border-primary text-primary bg-primary/5"
-                                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                                    ? "bg-sa-surface-2 text-foreground"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-sa-hover",
                                 t.id !== "general" && (isNew || (t.id === "progress" && selectedNodeId === null)) && "opacity-50 cursor-not-allowed",
                             )}
                         >
@@ -307,7 +306,7 @@ export function KEditorPanel() {
                         onClick={handleStartReview}
                         disabled={sessionLoading}
                         title={`Review ${totalReviewable} question${totalReviewable !== 1 ? "s" : ""}${dueCount > 0 ? ` (${dueCount} due)` : ""}`}
-                        className="mr-2 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border border-blue-700/60 bg-blue-900/20 text-blue-300 hover:bg-blue-900/40 hover:border-blue-600 transition-colors disabled:opacity-50"
+                        className="mr-2 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded-md bg-sa-amber text-sa-on-amber hover:bg-sa-amber/90 transition-colors duration-100 disabled:opacity-50"
                     >
                         {sessionLoading
                             ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -323,7 +322,7 @@ export function KEditorPanel() {
                         onClick={handleStartReviewAll}
                         disabled={sessionLoading}
                         title="Review every learning question across this knowledge"
-                        className="mr-2 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border border-purple-700/60 bg-purple-900/20 text-purple-300 hover:bg-purple-900/40 hover:border-purple-600 transition-colors disabled:opacity-50"
+                        className="mr-2 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded-md bg-sa-amber text-sa-on-amber hover:bg-sa-amber/90 transition-colors duration-100 disabled:opacity-50"
                     >
                         {sessionLoading
                             ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -340,12 +339,12 @@ export function KEditorPanel() {
                         disabled={statusUpdating}
                         title={isDraft ? "Set to Learning" : "Set to Draft"}
                         className={cn(
-                            "mr-3 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50",
+                            "mr-1 h-7 px-2.5 flex items-center gap-1.5 text-xs font-medium rounded-md border transition-colors duration-100 disabled:opacity-50",
                             isDraft
-                                ? "text-zinc-500 border-zinc-700/60 hover:text-zinc-300 hover:border-zinc-500"
+                                ? "text-muted-foreground border-sa-border-strong hover:bg-sa-hover hover:text-foreground"
                                 : isMaster
-                                    ? "text-amber-400 border-amber-800/50 bg-amber-900/10 hover:bg-amber-900/25"
-                                    : "text-indigo-400 border-indigo-800/50 bg-indigo-900/10 hover:bg-indigo-900/25",
+                                    ? "text-sa-amber-ink border-sa-amber/40 hover:bg-sa-amber/10"
+                                    : "text-foreground border-sa-border-strong hover:bg-sa-hover [&>svg]:text-sa-good",
                         )}
                     >
                         {statusUpdating
@@ -368,7 +367,7 @@ export function KEditorPanel() {
 
             {/* Review session overlay */}
             {reviewSession && !isNew && reviewNodeId !== null && (
-                <div className="absolute inset-0 z-50 bg-zinc-950 flex flex-col">
+                <div className="absolute inset-0 z-50 bg-background flex flex-col">
                     <KDailyReviewSession
                         nodeId={reviewNodeId}
                         quizTitle={reviewTitle}

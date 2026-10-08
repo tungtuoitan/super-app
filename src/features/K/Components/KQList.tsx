@@ -25,18 +25,18 @@ function AttachmentCard({ att, onUnlink, onView }: {
 }) {
     const langLabel = att.language ? (LANGUAGE_LABELS[att.language] ?? att.language) : "txt";
     return (
-        <div className="flex items-center gap-2 px-2 py-1.5 rounded border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800 group">
-            <Code2 className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+        <div className="flex items-center gap-2 px-2 h-8 rounded-lg border border-sa-border bg-sa-surface hover:bg-sa-hover group transition-colors duration-100">
+            <Code2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <button
                 type="button"
                 onClick={() => onView(att)}
-                className="flex-1 text-left text-xs font-mono text-zinc-300 hover:text-zinc-100 truncate transition-colors"
+                className="flex-1 text-left text-xs font-mono text-foreground/90 hover:text-foreground truncate transition-colors duration-100"
                 title="Click to view"
             >
                 {att.title}
             </button>
             {att.language && (
-                <span className="text-xs px-1 py-0.5 rounded bg-zinc-700 text-zinc-400 font-mono shrink-0">
+                <span className="text-[11px] px-1.5 rounded-md border border-sa-border-strong text-muted-foreground font-mono shrink-0">
                     {langLabel}
                 </span>
             )}
@@ -44,7 +44,7 @@ function AttachmentCard({ att, onUnlink, onView }: {
                 type="button"
                 onClick={onUnlink}
                 title="Unlink attachment"
-                className="text-zinc-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                className="text-muted-foreground hover:text-sa-danger transition-colors duration-100 opacity-0 group-hover:opacity-100"
             >
                 <X className="w-3.5 h-3.5" />
             </button>
@@ -91,35 +91,35 @@ function LinkPicker({ questionId, linkedIds, onLinked }: {
         <div className="relative">
             <button
                 onClick={handleOpen}
-                className="flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors"
+                className="flex items-center gap-1.5 px-2 h-7 text-xs rounded-md border border-sa-border-strong text-muted-foreground hover:bg-sa-hover hover:text-foreground transition-colors duration-100"
             >
                 <Link2 className="w-3 h-3" />
                 Link attachment
             </button>
             {open && (
-                <div className="absolute left-0 top-full mt-1 z-20 w-64 rounded border border-zinc-700 bg-zinc-900 shadow-lg">
+                <div className="absolute left-0 top-full mt-1 z-20 w-64 rounded-lg border border-sa-border-strong bg-popover sa-shadow-pop p-1">
                     {loading ? (
                         <div className="p-3 flex justify-center">
-                            <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
+                            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                         </div>
                     ) : available.length === 0 ? (
-                        <div className="p-3 text-xs text-zinc-500">No attachments available</div>
+                        <div className="p-3 text-xs text-muted-foreground">No attachments available</div>
                     ) : (
-                        <ul className="max-h-48 overflow-y-auto py-1">
+                        <ul className="max-h-48 overflow-y-auto">
                             {available.map(att => (
                                 <li key={att.id}>
                                     <button
                                         onClick={() => handleLink(att)}
                                         disabled={linking === att.id}
-                                        className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
+                                        className="w-full flex items-center gap-2 px-2 h-7 rounded-md text-left text-xs text-foreground hover:bg-sa-hover-strong transition-colors duration-100"
                                     >
                                         {linking === att.id
                                             ? <Loader2 className="w-3 h-3 animate-spin" />
-                                            : <Code2 className="w-3 h-3 text-zinc-500" />
+                                            : <Code2 className="w-3 h-3 text-muted-foreground" />
                                         }
                                         <span className="truncate font-mono">{att.title}</span>
                                         {att.language && (
-                                            <span className="ml-auto text-zinc-600">{LANGUAGE_LABELS[att.language] ?? att.language}</span>
+                                            <span className="ml-auto text-muted-foreground">{LANGUAGE_LABELS[att.language] ?? att.language}</span>
                                         )}
                                     </button>
                                 </li>
@@ -155,27 +155,23 @@ function QuestionRow({ question, onAttachmentsChanged, onView }: {
     };
 
     return (
-        <div className={cn("border-b border-zinc-800 last:border-b-0", isDeleted && "opacity-40")}>
+        <div className={cn("border-b border-sa-border last:border-b-0", isDeleted && "opacity-40")}>
             <div
-                className="flex items-start gap-2 px-4 py-2.5 hover:bg-zinc-800/40 cursor-pointer"
+                className="flex items-start gap-2 px-4 py-2 min-h-9 hover:bg-sa-hover cursor-pointer transition-colors duration-100"
                 onClick={() => setExpanded(e => !e)}
             >
-                <span className="mt-0.5 text-zinc-600 shrink-0">
+                <span className="mt-0.5 text-muted-foreground shrink-0">
                     {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                 </span>
-                <span className="flex-1 text-sm text-zinc-200 leading-snug">{question.question}</span>
+                <span className="flex-1 text-[13px] text-foreground leading-snug">{question.question}</span>
                 <div className="flex items-center gap-1.5 shrink-0 ml-2">
                     {atts.length > 0 && (
-                        <span className="text-xs px-1.5 py-0.5 rounded bg-blue-900/40 text-blue-400 font-mono border border-blue-800/50">
+                        <span className="text-[11px] px-1.5 rounded-md border border-sa-border-strong text-muted-foreground font-mono">
                             {atts.length} att
                         </span>
                     )}
-                    <span className={cn(
-                        "text-xs px-1.5 py-0.5 rounded border font-mono",
-                        isDraft
-                            ? "bg-zinc-800 text-zinc-500 border-zinc-700"
-                            : "bg-indigo-900/30 text-indigo-400 border-indigo-800/50"
-                    )}>
+                    <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <span className={cn("w-1.5 h-1.5 rounded-full", isDraft ? "border border-muted-foreground" : "bg-sa-good")} />
                         {isDraft ? "draft" : "learning"}
                     </span>
                 </div>
@@ -229,15 +225,15 @@ export function KQList({ nodeId }: Props) {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full bg-zinc-950">
-                <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+            <div className="flex items-center justify-center h-full bg-background">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
         );
     }
 
     if (questions.length === 0) {
         return (
-            <div className="flex items-center justify-center h-full bg-zinc-950 text-zinc-500 text-sm">
+            <div className="flex items-center justify-center h-full bg-background text-muted-foreground text-[13px]">
                 No questions
             </div>
         );
@@ -245,7 +241,7 @@ export function KQList({ nodeId }: Props) {
 
     return (
         <>
-            <div className="flex flex-col h-full bg-zinc-950 overflow-y-auto">
+            <div className="flex flex-col h-full bg-background overflow-y-auto">
                 {questions.map(q => (
                     <QuestionRow
                         key={q.id}
