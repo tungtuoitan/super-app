@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Send, Loader2 } from "lucide-react";
-import { RichTextEditor } from "@/shared";
+import { RichTextEditor, ShadcnButton } from "@/shared";
 import { useTaskCommentSelector } from "../Selectors/TaskCommentSelector";
 import { TaskCommentProvider, useTaskCommentStore } from "../store/useTaskComment.store";
 import { useTaskCommentHelper } from "../hooks/taskComment/useTaskComment.helper";
@@ -61,7 +61,7 @@ function TaskCommentInner() {
     }, [isLoadingComments]);
 
     const isNewTask = !selectedTask || selectedTask.id <= 0;
-    if (isNewTask) return <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
+    if (isNewTask) return <div className="flex h-[200px] items-center justify-center text-[13px] text-muted-foreground">
             Save the task first (Ctrl+S) to use this section.
         </div>
 
@@ -77,15 +77,15 @@ function TaskCommentInner() {
     return (
         <div className="flex flex-col h-full">
             <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto pr-1">
-                <div className="space-y-3">
+                <div className="space-y-2">
                     {isLoadingComments && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground py-4">
+                        <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             Loading comments...
                         </div>
                     )}
                     {!isLoadingComments && filteredComments.length === 0 && (
-                        <div className="text-xs text-muted-foreground py-4 text-center">
+                        <div className="py-4 text-center text-xs text-muted-foreground">
                             No comments yet. Share your thoughts, lessons, or notes.
                         </div>
                     )}
@@ -93,9 +93,9 @@ function TaskCommentInner() {
                         <CommentThread key={comment.id} commentId={comment.id} />
                     ))}
 
-                    <div className="border-t border-border pt-3 mt-1">
+                    <div className="mt-1 border-t border-sa-border pt-3">
                         <div className="space-y-2">
-                            <div className="border rounded-md overflow-hidden">
+                            <div className="overflow-hidden rounded-xl border border-sa-border transition-colors duration-100 focus-within:border-sa-border-strong">
                                 <RichTextEditor
                                     value={newComment}
                                     onChange={setNewComment}
@@ -109,14 +109,15 @@ function TaskCommentInner() {
                                 />
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] text-muted-foreground">Enter to submit</span>
-                                <button
+                                <span className="text-[11px] text-muted-foreground">Enter to submit</span>
+                                <ShadcnButton
+                                    size="sm"
                                     onClick={handleSubmit}
                                     disabled={!newComment.trim() || newComment === "<p></p>"}
-                                    className="flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
+                                    className="[&_svg]:size-3.5"
                                 >
-                                    <Send className="h-3 w-3" /> Send
-                                </button>
+                                    <Send /> Send
+                                </ShadcnButton>
                             </div>
                         </div>
                     </div>

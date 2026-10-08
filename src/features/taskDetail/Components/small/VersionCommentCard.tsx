@@ -57,8 +57,8 @@ export function VersionCommentCard({
     };
 
     return (
-        <div ref={cardRef} className="group rounded border border-border/50 bg-muted/10 px-3 py-2 space-y-2">
-            <div className="flex items-center gap-2">
+        <div ref={cardRef} className="group space-y-2 rounded-xl border border-sa-border bg-card px-3 py-2">
+            <div className="flex h-6 items-center gap-2">
                 <Icon className={cn("h-3.5 w-3.5", meta.color)} />
 
                 <div className="relative"
@@ -66,29 +66,29 @@ export function VersionCommentCard({
                     onMouseLeave={handleMouseLeave}
                 >
                     <span
-                        className={cn("text-xs font-medium cursor-pointer hover:underline", meta.color)}
+                        className={cn("cursor-pointer text-xs font-medium hover:underline", meta.color)}
                         onClick={handleToggleDiff}
                     >
                         {meta.label}
                     </span>
 
                     {hoverDiff && !showDiff && (
-                        <div className="absolute left-0 top-full mt-1 z-50 w-[400px] max-h-[300px] overflow-auto rounded border bg-popover shadow-lg p-2">
+                        <div className="sa-shadow-pop absolute left-0 top-full z-50 mt-1 max-h-[300px] w-[400px] overflow-auto rounded-lg border border-sa-border bg-popover p-2">
                             <SimpleDiff oldText={payload.oldText} newText={payload.newText}
                                 oldLabel="Before" newLabel="After" showImageDiff={isHtmlSection} stripHtml={isHtmlSection} />
                         </div>
                     )}
                 </div>
 
-                <span className="text-[10px] text-muted-foreground cursor-default" title={formatFullDate(createdAt)}>
+                <span className="cursor-default text-[11px] text-muted-foreground" title={formatFullDate(createdAt)}>
                     {timeAgo}
                 </span>
 
-                <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="ml-auto opacity-0 transition-opacity duration-100 group-hover:opacity-100">
                     <button onClick={handleToggleDiff} className={cn(
-                        "flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border transition-colors",
-                        showDiff ? "border-primary/40 text-primary bg-primary/10 !opacity-100"
-                            : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                        "flex h-6 items-center gap-1 rounded-md border px-2 text-[11px] transition-colors duration-100",
+                        showDiff ? "border-sa-border-strong bg-sa-hover-strong text-foreground !opacity-100"
+                            : "border-sa-border text-muted-foreground hover:bg-sa-hover hover:text-foreground",
                     )}>
                         <GitCompare className="h-3 w-3" />
                         {showDiff ? "Hide diff" : "Show diff"}

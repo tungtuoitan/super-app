@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
-import { RichTextEditor } from "@/shared";
+import { RichTextEditor, ShadcnButton } from "@/shared";
 
 export function ReplyInput({ onSubmit, onCancel }: { onSubmit: (c: string) => void; onCancel: () => void }) {
     const [text, setText] = useState("");
@@ -10,16 +10,16 @@ export function ReplyInput({ onSubmit, onCancel }: { onSubmit: (c: string) => vo
 
     return (
         <div className="space-y-2 mt-1">
-            <div className="border rounded-md overflow-hidden">
+            <div className="overflow-hidden rounded-xl border border-sa-border transition-colors duration-100 focus-within:border-sa-border-strong">
                 <RichTextEditor value={text} onChange={setText} placeholder="Write a reply... (Enter to send)" minHeight="72px" className="text-left" autoFocus onEnter={handleEnter} />
             </div>
             <div className="flex items-center gap-1.5">
-                <button onClick={() => { if (text.trim() && text !== "<p></p>") { onSubmit(text); setText(""); } }}
+                <ShadcnButton size="sm" onClick={() => { if (text.trim() && text !== "<p></p>") { onSubmit(text); setText(""); } }}
                     disabled={!text.trim() || text === "<p></p>"}
-                    className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40">
-                    <Send className="h-3 w-3" /> Reply
-                </button>
-                <button onClick={onCancel} className="text-xs px-2 py-1 rounded hover:bg-muted text-muted-foreground">Cancel</button>
+                    className="[&_svg]:size-3.5">
+                    <Send /> Reply
+                </ShadcnButton>
+                <ShadcnButton size="sm" variant="ghost" onClick={onCancel} className="text-muted-foreground">Cancel</ShadcnButton>
             </div>
         </div>
     );

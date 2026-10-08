@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Send, Reply, Edit2, Trash2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { RichTextEditor } from "@/shared";
+import { RichTextEditor, ShadcnButton } from "@/shared";
 import { useTaskCommentSelector } from "../../Selectors/TaskCommentSelector";
 import { useTaskCommentStore } from "../../store/useTaskComment.store";
 import { useTaskCommentHelper } from "../../hooks/taskComment/useTaskComment.helper";
@@ -39,8 +39,8 @@ export function CommentItem({ commentId, isReply }: { commentId: number; isReply
     // ── Editing mode ────────────────────────────────────────────────────────
     if (isEditing) {
         return (
-            <div className="rounded border border-primary/30 bg-muted/20 p-2 space-y-2">
-                <div className="border rounded-md overflow-hidden">
+            <div className="space-y-2 rounded-xl border border-sa-border-strong bg-card p-2">
+                <div className="overflow-hidden rounded-lg border border-sa-border">
                     <RichTextEditor
                         value={draftContent}
                         onChange={setDraftContent}
@@ -51,19 +51,16 @@ export function CommentItem({ commentId, isReply }: { commentId: number; isReply
                     />
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <button
+                    <ShadcnButton
+                        size="sm"
                         onClick={() => updateComment(commentId, draftContent)}
                         disabled={!draftContent.trim() || draftContent === "<p></p>"}
-                        className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
                     >
                         Save
-                    </button>
-                    <button
-                        onClick={cancelReplyOrEdit}
-                        className="text-xs px-2 py-1 rounded hover:bg-muted text-muted-foreground"
-                    >
+                    </ShadcnButton>
+                    <ShadcnButton size="sm" variant="ghost" onClick={cancelReplyOrEdit} className="text-muted-foreground">
                         Cancel
-                    </button>
+                    </ShadcnButton>
                 </div>
             </div>
         );
@@ -97,26 +94,26 @@ export function CommentItem({ commentId, isReply }: { commentId: number; isReply
     };
 
     return (
-        <div className="group rounded px-2 py-1.5 hover:bg-muted/30 transition-colors">
+        <div className="group rounded-lg px-2 py-1.5 transition-colors duration-100 hover:bg-sa-hover">
             <div className="flex items-start gap-2">
                 {$user.picture ? (
                     <img src={$user.picture} alt={displayName} className="h-5 w-5 rounded-full shrink-0 mt-0.5" />
                 ) : (
-                    <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <User className="h-3.5 w-3.5 text-primary" />
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sa-surface-2">
+                        <User className="h-3 w-3 text-muted-foreground" />
                     </div>
                 )}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-medium truncate">{displayName}</span>
+                        <span className="truncate text-xs font-medium text-foreground">{displayName}</span>
                         <span
-                            className="text-[10px] text-muted-foreground cursor-default"
+                            className="cursor-default text-[11px] text-muted-foreground"
                             title={formatFullDate(comment.createdAt)}
                         >
                             {timeAgo}
                         </span>
                         {wasEdited && (
-                            <span className="text-[10px] text-muted-foreground/60 italic">(edited)</span>
+                            <span className="text-[11px] text-muted-foreground/70">(edited)</span>
                         )}
                     </div>
                     <CollapsibleContent>
@@ -132,12 +129,12 @@ export function CommentItem({ commentId, isReply }: { commentId: number; isReply
                     </CollapsibleContent>
                 </div>
                 <div className={cn(
-                        "opacity-0 group-hover:opacity-100 flex items-center gap-0.5 shrink-0 transition-opacity",
+                        "flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-100 group-hover:opacity-100",
                     )}>
                         {!isReply && (
                             <button
                                 onClick={() => startReply(commentId)}
-                                className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                className="rounded-md p-1 text-muted-foreground transition-colors duration-100 hover:bg-sa-hover-strong hover:text-foreground"
                                 title="Reply"
                             >
                                 <Reply className="h-3 w-3" />
@@ -145,14 +142,14 @@ export function CommentItem({ commentId, isReply }: { commentId: number; isReply
                         )}
                         <button
                             onClick={() => startEdit(commentId, comment.content)}
-                            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                            className="rounded-md p-1 text-muted-foreground transition-colors duration-100 hover:bg-sa-hover-strong hover:text-foreground"
                             title="Edit"
                         >
                             <Edit2 className="h-3 w-3" />
                         </button>
                         <button
                             onClick={handleDeleteWithConfirmation}
-                            className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+                            className="rounded-md p-1 text-muted-foreground transition-colors duration-100 hover:bg-sa-danger/10 hover:text-sa-danger"
                             title="Delete"
                         >
                             <Trash2 className="h-3 w-3" />

@@ -34,7 +34,7 @@ export function CollapsibleContent({ children }: { children: React.ReactNode }) 
             {isOverflowing && (
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    className="relative z-10 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors mt-0.5"
+                    className="relative z-10 mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground transition-colors duration-100 hover:text-foreground"
                 >
                     {expanded ? (
                         <><ChevronUp className="h-3 w-3" /> Show less</>

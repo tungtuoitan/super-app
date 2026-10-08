@@ -23,13 +23,13 @@ function DiffImageThumb({ img, type }: { img: ImageInfo; type: "add" | "remove" 
 
     const isAdd = type === "add";
     return (
-        <div className={cn("flex items-center gap-2 rounded border px-2 py-1.5",
-            isAdd ? "border-green-500/40 bg-green-500/10" : "border-red-500/40 bg-red-500/10")}>
-            <span className={cn("text-[10px]", isAdd ? "text-green-400" : "text-red-400")}>
+        <div className={cn("flex items-center gap-2 rounded-lg border px-2 py-1.5",
+            isAdd ? "border-sa-good/35 bg-sa-good/10" : "border-sa-danger/35 bg-sa-danger/10")}>
+            <span className={cn("font-mono text-[11px]", isAdd ? "text-sa-good" : "text-sa-danger")}>
                 {isAdd ? "+" : "-"}
             </span>
             {blobUrl ? (
-                <img src={blobUrl} alt={`file-${img.fileId}`} className="h-12 max-w-[120px] object-cover rounded" />
+                <img src={blobUrl} alt={`file-${img.fileId}`} className="h-12 max-w-[120px] rounded-md object-cover" />
             ) : (
                 <span className="text-[10px] text-muted-foreground">Image #{img.fileId}</span>
             )}
@@ -48,8 +48,8 @@ function CopyButton({ text, label }: { text: string; label: string }) {
 
     return (
         <button onClick={handleCopy} title={`Copy ${label}`}
-            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-            {copied ? <Check className="h-2.5 w-2.5 text-green-400" /> : <Copy className="h-2.5 w-2.5" />}
+            className="flex h-6 items-center gap-1 rounded-md border border-sa-border px-1.5 text-[11px] text-muted-foreground transition-colors duration-100 hover:bg-sa-hover hover:text-foreground">
+            {copied ? <Check className="h-2.5 w-2.5 text-sa-good" /> : <Copy className="h-2.5 w-2.5" />}
             {label}
         </button>
     );
@@ -66,7 +66,7 @@ function InlineHighlight({ segments, side }: { segments: InlineSegment[]; side: 
                 return (
                     <span key={i} className={cn(
                         "rounded-sm",
-                        side === "old" ? "bg-red-500/30 text-red-300" : "bg-green-500/30 text-green-300",
+                        side === "old" ? "bg-sa-danger/25 text-sa-danger" : "bg-sa-good/25 text-sa-good",
                     )}>
                         {seg.text}
                     </span>
@@ -86,22 +86,22 @@ function DiffLineRow({ line, showUnchanged }: { line: DiffLine; showUnchanged: b
     return (
         <div className={cn(
             "flex leading-5 min-h-[20px] text-xs font-mono",
-            line.type === "add" && "bg-green-500/10 text-green-400",
-            line.type === "remove" && "bg-red-500/10 text-red-400",
-            isOldModify && "bg-red-500/10 text-red-400",
-            isNewModify && "bg-green-500/10 text-green-400",
+            line.type === "add" && "bg-sa-good/10 text-sa-good",
+            line.type === "remove" && "bg-sa-danger/10 text-sa-danger",
+            isOldModify && "bg-sa-danger/10 text-sa-danger",
+            isNewModify && "bg-sa-good/10 text-sa-good",
             line.type === "equal" && "text-muted-foreground/70",
         )}>
             {/* Old line number */}
             <span className={cn(
-                "w-8 shrink-0 select-none text-right pr-1 border-r border-border/40 text-[10px] leading-5",
+                "w-8 shrink-0 select-none text-right pr-1 border-r border-sa-border text-[10px] leading-5",
                 (line.type === "add" || isNewModify) ? "text-transparent" : "text-muted-foreground/40",
             )}>
                 {line.oldLineNo ?? ""}
             </span>
             {/* New line number */}
             <span className={cn(
-                "w-8 shrink-0 select-none text-right pr-1 border-r border-border/40 text-[10px] leading-5",
+                "w-8 shrink-0 select-none text-right pr-1 border-r border-sa-border text-[10px] leading-5",
                 (line.type === "remove" || isOldModify) ? "text-transparent" : "text-muted-foreground/40",
             )}>
                 {line.newLineNo ?? ""}
@@ -141,7 +141,7 @@ export function SimpleDiff({ oldText, newText, showImageDiff = false, onContentE
     const addCount = lines.filter((l) => l.type === "add" || (l.type === "modify" && l.side === "new")).length;
 
     if (!hasTextChanges && !hasImageChanges) {
-        return <div className="text-[10px] text-muted-foreground italic py-2">No differences found.</div>;
+        return <div className="py-2 text-[11px] text-muted-foreground">No differences found.</div>;
     }
 
     return (
@@ -154,12 +154,12 @@ export function SimpleDiff({ oldText, newText, showImageDiff = false, onContentE
             )}
 
             {hasTextChanges && (
-                <div className="rounded border border-border overflow-hidden">
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/40 border-b border-border">
-                        <span className="text-[10px] text-muted-foreground">
-                            <span className="text-red-400">−{removeCount}</span>
+                <div className="overflow-hidden rounded-lg border border-sa-border">
+                    <div className="flex h-8 items-center gap-2 border-b border-sa-border px-3">
+                        <span className="font-mono text-[11px] text-muted-foreground">
+                            <span className="text-sa-danger">−{removeCount}</span>
                             {" / "}
-                            <span className="text-green-400">+{addCount}</span>
+                            <span className="text-sa-good">+{addCount}</span>
                         </span>
                         <div className="ml-auto flex items-center gap-1.5">
                             <CopyButton text={displayOld} label="Old" />
@@ -168,7 +168,7 @@ export function SimpleDiff({ oldText, newText, showImageDiff = false, onContentE
                                 const next = !showUnchanged;
                                 setShowUnchanged(next);
                                 if (next && onContentExpand) requestAnimationFrame(() => onContentExpand());
-                            }} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+                            }} className="text-[11px] text-muted-foreground transition-colors duration-100 hover:text-foreground">
                                 {showUnchanged ? "Hide unchanged" : "Show all"}
                             </button>
                         </div>

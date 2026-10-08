@@ -13,11 +13,11 @@ export function CommentThread({ commentId }: { commentId: number }) {
     const replies = repliesByParentId.get(commentId) ?? [];
 
     return (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
             <CommentItem commentId={commentId} />
 
             {replies.length > 0 && (
-                <div className="ml-5 border-l-2 border-border pl-3 space-y-1.5">
+                <div className="ml-[18px] space-y-1 border-l border-sa-border pl-3">
                     {replies.map((reply) => (
                         <CommentItem key={reply.id} commentId={reply.id} isReply />
                     ))}
@@ -25,7 +25,7 @@ export function CommentThread({ commentId }: { commentId: number }) {
             )}
 
             {replyingTo === commentId && (
-                <div className="ml-5 pl-3">
+                <div className="ml-[18px] pl-3">
                     <ReplyInput
                         onSubmit={(content) => submitComment(content, commentId)}
                         onCancel={cancelReplyOrEdit}
