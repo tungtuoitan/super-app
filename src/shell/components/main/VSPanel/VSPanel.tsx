@@ -1,6 +1,6 @@
 import { X, Terminal } from "lucide-react";
-import { useState } from "react";
-import { Panel } from "react-resizable-panels";
+import { useRef, useState } from "react";
+import { Panel, type ImperativePanelHandle } from "react-resizable-panels";
 import { useDeviceStore, ConsoleTab } from "@/shared";
 import { TabNameList } from "./TabNameList";
 import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
@@ -8,6 +8,8 @@ import {useSideBarStore} from "@/shell/store/SideBar.store";
 import {useEditorTabBarHelper} from "@/shell/hooks/useEditorTabBar.helper";
 import {moduleRegistry} from "@/shell/moduleRegistry";
 import {PanelTabDefinition} from "@/shell/types/moduleRegistry.type";
+import { useCollapsiblePanelSync } from "@/shell/hooks/useCollapsiblePanel.headless";
+import { useConsoleSeen, usePanelTabRequest } from "@/shell/hooks/useConsoleSeen.headless";
 
 interface VSPanelProps {
     onClose: () => void;
@@ -41,7 +43,8 @@ export function VSPanel({ onClose }: VSPanelProps) {
     const allTabs: Array<PanelTabDefinition | { id: "console"; label: "Console"; icon: typeof Terminal }> = [
         ...modulePanelTabs,
         ...globalTabs,
-        ...(isMobile ? [{ id: "console" as const, label: "Console" as const, icon: Terminal }] : [])
+        // Console lives in the bottom panel on every device (#1514 — was a sidebar sub-panel on desktop)
+        { id: "console" as const, label: "Console" as const, icon: Terminal },
     ];
 
     const [activeTabId, setActiveTabId] = useState<string>(allTabs[0]?.id ?? "");
@@ -55,16 +58,23 @@ export function VSPanel({ onClose }: VSPanelProps) {
         setActiveTabId(id);
     };
 
+    // Collapse/expand the real Panel with isPanelVisible (closing used to leave an empty block)
+    const panelRef = useRef<ImperativePanelHandle>(null);
+    const panelReadyRef = useCollapsiblePanelSync(panelRef, isPanelVisible);
+    useConsoleSeen(isPanelVisible && resolvedTabId === "console");
+    usePanelTabRequest(changeTab);
+
     return (
         <Panel
+            ref={panelRef}
             id="bottom-panel"
             defaultSize={30}
             minSize={5}
             maxSize={60}
             collapsible
             collapsedSize={0}
-            onCollapse={() => setIsPanelVisible(false)}
-            onExpand={() => setIsPanelVisible(true)}
+            onCollapse={() => panelReadyRef.current && setIsPanelVisible(false)}
+            onExpand={() => panelReadyRef.current && setIsPanelVisible(true)}
         >
             {isPanelVisible && (
                 <div className="h-full border-t border-editor-border bg-editor-bg flex flex-col overflow-hidden">
@@ -82,7 +92,7 @@ export function VSPanel({ onClose }: VSPanelProps) {
                     </div>
 
                     <div className={`flex-1 overflow-auto ${resolvedTabId === "moving" || resolvedTabId === "console" ? "" : "p-3"}`}>
-                        {resolvedTabId === "console" && isMobile
+                        {resolvedTabId === "console"
                             ? <ConsoleTab />
                             : allTabs.filter((t): t is PanelTabDefinition => t.id === resolvedTabId && "Content" in t)
                                 .map((t) => <t.Content key={t.id} activeTab={activeTab} />)

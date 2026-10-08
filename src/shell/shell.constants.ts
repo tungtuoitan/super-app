@@ -10,6 +10,8 @@ export const shellConstants = {
     /** localStorage keys owned by the shell */
     storage: {
         tabPinnedState: "tabPinnedState",
+        /** Bottom panel (Console / module panels) open state — collapsed by default (#1514) */
+        panelVisible: "shellPanelVisible",
     } as const,
 
     navigation: {

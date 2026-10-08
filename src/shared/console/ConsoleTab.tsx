@@ -9,20 +9,20 @@ export function ConsoleTab() {
 
     return (
         <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between px-3 py-2 border-b border-editor-border">
-                <span className="text-[13px] font-medium text-editor-fg">Console Messages</span>
-                {messages.length > 0 && (
+            {/* #1514: the panel tab already says "Console" — only the Clear action here */}
+            {messages.length > 0 && (
+                <div className="flex items-center justify-end px-2 py-1 border-b border-editor-border">
                     <button
                         onClick={clearMessages}
-                        className="text-xs px-2 py-1 text-muted-foreground hover:text-editor-fg hover:bg-editor-hover rounded transition-colors"
+                        className="text-xs px-2 py-1 text-muted-foreground hover:text-editor-fg hover:bg-editor-hover rounded-md transition-colors"
                     >
                         Clear All
                     </button>
-                )}
-            </div>
+                </div>
+            )}
             <div className="flex-1 overflow-auto p-2 space-y-1">
                 {messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-muted-foreground text-sm">No messages</div>
+                    <div className="flex items-center justify-center h-full text-muted-foreground text-[13px]">No messages</div>
                 ) : (
                     messages.map((msg) => (
                         <ConsoleMessage

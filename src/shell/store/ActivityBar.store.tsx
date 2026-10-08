@@ -6,6 +6,8 @@
  */
 
 import React, { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
+import { storageService } from "@/shared";
+import { shellConstants } from "../shell.constants";
 
 export interface ActivityBarContextData {
     // Dialog states
@@ -22,6 +24,12 @@ export interface ActivityBarContextData {
     /** Homepage covering the workbench (desktop). Open at startup; the logo toggles it. */
     isHomeOpen: boolean;
     setIsHomeOpen: Dispatch<SetStateAction<boolean>>;
+    /** Id of the last console message the user has seen (bottom panel Console tab) */
+    consoleSeenId: string | null;
+    setConsoleSeenId: Dispatch<SetStateAction<string | null>>;
+    /** Panel tab to switch to on next render (e.g. "console" when opened with unread errors) */
+    panelTabRequest: string | null;
+    setPanelTabRequest: Dispatch<SetStateAction<string | null>>;
 }
 
 export const activityBarContextDefaultValue: ActivityBarContextData = {
@@ -38,6 +46,10 @@ export const activityBarContextDefaultValue: ActivityBarContextData = {
     setIsPanelVisible: () => {},
     isHomeOpen: false,
     setIsHomeOpen: () => {},
+    consoleSeenId: null,
+    setConsoleSeenId: () => {},
+    panelTabRequest: null,
+    setPanelTabRequest: () => {},
 };
 
 const ActivityBarContext = createContext<ActivityBarContextData>(activityBarContextDefaultValue);
@@ -57,8 +69,17 @@ export const ActivityBarProvider: React.FC<React.PropsWithChildren<unknown>> = (
 
     // Layout states
     const [isSideBarVisible, setIsSideBarVisible] = useState(true);
-    const [isPanelVisible, setIsPanelVisible] = useState(true);
+    // Bottom panel: collapsed by default, remembered across sessions (#1514)
+    const [isPanelVisible, setPanelVisibleState] = useState<boolean>(() => storageService.get<boolean>(shellConstants.storage.panelVisible) ?? false);
+    const setIsPanelVisible: Dispatch<SetStateAction<boolean>> = (value) =>
+        setPanelVisibleState((prev) => {
+            const next = typeof value === "function" ? value(prev) : value;
+            storageService.set(shellConstants.storage.panelVisible, next);
+            return next;
+        });
     const [isHomeOpen, setIsHomeOpen] = useState(true);
+    const [consoleSeenId, setConsoleSeenId] = useState<string | null>(null);
+    const [panelTabRequest, setPanelTabRequest] = useState<string | null>(null);
 
     return (
         <ActivityBarContext.Provider
@@ -76,6 +97,10 @@ export const ActivityBarProvider: React.FC<React.PropsWithChildren<unknown>> = (
                 setIsPanelVisible,
                 isHomeOpen,
                 setIsHomeOpen,
+                consoleSeenId,
+                setConsoleSeenId,
+                panelTabRequest,
+                setPanelTabRequest,
             }}
         >
             {children}
