@@ -117,8 +117,8 @@ export function KMarkdownImportPanel({ knowledgeId, initialParentNode, onSuccess
     return (
         <div className="flex flex-col w-full max-w-2xl mx-auto px-6 py-6 gap-5">
             <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-zinc-400" />
-                <h2 className="text-sm font-semibold text-zinc-300">Import from Markdown</h2>
+                <FileText className="w-4 h-4 text-muted-foreground" />
+                <h2 className="text-[15px] font-medium text-foreground">Import from Markdown</h2>
             </div>
 
             <GenericAutoComplete
@@ -129,28 +129,28 @@ export function KMarkdownImportPanel({ knowledgeId, initialParentNode, onSuccess
 
             {/* Markdown input */}
             <div className="flex flex-col gap-1.5">
-                <p className="text-xs font-medium text-zinc-400">Questions</p>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Questions</p>
                 <textarea
                     value={markdown}
                     onChange={(e) => { setMarkdown(e.target.value); if (state.insertedCount !== null || state.error) reset(); }}
                     disabled={state.isLoading}
                     placeholder={"# Node name\n\n## Section (optional)\n### Question?\nAnswer here\n\n### Another question?\nAnswer here"}
-                    className="min-h-[180px] w-full resize-none rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-500 font-mono"
+                    className="min-h-[180px] w-full resize-none rounded-lg border border-sa-border-strong bg-sa-surface px-3 py-2.5 text-[13px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring font-mono"
                     spellCheck={false}
                 />
 
                 {issues.length > 0 && (
                     <div className="flex flex-col gap-1">
                         {errors.map((issue, idx) => (
-                            <div key={idx} className="flex items-start gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-1.5">
-                                <XCircle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-red-400" />
-                                <span className="text-xs text-red-300">{issue.message}</span>
+                            <div key={idx} className="flex items-start gap-2 rounded-lg border border-sa-danger/35 px-3 py-1.5">
+                                <XCircle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-sa-danger" />
+                                <span className="text-xs text-foreground">{issue.message}</span>
                             </div>
                         ))}
                         {warnings.map((issue, idx) => (
-                            <div key={idx} className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-1.5">
-                                <TriangleAlert className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-400" />
-                                <span className="text-xs text-amber-300">{issue.message}</span>
+                            <div key={idx} className="flex items-start gap-2 rounded-lg border border-sa-amber/35 px-3 py-1.5">
+                                <TriangleAlert className="w-3.5 h-3.5 mt-0.5 shrink-0 text-sa-amber" />
+                                <span className="text-xs text-foreground">{issue.message}</span>
                             </div>
                         ))}
                     </div>
@@ -164,20 +164,20 @@ export function KMarkdownImportPanel({ knowledgeId, initialParentNode, onSuccess
                     {state.isLoading ? "Importing…" : "Import"}
                 </Button>
                 {state.insertedCount !== null && (
-                    <span className="flex items-center gap-1.5 text-xs text-emerald-400">
+                    <span className="flex items-center gap-1.5 text-xs text-sa-good">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         Done
                     </span>
                 )}
                 {state.error && (
-                    <span className="flex items-center gap-1.5 text-xs text-red-400">
+                    <span className="flex items-center gap-1.5 text-xs text-sa-danger">
                         <AlertCircle className="w-3.5 h-3.5" />
                         {state.error}
                     </span>
                 )}
             </div>
 
-            <p className="text-[11px] text-zinc-600">
+            <p className="text-[11px] text-muted-foreground">
                 Format: # node name &nbsp;·&nbsp; ## section (optional) &nbsp;·&nbsp; ### question
             </p>
         </div>

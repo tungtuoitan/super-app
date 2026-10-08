@@ -19,9 +19,9 @@ function CharDiffSide({ segments, side }: { segments: CharSegment[]; side: "old"
             {segments.map((s, i) => {
                 if (s.type === "equal") return <span key={i}>{s.text}</span>;
                 if (side === "old" && s.type === "remove")
-                    return <span key={i} className="bg-red-500/30 text-red-300 rounded-sm">{s.text}</span>;
+                    return <span key={i} className="bg-sa-danger/25 text-sa-danger rounded-sm">{s.text}</span>;
                 if (side === "new" && s.type === "add")
-                    return <span key={i} className="bg-green-500/30 text-green-300 rounded-sm">{s.text}</span>;
+                    return <span key={i} className="bg-sa-good/25 text-sa-good rounded-sm">{s.text}</span>;
                 return null;
             })}
         </span>
@@ -33,11 +33,11 @@ function InfoRow({ entry, side }: { entry: KRepoCompareEntry; side: "repo" | "db
     const Icon  = ENTITY_ICON[entry.entityType];
     const isRepo = side === "repo";
     return (
-        <div className="rounded-lg border border-border bg-muted/10 p-2.5 space-y-1.5">
+        <div className="rounded-lg border border-sa-border p-2.5 space-y-1.5">
             <div className="flex items-center gap-2 text-xs">
                 {isRepo
-                    ? <Plus  className="w-3.5 h-3.5 text-green-400 shrink-0" />
-                    : <Minus className="w-3.5 h-3.5 text-red-400 shrink-0" />}
+                    ? <Plus  className="w-3.5 h-3.5 text-sa-good shrink-0" />
+                    : <Minus className="w-3.5 h-3.5 text-sa-danger shrink-0" />}
                 <Icon className="w-3 h-3 text-muted-foreground shrink-0" />
                 <span className="font-medium truncate flex-1">{entry.name}</span>
                 <span className="text-[10px] text-muted-foreground capitalize shrink-0">{entry.entityType}</span>
@@ -45,7 +45,7 @@ function InfoRow({ entry, side }: { entry: KRepoCompareEntry; side: "repo" | "db
             {(isRepo ? entry.newText : entry.oldText) && (
                 <pre className={cn(
                     "text-[11px] whitespace-pre-wrap break-words max-h-24 overflow-y-auto pl-5 rounded-sm",
-                    isRepo ? "text-green-300 bg-green-500/10" : "text-red-300 bg-red-500/10",
+                    isRepo ? "text-sa-good bg-sa-good/10" : "text-sa-danger bg-sa-danger/10",
                 )}>
                     {isRepo ? entry.newText : entry.oldText}
                 </pre>
@@ -69,11 +69,9 @@ function splitStatusTag(text: string | null): { status: "active" | "draft" | nul
 function StatusBadge({ status }: { status: "active" | "draft" }) {
     return (
         <span className={cn(
-            "inline-block px-1.5 py-0 rounded text-[10px] font-medium border mr-1",
-            status === "active"
-                ? "bg-green-500/15 text-green-400 border-green-500/30"
-                : "bg-red-500/15 text-red-400 border-red-500/30",
+            "inline-flex items-center gap-1 px-1.5 rounded-md text-[10px] font-medium border border-sa-border-strong text-muted-foreground mr-1",
         )}>
+            <span className={cn("w-1.5 h-1.5 rounded-full", status === "active" ? "bg-sa-good" : "border border-muted-foreground")} />
             {status}
         </span>
     );
@@ -94,7 +92,7 @@ function ConflictRow({ entry }: { entry: KRepoCompareEntry }) {
     );
 
     return (
-        <div className="rounded-lg border border-border bg-muted/10 p-3 space-y-2">
+        <div className="rounded-xl border border-sa-border p-3 space-y-2">
             <div className="flex items-center gap-2 text-sm">
                 <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <span className="font-medium truncate flex-1">{entry.name}</span>
@@ -103,7 +101,7 @@ function ConflictRow({ entry }: { entry: KRepoCompareEntry }) {
 
             <div className="grid grid-cols-2 gap-2">
                 {/* Repo (incoming) — left */}
-                <div className="rounded border border-border/50 p-2 space-y-1">
+                <div className="rounded-lg border border-sa-border p-2 space-y-1">
                     <div className="flex items-center gap-1.5">
                         <GitBranch className="w-3 h-3 text-muted-foreground" />
                         <span className="text-[10px] text-muted-foreground font-medium">Repo (incoming)</span>
@@ -117,7 +115,7 @@ function ConflictRow({ entry }: { entry: KRepoCompareEntry }) {
                 </div>
 
                 {/* DB (current, priority) — right */}
-                <div className="rounded border border-border/50 p-2 space-y-1">
+                <div className="rounded-lg border border-sa-border p-2 space-y-1">
                     <div className="flex items-center gap-1.5">
                         <Database className="w-3 h-3 text-muted-foreground" />
                         <span className="text-[10px] text-muted-foreground font-medium">DB (current · priority)</span>
@@ -146,7 +144,7 @@ function Section({
         <div className="space-y-1.5">
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 {title}
-                <span className="px-1.5 py-0 rounded bg-muted border border-border text-[10px] text-foreground">{count}</span>
+                <span className="px-1.5 rounded-md border border-sa-border-strong font-mono text-[10px] text-foreground">{count}</span>
             </div>
             <div className="space-y-2 pl-1">{children}</div>
         </div>
@@ -203,7 +201,7 @@ export function KRepoConflictDialog({
             <DialogContent className="max-w-3xl w-full max-h-[88vh] flex flex-col">
                 <DialogHeader className="shrink-0">
                     <DialogTitle className="flex items-center gap-2">
-                        <GitMerge className="w-4 h-4 text-primary" />
+                        <GitMerge className="w-4 h-4 text-sa-amber" />
                         Review Changes ({entries.length})
                     </DialogTitle>
                     <DialogDescription>
@@ -228,18 +226,18 @@ export function KRepoConflictDialog({
                     </Section>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 pt-2 border-t border-border">
+                <div className="flex items-center gap-2 shrink-0 pt-2 border-t border-sa-border">
                     <button
                         onClick={() => onOpenChange(false)}
                         disabled={isResolving}
-                        className="ml-auto px-4 py-1.5 rounded-lg border border-border text-sm hover:bg-accent transition-all disabled:opacity-50"
+                        className="ml-auto px-3 h-8 rounded-lg border border-sa-border-strong text-[13px] hover:bg-sa-hover transition-colors duration-100 disabled:opacity-50"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleApply}
                         disabled={isResolving}
-                        className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1.5 px-3 h-8 rounded-lg bg-primary text-primary-foreground text-[13px] hover:bg-primary/90 transition-colors duration-100 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isResolving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                         Push to DB

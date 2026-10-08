@@ -299,7 +299,7 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-full bg-[#09090B]">
-                <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
         );
     }
@@ -309,11 +309,10 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
             {/* Validation indicator */}
             <button
                 onClick={handleValidationClick}
-                className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 px-2 py-1 rounded border transition-colors"
-                style={validationErrors.length > 0
-                    ? { borderColor: "#7f1d1d", backgroundColor: "#450a0a", color: "#f87171" }
-                    : { borderColor: "#14532d", backgroundColor: "#052e16", color: "#4ade80" }
-                }
+                className={`absolute bottom-4 right-4 z-10 flex items-center gap-1.5 px-2 h-7 rounded-md border bg-popover transition-colors duration-100 ${validationErrors.length > 0
+                    ? "border-sa-danger/40 text-sa-danger hover:bg-sa-danger/10"
+                    : "border-sa-good/30 text-sa-good hover:bg-sa-good/10"
+                }`}
                 title={validationErrors.length > 0
                     ? `${validationErrors.length} format error(s) — click to log`
                     : "Format OK"
@@ -337,7 +336,7 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
                 options={EDITOR_OPTIONS}
                 loading={
                     <div className="flex items-center justify-center h-full bg-[#09090B]">
-                        <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                     </div>
                 }
             />

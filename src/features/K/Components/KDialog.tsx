@@ -195,7 +195,7 @@ export function KDialog() {
         <Dialog open={isNodeDialogOpen} onOpenChange={(newOpen) => !newOpen && handleClose()}>
             <DialogContent className="sm:max-w-[550px] rounded-xl">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">{mode === "edit" ? `Edit ${itemLabel}` : `Create ${itemLabel}`}</DialogTitle>
+                    <DialogTitle className="text-lg font-medium">{mode === "edit" ? `Edit ${itemLabel}` : `Create ${itemLabel}`}</DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-6">
@@ -314,39 +314,39 @@ export function KDialog() {
 
                     {/* Attachments — edit mode only */}
                     {mode === "edit" && editingNode && (
-                        <div className="border border-zinc-700 rounded-lg overflow-hidden">
+                        <div className="border border-sa-border rounded-xl overflow-hidden">
                             <button
                                 type="button"
                                 onClick={() => setAttSectionOpen(o => !o)}
-                                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 transition-colors"
+                                className="w-full flex items-center justify-between px-3 h-9 text-[11px] font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors duration-100"
                             >
                                 <span>Attachments {nodeAttachments.length > 0 && `(${nodeAttachments.length})`}</span>
                                 {attSectionOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                             </button>
 
                             {attSectionOpen && (
-                                <div className="px-3 pb-3 space-y-2 border-t border-zinc-700">
+                                <div className="px-3 pb-3 space-y-2 border-t border-sa-border">
                                     {nodeAttachments.length === 0 && (
-                                        <p className="text-xs text-zinc-500 pt-2">No attachments linked to this node.</p>
+                                        <p className="text-xs text-muted-foreground pt-2">No attachments linked to this node.</p>
                                     )}
                                     {nodeAttachments.map(att => (
                                         <div key={att.id} className="flex items-center gap-2 pt-2">
-                                            <Code2 className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                                            <Code2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                                             <button
                                                 type="button"
                                                 onClick={() => setViewingAtt(att)}
-                                                className="flex-1 text-left text-xs font-mono text-zinc-300 hover:text-zinc-100 truncate transition-colors"
+                                                className="flex-1 text-left text-xs font-mono text-foreground/90 hover:text-foreground truncate transition-colors duration-100"
                                                 title="Click to view"
                                             >
                                                 {att.title}
                                             </button>
                                             {att.language && (
-                                                <span className="text-xs px-1 py-0.5 rounded bg-zinc-700 text-zinc-400 font-mono">{att.language}</span>
+                                                <span className="text-[11px] px-1.5 rounded-md border border-sa-border-strong text-muted-foreground font-mono">{att.language}</span>
                                             )}
                                             <button
                                                 type="button"
                                                 onClick={() => handleUnlinkFromNode(att)}
-                                                className="text-zinc-500 hover:text-red-400 transition-colors"
+                                                className="text-muted-foreground hover:text-sa-danger transition-colors duration-100"
                                             >
                                                 <X className="w-3.5 h-3.5" />
                                             </button>
@@ -358,17 +358,17 @@ export function KDialog() {
                                         <button
                                             type="button"
                                             onClick={() => { setAttPickerOpen(o => !o); loadAttPool(); }}
-                                            className="flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors"
+                                            className="flex items-center gap-1.5 px-2 h-7 text-xs rounded-md border border-sa-border-strong text-muted-foreground hover:bg-sa-hover hover:text-foreground transition-colors duration-100"
                                         >
                                             <Link2 className="w-3 h-3" />
                                             Link attachment
                                         </button>
                                         {attPickerOpen && (
-                                            <div className="absolute left-0 top-full mt-1 z-20 w-64 rounded border border-zinc-700 bg-zinc-900 shadow-lg">
+                                            <div className="absolute left-0 top-full mt-1 z-20 w-64 rounded-lg border border-sa-border-strong bg-popover sa-shadow-pop p-1">
                                                 {attPool.length === 0 ? (
-                                                    <div className="p-3 text-xs text-zinc-500">No attachments available</div>
+                                                    <div className="p-3 text-xs text-muted-foreground">No attachments available</div>
                                                 ) : (
-                                                    <ul className="max-h-48 overflow-y-auto py-1">
+                                                    <ul className="max-h-48 overflow-y-auto">
                                                         {attPool
                                                             .filter(a => !nodeAttachments.some(n => n.id === a.id))
                                                             .map(att => (
@@ -377,11 +377,11 @@ export function KDialog() {
                                                                         type="button"
                                                                         onClick={() => handleLinkToNode(att)}
                                                                         disabled={linkingAttId === att.id}
-                                                                        className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
+                                                                        className="w-full flex items-center gap-2 px-2 h-7 rounded-md text-left text-xs text-foreground hover:bg-sa-hover-strong transition-colors duration-100"
                                                                     >
                                                                         {linkingAttId === att.id
                                                                             ? <Loader2 className="w-3 h-3 animate-spin" />
-                                                                            : <Code2 className="w-3 h-3 text-zinc-500" />
+                                                                            : <Code2 className="w-3 h-3 text-muted-foreground" />
                                                                         }
                                                                         <span className="truncate font-mono">{att.title}</span>
                                                                     </button>
