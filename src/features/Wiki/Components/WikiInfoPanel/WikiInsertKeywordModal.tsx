@@ -142,16 +142,16 @@ export default function WikiInsertKeywordModal({ onClose }: Props) {
 
     return (
         <div
-            className="fixed inset-0 text-left bg-black/50 backdrop-blur-sm z-[1000000000000] flex items-center justify-center"
+            className="fixed inset-0 text-left bg-background/70 backdrop-blur-sm z-[1000000000000] flex items-center justify-center"
             onKeyDown={handleKeyDown}
         >
-            <div className="bg-zinc-900 border border-white/[0.08] rounded-2xl w-[520px] max-h-[82vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="bg-popover border border-sa-border-strong rounded-xl w-[520px] max-h-[82vh] flex flex-col sa-shadow-pop overflow-hidden">
 
                 {/* Header */}
-                <div className="px-5 pt-5 pb-3 flex items-start justify-between flex-shrink-0 border-b border-white/[0.06]">
+                <div className="px-5 pt-5 pb-3 flex items-start justify-between flex-shrink-0 border-b border-sa-border">
                     <div>
-                        <h2 className="text-[15px] font-semibold text-zinc-100 tracking-tight">Add Keywords</h2>
-                        <p className="text-xs text-zinc-500 mt-0.5">
+                        <h2 className="text-[15px] font-medium text-foreground tracking-tight">Add Keywords</h2>
+                        <p className="text-xs text-muted-foreground mt-0.5">
                             {validEntries.length > 0
                                 ? `${validEntries.length} keyword${validEntries.length > 1 ? "s" : ""} will be created`
                                 : "Define keywords and their synonyms"}
@@ -159,13 +159,13 @@ export default function WikiInsertKeywordModal({ onClose }: Props) {
                     </div>
                     <div className="flex items-center gap-2">
                         {/* Mode toggle */}
-                        <div className="flex items-center bg-zinc-800 rounded-lg p-0.5 border border-white/[0.06]">
+                        <div className="flex items-center bg-sa-surface-2 rounded-lg p-0.5 border border-sa-border">
                             <button
                                 onClick={() => setMode("text")}
                                 className={`flex items-center gap-1.5 h-6 px-2.5 rounded-md text-[11px] font-medium transition-colors ${
                                     mode === "text"
-                                        ? "bg-zinc-700 text-zinc-100"
-                                        : "text-zinc-500 hover:text-zinc-300"
+                                        ? "bg-sa-hover-strong text-foreground"
+                                        : "text-muted-foreground hover:text-foreground"
                                 }`}
                             >
                                 <AlignLeft className="w-3 h-3" /> Text
@@ -174,8 +174,8 @@ export default function WikiInsertKeywordModal({ onClose }: Props) {
                                 onClick={() => setMode("form")}
                                 className={`flex items-center gap-1.5 h-6 px-2.5 rounded-md text-[11px] font-medium transition-colors ${
                                     mode === "form"
-                                        ? "bg-zinc-700 text-zinc-100"
-                                        : "text-zinc-500 hover:text-zinc-300"
+                                        ? "bg-sa-hover-strong text-foreground"
+                                        : "text-muted-foreground hover:text-foreground"
                                 }`}
                             >
                                 <List className="w-3 h-3" /> Form
@@ -183,7 +183,7 @@ export default function WikiInsertKeywordModal({ onClose }: Props) {
                         </div>
                         <button
                             onClick={onClose}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+                            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-sa-hover-strong text-muted-foreground hover:text-foreground transition-colors duration-100"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -215,21 +215,21 @@ export default function WikiInsertKeywordModal({ onClose }: Props) {
                 </div>
 
                 {/* Footer */}
-                <div className="px-5 py-3.5 border-t border-white/[0.06] flex items-center justify-between flex-shrink-0">
-                    <span className="text-[10px] text-zinc-600">
+                <div className="px-5 py-3.5 border-t border-sa-border flex items-center justify-between flex-shrink-0">
+                    <span className="text-[10px] text-muted-foreground/70">
                         {mode === "text" ? "# keyword  - synonym" : "Enter → next row"}
                     </span>
                     <div className="flex gap-2">
                         <button
                             onClick={onClose}
-                            className="h-8 px-3.5 rounded-lg bg-zinc-800 text-zinc-400 text-xs font-medium hover:bg-zinc-700 hover:text-zinc-200 transition-colors"
+                            className="h-8 px-3.5 rounded-lg border border-sa-border-strong text-foreground text-xs font-medium hover:bg-sa-hover-strong hover:text-foreground transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSave}
                             disabled={validEntries.length === 0 || isSaving}
-                            className="h-8 px-4 rounded-lg bg-violet-600 text-white text-xs font-semibold hover:bg-violet-500 disabled:opacity-40 transition-colors flex items-center gap-1.5"
+                            className="h-8 px-4 rounded-lg bg-sa-amber text-sa-on-amber text-xs font-medium hover:bg-sa-amber/90 disabled:opacity-40 transition-colors flex items-center gap-1.5"
                         >
                             {isSaving && <Loader2 className="w-3 h-3 animate-spin" />}
                             {validEntries.length > 1 ? `Add ${validEntries.length} keywords` : "Add keyword"}
@@ -261,22 +261,22 @@ function TextMode({ textareaRef, mdText, setMdText, parsedEntries, existingNames
                 <textarea
                     ref={textareaRef}
                     autoFocus
-                    className="w-full h-48 bg-zinc-800 border border-white/[0.08] rounded-xl px-4 py-3 font-mono text-[12px] text-zinc-200 resize-none outline-none focus:border-violet-500/60 leading-relaxed placeholder:text-zinc-600 transition-colors"
+                    className="w-full h-48 bg-sa-surface-2 border border-sa-border rounded-xl px-4 py-3 font-mono text-[12px] text-foreground resize-none outline-none focus:border-ring leading-relaxed placeholder:text-muted-foreground transition-colors"
                     placeholder={PLACEHOLDER}
                     value={mdText}
                     onChange={e => setMdText(e.target.value)}
                     spellCheck={false}
                 />
-                <p className="text-[10px] text-zinc-600 mt-1.5">
-                    <span className="text-zinc-400 font-mono"># keyword</span> để thêm keyword&ensp;·&ensp;
-                    <span className="text-zinc-400 font-mono">- synonym</span> để thêm synonym cho keyword phía trên
+                <p className="text-[10px] text-muted-foreground/70 mt-1.5">
+                    <span className="text-muted-foreground font-mono"># keyword</span> để thêm keyword&ensp;·&ensp;
+                    <span className="text-muted-foreground font-mono">- synonym</span> để thêm synonym cho keyword phía trên
                 </p>
             </div>
 
             {/* Parsed preview */}
             {parsedEntries.length > 0 && (
                 <div className="px-5 pb-4 flex flex-col gap-1.5">
-                    <div className="text-[10px] text-zinc-600 font-medium uppercase tracking-wider mb-0.5">
+                    <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide mb-0.5">
                         Preview — {parsedEntries.length} parsed
                     </div>
                     {parsedEntries.map((entry, i) => {
@@ -291,22 +291,22 @@ function TextMode({ textareaRef, mdText, setMdText, parsedEntries, existingNames
                                 key={i}
                                 className={`flex items-start gap-2 px-3 py-2 rounded-lg border ${
                                     invalid
-                                        ? "border-red-500/20 bg-red-950/20"
-                                        : "border-white/[0.05] bg-zinc-800/50"
+                                        ? "border-sa-danger/20 bg-sa-danger/10"
+                                        : "border-sa-border bg-sa-surface-2"
                                 }`}
                             >
-                                <span className={`text-[12px] font-semibold flex-shrink-0 ${invalid ? "text-red-400" : "text-zinc-200"}`}>
+                                <span className={`text-[12px] font-semibold flex-shrink-0 ${invalid ? "text-sa-danger" : "text-foreground"}`}>
                                     {entry.name}
                                 </span>
                                 {invalid && (
-                                    <span className="text-[10px] text-red-400 self-center">
+                                    <span className="text-[10px] text-sa-danger self-center">
                                         {isDupe ? "already exists" : "duplicate"}
                                     </span>
                                 )}
                                 {entry.synonyms.length > 0 && !invalid && (
                                     <div className="flex flex-wrap gap-1 mt-px">
                                         {entry.synonyms.map(s => (
-                                            <span key={s} className="h-4 px-1.5 bg-zinc-700/60 rounded-full text-[10px] text-zinc-400">
+                                            <span key={s} className="h-4 px-1.5 border border-sa-border-strong rounded-md text-[10px] text-muted-foreground">
                                                 {s}
                                             </span>
                                         ))}
@@ -343,13 +343,13 @@ function FormMode({ listRef, rows, keywords, updateRow, removeRow, addRow, addSy
                 const isInvalid = isDupe || batchDupe;
 
                 return (
-                    <div key={row.id} className="bg-zinc-800/60 border border-white/[0.06] rounded-xl p-3 flex flex-col gap-2">
+                    <div key={row.id} className="bg-sa-surface-2 border border-sa-border rounded-xl p-3 flex flex-col gap-2">
                         {/* Name row */}
                         <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-zinc-600 font-mono w-4 text-right flex-shrink-0">{idx + 1}</span>
+                            <span className="text-[10px] text-muted-foreground/70 font-mono w-4 text-right flex-shrink-0">{idx + 1}</span>
                             <input
-                                className={`kw-name-input flex-1 h-8 bg-zinc-800 border rounded-lg px-3 text-[13px] font-medium text-zinc-100 outline-none placeholder:text-zinc-600 transition-colors ${
-                                    isInvalid ? "border-red-500/50 focus:border-red-500" : "border-white/[0.08] focus:border-violet-500"
+                                className={`kw-name-input flex-1 h-8 bg-sa-surface-2 border rounded-lg px-3 text-[13px] font-medium text-foreground outline-none placeholder:text-muted-foreground transition-colors ${
+                                    isInvalid ? "border-sa-danger/50 focus:border-sa-danger/35" : "border-sa-border focus:border-ring"
                                 }`}
                                 placeholder={idx === 0 ? "e.g. Dependency Injection" : "Keyword name…"}
                                 value={row.name}
@@ -366,8 +366,8 @@ function FormMode({ listRef, rows, keywords, updateRow, removeRow, addRow, addSy
                                 onClick={() => updateRow(row.id, { showSynonyms: !row.showSynonyms })}
                                 className={`flex items-center gap-1 h-8 px-2 rounded-lg border text-[10px] font-medium transition-colors flex-shrink-0 ${
                                     row.synonyms.length > 0
-                                        ? "border-violet-500/40 bg-violet-500/10 text-violet-400"
-                                        : "border-white/[0.06] bg-zinc-800 text-zinc-500 hover:text-zinc-300"
+                                        ? "border-sa-amber/40 bg-sa-amber/10 text-sa-amber-ink"
+                                        : "border-sa-border bg-sa-surface-2 text-muted-foreground hover:text-foreground"
                                 }`}
                             >
                                 {row.synonyms.length > 0 ? `≈ ${row.synonyms.length}` : "≈"}
@@ -376,7 +376,7 @@ function FormMode({ listRef, rows, keywords, updateRow, removeRow, addRow, addSy
                             {rows.length > 1 && (
                                 <button
                                     onClick={() => removeRow(row.id)}
-                                    className="w-7 h-7 flex items-center justify-center rounded-lg text-zinc-600 hover:bg-red-950/50 hover:text-red-400 transition-colors flex-shrink-0"
+                                    className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground/70 hover:bg-sa-danger/10 hover:text-sa-danger transition-colors flex-shrink-0"
                                 >
                                     <X className="w-3.5 h-3.5" />
                                 </button>
@@ -384,7 +384,7 @@ function FormMode({ listRef, rows, keywords, updateRow, removeRow, addRow, addSy
                         </div>
 
                         {isInvalid && (
-                            <p className="text-[10px] text-red-400 pl-6">
+                            <p className="text-[10px] text-sa-danger pl-6">
                                 {isDupe ? "Already exists in your wiki" : "Duplicate in this batch"}
                             </p>
                         )}
@@ -394,11 +394,11 @@ function FormMode({ listRef, rows, keywords, updateRow, removeRow, addRow, addSy
                                 {row.synonyms.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5">
                                         {row.synonyms.map(s => (
-                                            <span key={s} className="flex items-center gap-1 h-5 pl-2 pr-1 bg-zinc-700/60 border border-white/[0.07] rounded-full text-[11px] text-zinc-300">
+                                            <span key={s} className="flex items-center gap-1 h-5 pl-2 pr-1 border border-sa-border-strong rounded-md text-[11px] text-foreground">
                                                 {s}
                                                 <button
                                                     onClick={() => removeSynonym(row.id, s)}
-                                                    className="w-3.5 h-3.5 flex items-center justify-center rounded-full hover:bg-zinc-600 text-zinc-500 hover:text-zinc-200 transition-colors"
+                                                    className="w-3.5 h-3.5 flex items-center justify-center rounded-full hover:bg-sa-hover-strong text-muted-foreground hover:text-foreground transition-colors"
                                                 >
                                                     <X className="w-2 h-2" />
                                                 </button>
@@ -408,7 +408,7 @@ function FormMode({ listRef, rows, keywords, updateRow, removeRow, addRow, addSy
                                 )}
                                 <div className="flex gap-1.5">
                                     <input
-                                        className="flex-1 h-7 bg-zinc-800 border border-white/[0.08] rounded-lg px-2.5 text-[11px] text-zinc-200 outline-none focus:border-violet-500/50 placeholder:text-zinc-600 transition-colors"
+                                        className="flex-1 h-7 bg-transparent border border-sa-border-strong rounded-lg px-2.5 text-[11px] text-foreground outline-none focus:border-ring placeholder:text-muted-foreground transition-colors"
                                         placeholder="Add synonym…"
                                         value={row.synonymInput}
                                         onChange={e => updateRow(row.id, { synonymInput: e.target.value })}
@@ -417,7 +417,7 @@ function FormMode({ listRef, rows, keywords, updateRow, removeRow, addRow, addSy
                                     <button
                                         onClick={() => addSynonym(row.id)}
                                         disabled={!row.synonymInput.trim()}
-                                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800 border border-white/[0.08] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-700 disabled:opacity-30 transition-colors"
+                                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-sa-surface-2 border border-sa-border text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong disabled:opacity-30 transition-colors"
                                     >
                                         <Plus className="w-3 h-3" />
                                     </button>
@@ -430,7 +430,7 @@ function FormMode({ listRef, rows, keywords, updateRow, removeRow, addRow, addSy
 
             <button
                 onClick={addRow}
-                className="flex items-center gap-1.5 w-full h-8 px-3 rounded-xl border border-dashed border-white/[0.08] text-zinc-600 text-xs hover:border-violet-500/40 hover:text-violet-400 transition-colors"
+                className="flex items-center gap-1.5 w-full h-8 px-3 rounded-xl border border-dashed border-sa-border text-muted-foreground/70 text-xs hover:border-sa-amber/40 hover:text-sa-amber-ink transition-colors"
             >
                 <Plus className="w-3.5 h-3.5" /> Add another keyword
             </button>

@@ -92,8 +92,8 @@ export function WikiInfoCard({ info, keywords, onDelete, searchQuery = "" }: Car
         <>
             <div
                 ref={containerRef}
-                className={`relative text-left group bg-zinc-900 rounded-xl p-4 transition-colors border ${
-                    editing ? "_border-violet-500/25" : "_border-white/[0.06] _hover:border-white/[0.12]"
+                className={`relative text-left group bg-card rounded-xl p-4 transition-colors border ${
+                    editing ? "_border-sa-amber/25" : "_border-sa-border _hover:border-sa-border-strong"
                 }`}
                 onDoubleClick={e => { if (!editing && !(e.target as HTMLElement).closest("button")) enterEdit(); }}
             >
@@ -113,18 +113,18 @@ export function WikiInfoCard({ info, keywords, onDelete, searchQuery = "" }: Car
                     {editing ? (
                         <>
                             <button onMouseDown={e => e.preventDefault()} onClick={handleCancel}
-                                className="h-6 px-2 rounded-md text-[10px] text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors">Esc</button>
+                                className="h-6 px-2 rounded-md text-[10px] text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors">Esc</button>
                             <button onMouseDown={e => e.preventDefault()} onClick={handleSave} disabled={saving}
-                                className="h-6 px-2 rounded-md bg-violet-600 text-white text-[10px] font-semibold hover:bg-violet-500 disabled:opacity-40 transition-colors flex items-center gap-1">
+                                className="h-6 px-2 rounded-md bg-sa-amber text-sa-on-amber text-[11px] font-medium hover:bg-sa-amber/90 disabled:opacity-40 transition-colors flex items-center gap-1">
                                 {saving && <Loader2 className="w-2.5 h-2.5 animate-spin" />}Save
                             </button>
                         </>
                     ) : (
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={e => { e.stopPropagation(); enterEdit(); }}
-                                className="w-6 h-6 flex items-center justify-center rounded-md text-zinc-600 hover:bg-zinc-800 hover:text-zinc-300 transition-colors text-[11px]" title="Edit">✎</button>
+                                className="w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground/70 hover:bg-sa-hover-strong hover:text-foreground transition-colors text-[11px]" title="Edit">✎</button>
                             <button onClick={e => { e.stopPropagation(); onDelete(); }}
-                                className="w-6 h-6 flex items-center justify-center rounded-md text-zinc-600 hover:bg-red-950/50 hover:text-red-400 transition-colors text-[11px]">✕</button>
+                                className="w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground/70 hover:bg-sa-danger/10 hover:text-sa-danger transition-colors text-[11px]">✕</button>
                         </div>
                     )}
                 </div>
@@ -132,11 +132,11 @@ export function WikiInfoCard({ info, keywords, onDelete, searchQuery = "" }: Car
                 {/* Title */}
                 {editing ? (
                     <input autoFocus
-                        className={`w-full ${prClass} mb-2 bg-transparent outline-none text-[13px] font-semibold text-gray-500 tracking-tight leading-snug placeholder:text-gray-500`}
+                        className={`w-full ${prClass} mb-2 bg-transparent outline-none text-[13px] font-medium text-muted-foreground tracking-tight leading-snug placeholder:text-muted-foreground`}
                         value={editTitle} onChange={e => setEditTitle(e.target.value)} placeholder="Title (optional)…" />
                 ) : (
                     info.title && (
-                        <h3 className={`text-[13px] font-semibold tracking-tight leading-snug mb-2 ${prClass}`}
+                        <h3 className={`text-[13px] font-medium text-foreground tracking-tight leading-snug mb-2 ${prClass}`}
                             style={{ userSelect: "text", cursor: "text", opacity: lineDim(info.title) ? WIKI_MENTION.lineDimOpacity : 1 }}>
                             <MentionText text={info.title} {...mentionProps} />
                         </h3>
@@ -146,7 +146,7 @@ export function WikiInfoCard({ info, keywords, onDelete, searchQuery = "" }: Car
                 {/* Content */}
                 {editing ? (
                     <textarea ref={textareaRef}
-                        className={`w-full ${prClass} bg-transparent outline-none text-[13px] text-zinc-300 leading-relaxed placeholder:text-zinc-600 resize-none overflow-hidden`}
+                        className={`w-full ${prClass} bg-transparent outline-none text-[13px] text-foreground leading-relaxed placeholder:text-muted-foreground resize-none overflow-hidden`}
                         value={editContent} onChange={e => setEditContent(e.target.value)} placeholder="Content…" rows={1} />
                 ) : (
                     <div className={`text-[13px] leading-relaxed ${!info.title ? prClass : ""}`} style={{ userSelect: "text", cursor: "text" }}>

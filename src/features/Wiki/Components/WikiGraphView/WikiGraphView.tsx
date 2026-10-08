@@ -13,7 +13,7 @@ import {
     buildInfoCountRange, buildFamiliarityRange,
     type GraphNode,
 } from "../../utils/wiki.graph.utils";
-import { WIKI_NODE_SELECTED, WIKI_NODE_MARKED } from "../../utils/wiki.constants";
+import { getWikiGraphPalette } from "../../utils/wikiGraphTheme.utils";
 import WikiInsertModal from "../WikiInfoPanel/WikiInsertModal";
 import WikiInsertKeywordModal from "../WikiInfoPanel/WikiInsertKeywordModal";
 import { WikiKeywordEditModal } from "../small/WikiKeywordEditModal";
@@ -23,8 +23,7 @@ const INIT_SIM_STEPS = 400;
 const LERP_SPEED     = 0.1;   // alpha lerp per frame
 const ALPHA_DIM      = 0.08;  // dimmed node/edge opacity
 const ALPHA_NEIGHBOR = 0.55;  // connected-but-not-selected
-
-const EDGE_COLOR = "#4b5563"; // gray-600 — neutral edge
+const LABEL_FONT     = "Geist, -apple-system, sans-serif";
 
 export default function WikiGraphView() {
     const { keywords, infos, isLoading, searchText, setSearchText, setSelectedKeywordIds, selectedKeywordIds, markedKeywordIds, setMarkedKeywordIds, focusKeywordId, setFocusKeywordId } = useWikiStore();
@@ -152,6 +151,7 @@ export default function WikiGraphView() {
         const selIds = selectedIdsRef.current;
         const q      = searchText.trim().toLowerCase();
         const now    = Date.now();
+        const pal    = getWikiGraphPalette(); // theme tokens → concrete colors
 
         // ── Lerp camera toward target ─────────────────────────────────────────
         const ct = cameraTargetRef.current;
@@ -189,7 +189,7 @@ export default function WikiGraphView() {
         ctx.scale(dpr, dpr);
 
         // Background
-        ctx.fillStyle = "#0f1117";
+        ctx.fillStyle = pal.background;
         ctx.fillRect(0, 0, W, H);
 
         // Subtle dot grid
@@ -197,7 +197,7 @@ export default function WikiGraphView() {
         const step = 32 * scale;
         const x0   = ((offX % step) + step) % step;
         const y0   = ((offY % step) + step) % step;
-        ctx.fillStyle = "rgba(255,255,255,0.04)";
+        ctx.fillStyle = pal.dot;
         for (let x = x0; x < W; x += step)
             for (let y = y0; y < H; y += step)
                 ctx.fillRect(x - 0.75, y - 0.75, 1.5, 1.5);
@@ -220,8 +220,8 @@ export default function WikiGraphView() {
 
                 ctx.save();
                 ctx.globalAlpha = edgeAlpha;
-                ctx.strokeStyle = EDGE_COLOR;
-                ctx.lineWidth   = isHighlighted ? w + 0.5 : w * 0.6;
+                ctx.strokeStyle = isHighlighted ? pal.edgeActive : pal.edge;
+                ctx.lineWidth   = isHighlighted ? w * 0.6 + 0.6 : w * 0.5;
                 ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
                 ctx.restore();
             }
@@ -231,39 +231,35 @@ export default function WikiGraphView() {
         nodes.forEach(node => {
             const r          = kwRadius(node, infoCountRange.min, infoCountRange.max);
             const isSelected = selIds.has(node.id);
-            const { inner: colorInner, outer: colorOuter } =
+            const { inner: colorInner } =
                 kwColor(node, familiarityRange.min, familiarityRange.max);
 
             ctx.save();
             ctx.globalAlpha = node.alpha;
 
-            // Selected: violet glow
+            // Selected: soft amber glow
             if (isSelected) {
-                ctx.shadowColor = WIKI_NODE_SELECTED.glow;
-                ctx.shadowBlur  = 20;
+                ctx.shadowColor = pal.accentGlow;
+                ctx.shadowBlur  = 14;
             }
 
-            // Fill gradient — familiarity (gray→green) for normal, violet for selected
+            // Fill — surface; familiarity (gray→green) as a light tint, amber tint when selected
             ctx.beginPath();
             ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
-            const grad = ctx.createRadialGradient(
-                node.x - r * 0.3, node.y - r * 0.35, 0,
-                node.x, node.y, r * 1.1
-            );
-            grad.addColorStop(0, isSelected ? WIKI_NODE_SELECTED.inner : colorInner);
-            grad.addColorStop(1, isSelected ? WIKI_NODE_SELECTED.outer : colorOuter);
-            ctx.fillStyle = grad;
+            ctx.fillStyle = pal.nodeFill;
             ctx.fill();
             ctx.shadowBlur = 0;
+            ctx.fillStyle = isSelected ? pal.accentSoft : colorInner + "26"; // ~15% tint
+            ctx.fill();
 
             // Ring
             if (isSelected) {
-                // Pulsing violet ring for selected
+                // Pulsing amber ring for selected
                 const pulse = 0.55 + Math.sin(now / 700) * 0.45;
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
                 ctx.lineWidth   = 1.5;
-                ctx.strokeStyle = WIKI_NODE_SELECTED.ring;
+                ctx.strokeStyle = pal.accent;
                 ctx.globalAlpha = node.alpha * pulse;
                 ctx.stroke();
                 ctx.beginPath();
@@ -272,33 +268,32 @@ export default function WikiGraphView() {
                 ctx.globalAlpha = node.alpha * (1 - pulse) * 0.5;
                 ctx.stroke();
             } else {
-                // Subtle tinted ring matching node color
-                ctx.lineWidth   = 0.75;
-                ctx.strokeStyle = colorInner + "50"; // 31% opacity
-                ctx.globalAlpha = node.alpha * 0.6;
+                // Hairline ring tinted by familiarity
+                ctx.lineWidth   = 1;
+                ctx.strokeStyle = colorInner;
+                ctx.globalAlpha = node.alpha * 0.85;
                 ctx.stroke();
             }
 
             ctx.globalAlpha = node.alpha;
 
-            // Marked: amber outer ring + ★ badge
+            // Marked: dashed outer ring + amber ★ badge
             if (markedIdsRef.current.has(node.id)) {
-                ctx.shadowColor = WIKI_NODE_MARKED.glow;
-                ctx.shadowBlur  = 10;
-                ctx.strokeStyle = WIKI_NODE_MARKED.ring;
-                ctx.lineWidth   = 2;
+                ctx.strokeStyle = pal.marked;
+                ctx.lineWidth   = 1.25;
                 ctx.globalAlpha = node.alpha * 0.9;
+                ctx.setLineDash([3, 3]);
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, r + (isSelected ? 9 : 5), 0, Math.PI * 2);
                 ctx.stroke();
-                ctx.shadowBlur  = 0;
+                ctx.setLineDash([]);
 
                 // ★ badge at top-right of node
                 const bs = Math.max(8, r * 0.42);
                 const bx = node.x + r * 0.68;
                 const by = node.y - r * 0.68;
                 ctx.font         = `${bs}px serif`;
-                ctx.fillStyle    = WIKI_NODE_MARKED.badge;
+                ctx.fillStyle    = pal.accent;
                 ctx.textAlign    = "center";
                 ctx.textBaseline = "middle";
                 ctx.globalAlpha  = node.alpha;
@@ -327,7 +322,7 @@ export default function WikiGraphView() {
                 ctx.fillRect(node.x - r, node.y + r * 0.15, r * 2, r * 0.85);
                 ctx.restore();
                 const fs = Math.max(8, Math.min(10, r * 0.46));
-                ctx.font         = `600 ${fs}px -apple-system, sans-serif`;
+                ctx.font         = `500 ${fs}px ${LABEL_FONT}`;
                 ctx.fillStyle    = "#fff";
                 ctx.textAlign    = "center";
                 ctx.textBaseline = "middle";
@@ -338,8 +333,8 @@ export default function WikiGraphView() {
             } else {
                 // Text label
                 const fs = Math.max(9, Math.min(12, r * 0.58));
-                ctx.font          = `${isSelected ? 600 : 500} ${fs}px -apple-system, sans-serif`;
-                ctx.fillStyle     = "#fff";
+                ctx.font          = `${isSelected ? 600 : 500} ${fs}px ${LABEL_FONT}`;
+                ctx.fillStyle     = pal.label;
                 ctx.textAlign     = "center";
                 ctx.textBaseline  = "middle";
                 const words = node.name.split(" ");
@@ -564,13 +559,13 @@ export default function WikiGraphView() {
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#0f1117]">
+        <div className="flex flex-col h-full bg-background">
             {/* Toolbar */}
-            <div className="flex items-center gap-1.5 px-2.5 py-2 border-b border-white/[0.05] flex-shrink-0">
+            <div className="flex items-center gap-1 px-2.5 py-2 border-b border-sa-border flex-shrink-0">
                 <div className="relative flex-1">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-zinc-600 w-3.5 h-3.5 pointer-events-none" />
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground w-3.5 h-3.5 pointer-events-none" />
                     <input
-                        className="w-full h-7 bg-zinc-800/60 border border-white/[0.07] rounded-md pl-7 pr-2 text-xs text-zinc-200 outline-none focus:border-violet-500/60 placeholder:text-zinc-600 transition-colors"
+                        className="w-full h-7 bg-transparent border border-sa-border-strong rounded-md pl-7 pr-2 text-[13px] text-foreground outline-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-muted-foreground transition-colors duration-100"
                         placeholder="Search keywords…"
                         value={searchText}
                         onChange={e => setSearchText(e.target.value)}
@@ -578,7 +573,7 @@ export default function WikiGraphView() {
                 </div>
                 <button
                     onClick={handleAutoLayout}
-                    className="w-7 h-7 flex items-center justify-center rounded-md bg-zinc-800/60 border border-white/[0.07] text-zinc-600 hover:text-zinc-300 transition-colors"
+                    className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-sa-hover-strong hover:text-foreground transition-colors duration-100"
                     title="Auto layout"
                 >
                     <RefreshCw className="w-3.5 h-3.5" />
@@ -588,12 +583,12 @@ export default function WikiGraphView() {
                         onClick={handleToggleMark}
                         disabled={!allSelectedMarked && !canMarkMore}
                         className={[
-                            "w-7 h-7 flex items-center justify-center rounded-md border transition-colors",
+                            "w-7 h-7 flex items-center justify-center rounded-md transition-colors duration-100",
                             allSelectedMarked
-                                ? "bg-amber-500/20 border-amber-500/40 text-amber-400 hover:bg-amber-500/30"
+                                ? "bg-sa-amber/15 text-sa-amber-ink hover:bg-sa-amber/25"
                                 : canMarkMore
-                                    ? "bg-zinc-800/60 border-white/[0.07] text-zinc-500 hover:text-amber-400 hover:border-amber-500/30"
-                                    : "bg-zinc-800/60 border-white/[0.07] text-zinc-700 cursor-not-allowed opacity-50",
+                                    ? "text-muted-foreground hover:bg-sa-hover-strong hover:text-sa-amber-ink"
+                                    : "text-muted-foreground cursor-not-allowed opacity-40",
                         ].join(" ")}
                         title={
                             allSelectedMarked
@@ -609,32 +604,16 @@ export default function WikiGraphView() {
                         }
                     </button>
                 )}
-                {/* <button
-                    onClick={async () => {
-                        setIsRescanning(true);
-                        try {
-                            await wikiService.rescanAll();
-                            await loadAll();
-                        } finally {
-                            setIsRescanning(false);
-                        }
-                    }}
-                    disabled={isRescanning}
-                    className="w-7 h-7 flex items-center justify-center rounded-md bg-zinc-800/60 border border-white/[0.07] text-zinc-600 hover:text-emerald-400 hover:border-emerald-500/30 disabled:opacity-40 transition-colors"
-                    title="Re-scan all keyword↔info links"
-                >
-                    <ScanLine className={`w-3.5 h-3.5 ${isRescanning ? "animate-pulse" : ""}`} />
-                </button> */}
                 <button
                     onClick={() => setShowAddKeyword(true)}
-                    className="w-7 h-7 flex items-center justify-center rounded-md bg-zinc-800/60 border border-white/[0.07] text-zinc-400 hover:text-violet-300 hover:border-violet-500/40 transition-colors"
+                    className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-sa-hover-strong hover:text-foreground transition-colors duration-100"
                     title="Add keyword"
                 >
                     <Plus className="w-3.5 h-3.5" />
                 </button>
                 <button
                     onClick={() => setShowInsert(true)}
-                    className="w-7 h-7 flex items-center justify-center rounded-md bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+                    className="w-7 h-7 flex items-center justify-center rounded-md bg-sa-amber text-sa-on-amber hover:bg-sa-amber/90 transition-colors duration-100"
                     title="Insert info"
                 >
                     <Plus className="w-3.5 h-3.5" />
@@ -644,7 +623,7 @@ export default function WikiGraphView() {
             {/* Canvas */}
             <div className="flex-1 relative overflow-hidden">
                 {isLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center text-xs text-zinc-600">
+                    <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
                         Loading…
                     </div>
                 )}
@@ -660,35 +639,8 @@ export default function WikiGraphView() {
                     onContextMenu={handleContextMenu}
                 />
 
-                {/* Size legend */}
-                {/* <div className="absolute bottom-3 right-3 bg-zinc-900/80 border border-white/[0.05] rounded-lg px-2.5 py-2 text-[10px] text-zinc-600 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="w-2 h-2 rounded-full border border-violet-500/50 inline-block" />
-                        <span>Low usage</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="w-3.5 h-3.5 rounded-full border border-violet-400/50 inline-block" />
-                        <span>High usage</span>
-                    </div>
-                </div> */}
             </div>
 
-            {/* Tooltip */}
-            {/* {tooltip && (
-                <div
-                    className="fixed z-50 bg-zinc-900/95 border border-white/[0.08] rounded-lg px-3 py-2 shadow-xl pointer-events-none text-xs backdrop-blur-sm"
-                    style={{ left: tooltip.x, top: tooltip.y }}
-                >
-                    <div className="font-semibold text-zinc-100 mb-1">{tooltip.node.name}</div>
-                    <div className="text-zinc-500">
-                        Score {calcScore(tooltip.node)} · {tooltip.node.infoIds.length} info{tooltip.node.infoIds.length !== 1 ? "s" : ""}
-                    </div>
-                    {tooltip.node.synonyms.length > 0 && (
-                        <div className="text-violet-400 mt-0.5 text-[10px]">≈ {tooltip.node.synonyms.join(", ")}</div>
-                    )}
-                    <div className="text-zinc-600 mt-1 text-[10px]">double-click to edit</div>
-                </div>
-            )} */}
 
             {showInsert    && <WikiInsertModal          onClose={() => setShowInsert(false)} />}
             {showAddKeyword && <WikiInsertKeywordModal   onClose={() => setShowAddKeyword(false)} />}

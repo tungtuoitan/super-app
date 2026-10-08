@@ -29,7 +29,7 @@ export function WikiHighlightText({ text, highlight, className = "" }: Props) {
         parts.push(
             <mark
                 key={idx}
-                className="bg-yellow-400/80 text-black rounded-sm px-0.5"
+                className="bg-sa-amber/30 text-foreground rounded-sm px-0.5"
             >
                 {text.slice(idx, idx + query.length)}
             </mark>

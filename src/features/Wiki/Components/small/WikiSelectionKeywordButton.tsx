@@ -4,7 +4,6 @@ import { useWikiStore } from "../../store/useWiki.store";
 import { useWikiLoader } from "../../hooks/useWikiLoader.helper";
 import { wikiService } from "../../service/wiki.service";
 import type { WikiKeyword } from "../../types/wiki.type";
-import { MONO_ACCENT } from "../../utils/wiki.graph.utils";
 import { fuzzyMatchWithDiacritics } from "@/shared";
 
 function findMatchedKeyword(text: string, keywords: WikiKeyword[]): WikiKeyword | null {
@@ -68,8 +67,8 @@ export function WikiSelectionTooltip({ containerRef }: SelectionTooltipProps) {
             {anchor && selectedText && (
                 <div
                     id="wiki-sel-tooltip"
-                    className="fixed z-[99999] flex items-center gap-px rounded-lg shadow-xl border border-white/[0.08] overflow-hidden"
-                    style={{ left: anchor.x, top: anchor.y, transform: "translate(-50%, -100%)", background: "#1c1c1f", whiteSpace: "nowrap" }}
+                    className="fixed z-[99999] flex items-center gap-px rounded-lg sa-shadow-pop bg-popover border border-sa-border-strong overflow-hidden"
+                    style={{ left: anchor.x, top: anchor.y, transform: "translate(-50%, -100%)", whiteSpace: "nowrap" }}
                     onMouseDown={e => e.preventDefault()}
                 >
                     <TooltipBtn label="Create keyword" icon={<Plus className="w-3 h-3" />}
@@ -133,14 +132,14 @@ export function WikiKeywordTooltip({ keyword, infoId, rect, onClose }: KeywordTo
     return (
         <div
             id="wiki-kw-tooltip"
-            className="fixed z-[99999] flex items-center gap-px rounded-lg shadow-xl border border-white/[0.08] overflow-hidden"
-            style={{ left: rect.left + rect.width / 2, top: rect.top - 6, transform: "translate(-50%, -100%)", background: "#1c1c1f", whiteSpace: "nowrap" }}
+            className="fixed z-[99999] flex items-center gap-px rounded-lg sa-shadow-pop bg-popover border border-sa-border-strong overflow-hidden"
+            style={{ left: rect.left + rect.width / 2, top: rect.top - 6, transform: "translate(-50%, -100%)", whiteSpace: "nowrap" }}
             onMouseDown={e => e.preventDefault()}
         >
             {loading
-                ? <div className="flex items-center gap-1.5 h-7 px-2.5 text-[11px] text-zinc-500"><Loader2 className="w-3 h-3 animate-spin" />Loading…</div>
+                ? <div className="flex items-center gap-1.5 h-7 px-2.5 text-[11px] text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" />Loading…</div>
                 : isLinked
-                    ? <TooltipBtn label="Unlink" icon={<LinkIcon className="w-3 h-3" />} onClick={handleUnlink} className="text-red-400 hover:bg-red-950/40" />
+                    ? <TooltipBtn label="Unlink" icon={<LinkIcon className="w-3 h-3" />} onClick={handleUnlink} className="text-sa-danger hover:bg-sa-danger/10" />
                     : <TooltipBtn label="Create link" icon={<Link2 className="w-3 h-3" />} onClick={handleLink} />
             }
         </div>
@@ -154,7 +153,7 @@ function TooltipBtn({ label, icon, disabled, onClick, className }: { label: stri
         <button
             onClick={disabled ? undefined : onClick}
             className={`flex items-center gap-1.5 h-7 px-2.5 text-[11px] font-medium transition-colors ${
-                disabled ? "text-zinc-600 cursor-default" : `text-zinc-200 hover:bg-zinc-700 cursor-pointer ${className ?? ""}`
+                disabled ? "text-muted-foreground/70 cursor-default" : `text-foreground hover:bg-sa-hover-strong cursor-pointer ${className ?? ""}`
             }`}
         >
             {icon}{label}
@@ -179,26 +178,26 @@ export function WikiCreateKeywordModal({ initialName, onClose }: CreateKeywordMo
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100000] flex items-center justify-center"
+        <div className="fixed inset-0 bg-background/70 backdrop-blur-sm z-[100000] flex items-center justify-center"
             onKeyDown={e => { if (e.key === "Escape") onClose(); if (e.key === "Enter") { e.preventDefault(); handleSave(); } }}>
-            <div className="bg-zinc-900 border border-white/[0.08] rounded-2xl w-[360px] shadow-2xl overflow-hidden">
-                <div className="px-5 pt-5 pb-4 border-b border-white/[0.06] flex items-start justify-between">
+            <div className="bg-popover border border-sa-border-strong rounded-xl w-[360px] sa-shadow-pop overflow-hidden">
+                <div className="px-5 pt-5 pb-4 border-b border-sa-border flex items-start justify-between">
                     <div>
-                        <h2 className="text-[14px] font-semibold text-zinc-100">Create Keyword</h2>
-                        <p className="text-xs text-zinc-500 mt-0.5">Enter to save · Esc to cancel</p>
+                        <h2 className="text-[14px] font-medium text-foreground">Create Keyword</h2>
+                        <p className="text-xs text-muted-foreground mt-0.5">Enter to save · Esc to cancel</p>
                     </div>
-                    <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"><X className="w-4 h-4" /></button>
+                    <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-sa-hover-strong text-muted-foreground hover:text-foreground transition-colors duration-100"><X className="w-4 h-4" /></button>
                 </div>
                 <div className="px-5 py-4">
-                    <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Keyword name</label>
+                    <label className="block text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Keyword name</label>
                     <input autoFocus
-                        className="w-full h-9 bg-zinc-800 border border-white/[0.08] rounded-lg px-3 text-[13px] font-medium text-zinc-100 outline-none focus:border-violet-500 placeholder:text-zinc-600 transition-colors"
+                        className="w-full h-9 bg-transparent border border-sa-border-strong rounded-lg px-3 text-[13px] font-medium text-foreground outline-none focus:border-ring placeholder:text-muted-foreground transition-colors"
                         value={name} onChange={e => setName(e.target.value)} placeholder="Keyword name…" />
                 </div>
                 <div className="px-5 pb-4 flex justify-end gap-2">
-                    <button onClick={onClose} className="h-8 px-3.5 rounded-lg bg-zinc-800 text-zinc-400 text-xs font-medium hover:bg-zinc-700 transition-colors">Cancel</button>
+                    <button onClick={onClose} className="h-8 px-3.5 rounded-lg border border-sa-border-strong text-foreground text-xs font-medium hover:bg-sa-hover-strong transition-colors">Cancel</button>
                     <button onClick={handleSave} disabled={!name.trim() || saving}
-                        className="h-8 px-3.5 rounded-lg bg-violet-600 text-white text-xs font-semibold hover:bg-violet-500 disabled:opacity-40 transition-colors flex items-center gap-1.5">
+                        className="h-8 px-3.5 rounded-lg bg-sa-amber text-sa-on-amber text-xs font-medium hover:bg-sa-amber/90 disabled:opacity-40 transition-colors flex items-center gap-1.5">
                         {saving && <Loader2 className="w-3 h-3 animate-spin" />}<Check className="w-3 h-3" /> Create
                     </button>
                 </div>
@@ -216,7 +215,7 @@ function FuzzyHighlight({ text, indices }: { text: string; indices: number[] }) 
         <>
             {text.split("").map((ch, i) =>
                 set.has(i)
-                    ? <span key={i} style={{ color: MONO_ACCENT, fontWeight: 600 }}>{ch}</span>
+                    ? <span key={i} className="font-semibold text-sa-amber-ink">{ch}</span>
                     : <span key={i}>{ch}</span>
             )}
         </>
@@ -250,39 +249,39 @@ function WikiAddSynonymModal({ synonymText, onClose }: AddSynonymModalProps) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100000] flex items-center justify-center"
+        <div className="fixed inset-0 bg-background/70 backdrop-blur-sm z-[100000] flex items-center justify-center"
             onKeyDown={e => { if (e.key === "Escape") onClose(); }}>
-            <div className="bg-zinc-900 border border-white/[0.08] rounded-2xl w-[400px] shadow-2xl overflow-hidden">
-                <div className="px-5 pt-5 pb-4 border-b border-white/[0.06] flex items-start justify-between">
+            <div className="bg-popover border border-sa-border-strong rounded-xl w-[400px] sa-shadow-pop overflow-hidden">
+                <div className="px-5 pt-5 pb-4 border-b border-sa-border flex items-start justify-between">
                     <div>
-                        <h2 className="text-[14px] font-semibold text-zinc-100">Add synonym: <span style={{ color: MONO_ACCENT }}>"{synonymText}"</span></h2>
-                        <p className="text-xs text-zinc-500 mt-0.5">Pick the keyword this is a synonym of</p>
+                        <h2 className="text-[14px] font-medium text-foreground">Add synonym: <span className="text-sa-amber-ink">"{synonymText}"</span></h2>
+                        <p className="text-xs text-muted-foreground mt-0.5">Pick the keyword this is a synonym of</p>
                     </div>
-                    <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"><X className="w-4 h-4" /></button>
+                    <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-sa-hover-strong text-muted-foreground hover:text-foreground transition-colors duration-100"><X className="w-4 h-4" /></button>
                 </div>
                 <div className="px-5 pt-4 pb-2">
                     <div className="relative">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600 pointer-events-none" />
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/70 pointer-events-none" />
                         <input autoFocus
-                            className="w-full h-8 bg-zinc-800 border border-white/[0.08] rounded-lg pl-8 pr-3 text-[12px] text-zinc-200 outline-none focus:border-violet-500 placeholder:text-zinc-600 transition-colors"
+                            className="w-full h-8 bg-transparent border border-sa-border-strong rounded-lg pl-8 pr-3 text-[12px] text-foreground outline-none focus:border-ring placeholder:text-muted-foreground transition-colors"
                             placeholder="Search keywords…" value={search} onChange={e => setSearch(e.target.value)} />
                     </div>
                 </div>
                 <div className="px-5 pb-2 max-h-48 overflow-y-auto">
                     {filtered.length === 0
-                        ? <p className="text-xs text-zinc-600 py-3 text-center">No keywords found</p>
+                        ? <p className="text-xs text-muted-foreground/70 py-3 text-center">No keywords found</p>
                         : filtered.map(({ kw, indices }) => (
                             <button key={kw.id} onClick={() => setPicked(kw)}
-                                className={`w-full text-left px-3 py-2 rounded-lg text-[13px] transition-colors mb-0.5 ${picked?.id === kw.id ? "bg-violet-600/20 text-violet-200" : "text-zinc-300 hover:bg-zinc-800"}`}>
+                                className={`w-full text-left px-3 py-2 rounded-lg text-[13px] transition-colors mb-0.5 ${picked?.id === kw.id ? "bg-sa-amber/20 text-sa-amber-ink" : "text-foreground hover:bg-sa-hover-strong"}`}>
                                 <FuzzyHighlight text={kw.name} indices={indices} />
-                                {kw.synonyms.length > 0 && <span className="text-[11px] text-zinc-500 ml-2">≈ {kw.synonyms.join(", ")}</span>}
+                                {kw.synonyms.length > 0 && <span className="text-[11px] text-muted-foreground ml-2">≈ {kw.synonyms.join(", ")}</span>}
                             </button>
                         ))}
                 </div>
-                <div className="px-5 py-4 border-t border-white/[0.06] flex justify-end gap-2">
-                    <button onClick={onClose} className="h-8 px-3.5 rounded-lg bg-zinc-800 text-zinc-400 text-xs font-medium hover:bg-zinc-700 transition-colors">Cancel</button>
+                <div className="px-5 py-4 border-t border-sa-border flex justify-end gap-2">
+                    <button onClick={onClose} className="h-8 px-3.5 rounded-lg border border-sa-border-strong text-foreground text-xs font-medium hover:bg-sa-hover-strong transition-colors">Cancel</button>
                     <button onClick={handleSave} disabled={!picked || saving}
-                        className="h-8 px-3.5 rounded-lg bg-violet-600 text-white text-xs font-semibold hover:bg-violet-500 disabled:opacity-40 transition-colors flex items-center gap-1.5">
+                        className="h-8 px-3.5 rounded-lg bg-sa-amber text-sa-on-amber text-xs font-medium hover:bg-sa-amber/90 disabled:opacity-40 transition-colors flex items-center gap-1.5">
                         {saving && <Loader2 className="w-3 h-3 animate-spin" />}<Check className="w-3 h-3" /> Add synonym
                     </button>
                 </div>

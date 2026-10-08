@@ -41,20 +41,20 @@ export default function WikiEditInfoModal({ info, onClose }: Props) {
 
     return (
         <div
-            className="fixed inset-0 text-left bg-black/50 backdrop-blur-sm z-[1000000000000] flex items-center justify-center"
+            className="fixed inset-0 text-left bg-background/70 backdrop-blur-sm z-[1000000000000] flex items-center justify-center"
             onKeyDown={handleKey}
         >
-            <div className="bg-zinc-900 border border-white/[0.08] rounded-2xl w-[600px] max-h-[82vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="bg-popover border border-sa-border-strong rounded-xl w-[600px] max-h-[82vh] flex flex-col sa-shadow-pop overflow-hidden">
 
                 {/* Header */}
-                <div className="px-5 pt-5 pb-4 flex items-start justify-between flex-shrink-0 border-b border-white/[0.06]">
+                <div className="px-5 pt-5 pb-4 flex items-start justify-between flex-shrink-0 border-b border-sa-border">
                     <div>
-                        <h2 className="text-[15px] font-semibold text-zinc-100 tracking-tight">Edit Info</h2>
-                        <p className="text-xs text-zinc-500 mt-0.5">Ctrl+S to save · Esc to close</p>
+                        <h2 className="text-[15px] font-medium text-foreground tracking-tight">Edit Info</h2>
+                        <p className="text-xs text-muted-foreground mt-0.5">Ctrl+S to save · Esc to close</p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+                        className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-sa-hover-strong text-muted-foreground hover:text-foreground transition-colors duration-100"
                     >
                         <X className="w-4 h-4" />
                     </button>
@@ -64,10 +64,10 @@ export default function WikiEditInfoModal({ info, onClose }: Props) {
                 <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
                     {/* Title */}
                     <div>
-                        <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Title</label>
+                        <label className="block text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Title</label>
                         <input
                             autoFocus
-                            className="w-full h-9 bg-zinc-800 border border-white/[0.08] rounded-lg px-3 text-[13px] font-medium text-zinc-100 outline-none focus:border-violet-500 placeholder:text-zinc-600 transition-colors"
+                            className="w-full h-9 bg-transparent border border-sa-border-strong rounded-lg px-3 text-[13px] font-medium text-foreground outline-none focus:border-ring placeholder:text-muted-foreground transition-colors"
                             value={title}
                             onChange={e => setTitle(e.target.value)}
                             placeholder="Info title…"
@@ -76,9 +76,9 @@ export default function WikiEditInfoModal({ info, onClose }: Props) {
 
                     {/* Content */}
                     <div className="flex-1 flex flex-col">
-                        <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Content</label>
+                        <label className="block text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Content</label>
                         <textarea
-                            className="flex-1 min-h-[220px] bg-zinc-800 border border-white/[0.08] rounded-lg px-3 py-2.5 font-mono text-[12px] text-zinc-200 resize-none outline-none focus:border-violet-500 leading-relaxed placeholder:text-zinc-600 transition-colors"
+                            className="flex-1 min-h-[220px] bg-transparent border border-sa-border-strong rounded-lg px-3 py-2.5 font-mono text-[12px] text-foreground resize-none outline-none focus:border-ring leading-relaxed placeholder:text-muted-foreground transition-colors"
                             value={content}
                             onChange={e => setContent(e.target.value)}
                             placeholder="Content…"
@@ -87,17 +87,17 @@ export default function WikiEditInfoModal({ info, onClose }: Props) {
                 </div>
 
                 {/* Footer */}
-                <div className="px-5 py-3.5 border-t border-white/[0.06] flex justify-end gap-2 flex-shrink-0">
+                <div className="px-5 py-3.5 border-t border-sa-border flex justify-end gap-2 flex-shrink-0">
                     <button
                         onClick={onClose}
-                        className="h-8 px-3.5 rounded-lg bg-zinc-800 text-zinc-400 text-xs font-medium hover:bg-zinc-700 hover:text-zinc-200 transition-colors"
+                        className="h-8 px-3.5 rounded-lg border border-sa-border-strong text-foreground text-xs font-medium hover:bg-sa-hover-strong hover:text-foreground transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={!title.trim() || !isDirty || isSaving}
-                        className="h-8 px-3.5 rounded-lg bg-violet-600 text-white text-xs font-semibold hover:bg-violet-500 disabled:opacity-40 transition-colors flex items-center gap-1.5"
+                        className="h-8 px-3.5 rounded-lg bg-sa-amber text-sa-on-amber text-xs font-medium hover:bg-sa-amber/90 disabled:opacity-40 transition-colors flex items-center gap-1.5"
                     >
                         {isSaving && <Loader2 className="w-3 h-3 animate-spin" />}
                         Save

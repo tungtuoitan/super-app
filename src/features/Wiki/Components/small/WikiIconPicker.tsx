@@ -58,8 +58,8 @@ export function WikiIconPicker({ value, onChange }: Props) {
         <div
             className={`relative flex items-center gap-3 rounded-xl h-16 border-2 border-dashed px-3 cursor-pointer transition-colors
                 ${dragging
-                    ? "border-violet-500 bg-violet-500/10"
-                    : "border-white/[0.1] hover:border-violet-500/50 hover:bg-white/[0.02]"}
+                    ? "border-sa-amber bg-sa-amber/10"
+                    : "border-sa-border-strong hover:border-sa-amber/50 hover:bg-sa-hover-strong"}
             `}
             onClick={() => { if (!hasImg) fileRef.current?.click(); }}
             onDragOver={e => { e.preventDefault(); setDragging(true); }}
@@ -76,23 +76,23 @@ export function WikiIconPicker({ value, onChange }: Props) {
         >
             {/* Preview */}
             {hasImg ? (
-                <img src={value} alt="icon" className="w-9 h-9 rounded-lg object-cover flex-shrink-0 ring-1 ring-white/10" />
+                <img src={value} alt="icon" className="w-9 h-9 rounded-lg object-cover flex-shrink-0 ring-1 ring-sa-border-strong" />
             ) : (
-                <div className="w-9 h-9 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                    <BookOpen className="w-4 h-4 text-zinc-600" />
+                <div className="w-9 h-9 rounded-lg bg-sa-surface-2 flex items-center justify-center flex-shrink-0">
+                    <BookOpen className="w-4 h-4 text-muted-foreground/70" />
                 </div>
             )}
 
             {/* Label */}
             <div className="flex-1 min-w-0">
                 {busy ? (
-                    <span className="flex items-center gap-1.5 text-xs text-zinc-500">
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <Loader2 className="w-3 h-3 animate-spin" /> Processing…
                     </span>
                 ) : hasImg ? (
-                    <span className="text-xs text-zinc-400">Custom image set</span>
+                    <span className="text-xs text-muted-foreground">Custom image set</span>
                 ) : (
-                    <span className="text-xs text-zinc-500">Click, drag & drop, or paste image</span>
+                    <span className="text-xs text-muted-foreground">Click, drag & drop, or paste image</span>
                 )}
             </div>
 
@@ -102,7 +102,7 @@ export function WikiIconPicker({ value, onChange }: Props) {
                     <button
                         type="button"
                         onClick={e => { e.stopPropagation(); fileRef.current?.click(); }}
-                        className="p-1.5 rounded-md text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors"
                         title="Replace"
                     >
                         <Upload className="w-3.5 h-3.5" />
@@ -110,7 +110,7 @@ export function WikiIconPicker({ value, onChange }: Props) {
                     <button
                         type="button"
                         onClick={e => { e.stopPropagation(); onChange(undefined); }}
-                        className="p-1.5 rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-950/40 transition-colors"
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-sa-danger hover:bg-sa-danger/10 transition-colors"
                         title="Remove"
                     >
                         <X className="w-3.5 h-3.5" />
@@ -118,7 +118,7 @@ export function WikiIconPicker({ value, onChange }: Props) {
                 </div>
             )}
 
-            {!hasImg && !busy && <Upload className="w-4 h-4 text-zinc-600 flex-shrink-0" />}
+            {!hasImg && !busy && <Upload className="w-4 h-4 text-muted-foreground/70 flex-shrink-0" />}
 
             <input
                 ref={fileRef}

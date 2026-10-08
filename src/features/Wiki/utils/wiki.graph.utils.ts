@@ -1,10 +1,5 @@
 import type { WikiKeyword, WikiInfo } from "../types/wiki.type";
-import { WIKI_NODE_SIZE, WIKI_NODE_FAMILIARITY, WIKI_NODE_SELECTED } from "./wiki.constants";
-
-// ─── Accent colors (violet = selected/focused) ────────────────────────────────
-export const MONO_ACCENT       = "#8b5cf6"; // violet-500
-export const MONO_ACCENT_DIM   = "#6d28d9"; // violet-700
-export const MONO_ACCENT_LIGHT = "#c4b5fd"; // violet-300
+import { WIKI_NODE_SIZE, WIKI_NODE_FAMILIARITY } from "./wiki.constants";
 
 // ─── Familiarity helpers (drives node color) ──────────────────────────────────
 

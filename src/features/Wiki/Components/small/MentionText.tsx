@@ -49,7 +49,7 @@ function SearchHighlight({ text, query }: { text: string; query: string }) {
     return (
         <>
             {text.slice(0, idx)}
-            <mark style={{ background: "rgba(250,204,21,0.35)", color: "inherit", borderRadius: "2px", padding: 0 }}>
+            <mark style={{ background: "hsl(var(--sa-accent-amber) / 0.3)", color: "inherit", borderRadius: "2px", padding: 0 }}>
                 {text.slice(idx, idx + query.length)}
             </mark>
             {text.slice(idx + query.length)}
@@ -90,9 +90,9 @@ export default function MentionText({ text, keywords, linkedKeywordIds, searchQu
                             userSelect: "text",
                             textDecoration: "underline",
                             textDecorationStyle: isLinked ? "solid" : "dotted",
-                            textDecorationColor: isLinked ? "rgba(139,92,246,0.5)" : "rgba(204, 204, 204, 0.56)",
+                            textDecorationColor: isLinked ? "hsl(var(--sa-accent-amber) / 0.6)" : "hsl(var(--muted-foreground) / 0.5)",
                             textUnderlineOffset: "2px",
-                            color: isLinked ? "rgba(196,181,253,0.85)" : "inherit",
+                            color: isLinked ? "hsl(var(--sa-amber-ink))" : "inherit",
                             cursor: onKeywordClick ? "pointer" : "text",
                         }}
                     >
