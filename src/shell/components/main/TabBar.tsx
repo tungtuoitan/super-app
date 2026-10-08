@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { X, FileText, Pin } from "lucide-react";
 import { constants, useKeywordSelector } from "@/shared";
 import { useDeviceStore } from "@/shared";
@@ -8,6 +8,8 @@ import { BaseTab, getTabDeleteState } from "@/shell/types/tab.types";
 import { useEditorTabBarStore } from "@/shell/store/EditorTab.store";
 import { useEditorTabBarHelper } from "@/shell/hooks/useEditorTabBar.helper";
 import { shellConstants } from "@/shell/shell.constants";
+import { TabOverflowMenu } from "../small/TabOverflowMenu";
+import { useScrollActiveTabIntoView } from "../../hooks/useScrollActiveTab.headless";
 import { sortByPinnedFirst } from "@/shell/utils/tabBar.utils";
 // useTabBarShortcuts is registered inside useTabBarHelper — no separate call needed here.
 
@@ -108,8 +110,9 @@ function TabButton({
             onDrop={onDrop}
             onClick={onClick}
             onContextMenu={onContextMenu}
+            data-tab-id={tab.id}
             className={`
-                group h-[35px] pl-3 pr-1.5 flex items-center gap-2
+                group h-[35px] shrink-0 pl-3 pr-1.5 flex items-center gap-2
                 border-r border-b border-editor-border relative transition-colors duration-100
                 ${isDragging ? "opacity-50" : ""}
                 ${isActive
@@ -170,6 +173,11 @@ export function TabBar() {
         useTabBarHelper();
     const { isMobile } = useDeviceStore();
     // useTabBarShortcuts is already called inside useTabBarHelper above.
+
+    // Desktop: one scrollable line + "…" menu (#1514); mobile keeps wrapping
+    const tabScrollRef = useRef<HTMLDivElement>(null);
+    useScrollActiveTabIntoView(tabScrollRef, activeTabId);
+    const tabLineClass = isMobile ? "flex flex-wrap" : "flex flex-nowrap";
 
     // ── Task grouping (driven by registry, not hardcoded) ──────────────────────
     // Group leader: any tab where moduleRegistry.getTabGroupKey returns a key
@@ -246,7 +254,7 @@ export function TabBar() {
     // ── Render ─────────────────────────────────────────────────────────────────
 
     return (
-        <div className={`min-h-[35px] flex items-start border-b border-editor-border ${isMobile ? "bg-editor-bg" : "bg-editor-sidebar"}`}>
+        <div className={`min-h-[35px] flex border-b border-editor-border ${isMobile ? "items-start bg-editor-bg" : "items-stretch bg-editor-sidebar"}`}>
             {isLoadingTabs ? (
                 <div className="px-4 w-full h-[35px] flex items-center gap-2">
                     <div className="h-4 w-24 bg-sa-hover-strong animate-pulse rounded" />
@@ -254,7 +262,15 @@ export function TabBar() {
                     <div className="h-4 w-20 bg-sa-hover-strong animate-pulse rounded" />
                 </div>
             ) : openTabs.length > 0 ? (
-                <div className="flex-1 flex flex-wrap">
+                <>
+                <div
+                    ref={tabScrollRef}
+                    className={`flex-1 min-w-0 ${tabLineClass} ${isMobile ? "" : "overflow-x-auto overflow-y-hidden sa-scrollbar-none"}`}
+                    onWheel={(e) => {
+                        // vertical wheel scrolls the single tab line horizontally
+                        if (!isMobile && tabScrollRef.current && Math.abs(e.deltaY) > Math.abs(e.deltaX)) tabScrollRef.current.scrollLeft += e.deltaY;
+                    }}
+                >
                     {openTabs.map((tab) => {
                         if (childTabIds.has(tab.id)) return null; // rendered inside group below
 
@@ -264,9 +280,9 @@ export function TabBar() {
 
                         if (group && group.children.length > 0) {
                             return (
-                                <div key={tab.id} className="flex items-stretch">
+                                <div key={tab.id} className="flex shrink-0 items-stretch">
                                     <div className="w-0.5 bg-sa-amber/40 flex-shrink-0" />
-                                    <div className="flex flex-wrap">
+                                    <div className={tabLineClass}>
                                         <TabButton key={tab.id} {...makeTabProps(tab, isPinned)} />
                                         {group.children.map((child) => (
                                             <TabButton key={child.id} {...makeTabProps(child, !!child.isPinned)} />
@@ -280,6 +296,8 @@ export function TabBar() {
                         return <TabButton key={tab.id} {...makeTabProps(tab, isPinned)} />;
                     })}
                 </div>
+                {!isMobile && <TabOverflowMenu tabs={openTabs} activeTabId={activeTabId} onSelect={updateActiveTab} />}
+                </>
             ) : (
                 <div className="px-4 w-full h-[35px] flex items-center">
                     <p className="text-[13px] text-muted-foreground/70 italic">No tabs open</p>

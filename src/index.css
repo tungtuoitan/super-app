@@ -175,6 +175,13 @@
     .sa-shadow-pop {
         box-shadow: var(--sa-shadow-pop);
     }
+    /* Scrollable strips without a visible scrollbar (single-line tab bar) */
+    .sa-scrollbar-none {
+        scrollbar-width: none;
+    }
+    .sa-scrollbar-none::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 /* Global Scrollbar — thin, quiet */
