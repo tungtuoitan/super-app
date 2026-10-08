@@ -14,13 +14,13 @@ import { REQUIRED_ENVIRONMENTS, OPTIONAL_ENVIRONMENTS } from "../task.constants"
 import type { TestcaseEnvironment } from "../task.constants";
 import {
     CheckSquare2,
-    Square,
     ChevronDown,
     ChevronRight,
     Edit2,
     Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/shared";
 import { TaskChecklistProvider, useTaskChecklistStore } from "../store/useTaskChecklist.store";
 import { useTaskChecklistSelector } from "../Selectors/TaskChecklistSelector";
 import { useTaskDetailChecklistSelector } from "../Selectors/TaskDetailChecklistSelector";
@@ -77,7 +77,7 @@ function TaskChecklistInner() {
             <button
                 onClick={handleStartEdit}
                 disabled={isDisabled}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
+                className="flex h-7 items-center gap-1.5 rounded-md px-2 text-[13px] text-muted-foreground transition-colors duration-100 hover:bg-sa-hover hover:text-foreground disabled:opacity-40"
             >
                 <Plus className="h-3.5 w-3.5" />
                 Create checklist
@@ -91,16 +91,16 @@ function TaskChecklistInner() {
             <div className="flex flex-col h-full gap-1 mt-2">
                 {/* Type selector */}
                 <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] text-muted-foreground">Type:</span>
+                    <span className="text-[11px] text-muted-foreground">Type</span>
                     {(["checklist", "testcase", "repeat-checklist"] as ChecklistType[]).map((t) => (
                         <button
                             key={t}
                             onClick={() => setEditChecklistType(t)}
                             className={cn(
-                                "text-[10px] px-2 py-0.5 rounded border transition-colors",
+                                "h-6 rounded-md border px-2 text-[11px] transition-colors duration-100",
                                 editChecklistType === t
-                                    ? "border-primary text-primary bg-primary/10"
-                                    : "border-border text-muted-foreground hover:text-foreground"
+                                    ? "border-sa-border-strong bg-sa-hover-strong text-foreground"
+                                    : "border-transparent text-muted-foreground hover:bg-sa-hover hover:text-foreground"
                             )}
                         >
                             {getChecklistTypeLabel(t)}
@@ -119,17 +119,17 @@ function TaskChecklistInner() {
                     value={editText}
                     onChange={(e) => handleEditChange(e.target.value)}
                     className={cn(
-                        "flex-1 min-h-[600px] w-full text-xs font-mono rounded border bg-muted/30 px-3 py-2 resize-none outline-none focus:border-primary transition-colors leading-6",
-                        editErrors.length > 0 ? "border-destructive" : "border-border"
+                        "flex-1 min-h-[600px] w-full resize-none rounded-xl border bg-transparent px-3 py-2 font-mono text-xs leading-6 outline-none transition-colors duration-100 focus:border-sa-border-strong",
+                        editErrors.length > 0 ? "border-sa-danger/60" : "border-sa-border"
                     )}
                     placeholder={"# Group Name\n- Item one\n- Optional item-o"}
                     spellCheck={false}
                     autoFocus={editCursorPos < 0}
                 />
                 {editErrors.length > 0 && (
-                    <div className="rounded border border-destructive/40 bg-destructive/5 px-3 py-2 space-y-0.5 shrink-0">
+                    <div className="shrink-0 space-y-0.5 rounded-lg border border-sa-danger/35 bg-sa-danger/10 px-3 py-2">
                         {editErrors.map((e, i) => (
-                            <p key={i} className="text-xs text-destructive leading-relaxed">{e}</p>
+                            <p key={i} className="text-xs leading-relaxed text-sa-danger">{e}</p>
                         ))}
                     </div>
                 )}
@@ -157,26 +157,26 @@ function TaskChecklistInner() {
     return (
         <div className="flex flex-col h-full">
             {/* Header: progress bar + edit button — fixed */}
-            <div className="flex items-center gap-2 shrink-0 pb-2">
-                <div className="flex-1 h-0.5 rounded-full bg-muted overflow-hidden">
+            <div className="flex h-8 shrink-0 items-center gap-2 pb-1">
+                <div className="h-1 flex-1 overflow-hidden rounded-full bg-sa-hover-strong">
                     <div
                         className={cn(
                             "h-full rounded-full transition-all duration-300",
-                            "bg-amber-500"
+                            allDone ? "bg-sa-good" : "bg-sa-amber"
                         )}
                         style={{ width: progress ? `${(progress.done / progress.total) * 100}%` : "0%" }}
                     />
                 </div>
-                <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">
+                <span className="shrink-0 font-mono text-[11px] text-muted-foreground">
                     {progress?.done}/{progress?.total}
                 </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
+                <span className="shrink-0 rounded-md border border-sa-border-strong px-1.5 text-[11px] leading-5 text-muted-foreground">
                     {getChecklistTypeLabel(parsedChecklist?.checklistType)}
                 </span>
                 {!isDisabled && (
                     <button
                         onClick={handleStartEdit}
-                        className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        className="rounded-md p-1 text-muted-foreground transition-colors duration-100 hover:bg-sa-hover hover:text-foreground"
                         title="Edit checklist"
                     >
                         <Edit2 className="h-3 w-3" />
@@ -186,7 +186,7 @@ function TaskChecklistInner() {
 
             {/* Env tabs — only for testcase */}
             {isTestcase && (
-                <div className="flex items-center gap-1 shrink-0 pb-2">
+                <div className="flex shrink-0 items-center gap-1 pb-2">
                     {visibleEnvs.map((e) => {
                         const ep = checklistProgress(parsedChecklist!, e);
                         const isActive = e === activeEnv;
@@ -195,14 +195,14 @@ function TaskChecklistInner() {
                                 key={e}
                                 onClick={() => setActiveEnv(e)}
                                 className={cn(
-                                    "text-[10px] px-2 py-0.5 rounded border transition-colors tabular-nums",
+                                    "h-6 rounded-md border px-2 font-mono text-[11px] transition-colors duration-100",
                                     isActive
-                                        ? "border-amber-500 text-amber-500 bg-amber-500/10"
-                                        : "border-border text-muted-foreground hover:text-foreground"
+                                        ? "border-sa-amber/50 bg-sa-amber/15 text-sa-amber-ink"
+                                        : "border-sa-border text-muted-foreground hover:bg-sa-hover hover:text-foreground"
                                 )}
                             >
                                 {e}
-                                <span className="ml-1 opacity-60">{ep.done}/{ep.total}</span>
+                                <span className="ml-1.5 opacity-60">{ep.done}/{ep.total}</span>
                             </button>
                         );
                     })}
@@ -210,7 +210,7 @@ function TaskChecklistInner() {
                         <button
                             key={`add-${e}`}
                             onClick={() => setEnabledOptionalEnvs((prev) => [...prev, e])}
-                            className="text-[10px] px-1.5 py-0.5 rounded border border-dashed border-border text-muted-foreground/50 hover:text-foreground hover:border-foreground transition-colors"
+                            className="h-6 rounded-md border border-dashed border-sa-border-strong px-1.5 font-mono text-[11px] text-muted-foreground/60 transition-colors duration-100 hover:border-foreground/40 hover:text-foreground"
                             title={`Enable ${e} environment`}
                         >
                             + {e}
@@ -220,7 +220,7 @@ function TaskChecklistInner() {
             )}
 
             {/* Items — scrollable */}
-            <div className="flex-1 min-h-0 overflow-y-auto space-y-1 pr-1">
+            <div className="min-h-0 flex-1 space-y-0.5 overflow-y-auto pr-1">
                 {parsedChecklist!.groups.map((group, gi) => {
                     const collapsed = collapsedGroups.has(group.name);
                     const groupDone = group.items.every((i) => {
@@ -231,14 +231,14 @@ function TaskChecklistInner() {
                     const headerIndent = level === 1 ? "" : level === 2 ? "pl-6" : "pl-12";
                     const itemIndent = level === 1 ? "pl-5" : level === 2 ? "pl-11" : "pl-[4.25rem]";
                     return (
-                        <div key={gi} className="space-y-0.5">
+                        <div key={gi} className="space-y-px">
                             {/* Continuation groups skip the header */}
                             {!group.isContinuation && (
                                 <button
                                     onClick={() => toggleGroup(group.name)}
                                     onDoubleClick={() => !isDisabled && handleStartEditAt(gi, -1)}
                                     className={cn(
-                                        "flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground w-full text-left transition-colors py-0.5",
+                                        "flex h-7 w-full items-center gap-1 rounded-md text-left text-xs font-medium text-muted-foreground transition-colors duration-100 hover:text-foreground",
                                         headerIndent,
                                         level >= 2 && "font-normal",
                                     )}
@@ -262,32 +262,29 @@ function TaskChecklistInner() {
                                         key={ii}
                                         onDoubleClick={() => !isDisabled && handleStartEditAt(gi, ii)}
                                         className={cn(
-                                            "flex items-start gap-1.5 py-0.5 rounded",
+                                            "flex min-h-7 items-start gap-2 rounded-md py-1 pr-1.5 transition-colors duration-100",
                                             itemIndent,
-                                            isLocked ? "opacity-35" : "hover:bg-muted/40"
+                                            isLocked ? "opacity-35" : "hover:bg-sa-hover"
                                         )}
                                     >
-                                        <button
-                                            onClick={() => handleToggle(gi, ii, "check")}
+                                        <Checkbox
+                                            checked={s.isChecked}
+                                            onCheckedChange={() => handleToggle(gi, ii, "check")}
                                             disabled={isDisabled || isLocked}
-                                            className="mt-1 shrink-0 text-muted-foreground hover:text-amber-500 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            {s.isChecked
-                                                ? <CheckSquare2 className="h-3.5 w-3.5 text-amber-500" />
-                                                : <Square className="h-3.5 w-3.5" />}
-                                        </button>
+                                            className="mt-[3px]"
+                                        />
 
                                         <span
                                             onClick={() => !isDisabled && !isLocked && handleToggle(gi, ii, "check")}
                                             className={cn(
-                                                "flex-1 text-xs leading-5 text-left select-none",
+                                                "flex-1 select-none text-left text-[13px] leading-5",
                                                 isDisabled || isLocked ? "cursor-default" : "cursor-pointer",
                                                 (s.isChecked || s.isSkipped) && "line-through text-muted-foreground opacity-70"
                                             )}
                                         >
                                             {item.name}
                                             {item.isOptional && (
-                                                <span className="ml-1 text-[10px] opacity-40">-o</span>
+                                                <span className="ml-1.5 font-mono text-[10px] text-muted-foreground/60">-o</span>
                                             )}
                                         </span>
                                     </div>
@@ -298,7 +295,7 @@ function TaskChecklistInner() {
                 })}
 
                 {allDone && (
-                    <div className="flex items-center gap-1.5 text-xs text-amber-500 font-medium pt-1">
+                    <div className="flex items-center gap-1.5 pt-1 text-xs font-medium text-sa-good">
                         <CheckSquare2 className="h-3.5 w-3.5" />
                         All checks complete — task can now be closed.
                     </div>

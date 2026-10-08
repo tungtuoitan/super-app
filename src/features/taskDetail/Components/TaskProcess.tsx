@@ -62,7 +62,7 @@ function TaskProcessInner() {
             <button
                 onClick={handleStartEdit}
                 disabled={isDisabled}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
+                className="flex h-7 items-center gap-1.5 rounded-md px-2 text-[13px] text-muted-foreground transition-colors duration-100 hover:bg-sa-hover hover:text-foreground disabled:opacity-40"
             >
                 <Plus className="h-3.5 w-3.5" />
                 Create process
@@ -86,17 +86,17 @@ function TaskProcessInner() {
                     value={editText}
                     onChange={(e) => handleEditChange(e.target.value)}
                     className={cn(
-                        "flex-1 min-h-[600px] w-full text-xs font-mono rounded border bg-muted/30 px-3 py-2 resize-none outline-none focus:border-primary transition-colors leading-6",
-                        editErrors.length > 0 ? "border-destructive" : "border-border"
+                        "flex-1 min-h-[600px] w-full resize-none rounded-xl border bg-transparent px-3 py-2 font-mono text-xs leading-6 outline-none transition-colors duration-100 focus:border-sa-border-strong",
+                        editErrors.length > 0 ? "border-sa-danger/60" : "border-sa-border"
                     )}
                     placeholder={"# Phase Name\n- Step one\n- Optional step-o"}
                     spellCheck={false}
                     autoFocus={editCursorPos < 0}
                 />
                 {editErrors.length > 0 && (
-                    <div className="rounded border border-destructive/40 bg-destructive/5 px-3 py-2 space-y-0.5 shrink-0">
+                    <div className="shrink-0 space-y-0.5 rounded-lg border border-sa-danger/35 bg-sa-danger/10 px-3 py-2">
                         {editErrors.map((e, i) => (
-                            <p key={i} className="text-xs text-destructive leading-relaxed">{e}</p>
+                            <p key={i} className="text-xs leading-relaxed text-sa-danger">{e}</p>
                         ))}
                     </div>
                 )}
@@ -116,23 +116,23 @@ function TaskProcessInner() {
     return (
         <div className="flex flex-col h-full">
             {/* Header: progress bar + edit button — fixed */}
-            <div className="flex items-center gap-2 shrink-0 pb-2">
-                <div className="flex-1 h-0.5 rounded-full bg-muted overflow-hidden">
+            <div className="flex h-8 shrink-0 items-center gap-2 pb-1">
+                <div className="h-1 flex-1 overflow-hidden rounded-full bg-sa-hover-strong">
                     <div
                         className={cn(
                             "h-full rounded-full transition-all duration-300",
-                            allDone ? "bg-purple-500" : "bg-purple-500"
+                            allDone ? "bg-sa-good" : "bg-sa-amber"
                         )}
                         style={{ width: progress ? `${(progress.done / progress.total) * 100}%` : "0%" }}
                     />
                 </div>
-                <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">
+                <span className="shrink-0 font-mono text-[11px] text-muted-foreground">
                     {progress?.done}/{progress?.total}
                 </span>
                 {!isDisabled && (
                     <button
                         onClick={handleStartEdit}
-                        className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        className="rounded-md p-1 text-muted-foreground transition-colors duration-100 hover:bg-sa-hover hover:text-foreground"
                         title="Edit process"
                     >
                         <Edit2 className="h-3 w-3" />
@@ -141,7 +141,7 @@ function TaskProcessInner() {
             </div>
 
             {/* Items — scrollable */}
-            <div className="flex-1 min-h-0 overflow-y-auto space-y-1 pr-1">
+            <div className="min-h-0 flex-1 space-y-0.5 overflow-y-auto pr-1">
                 {parsedProcess!.groups.map((group, gi) => {
                     const collapsed = collapsedGroups.has(group.name);
                     const groupDone = group.items.every((i) => i.isChecked || i.isSkipped);
@@ -149,14 +149,14 @@ function TaskProcessInner() {
                     const headerIndent = level === 1 ? "" : level === 2 ? "pl-6" : "pl-12";
                     const itemIndent = level === 1 ? "pl-5" : level === 2 ? "pl-11" : "pl-[4.25rem]";
                     return (
-                        <div key={gi} className="space-y-0.5">
+                        <div key={gi} className="space-y-px">
                             {/* Continuation groups skip the header */}
                             {!group.isContinuation && (
                                 <button
                                     onClick={() => toggleGroup(group.name)}
                                     onDoubleClick={() => !isDisabled && handleStartEditAt(gi, -1)}
                                     className={cn(
-                                        "flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground w-full text-left transition-colors py-0.5",
+                                        "flex h-7 w-full items-center gap-1 rounded-md text-left text-xs font-medium text-muted-foreground transition-colors duration-100 hover:text-foreground",
                                         headerIndent,
                                         level >= 2 && "font-normal",
                                     )}
@@ -179,32 +179,32 @@ function TaskProcessInner() {
                                         key={ii}
                                         onDoubleClick={() => !isDisabled && handleStartEditAt(gi, ii)}
                                         className={cn(
-                                            "flex items-start gap-1.5 py-0.5 rounded",
+                                            "flex min-h-7 items-start gap-2 rounded-md py-1 pr-1.5 transition-colors duration-100",
                                             itemIndent,
-                                            isLocked ? "opacity-35" : "hover:bg-muted/40"
+                                            isLocked ? "opacity-35" : "hover:bg-sa-hover"
                                         )}
                                     >
                                         <button
                                             onClick={() => handleToggle(gi, ii, "check")}
                                             disabled={isDisabled || isLocked}
-                                            className="mt-1 shrink-0 text-muted-foreground hover:text-purple-500 disabled:cursor-not-allowed transition-colors"
+                                            className="mt-[3px] shrink-0 text-muted-foreground transition-colors duration-100 hover:text-foreground disabled:cursor-not-allowed"
                                         >
                                             {item.isChecked
-                                                ? <CheckCircle2 className="h-3.5 w-3.5 text-purple-500" />
+                                                ? <CheckCircle2 className="h-3.5 w-3.5 text-sa-good" />
                                                 : <Circle className="h-3.5 w-3.5" />}
                                         </button>
 
                                         <span
                                             onClick={() => !isDisabled && !isLocked && handleToggle(gi, ii, "check")}
                                             className={cn(
-                                                "flex-1 text-xs leading-5 text-left select-none",
+                                                "flex-1 select-none text-left text-[13px] leading-5",
                                                 isDisabled || isLocked ? "cursor-default" : "cursor-pointer",
                                                 (item.isChecked || item.isSkipped) && "line-through text-muted-foreground opacity-70"
                                             )}
                                         >
                                             {item.name}
                                             {item.isOptional && (
-                                                <span className="ml-1 text-[10px] opacity-40">-o</span>
+                                                <span className="ml-1.5 font-mono text-[10px] text-muted-foreground/60">-o</span>
                                             )}
                                         </span>
                                     </div>
@@ -215,7 +215,7 @@ function TaskProcessInner() {
                 })}
 
                 {allDone && (
-                    <div className="flex items-center gap-1.5 text-xs text-purple-500 font-medium pt-1">
+                    <div className="flex items-center gap-1.5 pt-1 text-xs font-medium text-sa-good">
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         All steps complete!
                     </div>
