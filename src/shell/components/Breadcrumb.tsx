@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { Layers, FileText } from "lucide-react";
+import { Layers, FileText, ChevronRight } from "lucide-react";
 import type { BreadcrumbItem } from "../utils/breadcrumb.utils";
 import { useKeywordNavigationHelper } from "../commandPallete/useKeywordNavigation.helper";
 import { ICON_MAP, IconKey, useKeywordSelector } from "@/shared";
@@ -34,7 +34,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
     };
 
     return (
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+        <div className="flex min-w-0 items-center gap-0.5 text-[13px] text-muted-foreground">
             {items.map((item, index) => {
                 const isDisabled = !!item.disabled;
                 const isLast = index === items.length - 1;
@@ -61,29 +61,29 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                             {item.type === "workspace" && (
                                 <Layers
                                     className="w-3.5 h-3.5"
-                                    style={{ color: item.color || "#75beff" }}
+                                    style={{ color: item.color || "hsl(var(--muted-foreground))" }}
                                 />
                             )}
                             {item.type === "folder" && (
                                 <FolderIconWithBadge
                                     iconType={item.icon as IconKey}
-                                    color={item.color || "#75beff"}
+                                    color={item.color || undefined}
                                     size="sm"
                                 />
                             )}
                             {item.type === "note" && (
                                 <NoteIcon
                                     className="w-3.5 h-3.5"
-                                    style={{ color: item.isNew ? "hsl(var(--sa-amber-ink))" : (item.color || (isDisabled ? "#4FC3F7" : "#75beff")) }}
+                                    style={{ color: item.isNew ? "hsl(var(--sa-amber-ink))" : (item.color || "hsl(var(--muted-foreground))") }}
                                 />
                             )}
 
                             {/* Name */}
                             <span
-                                className={`text-xs truncate max-w-[200px] ${
+                                className={`text-[13px] truncate max-w-[220px] ${
                                     item.isNew
                                         ? "text-sa-amber-ink"
-                                        : (isDisabled ? "text-editor-fg" : "text-muted-foreground")
+                                        : (isDisabled || isLast ? "text-foreground font-medium" : "text-muted-foreground")
                                 }`}
                             >
                                 {item.name}
@@ -92,7 +92,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
 
                         {/* Separator */}
                         {!isLast && (
-                            <span className="text-muted-foreground/50">/</span>
+                            <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/60" />
                         )}
                     </React.Fragment>
                 );

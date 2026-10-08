@@ -93,20 +93,23 @@ export function EditorToolbar() {
     });
 
     return (
-        <div className="h-6 flex items-center justify-between px-4 bg-editor-bg border-b border-editor-border gap-2">
+        // View header (#1514): back · breadcrumb (or tab title) · actions — was a 24px toolbar
+        <div className="h-10 flex items-center justify-between px-4 bg-editor-bg border-b border-editor-border gap-2">
             {/* Left: Back button + Breadcrumb */}
             <div className="flex items-center gap-2 flex-1 min-w-0">
                 {effectiveOpenedBy && (
                     <BackButton openedBy={effectiveOpenedBy} />
                 )}
-                {activeTab?.breadcrumb && activeTab.breadcrumb.length > 0 && (
+                {activeTab?.breadcrumb && activeTab.breadcrumb.length > 0 ? (
                     <Breadcrumb items={activeTab.breadcrumb} />
+                ) : (
+                    activeTab?.title && <span className="truncate text-[13px] font-medium text-foreground">{activeTab.title}</span>
                 )}
             </div>
 
             {/* Action Buttons */}
             <TooltipProvider>
-                <div className="flex gap-1">
+                <div className="flex gap-0.5">
                     {isDeleted && !isPermanentlyDeleted ? (
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -116,9 +119,9 @@ export function EditorToolbar() {
                                         size="icon"
                                         onClick={upsertOrchestrator}
                                         disabled={isSaving}
-                                        className="h-8 w-8 text-sa-good hover:bg-sa-good/10 disabled:text-muted-foreground/40"
+                                        className="h-7 w-7 text-sa-good hover:bg-sa-good/10 disabled:text-muted-foreground/40"
                                     >
-                                        <Undo2 className="h-[18px] w-[18px]" />
+                                        <Undo2 className="h-4 w-4" />
                                     </Button>
                                 </span>
                             </TooltipTrigger>
@@ -137,9 +140,9 @@ export function EditorToolbar() {
                                         size="icon"
                                         onClick={upsertOrchestrator}
                                         disabled={!activeTab?.hasUnsavedChanges || isSaving}
-                                        className={`h-8 w-8 ${activeTab?.hasUnsavedChanges ? "text-sa-amber hover:bg-sa-amber/10" : "text-muted-foreground"} disabled:text-muted-foreground/40`}
+                                        className={`h-7 w-7 ${activeTab?.hasUnsavedChanges ? "text-sa-amber hover:bg-sa-amber/10" : "text-muted-foreground"} disabled:text-muted-foreground/40`}
                                     >
-                                        <Save className="h-[18px] w-[18px]" />
+                                        <Save className="h-4 w-4" />
                                     </Button>
                                 </span>
                             </TooltipTrigger>
@@ -158,9 +161,9 @@ export function EditorToolbar() {
                                         size="icon"
                                         onClick={commonCancel}
                                         disabled={!activeTab?.hasUnsavedChanges || isDeleted}
-                                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong disabled:text-muted-foreground/40"
+                                        className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong disabled:text-muted-foreground/40"
                                     >
-                                        <RotateCcw className="h-[18px] w-[18px]" />
+                                        <RotateCcw className="h-4 w-4" />
                                     </Button>
                                 </span>
                             </TooltipTrigger>
