@@ -63,28 +63,28 @@ export function KAttachmentViewerDialog({ atts, att, onClose }: Props) {
     return (
         <Dialog open={!!att} onOpenChange={open => !open && onClose()}>
             <DialogPortal>
-                <DialogOverlay className="bg-black/50" />
+                <DialogOverlay />
                 <DialogPrimitive.Content
                     className={isMobile
-                        ? "fixed inset-x-0 bottom-0 z-[10002] overflow-hidden rounded-t-2xl bg-zinc-900 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-4 duration-200"
-                        : "fixed left-1/2 top-1/2 z-[10002] w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl bg-zinc-900 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] duration-200"
+                        ? "fixed inset-x-0 bottom-0 z-[10002] overflow-hidden rounded-t-2xl border-t border-sa-border-strong bg-popover text-popover-foreground sa-shadow-pop data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-4 duration-200"
+                        : "fixed left-1/2 top-1/2 z-[10002] w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border border-sa-border-strong bg-popover text-popover-foreground sa-shadow-pop data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] duration-200"
                     }
                 >
                     {/* Drag handle — mobile only */}
                     {isMobile && (
                         <div className="flex justify-center pt-2.5 pb-1">
-                            <div className="w-9 h-1 rounded-full bg-zinc-600" />
+                            <div className="w-9 h-1 rounded-full bg-sa-border-strong" />
                         </div>
                     )}
 
                     {/* Header */}
-                    <div className="flex flex-row items-center gap-2 px-4 py-3 border-b border-zinc-800">
+                    <div className="flex flex-row items-center gap-2 px-3 py-2 border-b border-sa-border">
                         {/* Prev / Next */}
                         <button
                             onClick={() => setCurrentIdx(i => i - 1)}
                             disabled={!hasPrev}
                             title="Previous file"
-                            className="shrink-0 p-1.5 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors disabled:opacity-25 disabled:pointer-events-none"
+                            className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors duration-100 disabled:opacity-25 disabled:pointer-events-none"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
@@ -92,50 +92,50 @@ export function KAttachmentViewerDialog({ atts, att, onClose }: Props) {
                             onClick={() => setCurrentIdx(i => i + 1)}
                             disabled={!hasNext}
                             title="Next file"
-                            className="shrink-0 p-1.5 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors disabled:opacity-25 disabled:pointer-events-none"
+                            className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors duration-100 disabled:opacity-25 disabled:pointer-events-none"
                         >
                             <ChevronRight className="w-4 h-4" />
                         </button>
 
                         {/* Title + counter */}
-                        <DialogPrimitive.Title className="flex-1 text-sm font-mono text-zinc-200 truncate leading-none">
+                        <DialogPrimitive.Title className="flex-1 text-[13px] font-mono text-foreground truncate leading-none">
                             {current?.title ?? ""}
                         </DialogPrimitive.Title>
                         {atts.length > 1 && (
-                            <span className="text-xs text-zinc-500 shrink-0">{currentIdx + 1}/{atts.length}</span>
+                            <span className="font-mono text-xs text-muted-foreground shrink-0">{currentIdx + 1}/{atts.length}</span>
                         )}
 
-                        <span className="text-xs px-2 py-0.5 rounded bg-zinc-700 text-zinc-400 font-mono shrink-0">
+                        <span className="text-[11px] px-1.5 rounded-md border border-sa-border-strong text-muted-foreground font-mono shrink-0">
                             {langLabel}
                         </span>
                         <button
                             onClick={handleCopy}
                             title="Copy to clipboard"
-                            className="shrink-0 p-2 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
+                            className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors duration-100"
                         >
-                            {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                            {copied ? <Check className="w-4 h-4 text-sa-good" /> : <Copy className="w-4 h-4" />}
                         </button>
                         <button
                             onClick={onClose}
                             title="Close"
-                            className="shrink-0 p-2 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
+                            className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors duration-100"
                         >
                             <X className="w-4 h-4" />
                         </button>
                     </div>
 
-                    {/* Code area */}
+                    {/* Code area — background matches the dark-plus Shiki theme (code data, not chrome) */}
                     <div
                         className="overflow-auto bg-[#1e1e1e]"
                         style={{ height: isMobile ? "70vh" : "60vh" }}
                     >
                         {!current?.content ? (
-                            <div className="flex items-center justify-center h-full text-sm text-zinc-500">
+                            <div className="flex items-center justify-center h-full text-[13px] text-muted-foreground">
                                 No content
                             </div>
                         ) : busy && !html ? (
                             <div className="flex items-center justify-center h-full">
-                                <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+                                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                             </div>
                         ) : (
                             <div

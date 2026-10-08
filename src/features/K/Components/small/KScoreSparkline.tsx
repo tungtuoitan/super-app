@@ -4,7 +4,7 @@
 }
 
 const barColor = (pct: number) =>
-    pct >= 70 ? "#22c55e" : pct >= 40 ? "#eab308" : "#ef4444";
+    pct >= 70 ? "hsl(var(--sa-good))" : pct >= 40 ? "hsl(var(--sa-accent-amber))" : "hsl(var(--sa-danger))";
 
 export function KScoreSparkline({ scores, slots: SLOTS = 7 }: KScoreSparklineProps) {
     const barW = 6;

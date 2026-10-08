@@ -16,7 +16,7 @@ const H = 10;
 const W = SLOTS * (DOT_SIZE + GAP) - GAP;
 
 const dotColor = (point: number) =>
-    point >= 4 ? "#22c55e" : point >= 2 ? "#eab308" : "#ef4444";
+    point >= 4 ? "hsl(var(--sa-good))" : point >= 2 ? "hsl(var(--sa-accent-amber))" : "hsl(var(--sa-danger))";
 
 function formatNextReview(iso: string): string {
     const diff = (parseInstant(iso)?.getTime() ?? Date.now()) - Date.now();
@@ -36,7 +36,7 @@ function formatNextReview(iso: string): string {
 }
 
 const retentionColor = (r: number) =>
-    r >= 80 ? "#22c55e" : r >= 50 ? "#eab308" : r >= 20 ? "#f97316" : "#ef4444";
+    r >= 80 ? "hsl(var(--sa-good))" : r >= 50 ? "hsl(var(--sa-accent-amber))" : r >= 20 ? "hsl(var(--muted-foreground))" : "hsl(var(--sa-danger))";
 
 export function KScoreBar({ scores, srsNextReviewAt, retention }: KScoreBarProps) {
     if (scores.length === 0 && !srsNextReviewAt && (retention == null || retention === 0)) return null;
@@ -72,12 +72,12 @@ export function KScoreBar({ scores, srsNextReviewAt, retention }: KScoreBarProps
                 </svg>
             )}
             {srsNextReviewAt && (
-                <span className={`text-[10px] leading-none whitespace-nowrap ${isDue ? "text-blue-400" : "text-zinc-500"}`}>
+                <span className={`font-mono text-[10px] leading-none whitespace-nowrap ${isDue ? "text-sa-amber-ink" : "text-muted-foreground"}`}>
                     {formatNextReview(srsNextReviewAt)}
                 </span>
             )}
             {retention != null && retention > 0 && (
-                <span className="text-[10px] leading-none whitespace-nowrap font-medium" style={{ color: retentionColor(retention) }}>
+                <span className="font-mono text-[10px] leading-none whitespace-nowrap font-medium" style={{ color: retentionColor(retention) }}>
                     {Math.round(retention)}%
                 </span>
             )}
