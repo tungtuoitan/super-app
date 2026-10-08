@@ -78,8 +78,8 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({ onClick, isActive, disabl
         disabled={disabled}
         title={title}
         className={cn(
-            "p-1.5 rounded hover:bg-muted transition-colors",
-            isActive && "bg-muted text-primary",
+            "inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-sa-hover-strong hover:text-foreground transition-colors duration-100",
+            isActive && "bg-sa-hover-strong text-sa-amber-ink",
             disabled && "opacity-50 cursor-not-allowed"
         )}
     >
@@ -547,7 +547,7 @@ export function RichTextEditor({
             {showBubbleMenu && (
                 <div
                     ref={bubbleMenuRef}
-                    className="absolute z-50 flex items-center gap-0.5 p-1 bg-popover border border-border rounded-lg shadow-lg animate-in fade-in-0 zoom-in-95 duration-100"
+                    className="absolute z-50 flex items-center gap-0.5 p-1 bg-popover border border-sa-border-strong sa-shadow-pop rounded-lg animate-in fade-in-0 zoom-in-95 duration-100"
                     style={{
                         top: bubbleMenuPosition.top,
                         left: bubbleMenuPosition.left,
@@ -560,7 +560,7 @@ export function RichTextEditor({
                         disabled={disabled}
                         title="Bold (Ctrl+B)"
                     >
-                        <Bold className="h-4 w-4" />
+                        <Bold className="h-3.5 w-3.5" />
                     </ToolbarButton>
 
                     <ToolbarButton
@@ -569,7 +569,7 @@ export function RichTextEditor({
                         disabled={disabled}
                         title="Italic (Ctrl+I)"
                     >
-                        <Italic className="h-4 w-4" />
+                        <Italic className="h-3.5 w-3.5" />
                     </ToolbarButton>
 
                     <ToolbarButton
@@ -578,10 +578,10 @@ export function RichTextEditor({
                         disabled={disabled}
                         title="Underline (Ctrl+U)"
                     >
-                        <UnderlineIcon className="h-4 w-4" />
+                        <UnderlineIcon className="h-3.5 w-3.5" />
                     </ToolbarButton>
 
-                    <div className="w-px h-5 bg-border mx-0.5" />
+                    <div className="w-px h-4 bg-sa-border-strong mx-0.5" />
 
                     <ToolbarButton
                         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
@@ -589,7 +589,7 @@ export function RichTextEditor({
                         disabled={disabled}
                         title="Heading 1"
                     >
-                        <Heading1 className="h-4 w-4" />
+                        <Heading1 className="h-3.5 w-3.5" />
                     </ToolbarButton>
 
                     <ToolbarButton
@@ -598,10 +598,10 @@ export function RichTextEditor({
                         disabled={disabled}
                         title="Heading 2"
                     >
-                        <Heading2 className="h-4 w-4" />
+                        <Heading2 className="h-3.5 w-3.5" />
                     </ToolbarButton>
 
-                    <div className="w-px h-5 bg-border mx-0.5" />
+                    <div className="w-px h-4 bg-sa-border-strong mx-0.5" />
 
                     <ToolbarButton
                         onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -609,7 +609,7 @@ export function RichTextEditor({
                         disabled={disabled}
                         title="Bullet List"
                     >
-                        <List className="h-4 w-4" />
+                        <List className="h-3.5 w-3.5" />
                     </ToolbarButton>
 
                     <ToolbarButton
@@ -618,7 +618,7 @@ export function RichTextEditor({
                         disabled={disabled}
                         title="Ordered List"
                     >
-                        <ListOrdered className="h-4 w-4" />
+                        <ListOrdered className="h-3.5 w-3.5" />
                     </ToolbarButton>
 
                     <ToolbarButton
@@ -627,7 +627,7 @@ export function RichTextEditor({
                         disabled={disabled}
                         title="Checklist"
                     >
-                        <ListChecks className="h-4 w-4" />
+                        <ListChecks className="h-3.5 w-3.5" />
                     </ToolbarButton>
 
                     <ToolbarButton
@@ -636,10 +636,10 @@ export function RichTextEditor({
                         disabled={disabled}
                         title="Code Block"
                     >
-                        <Code2 className="h-4 w-4" />
+                        <Code2 className="h-3.5 w-3.5" />
                     </ToolbarButton>
 
-                    <div className="w-px h-5 bg-border mx-0.5" />
+                    <div className="w-px h-4 bg-sa-border-strong mx-0.5" />
 
                     {/* Color Picker */}
                     <div className="relative">
@@ -649,17 +649,17 @@ export function RichTextEditor({
                             disabled={disabled}
                             title="Text Color"
                             className={cn(
-                                "p-1.5 rounded hover:bg-muted transition-colors flex items-center gap-0.5",
-                                showColorPicker && "bg-muted",
+                                "inline-flex h-7 items-center gap-0.5 rounded-md px-1.5 text-muted-foreground hover:bg-sa-hover-strong hover:text-foreground transition-colors duration-100",
+                                showColorPicker && "bg-sa-hover-strong text-foreground",
                                 disabled && "opacity-50 cursor-not-allowed"
                             )}
                         >
-                            <Palette className="h-4 w-4" />
+                            <Palette className="h-3.5 w-3.5" />
                             <ChevronDown className="h-3 w-3" />
                         </button>
                         {showColorPicker && (
                             <div
-                                className="absolute top-full w-72 left-0 mt-1 p-1.5 bg-popover border border-border rounded-lg shadow-lg flex  gap-1 z-10"
+                                className="absolute top-full left-0 mt-1 p-1.5 bg-popover border border-sa-border-strong sa-shadow-pop rounded-lg flex gap-1 z-10"
                                 onMouseDown={(e) => e.preventDefault()}
                             >
                                 {TEXT_COLORS.map((item) => (
@@ -676,7 +676,7 @@ export function RichTextEditor({
                                         }}
                                         title={item.name}
                                         className={cn(
-                                            "w-6 h-6 rounded border border-border hover:scale-110 transition-transform",
+                                            "w-5 h-5 rounded-md border border-sa-border-strong hover:scale-110 transition-transform duration-100",
                                             !item.color && "bg-foreground"
                                         )}
                                         style={item.color ? { backgroundColor: item.color } : undefined}
@@ -686,14 +686,14 @@ export function RichTextEditor({
                         )}
                     </div>
 
-                    <div className="w-px h-5 bg-border mx-0.5" />
+                    <div className="w-px h-4 bg-sa-border-strong mx-0.5" />
 
                     <ToolbarButton
                         onClick={() => imageInputRef.current?.click()}
                         disabled={disabled || isUploading}
                         title="Insert Image"
                     >
-                        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
+                        {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
                     </ToolbarButton>
 
                     <ToolbarButton
@@ -701,14 +701,14 @@ export function RichTextEditor({
                         disabled={disabled || isUploading}
                         title="Attach File"
                     >
-                        <Paperclip className="h-4 w-4" />
+                        <Paperclip className="h-3.5 w-3.5" />
                     </ToolbarButton>
                 </div>
             )}
 
             {/* Upload indicator */}
             {isUploading && (
-                <div className="flex items-center gap-1 px-3 py-1 border-b bg-muted/30 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5 px-3 py-1 border-b border-sa-border text-[11px] text-muted-foreground">
                     <Loader2 className="h-3 w-3 animate-spin" />
                     Uploading...
                 </div>
