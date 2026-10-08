@@ -61,20 +61,20 @@ export function CustomDragPreview({
                     transform: `translate(${mouseX - centerOffset + rightOffset}px, ${mouseY + 10}px)`,
                 }}
                 className={`
-                    absolute bg-editor-bg/95 border border-editor-border rounded-md p-2 px-3 h-8
+                    absolute bg-popover border border-sa-border-strong rounded-lg p-2 px-3 h-8
                     ${itemCount > 1 ? "min-w-[60px]" : "min-w-[200px]"}
-                    max-w-[300px] shadow-lg
+                    max-w-[300px] sa-shadow-pop
                 `}
             >
                 <div className={`flex items-center mt-[-4px] gap-2 ${itemCount > 1 ? "justify-center" : "justify-start"}`}>
                     {/* Icon */}
-                    <TagIcon className="w-4 h-4 text-primary" />
+                    <TagIcon className="w-3.5 h-3.5 text-sa-amber" />
 
                     {/* Text: Show folder name for single item, count for multiple */}
                     <span
                         className={`
-                            text-editor-fg truncate
-                            ${itemCount > 1 ? "font-bold text-base" : "font-medium text-sm"}
+                            text-foreground truncate
+                            ${itemCount > 1 ? "font-mono font-medium text-[13px]" : "font-medium text-[13px]"}
                         `}
                     >
                         {displayText}

@@ -70,8 +70,8 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
             }}
             onContextMenu={handleRightClick}
             className={`
-                flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded group hover:bg-editor-hover-light
-                ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
+                flex items-center h-full w-full py-1 pr-2 cursor-pointer rounded-md group hover:bg-sa-hover transition-colors duration-100
+                ${isDropTarget ? "bg-sa-amber/10 outline outline-1 outline-sa-amber/60 -outline-offset-1 rounded-md" : ""}
             `}
         >
             {/* Expand/Collapse Button */}
@@ -81,14 +81,14 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
                     e.preventDefault();
                     node.toggle();
                 }}
-                className={`p-0.5 ${hasChildren ? "visible" : "invisible"} text-editor-fg`}
+                className={`p-0.5 rounded ${hasChildren ? "visible" : "invisible"} text-muted-foreground/70 hover:text-foreground`}
             >
-                {hasChildren ? node.isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" /> : <div className="w-4 h-4"/>}
+                {hasChildren ? node.isOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5"/>}
             </button>
 
             {/* Workspace Icon */}
-            <div className="mr-2 flex items-center">
-                <Layers className="w-4 h-4" style={{ color: folderItem.color || "#75beff" }} />
+            <div className="ml-0.5 mr-2 flex items-center">
+                <Layers className="w-4 h-4" style={{ color: folderItem.color || "hsl(var(--muted-foreground))" }} />
             </div>
 
             {/* Workspace Name */}
@@ -96,7 +96,7 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
                 <HighlightText
                     text={folderItem.name}
                     highlight={treeType === "workspaceTree" ? searchQuery : ""}
-                    className="text-sm font-semibold uppercase tracking-wide text-editor-fg truncate"
+                    className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground truncate"
                 />
             </div>
 
@@ -109,9 +109,9 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
                             e.stopPropagation();
                             addNewFolder(treeData);
                         }}
-                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
+                        className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors duration-100"
                     >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-3.5 h-3.5" />
                     </button>
 
                     <button
@@ -120,9 +120,9 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
                             e.stopPropagation();
                             loadTree();
                         }}
-                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
+                        className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors duration-100"
                     >
-                        <RefreshCw className="w-4 h-4" />
+                        <RefreshCw className="w-3.5 h-3.5" />
                     </button>
 
                     {/* <button
@@ -131,7 +131,7 @@ export function RootFolderNode({ node, style, dragHandle, treeData, treeType = "
                             e.stopPropagation();
                             _treeRef?.current?.closeAll();
                         }}
-                        className="p-1 text-editor-fg hover:bg-editor-hover rounded"
+                        className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors duration-100"
                     >
                         <ChevronsUp className="w-4 h-4" />
                     </button> */}

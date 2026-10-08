@@ -38,10 +38,7 @@ export function HighlightText({ text, highlight, className = "" }: HighlightText
                 return isMatch ? (
                     <mark
                         key={index}
-                        className="bg-yellow-400/80 text-black rounded-sm px-0.5"
-                        style={{
-                            backgroundColor: "rgb(250 204 21 / 0.8)", // yellow-400/80
-                        }}
+                        className="bg-sa-amber/30 text-foreground rounded-sm px-0.5"
                     >
                         {part}
                     </mark>

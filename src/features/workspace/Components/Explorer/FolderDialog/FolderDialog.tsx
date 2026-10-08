@@ -149,10 +149,10 @@ export function FolderDialog() {
         <Dialog open={isFolderDialogOpen} onOpenChange={(newOpen) => !newOpen && handleClose()}>
             <DialogContent className="sm:max-w-[550px] rounded-xl">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">{mode === "edit" ? `Edit ${itemLabel}` : `Create ${itemLabel}`}</DialogTitle>
+                    <DialogTitle className="text-lg font-medium">{mode === "edit" ? `Edit ${itemLabel}` : `Create ${itemLabel}`}</DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-6">
+                <div className="space-y-5">
                     {/* Folder name with suggestions dropdown for folders */}
                     {itemType === workspaceConstants.itemTypes.folder && mode === "create" ? (
                         <div className="space-y-2">

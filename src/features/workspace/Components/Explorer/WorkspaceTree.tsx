@@ -154,14 +154,14 @@ export function WorkspaceTree() {
                 data-workspace-tree
                 tabIndex={0}
                 onContextMenu={handleContainerContextMenu}
-                className="h-full flex flex-col py-4 pl-4 pt-0 relative focus:outline-none focus-within:bg-editor-hover/30 transition-colors overflow-auto"
+                className="h-full flex flex-col py-4 pl-4 pt-0 relative focus:outline-none transition-colors duration-100 overflow-auto"
             >
                 {/* Loading overlay when dragging */}
                 {isDragging && (
-                    <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">
-                        <div className="bg-editor-sidebar p-4 px-6 rounded-lg shadow-lg flex items-center gap-3">
-                            <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                            <span className="text-sm text-editor-fg">Moving folder...</span>
+                    <div className="absolute inset-0 bg-background/40 z-[1000] flex items-center justify-center pointer-events-none">
+                        <div className="bg-popover border border-sa-border-strong sa-shadow-pop py-2.5 px-4 rounded-lg flex items-center gap-2.5">
+                            <Loader2 className="w-4 h-4 text-sa-amber animate-spin" />
+                            <span className="text-[13px] text-foreground">Moving folder...</span>
                         </div>
                     </div>
                 )}
