@@ -161,14 +161,14 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
     return (
         <div className="flex flex-col h-full overflow-hidden">
             {/* Toolbar */}
-            <div className="flex items-center gap-2 px-4 py-2 border-b border-border flex-shrink-0 flex-wrap">
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-sa-border flex-shrink-0 flex-wrap">
                 {/* Graph type */}
-                <div className="flex items-center gap-1 rounded-md border border-border p-0.5 bg-muted/20">
+                <div className="flex items-center gap-0.5 rounded-lg border border-sa-border p-0.5">
                     <button
                         onClick={() => setGraphMode("frequency")}
                         className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors",
-                            graphMode === "frequency" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                            "flex items-center gap-1.5 px-2.5 h-6 rounded-md text-[13px] transition-colors duration-100",
+                            graphMode === "frequency" ? "bg-sa-surface-2 text-foreground" : "text-muted-foreground hover:text-foreground"
                         )}
                     >
                         <Activity className="w-3 h-3" />
@@ -177,8 +177,8 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
                     <button
                         onClick={() => setGraphMode("count")}
                         className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors",
-                            graphMode === "count" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                            "flex items-center gap-1.5 px-2.5 h-6 rounded-md text-[13px] transition-colors duration-100",
+                            graphMode === "count" ? "bg-sa-surface-2 text-foreground" : "text-muted-foreground hover:text-foreground"
                         )}
                     >
                         <BarChart2 className="w-3 h-3" />
@@ -190,19 +190,19 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
                 <div ref={checklistRef} className="relative">
                     <button
                         onClick={() => setChecklistOpen((v) => !v)}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+                        className="flex items-center gap-1.5 px-2.5 h-7 rounded-lg border border-sa-border text-[13px] text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors duration-100"
                     >
                         Tracks ({selectedIds.size}/{activeTracks.length})
                         <ChevronDown className="w-3 h-3" />
                     </button>
                     {checklistOpen && (
-                        <div className="absolute top-full left-0 mt-1 z-50 w-52 rounded-md border border-border bg-popover shadow-lg overflow-hidden">
+                        <div className="absolute top-full left-0 mt-1 z-50 w-52 rounded-lg border border-sa-border bg-popover sa-shadow-pop overflow-hidden">
                             <button
                                 onClick={() => {
                                     if (allChecked) setSelectedIds(new Set());
                                     else setSelectedIds(new Set(activeTracks.map((t) => t.id)));
                                 }}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:bg-muted/30 border-b border-border"
+                                className="w-full flex items-center gap-2 px-3 h-8 text-[13px] text-muted-foreground hover:bg-sa-hover-strong border-b border-sa-border"
                             >
                                 <div className="w-3.5 h-3.5 flex items-center justify-center">
                                     {allChecked && <Check className="w-3 h-3" />}
@@ -215,7 +215,7 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
                                     <button
                                         key={track.id}
                                         onClick={() => toggleTrack(track.id)}
-                                        className="w-full flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-muted/30 transition-colors"
+                                        className="w-full flex items-center gap-2 px-3 h-8 text-[13px] hover:bg-sa-hover-strong transition-colors duration-100"
                                     >
                                         <Checkbox
                                             checked={selectedIds.has(track.id)}
@@ -237,19 +237,19 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
                 <div ref={dateRef} className="relative ml-auto">
                     <button
                         onClick={() => setDateDropOpen((v) => !v)}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+                        className="flex items-center gap-1.5 px-2.5 h-7 rounded-lg border border-sa-border text-[13px] text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors duration-100"
                     >
                         {currentRangeLabel}
                         <ChevronDown className="w-3 h-3" />
                     </button>
                     {dateDropOpen && (
-                        <div className="absolute top-full right-0 mt-1 z-50 w-32 rounded-md border border-border bg-popover shadow-lg overflow-hidden">
+                        <div className="absolute top-full right-0 mt-1 z-50 w-32 rounded-lg border border-sa-border bg-popover sa-shadow-pop overflow-hidden">
                             {DATE_RANGE_OPTIONS.map((opt) => (
                                 <button
                                     key={opt.label}
                                     onClick={() => { setDateRangeDays(opt.days); setDateDropOpen(false); }}
                                     className={cn(
-                                        "w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left hover:bg-muted/30 transition-colors",
+                                        "w-full flex items-center gap-2 px-3 h-8 text-[13px] text-left hover:bg-sa-hover-strong transition-colors duration-100",
                                         dateRangeDays === opt.days ? "text-foreground" : "text-muted-foreground"
                                     )}
                                 >
@@ -265,7 +265,7 @@ export function TrackGraphContent({ onLogClick }: TrackGraphContentProps) {
             {/* Graph */}
             <div className="flex-1 overflow-hidden p-4">
                 {selectedTracks.length === 0 ? (
-                    <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                    <div className="h-full flex items-center justify-center text-muted-foreground text-[13px]">
                         Select at least one track
                     </div>
                 ) : graphMode === "count" ? (
@@ -297,7 +297,7 @@ export function TrackTimelineSheet({ open, onClose, onLogClick }: TrackTimelineS
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
             <DialogContent className="max-w-4xl w-full h-[80vh] flex flex-col gap-0 p-0 overflow-hidden">
                 <DialogHeader className="px-5 pt-4 pb-0 flex-shrink-0">
-                    <DialogTitle className="text-sm font-semibold">Track Activity</DialogTitle>
+                    <DialogTitle className="text-sm font-medium">Track Activity</DialogTitle>
                 </DialogHeader>
                 <TrackGraphContent onLogClick={onLogClick} />
             </DialogContent>
@@ -318,12 +318,12 @@ function CountChart({ data, selectedTracks, activeTracks }: CountChartProps) {
     return (
         <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.25} />
-                <XAxis dataKey="dateLabel" tick={{ fill: "#9ca3af", fontSize: 10 }} tickLine={false} axisLine={{ stroke: "#4b5563" }} interval={interval} />
-                <YAxis allowDecimals={false} tick={{ fill: "#9ca3af", fontSize: 10 }} tickLine={false} axisLine={false} width={24} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.6} />
+                <XAxis dataKey="dateLabel" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} tickLine={false} axisLine={{ stroke: "hsl(var(--sa-border-strong))" }} interval={interval} />
+                <YAxis allowDecimals={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} tickLine={false} axisLine={false} width={24} />
                 <Tooltip
-                    contentStyle={{ backgroundColor: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12 }}
-                    labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600, marginBottom: 4 }}
+                    contentStyle={{ backgroundColor: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12, boxShadow: "var(--sa-shadow-pop)" }}
+                    labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 500, marginBottom: 4 }}
                     formatter={(value, _name, entry: any) => {
                         const trackId = Number(entry?.dataKey);
                         const track = activeTracks.find((t: any) => t.id === trackId);
@@ -379,8 +379,8 @@ function YAxisTrackTick(props: any) {
                 x={iconSize + gap}
                 y={iconSize / 2 + 1}
                 dominantBaseline="middle"
-                fill="#9ca3af"
-                fontSize={10}
+                fill="hsl(var(--muted-foreground))"
+                fontSize={11}
                 style={{ maxWidth: maxNameWidth }}
             >
                 {track.name.length > 9 ? track.name.slice(0, 8) + "…" : track.name}
@@ -446,24 +446,24 @@ function FrequencyChart({ freqData, xTicks, days, onDotClick, logs }: FrequencyC
     return (
         <div className="flex flex-col h-full gap-1">
             <div className="flex items-center justify-end gap-1 flex-shrink-0">
-                <button onClick={zoomIn} disabled={zoomDays <= ZOOM_STEPS[0]} className="p-1 rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted/30 disabled:opacity-30 transition-colors" title="Zoom in">
+                <button onClick={zoomIn} disabled={zoomDays <= ZOOM_STEPS[0]} className="p-1 rounded-md border border-sa-border text-muted-foreground hover:text-foreground hover:bg-sa-hover disabled:opacity-30 transition-colors duration-100" title="Zoom in">
                     <ZoomIn className="w-3.5 h-3.5" />
                 </button>
-                <span className="text-xs text-muted-foreground w-16 text-center">{zoomDays}d</span>
-                <button onClick={zoomOut} disabled={zoomDays >= Math.min(days, ZOOM_STEPS[ZOOM_STEPS.length - 1])} className="p-1 rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted/30 disabled:opacity-30 transition-colors" title="Zoom out">
+                <span className="text-[13px] font-mono text-muted-foreground w-16 text-center">{zoomDays}d</span>
+                <button onClick={zoomOut} disabled={zoomDays >= Math.min(days, ZOOM_STEPS[ZOOM_STEPS.length - 1])} className="p-1 rounded-md border border-sa-border text-muted-foreground hover:text-foreground hover:bg-sa-hover disabled:opacity-30 transition-colors duration-100" title="Zoom out">
                     <ZoomOut className="w-3.5 h-3.5" />
                 </button>
             </div>
             <div className="flex-1">
                 <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart margin={{ top: 16, right: 16, left: 8, bottom: 8 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.6} />
                         <XAxis
                             type="number" dataKey="x"
                             domain={[windowStart, windowEnd]}
                             ticks={visibleTicks.map((t) => t.idx)}
                             tickFormatter={(v) => xTicks.find((t) => t.idx === v)?.label ?? ""}
-                            tick={{ fill: "#9ca3af", fontSize: 10 }} tickLine={false} axisLine={{ stroke: "#4b5563" }}
+                            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} tickLine={false} axisLine={{ stroke: "hsl(var(--sa-border-strong))" }}
                         />
                         <YAxis
                             type="number" dataKey="y"
@@ -473,7 +473,7 @@ function FrequencyChart({ freqData, xTicks, days, onDotClick, logs }: FrequencyC
                         />
                         <Tooltip
                             cursor={false}
-                            contentStyle={{ backgroundColor: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12 }}
+                            contentStyle={{ backgroundColor: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12, boxShadow: "var(--sa-shadow-pop)" }}
                             formatter={(value: any, name: any, props: any) => {
                                 if (name === "x") return null;
                                 if (name === "count") return [props?.payload?.count, "times"];
@@ -514,25 +514,25 @@ function FreqTooltip({ active, payload, freqData, days, logs }: any) {
         .filter(Boolean);
 
     return (
-        <div style={{ backgroundColor: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "8px 10px", fontSize: 12, minWidth: 160, maxWidth: 240 }}>
+        <div style={{ backgroundColor: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, boxShadow: "var(--sa-shadow-pop)", padding: "8px 10px", fontSize: 12, minWidth: 160, maxWidth: 240 }}>
             {/* Track header */}
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                 <TrackIconDisplay value={track?.emoji} trackColor={track?.color} size="sm" />
-                <span style={{ fontWeight: 600, color: "hsl(var(--foreground))" }}>{track?.name}</span>
+                <span style={{ fontWeight: 500, color: "hsl(var(--foreground))" }}>{track?.name}</span>
             </div>
-            <div style={{ color: "#9ca3af", marginBottom: 4 }}>{date} · {p.count}×</div>
+            <div style={{ color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{date} · {p.count}×</div>
             {/* Log entries */}
             {dotLogs.slice(0, 3).map((log: any) => (
                 <div key={log.id} style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 4, marginTop: 4 }}>
                     {log.title && <div style={{ color: "hsl(var(--foreground))", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{log.title}</div>}
-                    {log.description && <div style={{ color: "#9ca3af", fontSize: 11, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{log.description}</div>}
+                    {log.description && <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 11, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{log.description}</div>}
                     {(log.occurAt ?? log.createdAt) && (
-                        <div style={{ color: "#6b7280", fontSize: 10, marginTop: 1 }}>{format(new Date(log.occurAt ?? log.createdAt), "HH:mm")}</div>
+                        <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 10, marginTop: 1 }}>{format(new Date(log.occurAt ?? log.createdAt), "HH:mm")}</div>
                     )}
                 </div>
             ))}
-            {dotLogs.length > 3 && <div style={{ color: "#6b7280", fontSize: 10, marginTop: 4 }}>+{dotLogs.length - 3} more</div>}
-            {p.logIds?.length > 0 && <div style={{ color: "#9ca3af", fontSize: 10, marginTop: 4 }}>click to open</div>}
+            {dotLogs.length > 3 && <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 10, marginTop: 4 }}>+{dotLogs.length - 3} more</div>}
+            {p.logIds?.length > 0 && <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 10, marginTop: 4 }}>click to open</div>}
         </div>
     );
 }

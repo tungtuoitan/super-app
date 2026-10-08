@@ -16,7 +16,7 @@ export function TrackPanelMenu() {
             <MenuDivider />
             <MenuItem
                 onClick={() => executeDirectly({ callback: contextData?.onDelete })}
-                className="text-red-500"
+                className="text-sa-danger"
             >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete

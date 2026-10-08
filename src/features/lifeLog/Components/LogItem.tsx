@@ -92,17 +92,17 @@ export function LogItem({ log, trackEmoji, trackColor, onClick, onDelete }: LogI
 
     const title = log.isSensitive ? (
         <SensitiveOverlay>
-            <span className="font-medium text-sm">{log.title || log.type}</span>
+            <span className="text-[13px] text-foreground">{log.title || log.type}</span>
         </SensitiveOverlay>
     ) : (
-        <span className="font-medium text-sm truncate">{log.title || log.type}</span>
+        <span className="text-[13px] text-foreground truncate">{log.title || log.type}</span>
     );
 
     return (
         <div
             className={cn(
-                "flex items-start gap-2 px-3 py-2 hover:bg-muted/30 cursor-pointer transition-colors",
-                "border-b border-border/50 select-none"
+                "flex items-center gap-2 px-3 min-h-[32px] py-1.5 hover:bg-sa-hover cursor-pointer transition-colors duration-100",
+                "border-b border-sa-border select-none"
             )}
             onMouseDown={startPress}
             onMouseUp={cancelPress}
@@ -116,12 +116,12 @@ export function LogItem({ log, trackEmoji, trackColor, onClick, onDelete }: LogI
             {log.trackId ? (
                 <TrackIconDisplay value={trackEmoji} trackColor={trackColor} size="sm" />
             ) : (
-                <LogTypeBadge type={log.type} className="mt-0.5" />
+                <LogTypeBadge type={log.type} />
             )}
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">{title}</div>
             </div>
-            <span className="text-[10px] text-muted-foreground flex-shrink-0 mt-0.5 whitespace-nowrap">
+            <span className="text-[11px] font-mono text-muted-foreground flex-shrink-0 whitespace-nowrap">
                 {formatLogTime(log)}
             </span>
         </div>

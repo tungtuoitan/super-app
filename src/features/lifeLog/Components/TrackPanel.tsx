@@ -33,25 +33,25 @@ export function TrackPanel() {
     })()
 
     return (
-        <div className="border-b border-border flex-shrink-0 flex items-center" style={{ borderTop: "1px solid rgb(63, 63, 70)" }}>
+        <div className="border-y border-sa-border flex-shrink-0 flex items-center">
             {/* Scrollable track list */}
             <div className="flex-1 flex  overflow-x-auto scrollbar-hide items-left min-w-0">
                  
                 {sortedTracks.length === 0 && (
-                    <p className="text-xs text-muted-foreground italic flex-shrink-0">No tracks yet.</p>
+                    <p className="text-[13px] text-muted-foreground flex-shrink-0">No tracks yet.</p>
                 )}
                 {sortedTracks.map((track) => (
                     <TrackItem key={track.id} track={track} />
                 ))}
                 <button
                     onClick={() => openNewTrackTab()}
-                    className={`flex flex-col justify-center items-center gap-1 rounded-lg border transition-all bg-muted/30 border-border hover:bg-muted/60 hover:border-primary/30 cursor-pointer select-none flex-shrink-0 ${isMobile ? "w-[76px] px-2 py-3" : "w-[60px] px-2 py-2"}`}
+                    className={`flex flex-col justify-center items-center gap-1 rounded-lg border transition-colors duration-100 border-sa-border hover:bg-sa-hover hover:border-sa-border-strong cursor-pointer select-none flex-shrink-0 ${isMobile ? "w-[76px] px-2 py-3" : "w-[60px] px-2 py-2"}`}
                     title="Add New Track"
                 >
-                    <div className="bg-green-900x border-gray-600 border rounded-[20%] w-7 h-7 flex items-center justify-center">
+                    <div className="border-sa-border-strong border rounded-md w-7 h-7 flex items-center justify-center">
                         <Plus className={isMobile ? "w-5 h-5 spin text-muted-foreground" : "w-4 h-4 text-muted-foreground"} />
                     </div>
-                    <span className="text-[9px] text-center leading-tight text-muted-foreground">New Track</span>
+                    <span className="text-[11px] text-center leading-tight text-muted-foreground">New Track</span>
                 </button>
             </div>
 
@@ -59,14 +59,14 @@ export function TrackPanel() {
             {/* <div className="flex items-center flex-col pr-1 gap-1 flex-shrink-0 border-l border-border">
                 <button
                     onClick={openGraphTab}
-                    className={`rounded border border-border bg-black text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ${isMobile ? "p-2" : "p-1"}`}
+                    className={`rounded-md border border-sa-border text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors duration-100 ${isMobile ? "p-2" : "p-1"}`}
                     title="Track activity graph"
                 >
                     <BarChart2 className={isMobile ? "w-4 h-4" : "w-3.5 h-3.5"} />
                 </button>
                 <button
                     onClick={() => setCreateOpen(true)}
-                    className={`rounded border border-border bg-black  text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ${isMobile ? "p-2" : "p-1"}`}
+                    className={`rounded-md border border-sa-border text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors duration-100 ${isMobile ? "p-2" : "p-1"}`}
                     title="Add track"
                 >
                     <Plus className={isMobile ? "w-5 h-5" : "w-3.5 h-3.5"} />

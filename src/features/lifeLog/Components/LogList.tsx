@@ -51,25 +51,25 @@ export function LogList() {
         <div className="flex flex-col h-full overflow-hidden relative">
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-1.5 flex-shrink-0">
-                <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">Logs {activeLogs.length > 0 && `(${activeLogs.length})`}</span>
+                <span className="text-[11px] uppercase font-medium text-muted-foreground tracking-wide">Logs {activeLogs.length > 0 && `(${activeLogs.length})`}</span>
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => loadLogs()}
-                        className={`rounded text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ${isMobile ? "p-2" : "p-0.5"}`}
+                        className={`rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors duration-100 ${isMobile ? "p-2" : "p-1"}`}
                         title="Refresh"
                     >
                         <RefreshCw className={isMobile ? "w-4 h-4" : "w-3 h-3"} />
                     </button>
                     <button
                         onClick={openGraphTab}
-                        className={`rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ${isMobile ? "p-2" : "p-1"}`}
+                        className={`rounded-md border border-sa-border text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors duration-100 ${isMobile ? "p-2" : "p-1"}`}
                         title="Track activity graph"
                         >
                         <BarChart2 className={isMobile ? "w-3.5 h-3.5" : "w-3.5 h-3.5"} />
                     </button>
                     {/* <button
                         onClick={() => handleAddTrack()}
-                        className={`rounded border border-border  text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ${isMobile ? "p-2" : "p-1"}`}
+                        className={`rounded-md border border-sa-border text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors ${isMobile ? "p-2" : "p-1"}`}
                         title="Add track"
                         >
                         <Plus className={isMobile ? "w-3.5 h-3.5" : "w-3.5 h-3.5"} />
@@ -80,23 +80,20 @@ export function LogList() {
 <div
   onClick={handleAddLog}
   className="
-    absolute bottom-4 right-4 border-[rgb(251, 191, 36)]
+    absolute bottom-4 right-4
     flex items-center justify-center
     h-12 w-12
-    rounded-2xl
-    bg-background/80
-    backdrop-blur-xl
-    border border-border
-    shadow-lg shadow-black/5
-    hover:bg-accent
-    hover:border-yellow-400/20
-    hover:shadow-xl
-    hover:-translate-y-0.5
-    transition-all duration-200
+    rounded-xl
+    bg-sa-surface-2
+    border border-sa-border-strong
+    sa-shadow-pop
+    hover:bg-sa-hover-strong
+    hover:border-sa-amber/40
+    transition-colors duration-100
     cursor-pointer
   "
 >
-  <NotebookPen className="w-5 h-5" style={{color: 'rgb(251, 191, 36)'}} />
+  <NotebookPen className="w-5 h-5 text-sa-amber" />
 </div>
             {/* Content */}
             <div className="flex-1 overflow-y-auto ">
@@ -107,11 +104,11 @@ export function LogList() {
                 ) : filtered.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-24 text-muted-foreground">
                         {searchQuery ? (
-                            <p className="text-xs">No results for "{searchQuery}"</p>
+                            <p className="text-[13px]">No results for "{searchQuery}"</p>
                         ) : (
                             <>
-                                <p className="text-xs">No logs yet.</p>
-                                <button onClick={handleAddLog} className="text-xs text-primary hover:underline mt-1">
+                                <p className="text-[13px]">No logs yet.</p>
+                                <button onClick={handleAddLog} className="text-[13px] text-sa-amber-ink hover:underline mt-1">
                                     Add your first log
                                 </button>
                             </>

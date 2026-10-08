@@ -42,17 +42,17 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
             {/* Icon header */}
             {
                 isTrack ? <>
-                <Label className="text-xs text-left text-muted-foreground block mb-[-4px]">Track Title</Label>
+                <Label className="text-[11px] font-medium text-left uppercase tracking-wide text-muted-foreground block mb-[-4px]">Track Title</Label>
                 <div className="flex items-center gap-3">
                     <TrackIconDisplay value={track?.emoji} trackColor={track?.color} size="lg" />
-                    <span className="text-sm text-left font-medium text-muted-foreground">
+                    <span className="text-sm text-left font-medium text-foreground">
                         {track?.name ?? "Track"}
                     </span>
                 </div>
                 </>
                 :
                 <div>
-                    <Label className="text-xs text-left text-muted-foreground mb-1 block">Log Title</Label>
+                    <Label className="text-[11px] font-medium text-left uppercase tracking-wide text-muted-foreground mb-1.5 block">Log Title</Label>
                     <Input
                         value={log.title ?? ""}
                         onChange={(e) => handleFieldChange("title", e.target.value)}
@@ -65,7 +65,7 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
             {/* Type — hidden for track logs */}
             {!isTrack && (
                 <div>
-                    <Label className="text-xs text-left text-muted-foreground mb-1 block">Type</Label>
+                    <Label className="text-[11px] font-medium text-left uppercase tracking-wide text-muted-foreground mb-1.5 block">Type</Label>
                     <Select value={log.type} onValueChange={(v) => handleFieldChange("type", v as LogType)}>
                         <SelectTrigger className="w-48">
                             <SelectValue />
@@ -88,7 +88,7 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
             <div className="flex justify-between">
                 {/* Occur At */}
                 <div className="w-full">
-                    <Label className="text-xs text-left text-muted-foreground mb-1 block">When</Label>
+                    <Label className="text-[11px] font-medium text-left uppercase tracking-wide text-muted-foreground mb-1.5 block">When</Label>
                     <SingleDatePicker
                         value={log.occurAt ?? log.createdAt}
                         onChange={(d) => handleFieldChange("occurAt", d ?? log.createdAt)}
@@ -105,13 +105,13 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
                         checked={log.isSensitive}
                         onCheckedChange={(v: boolean) => handleFieldChange("isSensitive", !!v)}
                     />
-                    <Label htmlFor="sensitive-edit" className="text-sm cursor-pointer">Sensitive</Label>
+                    <Label htmlFor="sensitive-edit" className="text-[13px] text-muted-foreground cursor-pointer">Sensitive</Label>
                 </div>
             </div>
 
             {/* Description */}
             <div>
-                <Label className="text-xs text-left text-muted-foreground mb-1 block">Description</Label>
+                <Label className="text-[11px] font-medium text-left uppercase tracking-wide text-muted-foreground mb-1.5 block">Description</Label>
                 <Textarea
                     value={log.description ?? ""}
                     onChange={(e) => handleFieldChange("description", e.target.value)}
@@ -122,8 +122,8 @@ export function LogGeneral({ logId, tabId }: LogGeneralProps) {
             </div>
 
             {/* Metadata */}
-            <div className="text-xs text-left text-muted-foreground space-y-1">
-                <div >Created: {format(log.createdAt, "dd/MM/yyyy HH:mm")}</div>
+            <div className="text-[13px] text-left text-muted-foreground space-y-1 border-t border-sa-border pt-3">
+                <div>Created: <span className="font-mono">{format(log.createdAt, "dd/MM/yyyy HH:mm")}</span></div>
                 {log.location && <div>Location: {log.location}</div>}
             </div>
         </div>

@@ -18,7 +18,7 @@ export function LogTypeBadge({ type, trackColor, className }: LogTypeBadgeProps)
 
     return (
         <span
-            className={cn("inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0", className)}
+            className={cn("inline-flex items-center justify-center w-5 h-5 rounded-md flex-shrink-0", className)}
             style={{ color: color }}
             title={cfg.label}
         >

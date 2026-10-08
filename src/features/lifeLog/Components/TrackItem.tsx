@@ -102,16 +102,16 @@ export function TrackItem({ track, onClick }: TrackItemProps) {
             onClick={handleClick}
             onContextMenu={openMenu}
             className={cn(
-                "flex flex-col items-center gap-1 rounded-lg border transition-all",
-                "bg-muted/30 border-border hover:bg-muted/60 hover:border-primary/30",
+                "flex flex-col items-center gap-1 rounded-lg border transition-colors duration-100",
+                "border-sa-border hover:bg-sa-hover hover:border-sa-border-strong",
                 "cursor-pointer select-none flex-shrink-0",
                 isMobile ? "w-[76px] px-2 py-3" : "w-[60px] px-2 py-2",
-                flashing && "border-primary/70 bg-primary/10"
+                flashing && "border-sa-amber/60 bg-sa-amber/10"
             )}
             title={track.name}
         >
             <TrackIconDisplay value={track.emoji} trackColor={track.color} size={isMobile ? "lg" : "md"} />
-            <span className="text-[9px] text-center leading-tight line-clamp-1 w-full break-words">{track.name}</span>
+            <span className="text-[11px] text-center leading-tight line-clamp-1 w-full break-words">{track.name}</span>
         </button>
     );
 }

@@ -37,7 +37,7 @@ function LifeLogTabIcon({ tab }: { tab: BaseTab }) {
         return <TrackIconDisplay value={track?.emoji} trackColor={track?.color} size="sm" />;
     }
     if (!log.type) {
-        return <FileText className={className} style={{ color: "#9ca3af" }} />;
+        return <FileText className={className} style={{ color: "hsl(var(--muted-foreground))" }} />;
     }
     return <LogTypeIcon type={log.type} className={className} />;
 }

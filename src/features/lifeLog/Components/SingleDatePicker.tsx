@@ -99,13 +99,13 @@ export function SingleDatePicker({ value, onChange, placeholder = "Pick date", c
                 <button
                     type="button"
                     className={cn(
-                        "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-input bg-background text-sm hover:bg-muted/30 transition-colors text-left",
+                        "flex items-center gap-1.5 px-2.5 h-9 rounded-lg border border-sa-border-strong bg-background text-sm hover:bg-sa-hover transition-colors duration-100 text-left",
                         !value && "text-muted-foreground",
                         className
                     )}
                 >
                     <CalendarIcon className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
-                    <span className={cn("flex-1", value && isToday(value) ? "text-yellow-500 font-medium" : "")}>
+                    <span className={cn("flex-1", value && isToday(value) ? "text-sa-amber-ink font-medium" : "")}>
                         {value ? formatDisplay(value) : placeholder}
                     </span>
                     {value && (
@@ -121,16 +121,16 @@ export function SingleDatePicker({ value, onChange, placeholder = "Pick date", c
                 {/* Calendar with today dot */}
                 <div className="single-date-picker-calendar">
                     <style>{`
-                        /* Selected date = green — target Radix data-selected-single attribute */
+                        /* Selected date = amber accent — target Radix data-selected-single attribute */
                         .single-date-picker-calendar [data-selected-single="true"],
                         .single-date-picker-calendar [aria-selected="true"] {
-                            background-color: #22c55e !important;
-                            color: white !important;
+                            background-color: hsl(var(--sa-accent-amber)) !important;
+                            color: hsl(var(--sa-on-amber)) !important;
                             border-radius: 6px !important;
                         }
                         .single-date-picker-calendar [data-selected-single="true"]:hover,
                         .single-date-picker-calendar [aria-selected="true"]:hover {
-                            background-color: #16a34a !important;
+                            background-color: hsl(var(--sa-accent-amber) / 0.85) !important;
                         }
 
                         /* Today dot — always visible, even on selected */
@@ -146,13 +146,13 @@ export function SingleDatePicker({ value, onChange, placeholder = "Pick date", c
                             width: 4px;
                             height: 4px;
                             border-radius: 50%;
-                            background-color: #eab308;
+                            background-color: hsl(var(--sa-accent-amber));
                             z-index: 10;
                         }
-                        /* Keep dot visible when today is selected (green bg) */
+                        /* Keep dot visible when today is selected (amber bg) */
                         .single-date-picker-calendar [data-selected-single="true"].today-dot::after,
                         .single-date-picker-calendar [aria-selected="true"].today-dot::after {
-                            background-color: #fef08a;
+                            background-color: hsl(var(--sa-on-amber));
                         }
                     `}</style>
                     <Calendar
@@ -168,12 +168,12 @@ export function SingleDatePicker({ value, onChange, placeholder = "Pick date", c
                 </div>
 
                 {/* Hour stepper */}
-                <div className="border-t px-3 py-2.5 flex items-center gap-3">
+                <div className="border-t border-sa-border px-3 py-2.5 flex items-center gap-3">
                     <button
                         type="button"
                         onClick={toggleHour}
                         disabled={!value}
-                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 transition-colors"
+                        className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground disabled:opacity-40 transition-colors duration-100"
                     >
                         <Clock className="w-3.5 h-3.5" />
                         <span>Hour</span>
@@ -185,7 +185,7 @@ export function SingleDatePicker({ value, onChange, placeholder = "Pick date", c
                                 type="button"
                                 onClick={() => stepHour(-1)}
                                 disabled={hour <= 0}
-                                className="w-6 h-6 flex items-center justify-center rounded border border-input hover:bg-muted/50 disabled:opacity-30 transition-colors"
+                                className="w-6 h-6 flex items-center justify-center rounded-md border border-sa-border-strong hover:bg-sa-hover disabled:opacity-30 transition-colors duration-100"
                             >
                                 <ChevronDown className="w-3 h-3" />
                             </button>
@@ -196,13 +196,13 @@ export function SingleDatePicker({ value, onChange, placeholder = "Pick date", c
                                 type="button"
                                 onClick={() => stepHour(1)}
                                 disabled={hour >= 23}
-                                className="w-6 h-6 flex items-center justify-center rounded border border-input hover:bg-muted/50 disabled:opacity-30 transition-colors"
+                                className="w-6 h-6 flex items-center justify-center rounded-md border border-sa-border-strong hover:bg-sa-hover disabled:opacity-30 transition-colors duration-100"
                             >
                                 <ChevronUp className="w-3 h-3" />
                             </button>
                         </div>
                     ) : (
-                        <span className="ml-auto text-xs text-muted-foreground italic">not set — click to add</span>
+                        <span className="ml-auto text-[13px] text-muted-foreground">not set — click to add</span>
                     )}
                 </div>
             </PopoverContent>

@@ -75,10 +75,10 @@ export function TrackIconPicker({ value, onChange, trackColor }: TrackIconPicker
         <div
             tabIndex={0}
             className={cn(
-                "relative flex items-center gap-3 rounded-lg h-[70px] border-2 border-dashed px-3 py-3 cursor-pointer transition-colors outline-none focus:border-primary/50",
+                "relative flex items-center gap-3 rounded-lg h-[70px] border border-dashed px-3 py-3 cursor-pointer transition-colors duration-100 outline-none focus-visible:border-sa-amber/60",
                 dragging
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50 hover:bg-muted/20"
+                    ? "border-sa-amber bg-sa-amber/10"
+                    : "border-sa-border-strong hover:border-sa-amber/50 hover:bg-sa-hover"
             )}
             onClick={(e) => {
                 if (e.shiftKey) return; // Shift + click → huỷ
@@ -98,7 +98,7 @@ export function TrackIconPicker({ value, onChange, trackColor }: TrackIconPicker
             ) : (
                 <span
                     className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
-                    style={{ color: trackColor ?? "#f59e0b" }}
+                    style={{ color: trackColor ?? "hsl(var(--sa-accent-amber))" }}
                 >
                     <Shell className="w-5 h-5" />
                 </span>
@@ -107,11 +107,11 @@ export function TrackIconPicker({ value, onChange, trackColor }: TrackIconPicker
             {/* Label */}
             <div className="flex-1 min-w-0">
                 {processing ? (
-                    <span className="text-xs text-muted-foreground">Processing...</span>
+                    <span className="text-[13px] text-muted-foreground">Processing...</span>
                 ) : hasImage ? (
-                    <span className="text-xs text-muted-foreground">Custom image</span>
+                    <span className="text-[13px] text-muted-foreground">Custom image</span>
                 ) : (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-[13px] text-muted-foreground">
                         Click, drag & drop, or paste to upload
                     </span>
                 )}
@@ -123,7 +123,7 @@ export function TrackIconPicker({ value, onChange, trackColor }: TrackIconPicker
                     <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                        className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                        className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors duration-100"
                         title="Replace image"
                     >
                         <Upload className="w-3.5 h-3.5" />
@@ -131,7 +131,7 @@ export function TrackIconPicker({ value, onChange, trackColor }: TrackIconPicker
                     <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); onChange(""); }}
-                        className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-muted/50 transition-colors"
+                        className="p-1 rounded-md text-muted-foreground hover:text-sa-danger hover:bg-sa-hover transition-colors duration-100"
                         title="Remove image"
                     >
                         <X className="w-3.5 h-3.5" />
