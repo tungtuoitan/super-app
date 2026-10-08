@@ -43,8 +43,8 @@ export function KView() {
         const draftCount  = ws.draftCount  ?? 0;
 
         const badges: IAutoCompleteOptions['badges'] = [];
-        if (reviewCount > 0) badges.push({ text: reviewCount, className: 'bg-blue-500/20 text-blue-400' });
-        if (draftCount  > 0) badges.push({ text: draftCount,  className: 'bg-yellow-500/20 text-yellow-500' });
+        if (reviewCount > 0) badges.push({ text: reviewCount, className: 'bg-sa-amber/15 text-sa-amber-ink font-mono' });
+        if (draftCount  > 0) badges.push({ text: draftCount,  className: 'border border-sa-border-strong text-muted-foreground font-mono' });
 
         return {
             id: ws.id.toString(),
