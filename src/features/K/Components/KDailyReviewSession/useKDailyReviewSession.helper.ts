@@ -50,7 +50,7 @@ export function useKDailyReviewSession({ nodeId, questions, onComplete, isQuickQ
     const currentQuestion = questions[currentIndex];
     const progress        = totalQuestions > 0 ? Math.round(((currentIndex + 1) / totalQuestions) * 100) : 0;
 
-    const haloColor = hoveredScore !== null ? BALL_BG[hoveredScore] : "rgba(161,161,170,0.7)";
+    const haloColor = hoveredScore !== null ? BALL_BG[hoveredScore] : "hsl(var(--sa-muted) / 0.7)";
 
     useEffect(() => { questionStartRef.current = Date.now(); }, [currentIndex]);
     useEffect(() => () => {

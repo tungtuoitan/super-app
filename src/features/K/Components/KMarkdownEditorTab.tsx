@@ -298,14 +298,14 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full bg-[#09090B]">
+            <div className="flex items-center justify-center h-full bg-[#0C0C0D]">
                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
         );
     }
 
     return (
-        <div className="relative flex flex-col h-full bg-[#09090B]">
+        <div className="relative flex flex-col h-full bg-[#0C0C0D]">
             {/* Validation indicator */}
             <button
                 onClick={handleValidationClick}
@@ -335,7 +335,7 @@ export function KMarkdownEditorTab({ nodeId }: Props) {
                 onMount={handleEditorMount}
                 options={EDITOR_OPTIONS}
                 loading={
-                    <div className="flex items-center justify-center h-full bg-[#09090B]">
+                    <div className="flex items-center justify-center h-full bg-[#0C0C0D]">
                         <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                     </div>
                 }
