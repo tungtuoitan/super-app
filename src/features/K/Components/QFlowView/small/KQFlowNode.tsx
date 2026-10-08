@@ -18,8 +18,8 @@ const HANDLE_ID: Record<Position, string> = {
 };
 
 // Ghost div and textarea share these classes — must be identical to prevent jitter on mode switch
-const Q_TEXT = "w-full text-xs font-semibold text-zinc-100 leading-relaxed";
-const A_TEXT = "w-full text-[11px] text-zinc-400 leading-relaxed";
+const Q_TEXT = "w-full text-xs font-medium text-foreground leading-relaxed";
+const A_TEXT = "w-full text-[11px] text-muted-foreground leading-relaxed";
 
 export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData>>) {
     const { editingNodeId, connectingSourceId, flowNodes, flowEdges, nodeId, searchMatchIds, searchActiveIndex, searchQuery } = useKQFlowStore();
@@ -164,20 +164,20 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
     return (
         <div
             ref={cardRef}
-            className={`group text-left relative flex flex-col rounded-lg border ${isEditing ? "nodrag" : ""} ${
+            className={`group text-left relative flex flex-col rounded-xl border transition-colors duration-100 ${isEditing ? "nodrag" : ""} ${
                 isDeleted
-                    ? "border-zinc-800/40 bg-zinc-900/20 opacity-50"
+                    ? "border-sa-border bg-sa-surface/40 opacity-50"
                     : isCut
-                    ? "border-blue-500 bg-zinc-900/80 ring-1 ring-blue-500/60 shadow-lg shadow-blue-500/10 opacity-60"
+                    ? "border-dashed border-sa-amber bg-sa-surface ring-1 ring-sa-amber/40 opacity-60"
                     : isDraft && selected
-                    ? "border-blue-500/50 bg-[#261C1C]/80 ring-1 ring-blue-500/40 shadow-lg shadow-blue-500/10"
+                    ? "border-dashed border-sa-amber bg-sa-surface ring-1 ring-sa-amber/40"
                     : isDraft
-                    ? "border-amber-700/50 bg-[#261C1C]/80"
+                    ? "border-dashed border-sa-border-strong bg-sa-surface/70"
                     : selected
-                    ? "border-blue-500/50 bg-zinc-900/80 ring-1 ring-blue-500/40 shadow-lg shadow-blue-500/10"
-                    : "border-zinc-700/60 bg-zinc-900/80"
-            } ${isFlashing ? "ring-2 ring-amber-400/20 scale-[1.02] brightness-125 transition-all duration-150" : ""
-            } ${isActiveMatch ? "ring-2 ring-amber-400 shadow-[0_0_10px_2px] shadow-amber-400/30" : isSearchMatch ? "ring-2 ring-amber-400/50" : ""}`}
+                    ? "border-sa-amber bg-sa-surface ring-1 ring-sa-amber/40"
+                    : "border-sa-border-strong bg-sa-surface hover:border-muted-foreground/40"
+            } ${isFlashing ? "ring-2 ring-sa-amber/40 scale-[1.02] transition-all duration-150" : ""
+            } ${isActiveMatch ? "ring-2 ring-sa-amber" : isSearchMatch ? "ring-2 ring-sa-amber/40" : ""}`}
             style={{ width: 280 }}
             onDoubleClick={isMobile ? undefined : (e) => {
                 if (!isDeleted && editingNodeId === null) {
@@ -198,20 +198,20 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
             {/* Unsaved changes prompt overlay */}
             {isEditing && showUnsavedPrompt && (
                 <div
-                    className="absolute inset-0 rounded-lg bg-zinc-950/96 flex flex-col items-center justify-center gap-3 z-30 nodrag nopan"
+                    className="absolute inset-0 rounded-xl bg-popover/95 flex flex-col items-center justify-center gap-3 z-30 nodrag nopan"
                     onMouseDown={(e) => e.stopPropagation()}
                 >
-                    <p className="text-xs text-zinc-400 font-medium">Save changes?</p>
+                    <p className="text-[13px] text-foreground font-medium">Save changes?</p>
                     <div className="flex gap-2">
                         <button
                             onClick={handleSave}
-                            className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors"
+                            className="text-xs h-7 px-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors duration-100"
                         >
                             Save
                         </button>
                         <button
                             onClick={handleCancel}
-                            className="text-xs px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded transition-colors"
+                            className="text-xs h-7 px-3 border border-sa-border-strong text-muted-foreground hover:bg-sa-hover hover:text-foreground rounded-md transition-colors duration-100"
                         >
                             Discard
                         </button>
@@ -221,7 +221,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
 
             {HANDLES.map((pos) => (
                 <Handle key={pos} type="source" position={pos} id={HANDLE_ID[pos]}
-                    className="!rounded-full !border-[1.5px] !border-primary !bg-primary/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150 before:content-[''] before:absolute before:inset-[-8px] before:rounded-full"
+                    className="!rounded-full !border-[1.5px] !border-sa-amber !bg-sa-amber/80 z-10 !w-2 !h-2 hover:!w-3 hover:!h-3 !transition-all !duration-150 before:content-[''] before:absolute before:inset-[-8px] before:rounded-full"
                     style={{ opacity: showHandles ? 1 : 0, pointerEvents: showHandles ? "auto" : "none", transition: "opacity 0.15s" }}
                 />
             ))}
@@ -231,13 +231,13 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                 <div className="absolute top-1.5 right-1.5 flex gap-1 z-10 nodrag nopan">
                     <button
                         onMouseDown={(e) => { e.preventDefault(); handleCancel(); }}
-                        className="text-[10px] text-zinc-500 hover:text-zinc-300 px-1.5 py-0.5 rounded bg-zinc-800/90 border border-zinc-700"
+                        className="text-[10px] font-mono text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded-md bg-popover border border-sa-border-strong"
                     >
                         Esc
                     </button>
                     <button
                         onMouseDown={(e) => { e.preventDefault(); if (draftQ.trim()) handleSave(); }}
-                        className="text-[10px] text-indigo-400 hover:text-indigo-300 disabled:opacity-30 px-1.5 py-0.5 rounded bg-zinc-800/90 border border-indigo-800/60"
+                        className="text-[10px] text-sa-on-amber hover:bg-sa-amber/90 disabled:opacity-30 px-1.5 py-0.5 rounded-md bg-sa-amber border border-sa-amber"
                     >
                         Save
                     </button>
@@ -260,18 +260,18 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                         onChange={(e) => setDraftQ(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Question…"
-                        className={`nodrag nopan absolute inset-0 pl-3 pt-3 pb-1 pr-20 ${Q_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-zinc-600`}
+                        className={`nodrag nopan absolute inset-0 pl-3 pt-3 pb-1 pr-20 ${Q_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-muted-foreground/50`}
                     />
                 ) : (
                     <div className={`absolute inset-0 px-3 pt-3 pb-1 ${Q_TEXT} whitespace-pre-wrap break-words select-none`}>
                         {question.question
                             ? <HighlightText text={question.question} highlight={searchQuery} />
-                            : <span className="text-zinc-600">—</span>}
+                            : <span className="text-muted-foreground/50">—</span>}
                     </div>
                 )}
             </div>
 
-            <div className="border-t border-zinc-800/60" />
+            <div className="border-t border-sa-border" />
 
             {/* Answer field — same ghost pattern */}
             <div className="px-3 pt-1.5 pb-2 relative">
@@ -285,13 +285,13 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                         onChange={(e) => setDraftA(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Answer… (Ctrl+Enter to save)"
-                        className={`nodrag nopan absolute inset-0 px-3 pt-1.5 pb-2 ${A_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-zinc-600`}
+                        className={`nodrag nopan absolute inset-0 px-3 pt-1.5 pb-2 ${A_TEXT} bg-transparent outline-none resize-none overflow-hidden cursor-text placeholder:text-muted-foreground/50`}
                     />
                 ) : (
                     <div className={`absolute inset-0 px-3 pt-1.5 pb-2 ${A_TEXT} whitespace-pre-wrap break-words select-none`}>
                         {question.answer
                             ? <HighlightText text={question.answer} highlight={searchQuery} />
-                            : <span className="text-zinc-700 italic">no answer</span>}
+                            : <span className="text-muted-foreground/50 italic">no answer</span>}
                     </div>
                 )}
             </div>
@@ -304,8 +304,8 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                         title={isDraft ? "Unmark draft" : "Mark as draft"}
                         className={`nodrag nopan ml-auto shrink-0 rounded -m-1.5 p-2 transition-colors ${
                             isDraft
-                                ? "text-amber-500 hover:text-amber-300"
-                                : "text-zinc-700 hover:text-zinc-400 opacity-0 group-hover:opacity-100"
+                                ? "text-sa-amber hover:text-sa-amber/80"
+                                : "text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100"
                         }`}
                     >
                         <PenLine className="w-3 h-3" />
@@ -316,13 +316,13 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
             {ctxMenu && createPortal(
                 <div
                     ref={ctxMenuRef}
-                    className="fixed z-[9999] min-w-[160px] bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl py-1 text-sm nodrag nopan"
+                    className="fixed z-[9999] min-w-[160px] bg-popover text-popover-foreground border border-sa-border-strong rounded-lg sa-shadow-pop p-1 text-[13px] nodrag nopan"
                     style={{ top: ctxMenu.y, left: ctxMenu.x }}
                 >
                     {isDeleted ? (
                         <button
                             onMouseDown={() => { setCtxMenu(null); setShowMoveMenu(false); handleRestoreQuestion(question.id); }}
-                            className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-green-400"
+                            className="flex items-center gap-2 w-full px-3 py-1.5 text-left rounded-md hover:bg-sa-hover-strong transition-colors duration-100 text-sa-good"
                         >
                             <RotateCcw className="w-3.5 h-3.5" /> Restore
                         </button>
@@ -330,13 +330,13 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                         <>
                             <button
                                 onMouseDown={() => { setCtxMenu(null); setShowMoveMenu(false); setDraftQ(question.question); setDraftA(question.answer ?? ""); handleRenameStart(id); }}
-                                className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-zinc-200"
+                                className="flex items-center gap-2 w-full px-3 py-1.5 text-left rounded-md hover:bg-sa-hover-strong transition-colors duration-100 text-foreground"
                             >
-                                <Pencil className="w-3.5 h-3.5 text-zinc-400" /> Edit
+                                <Pencil className="w-3.5 h-3.5 text-muted-foreground" /> Edit
                             </button>
                             <button
                                 onMouseDown={() => { setCtxMenu(null); setShowMoveMenu(false); handleToggleDraft(question.id); }}
-                                className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-amber-400"
+                                className="flex items-center gap-2 w-full px-3 py-1.5 text-left rounded-md hover:bg-sa-hover-strong transition-colors duration-100 text-sa-amber-ink"
                             >
                                 <PenLine className="w-3.5 h-3.5" /> {isDraft ? "Unmark draft" : "Mark as draft"}
                             </button>
@@ -344,18 +344,18 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                             <div className="relative">
                                 <button
                                     onMouseDown={(e) => { e.stopPropagation(); setShowMoveMenu((v) => !v); }}
-                                    className="flex items-center justify-between w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-zinc-200"
+                                    className="flex items-center justify-between w-full px-3 py-1.5 text-left rounded-md hover:bg-sa-hover-strong transition-colors duration-100 text-foreground"
                                 >
                                     <span className="flex items-center gap-1.5">
                                         Move to…
                                         {getMovableIds(question.id).length > 1 && (
-                                            <span className="text-[10px] text-zinc-500 bg-zinc-800 rounded px-1">{getMovableIds(question.id).length}</span>
+                                            <span className="text-[10px] font-mono text-muted-foreground border border-sa-border-strong rounded-md px-1">{getMovableIds(question.id).length}</span>
                                         )}
                                     </span>
-                                    <ChevronRight className="w-3 h-3 text-zinc-500" />
+                                    <ChevronRight className="w-3 h-3 text-muted-foreground" />
                                 </button>
                                 {showMoveMenu && (
-                                    <div className="absolute left-full top-0 ml-0.5 w-[200px] bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl py-1 flex flex-col">
+                                    <div className="absolute left-full top-0 ml-1 w-[200px] bg-popover border border-sa-border-strong rounded-lg sa-shadow-pop p-1 flex flex-col">
                                         {/* Search input */}
                                         <div className="px-2 pt-1 pb-1 shrink-0">
                                             <input
@@ -365,7 +365,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                                                 onMouseDown={(e) => e.stopPropagation()}
                                                 onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Escape") { setShowMoveMenu(false); } }}
                                                 placeholder="Search…"
-                                                className="w-full px-2 py-1 text-xs bg-zinc-800 border border-zinc-700 rounded text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-zinc-500"
+                                                className="w-full px-2 h-7 text-xs bg-background border border-sa-border-strong rounded-md text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-sa-amber/60"
                                             />
                                         </div>
                                         <div className="overflow-y-auto max-h-[200px]">
@@ -373,7 +373,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                                             {nodeId !== 0 && "orphan".includes(moveSearch.toLowerCase()) && (
                                                 <button
                                                     onMouseDown={(e) => { e.stopPropagation(); setCtxMenu(null); setShowMoveMenu(false); handleMoveQuestion(getMovableIds(question.id), null); }}
-                                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-zinc-400 italic text-xs"
+                                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left rounded-md hover:bg-sa-hover-strong transition-colors duration-100 text-muted-foreground italic text-xs"
                                                 >
                                                     Orphan (no node)
                                                 </button>
@@ -384,7 +384,7 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                                                     <button
                                                         key={n.id}
                                                         onMouseDown={(e) => { e.stopPropagation(); setCtxMenu(null); setShowMoveMenu(false); handleMoveQuestion(getMovableIds(question.id), n.id); }}
-                                                        className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-zinc-200 text-xs truncate"
+                                                        className="flex items-center gap-2 w-full px-3 py-1.5 text-left rounded-md hover:bg-sa-hover-strong transition-colors duration-100 text-foreground text-xs truncate"
                                                         title={n.name}
                                                     >
                                                         {n.name}
@@ -395,19 +395,19 @@ export function KQFlowNode({ id, data, selected }: NodeProps<Node<KQFlowNodeData
                                     </div>
                                 )}
                             </div>
-                            <div className="my-1 border-t border-zinc-800" />
+                            <div className="my-1 border-t border-sa-border" />
                             {selectedStringIds.length >= 2 && (
                                 <button
                                     onMouseDown={() => { setCtxMenu(null); setShowMoveMenu(false); handleOrganize(selectedStringIds); }}
-                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-zinc-200"
+                                    className="flex items-center gap-2 w-full px-3 py-1.5 text-left rounded-md hover:bg-sa-hover-strong transition-colors duration-100 text-foreground"
                                 >
-                                    <Grid2X2 className="w-3.5 h-3.5 text-zinc-400" />
+                                    <Grid2X2 className="w-3.5 h-3.5 text-muted-foreground" />
                                     Organize ({selectedStringIds.length})
                                 </button>
                             )}
                             <button
                                 onMouseDown={() => { setCtxMenu(null); setShowMoveMenu(false); handleDeleteQuestion(question.id); }}
-                                className="flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-zinc-800 transition-colors text-red-400"
+                                className="flex items-center gap-2 w-full px-3 py-1.5 text-left rounded-md hover:bg-sa-danger/10 transition-colors duration-100 text-sa-danger"
                             >
                                 <Trash2 className="w-3.5 h-3.5" /> Delete
                             </button>

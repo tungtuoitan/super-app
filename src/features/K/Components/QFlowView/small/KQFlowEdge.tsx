@@ -53,7 +53,7 @@ export function KQFlowEdge({
         centerY,
     });
 
-    const strokeColor = selected ? "hsl(var(--primary))" : "#6b7280cc";
+    const strokeColor = selected ? "hsl(var(--sa-accent-amber))" : "hsl(var(--muted-foreground) / 0.7)";
     const strokeWidth = selected ? 2.2 : 1.8;
     const speed = selected ? 0.5 : 0.9;
     const animFwd = `flow-fwd-kq ${speed}s linear infinite`;
@@ -87,14 +87,14 @@ export function KQFlowEdge({
                     @keyframes flow-fwd-kq { from { stroke-dashoffset: ${FLOW_PERIOD}; } to { stroke-dashoffset: 0; } }
                     @keyframes flow-bwd-kq { from { stroke-dashoffset: 0; } to { stroke-dashoffset: ${FLOW_PERIOD}; } }
                     .react-flow__edge.selected .react-flow__edgeupdater {
-                        fill: hsl(var(--primary));
+                        fill: hsl(var(--sa-accent-amber));
                         stroke: hsl(var(--background));
                         stroke-width: 2.5;
                         r: 8;
                         cursor: crosshair;
                     }
                     .react-flow__edge.selected .react-flow__edgeupdater:hover {
-                        fill: hsl(var(--primary) / 0.8);
+                        fill: hsl(var(--sa-accent-amber) / 0.8);
                         r: 10;
                     }
                 `}</style>
@@ -143,7 +143,7 @@ export function KQFlowEdge({
                     >
                         <button
                             onClick={handleToggle}
-                            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-primary text-primary-foreground shadow-lg hover:bg-primary/80 active:scale-95 transition-all border border-primary/30"
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-sa-amber text-sa-on-amber hover:bg-sa-amber/85 active:scale-95 transition-all duration-100 border border-sa-amber"
                         >
                             <span className="text-sm leading-none">{ARROW_SYMBOL[currentArrow]}</span>
                         </button>
@@ -156,7 +156,7 @@ export function KQFlowEdge({
                     >
                         <button
                             onClick={handleDeleteClick}
-                            className="flex items-center justify-center w-5 h-5 rounded-full bg-zinc-800 border border-zinc-600 text-zinc-400 hover:text-red-400 hover:border-red-600 transition-colors shadow-md text-xs"
+                            className="flex items-center justify-center w-5 h-5 rounded-full bg-popover border border-sa-border-strong text-muted-foreground hover:text-sa-danger hover:border-sa-danger/50 transition-colors duration-100 text-xs"
                         >
                             ×
                         </button>

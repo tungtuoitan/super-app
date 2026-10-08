@@ -181,20 +181,33 @@ function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: Canvas
                 .kflow-canvas .react-flow__edges      { z-index: 0; }
                 .kflow-canvas .react-flow__nodes      { z-index: 1; }
                 .kflow-canvas .react-flow__edgelabels { z-index: 2; }
+                .kflow-canvas {
+                    --xy-controls-button-background-color: hsl(var(--card));
+                    --xy-controls-button-background-color-hover: hsl(var(--popover));
+                    --xy-controls-button-color: hsl(var(--muted-foreground));
+                    --xy-controls-button-color-hover: hsl(var(--foreground));
+                    --xy-controls-button-border-color: hsl(var(--sa-border));
+                    --xy-controls-box-shadow: none;
+                    --xy-selection-background-color: hsl(var(--sa-accent-amber) / 0.06);
+                    --xy-selection-border: 1px dashed hsl(var(--sa-accent-amber) / 0.5);
+                    --xy-connectionline-stroke: hsl(var(--sa-accent-amber));
+                    --xy-minimap-mask-stroke-color: hsl(var(--sa-accent-amber));
+                }
+                .kflow-canvas .react-flow__controls { border: 1px solid hsl(var(--sa-border-strong)); border-radius: 8px; overflow: hidden; }
             `}</style>
 
             {/* Transition overlay — snaps to opaque instantly (no transition class
                 on opacity-100) so viewport teleports are never visible; fades out
                 smoothly once the canvas is fully ready */}
             <div
-                className={`absolute inset-0 z-50 bg-zinc-950 flex items-center justify-center ${
+                className={`absolute inset-0 z-50 bg-background flex items-center justify-center ${
                     isCanvasReady
                         ? "opacity-0 pointer-events-none transition-opacity duration-150"
                         : "opacity-100"
                 }`}
             >
                 {!isCanvasReady && (
-                    <Loader2 className="w-5 h-5 animate-spin text-zinc-600" />
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                 )}
             </div>
             <ReactFlow
@@ -240,13 +253,14 @@ function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: Canvas
                 panOnScroll={false}
                 panOnDrag={isMobile ? [0] : [1]}
             >
-                <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="rgba(113,113,122,0.2)" />
+                <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="hsl(var(--muted-foreground) / 0.25)" />
                 <KQFlowSearchBar />
                 <Controls showInteractive={false} />
                 <MiniMap
-                    nodeColor={() => "rgba(99,102,241,0.4)"}
-                    maskColor="rgba(0,0,0,0.6)"
-                    style={{ background: "rgba(24,24,27,0.9)", ...(isMobile && { width: 110, height: 70 }) }}
+                    nodeColor={() => "hsl(var(--muted-foreground) / 0.5)"}
+                    maskColor="hsl(var(--background) / 0.6)"
+                    className="!rounded-lg border border-sa-border overflow-hidden"
+                    style={{ background: "hsl(var(--card))", ...(isMobile && { width: 110, height: 70 }) }}
                 />
             </ReactFlow>
         </div>

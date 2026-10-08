@@ -98,10 +98,10 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
     return (
         <div className="flex flex-col h-full relative">
             {/* Toolbar */}
-            <div className="flex items-center gap-1.5 px-3 h-11 border-b border-zinc-800/60 shrink-0">
+            <div className="flex items-center gap-1.5 px-3 h-10 border-b border-sa-border shrink-0">
 
                 {nodeId === null && (
-                    <span className="text-xs text-zinc-500 italic">Orphaned questions</span>
+                    <span className="text-[13px] text-muted-foreground">Orphaned questions</span>
                 )}
 
                 <div className="ml-auto flex items-center gap-2">
@@ -111,11 +111,11 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                             {sparkScores.length > 0 && (
                                 <KScoreSparkline scores={sparkScores} slots={7} />
                             )}
-                            <div className="flex items-center gap-1.5 text-[11px]">
-                                {dueCount > 0 && <span className="text-orange-400/80 font-medium">{dueCount} due</span>}
-                                {newCount  > 0 && <span className="text-blue-400/80 font-medium">{newCount} new</span>}
-                                {draftCount > 0 && <span className="text-amber-600/70 font-medium">{draftCount} draft</span>}
-                                <span className="text-zinc-500">{activeQuestions.length} Q</span>
+                            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                                {dueCount > 0 && <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-sa-amber" /><span className="font-mono text-foreground">{dueCount}</span> due</span>}
+                                {newCount  > 0 && <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-foreground/70" /><span className="font-mono text-foreground">{newCount}</span> new</span>}
+                                {draftCount > 0 && <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full border border-muted-foreground" /><span className="font-mono text-foreground">{draftCount}</span> draft</span>}
+                                <span><span className="font-mono text-foreground">{activeQuestions.length}</span> Q</span>
                             </div>
                         </div>
                     )}
@@ -131,8 +131,8 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                             className={[
                                 "h-7 px-2 flex items-center gap-1 text-xs rounded border transition-colors disabled:opacity-50",
                                 resetConfirm
-                                    ? "text-red-400 border-red-700/60 bg-red-950/30 hover:bg-red-950/50"
-                                    : "text-zinc-600 border-zinc-800 hover:text-zinc-400 hover:border-zinc-600",
+                                    ? "text-sa-danger border-sa-danger/40 bg-sa-danger/10 hover:bg-sa-danger/15"
+                                    : "text-muted-foreground border-sa-border hover:text-foreground hover:border-sa-border-strong",
                             ].join(" ")}
                         >
                             {resetLoading
@@ -148,14 +148,14 @@ function KQFlowContent({ nodeId }: KQFlowViewProps) {
                         <button
                             onClick={() => setShowDeleted(v => !v)}
                             title={showDeleted ? "Hide deleted questions" : `Show ${deletedCount} deleted question${deletedCount !== 1 ? "s" : ""}`}
-                            className={`h-7 px-2 flex items-center gap-1 text-xs rounded border transition-colors ${
+                            className={`h-7 px-2 flex items-center gap-1 text-xs rounded-md border transition-colors duration-100 ${
                                 showDeleted
-                                    ? "text-red-400 border-red-800/60 bg-red-950/20"
-                                    : "text-zinc-600 border-zinc-800 hover:text-zinc-400 hover:border-zinc-600"
+                                    ? "text-sa-danger border-sa-danger/35 bg-sa-danger/10"
+                                    : "text-muted-foreground border-sa-border hover:bg-sa-hover hover:text-foreground hover:border-sa-border-strong"
                             }`}
                         >
                             {showDeleted ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                            <span>{deletedCount}</span>
+                            <span className="font-mono">{deletedCount}</span>
                         </button>
                     )}
                 </div>

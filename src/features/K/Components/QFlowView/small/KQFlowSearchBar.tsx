@@ -41,8 +41,8 @@ export function KQFlowSearchBar() {
 
     return (
         <Panel position="top-left" className="!m-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg min-w-[240px]">
-                <Search className="h-3.5 w-3.5 text-zinc-500 flex-shrink-0" />
+            <div className="flex items-center gap-1.5 px-2.5 h-8 bg-popover border border-sa-border-strong rounded-lg sa-shadow-pop min-w-[240px]">
+                <Search className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                 <input
                     ref={inputRef}
                     type="text"
@@ -51,13 +51,13 @@ export function KQFlowSearchBar() {
                     onKeyDown={handleKeyDown}
                     placeholder="Search questions..."
                     className={cn(
-                        "flex-1 bg-transparent text-xs outline-none border-none text-zinc-100 placeholder:text-zinc-600 min-w-0",
-                        noResults && "text-red-400",
+                        "flex-1 bg-transparent text-[13px] outline-none border-none text-foreground placeholder:text-muted-foreground/60 min-w-0",
+                        noResults && "text-sa-danger",
                     )}
                 />
                 <span className={cn(
-                    "text-xs tabular-nums flex-shrink-0 min-w-[32px] text-right",
-                    noResults ? "text-red-400" : "text-zinc-500",
+                    "font-mono text-xs tabular-nums flex-shrink-0 min-w-[32px] text-right",
+                    noResults ? "text-sa-danger" : "text-muted-foreground",
                 )}>
                     {searchQuery.trim()
                         ? hasResults
@@ -69,7 +69,7 @@ export function KQFlowSearchBar() {
                     <button
                         onClick={handlePrev}
                         disabled={!hasResults}
-                        className="p-0.5 rounded hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-zinc-400"
+                        className="p-0.5 rounded-md hover:bg-sa-hover-strong hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-100 text-muted-foreground"
                         title="Previous match (Shift+Enter)"
                     >
                         <ChevronUp className="h-3.5 w-3.5" />
@@ -77,7 +77,7 @@ export function KQFlowSearchBar() {
                     <button
                         onClick={handleNext}
                         disabled={!hasResults}
-                        className="p-0.5 rounded hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-zinc-400"
+                        className="p-0.5 rounded-md hover:bg-sa-hover-strong hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-100 text-muted-foreground"
                         title="Next match (Enter)"
                     >
                         <ChevronDown className="h-3.5 w-3.5" />
@@ -85,7 +85,7 @@ export function KQFlowSearchBar() {
                 </div>
                 <button
                     onClick={handleClose}
-                    className="p-0.5 rounded hover:bg-zinc-700 flex-shrink-0 transition-colors text-zinc-500"
+                    className="p-0.5 rounded-md hover:bg-sa-hover-strong hover:text-foreground flex-shrink-0 transition-colors duration-100 text-muted-foreground"
                     title="Close (Escape)"
                 >
                     <X className="h-3.5 w-3.5" />
