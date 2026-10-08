@@ -111,8 +111,8 @@ export function WorkspaceView() {
 
                 {/* Loading Overlay */}
                 {(isLoadingWorkspaces || isLoadingTree || isLoadingTreeByOpeningFolder) && (
-                    <div className="absolute inset-0 bg-background backdrop-blur-sm flex items-center justify-center z-10">
-                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
+                        <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
                     </div>
                 )}
             </div>

@@ -69,7 +69,7 @@ export function WsDetailContent() {
     if (!selectedWs) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
-                <p>No workspace selected</p>
+                <p className="text-[13px]">No workspace selected</p>
             </div>
         );
     }
@@ -88,12 +88,12 @@ export function WsDetailContent() {
 
     return (
         <ScrollArea className="h-full w-full">
-            <div className="p-6 space-y-6 max-w-4xl mx-auto">
+            <div className="p-6 space-y-4 max-w-4xl mx-auto">
                 {/* Header Card */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Briefcase className="h-5 w-5" />
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                            <Briefcase className="h-4 w-4 text-muted-foreground" />
                             Workspace Details
                         </CardTitle>
                     </CardHeader>
@@ -140,8 +140,8 @@ export function WsDetailContent() {
 
                         {/* Description */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium flex items-center gap-2">
-                                <FileText className="h-4 w-4" />
+                            <label className="text-[13px] font-medium text-muted-foreground flex items-center gap-2">
+                                <FileText className="h-3.5 w-3.5" />
                                 Description
                             </label>
                             <Textarea
@@ -159,8 +159,8 @@ export function WsDetailContent() {
                 {/* Metadata Card */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Calendar className="h-5 w-5" />
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
                             Metadata
                         </CardTitle>
                     </CardHeader>

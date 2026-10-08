@@ -32,7 +32,7 @@ export function WsGridMenu() {
                 <>
                     <MenuItem
                         onClick={(e) => openConfirmDialog({ type: "hard-delete", entityType: "workspace", count: wsGridSelectedCount, allAreTempItems: false, onConfirm: contextData?.onHardDelete!, event: e })}
-                        className="text-red-600 hover:bg-red-50"
+                        className="text-sa-danger"
                     >
                         <HardDeleteIcon className="w-4 h-4 mr-2" />
                         Hard Delete

@@ -42,7 +42,7 @@ export function WsEditorPanel({ tab }: WsEditorPanelProps) {
     };
 
     return (
-        <div className="w-full h-full flex flex-col overflow-hidden bg-[#f6f6f6]">
+        <div className="w-full h-full flex flex-col overflow-hidden bg-background">
             {/* Content */}
             <div ref={contentRef} onScroll={handleScroll} className="flex-1 overflow-auto bg-background">
                 <WsDetailContent />
