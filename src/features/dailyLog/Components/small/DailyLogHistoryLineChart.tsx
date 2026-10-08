@@ -73,7 +73,7 @@ export function DailyLogHistoryLineChart({ points, height = 220 }: Props) {
                     );
                 })}
 
-                <path d={smoothLinePath(pts, 0.4)} fill="none" stroke="#0071e3" strokeWidth={1.5} strokeLinejoin="round" />
+                <path d={smoothLinePath(pts, 0.4)} fill="none" stroke="hsl(var(--sa-accent-amber))" strokeWidth={1.5} strokeLinejoin="round" />
 
                 {hovered != null && (
                     <line x1={toX(hovered)} y1={PAD.top} x2={toX(hovered)} y2={PAD.top + PLOT_H}
@@ -87,7 +87,7 @@ export function DailyLogHistoryLineChart({ points, height = 220 }: Props) {
                 ))}
 
                 {hovered != null && (
-                    <circle cx={toX(hovered)} cy={toY(Number(points[hovered].value))} r={4} fill="#0071e3" />
+                    <circle cx={toX(hovered)} cy={toY(Number(points[hovered].value))} r={4} fill="hsl(var(--sa-accent-amber))" />
                 )}
             </svg>
 
@@ -95,7 +95,7 @@ export function DailyLogHistoryLineChart({ points, height = 220 }: Props) {
                 <div className="absolute pointer-events-none text-[11px] rounded-lg sa-shadow-pop px-2.5 py-2 bg-popover border border-sa-border"
                     style={{ left: Math.min(toX(hovered) + 8, W - 130), top: 4, minWidth: 100 }}>
                     <div className="text-[11px] text-muted-foreground mb-0.5">{formatDayMonth(points[hovered].logDate)}</div>
-                    <div className="font-medium font-mono text-[#0071e3]">{points[hovered].value}</div>
+                    <div className="font-medium font-mono text-sa-amber-ink">{points[hovered].value}</div>
                 </div>
             )}
         </div>

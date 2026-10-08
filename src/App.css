@@ -126,10 +126,10 @@ display: none ;
 }
 
 .ProseMirror .task-item > label input[type="checkbox"]:checked {
-  background-color: #000000; /* xám nhạt (gray-200) */
-  border-color: #353535;   /*  xám viền (gray-400) */
+  background-color: hsl(var(--sa-accent-amber));
+  border-color: hsl(var(--sa-accent-amber));
 }
 
 .ProseMirror .task-item > label input[type="checkbox"]:hover {
-  border-color: #353535;   /*  xám viền (gray-400) */
+  border-color: hsl(var(--sa-border-strong));
 }

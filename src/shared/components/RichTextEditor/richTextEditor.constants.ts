@@ -18,17 +18,17 @@ export const richTextEditorConstants = {
                     { token: "meta.link.inline.markdown", foreground: "D4D4D4" },
                 ],
                 colors: {
-                    "editor.background": "#09090B",
-                    "editor.foreground": "#D4D4D4",
-                    "editorLineNumber.foreground": "#858585",
-                    "editorCursor.foreground": "#AEAFAD",
-                    "editor.selectionBackground": "#264F78",
-                    "editor.inactiveSelectionBackground": "#3A3D41",
+                    "editor.background": "#0C0C0D",
+                    "editor.foreground": "#EDEDED",
+                    "editorLineNumber.foreground": "#6E6E74",
+                    "editorCursor.foreground": "#F2B54B",
+                    "editor.selectionBackground": "#F2B54B33",
+                    "editor.inactiveSelectionBackground": "#F2B54B1F",
                 },
             } as _monaco.editor.IStandaloneThemeData,
         },
         editor: {
-            fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
+            fontFamily: "'Geist Mono', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
             options: (disabled: boolean, value: string) =>
                 ({
                     value,
@@ -37,7 +37,7 @@ export const richTextEditorConstants = {
                     minimap: { enabled: false },
                     wordWrap: "on",
                     fontSize: 14,
-                    fontFamily: "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
+                    fontFamily: "'Geist Mono', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
                     lineNumbers: "on",
                     lineNumbersMinChars: 3,
                     lineDecorationsWidth: 16,
