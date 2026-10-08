@@ -13,16 +13,17 @@ export const richTextEditorConstants = {
                 base: "vs-dark",
                 inherit: true,
                 rules: [
-                    { token: "string.link.markdown", foreground: "D4D4D4" },
-                    { token: "string", foreground: "D4D4D4" },
-                    { token: "meta.link.inline.markdown", foreground: "D4D4D4" },
+                    { token: "string.link.markdown", foreground: "DCDCDE" },
+                    { token: "string", foreground: "DCDCDE" },
+                    { token: "meta.link.inline.markdown", foreground: "DCDCDE" },
                 ],
                 colors: {
-                    "editor.background": "#0C0C0D",
-                    "editor.foreground": "#EDEDED",
-                    "editorLineNumber.foreground": "#6E6E74",
-                    "editorCursor.foreground": "#F2B54B",
-                    "editor.selectionBackground": "#F2B54B33",
+                    "editor.background": "#0C0C0D", // = --background (dark)
+                    "editor.foreground": "#DCDCDE",
+                    "editorLineNumber.foreground": "#4A4A4F",
+                    "editorLineNumber.activeForeground": "#8C8C92",
+                    "editorCursor.foreground": "#F2B54B", // = --sa-accent-amber
+                    "editor.selectionBackground": "#F2B54B38", // amber @22%
                     "editor.inactiveSelectionBackground": "#F2B54B1F",
                 },
             } as _monaco.editor.IStandaloneThemeData,
