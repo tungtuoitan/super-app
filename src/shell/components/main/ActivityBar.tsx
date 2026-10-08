@@ -1,4 +1,5 @@
-import { Settings, UserCircle } from "lucide-react";
+import { Settings, UserCircle, PanelLeftOpen, Search } from "lucide-react";
+import { useCommandPaletteStore } from "@/shell/commandPallete/useCommandPalette.store";
 import { useEffect, useRef } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared";
 import { SettingsDialog } from "../SettingsDialog";
@@ -9,6 +10,7 @@ import {useActivityBarHelper} from "@/shell/hooks/useActivityBar.helper";
 import {ModuleDefinition} from "@/shell/types/moduleRegistry.type";
 import {useSideBarStore} from "@/shell/store/SideBar.store";
 import {moduleRegistry} from "@/shell/moduleRegistry";
+import { PanelToggleButton } from "../small/PanelToggleButton";
 import {ActivityBarView} from "@/shell/types/activeBarView";
 
 // ─── Per-module button (own component so hooks inside useBadge work) ─────────
@@ -60,10 +62,13 @@ function ModuleButton({ module, isActive, horizontal, onClick }: {
 
 interface ActivityBarProps {
     horizontal?: boolean;
+    /** Render Accounts/Settings dialogs here (false when the layout renders them itself) */
+    withDialogs?: boolean;
 }
 
-export function ActivityBar({ horizontal }: ActivityBarProps) {
-    const { setAccountsOpen, setSettingsOpen } = useActivityBarStore();
+export function ActivityBar({ horizontal, withDialogs = true }: ActivityBarProps) {
+    const { setAccountsOpen, setSettingsOpen, setIsSideBarVisible } = useActivityBarStore();
+    const { setIsOpen: setIsCommandPaletteOpen } = useCommandPaletteStore();
     const { handleActivityClick } = useActivityBarHelper();
     const { isAuthenticated, $user } = useAuthStore();
     const { moduleName } = useSideBarStore();
@@ -164,6 +169,13 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
     return (
         <>
             <div className="w-12 h-full bg-editor-activitybar flex flex-col items-center border-r border-editor-border">
+                {/* Collapsed-sidebar rail (#1514): expand + search on top */}
+                <button onClick={() => setIsSideBarVisible(true)} className="w-12 h-12 flex items-center justify-center text-muted-foreground/70 hover:text-foreground transition-colors duration-100" aria-label="Expand sidebar" title="Expand sidebar">
+                    <PanelLeftOpen className="w-5 h-5" strokeWidth={1.75} />
+                </button>
+                <button onClick={() => setIsCommandPaletteOpen(true)} className="w-12 h-12 flex items-center justify-center text-muted-foreground/70 hover:text-foreground transition-colors duration-100" aria-label="Search (Ctrl+P)" title="Search (Ctrl+P)">
+                    <Search className="w-5 h-5" strokeWidth={1.75} />
+                </button>
                 <div className="flex-1">
                     {visibleModules.map((m) => (
                         <ModuleButton
@@ -175,11 +187,12 @@ export function ActivityBar({ horizontal }: ActivityBarProps) {
                         />
                     ))}
                 </div>
+                <PanelToggleButton variant="rail" side="right" />
                 <div className="pb-1">{accountButton}</div>
                 <div className="pb-1">{settingsButton}</div>
             </div>
-            <AccountsDialog />
-            <SettingsDialog />
+            {withDialogs && <AccountsDialog />}
+            {withDialogs && <SettingsDialog />}
         </>
     );
 }

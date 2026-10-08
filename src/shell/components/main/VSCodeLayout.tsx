@@ -2,7 +2,9 @@
 import { Panel, PanelGroup, type ImperativePanelHandle } from "react-resizable-panels";
 import { ActivityBar } from "./ActivityBar";
 import { VSCodeResizeHandle } from "../VSCodeResizeHandle";
-import { VSSideBar } from "./VSSideBar";
+import { AppSidebar } from "./AppSidebar";
+import { AccountsDialog } from "../AccountsDialog";
+import { SettingsDialog } from "../SettingsDialog";
 import { VSPanel } from "./VSPanel/VSPanel";
 import { VSEditorArea } from "./VSEditorArea";
 import { useLocation } from "react-router-dom";
@@ -14,6 +16,7 @@ import {useActivityBarStore} from "@/shell/store/ActivityBar.store";
 import {useModuleRegisterHelper} from "@/shell/hooks/useModuleRegister.helper";
 import { GlobalModuleInit } from "../GlobalModuleInit";
 import {moduleRegistry} from "@/shell/moduleRegistry";
+import { usePanelShortcut } from "@/shell/hooks/usePanelShortcut.headless";
 
 interface VSCodeLayoutProps {
     className?: string;
@@ -22,11 +25,12 @@ interface VSCodeLayoutProps {
 export function VSCodeLayout({ className }: VSCodeLayoutProps) {
     const location = useLocation();
     const { isMobile } = useDeviceStore();
-    const { setIsPanelVisible, isHomeOpen } = useActivityBarStore();
+    const { setIsPanelVisible, isHomeOpen, isSideBarVisible } = useActivityBarStore();
     const HomeView = moduleRegistry.getHomeView();
     const mobileEditorRef = useRef<ImperativePanelHandle>(null);
     const { moduleName } = useSideBarStore();
     useDetectDevice()
+    usePanelShortcut();
 
     const { registerGrid } = useModuleRegisterHelper();
 
@@ -130,33 +134,36 @@ export function VSCodeLayout({ className }: VSCodeLayoutProps) {
             className={`w-full h-full flex flex-col overflow-hidden bg-editor-bg text-editor-fg ${className || ""}`}
         >
             <div className="flex-1 flex overflow-hidden">
-                <ActivityBar />
+                {/* Unified sidebar (#1514); when collapsed the ActivityBar shows as an icon rail */}
+                {!isSideBarVisible && <ActivityBar withDialogs={false} />}
 
-                {/* Workbench stays mounted under the homepage so tabs/sidebar keep their state */}
                 <div className="relative flex-1 flex overflow-hidden">
-                {isHomeOpen && HomeView && (
-                    <div className="absolute inset-0 z-30">
-                        <HomeView />
-                    </div>
-                )}
-                <PanelGroup direction="horizontal" autoSaveId="notes-layout-horizontal" className="flex-1">
-                    <>
-                        <VSSideBar moduleName={moduleName} />
-                        <VSCodeResizeHandle direction="horizontal" id="sidebar-resize" />
-                    </>
+                <PanelGroup direction="horizontal" autoSaveId="app-layout-horizontal" className="flex-1">
+                    <AppSidebar moduleName={moduleName} />
+                    <VSCodeResizeHandle direction="horizontal" id="sidebar-resize" />
 
                     <Panel id="main-content" minSize={50}>
-                        <PanelGroup direction="vertical" autoSaveId="notes-layout-vertical">
-                            <Panel id="editor-area" defaultSize={70} minSize={30}>
-                                <VSEditorArea />
-                            </Panel>
-                            <VSCodeResizeHandle direction="vertical" id="panel-resize" />
-                            <VSPanel onClose={() => setIsPanelVisible(false)} />
-                        </PanelGroup>
+                        <div className="relative h-full w-full">
+                            {/* Workbench stays mounted under the homepage so tabs keep their state */}
+                            {isHomeOpen && HomeView && (
+                                <div className="absolute inset-0 z-30">
+                                    <HomeView />
+                                </div>
+                            )}
+                            <PanelGroup direction="vertical" autoSaveId="notes-layout-vertical">
+                                <Panel id="editor-area" defaultSize={70} minSize={30}>
+                                    <VSEditorArea />
+                                </Panel>
+                                <VSCodeResizeHandle direction="vertical" id="panel-resize" />
+                                <VSPanel onClose={() => setIsPanelVisible(false)} />
+                            </PanelGroup>
+                        </div>
                     </Panel>
                 </PanelGroup>
                 </div>
             </div>
+            <AccountsDialog />
+            <SettingsDialog />
         </div>
         </>
     );

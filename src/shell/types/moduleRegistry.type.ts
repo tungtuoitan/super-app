@@ -1,7 +1,7 @@
 /**
  * Module Registry — VSCode Shell Extension Points
  *
- * Shell (ActivityBar, VSSideBar, VSEditorArea, VSPanel, TabBar) does NOT import features directly.
+ * Shell (AppSidebar, ActivityBar rail, VSEditorArea, VSPanel, TabBar) does NOT import features directly.
  * Instead, each feature registers a ModuleDefinition here.
  * Shell reads from this registry at render time.
  *
@@ -197,7 +197,7 @@ export interface ModuleDefinition {
      */
     hideFromActivityBar?: boolean;
 
-    // ── VSSideBar header ─────────────────────────────────────────────────────
+    // ── AppSidebar section header ─────────────────────────────────────────────────────
     /**
      * When true, the filter button (RightSideBar) in the sidebar header is hidden.
      * Use for modules that have their own filter UI or no filterable grid.
@@ -217,7 +217,7 @@ export interface ModuleDefinition {
      */
     useStatusDot?: () => { color: string } | null;
 
-    // ── VSSideBar ────────────────────────────────────────────────────────────
+    // ── AppSidebar module section ────────────────────────────────────────────────────────────
     /** Component rendered inside the sidebar when this module is active */
     SidebarView: ComponentType;
 

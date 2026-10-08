@@ -1,7 +1,7 @@
 ﻿import { Route, Routes, Navigate } from "react-router-dom";
 
 import { useNavigationStore } from "../../../contexts/NavigationContext";
-import { TopNav } from "./TopNav";
+import { CommandPalette } from "@/shell/commandPallete/CommandPalette";
 import { AuthCallback, constants } from "@/shared";
 import { useMenuContextHelper } from "@/shared";
 import {useDeviceStore} from "@/shared";
@@ -53,9 +53,10 @@ export default function MainNav() {
                 tabIndex={0} // Enable keyboard navigation
                 style={{ height: "100%", width: "100vw" }}
             >
-                {isMobile ? null : <TopNav />}
+                {/* TopNav removed (#1514): logo/search/DEV live in the sidebar; palette stays mounted */}
+                {isMobile ? null : <CommandPalette />}
                 <div className={`side-tabs height-[100%]`}>
-                    <div id="bodyWrapper" ref={bodyWrapperRef} className={`w-full ${isMobile ? 'h-screen': 'h-[calc(100vh-36px)]'}`}>
+                    <div id="bodyWrapper" ref={bodyWrapperRef} className="w-full h-screen">
                         <Routes>
                             {/* <Route path={shellConstants.navigation.path.home} element={<Navigate to={shellConstants.navigation.path.home} replace />} /> */}
                             <Route path={shellConstants.navigation.path.home} element={<VSCodeLayout />} />

@@ -47,7 +47,7 @@ export function RightSideBar({ hideFilter }: { hideFilter?: boolean } = {}) {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className={`!outline-none !ring-0 h-7 ${isMobile ? "w-[100px]" : "w-[140px]"} rounded-lg pl-7 pr-7 text-[12px] bg-transparent ring-0 focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none`}
+                    className={`!outline-none !ring-0 h-7 ${isMobile ? "w-[100px]" : "w-[120px]"} rounded-lg pl-7 pr-7 text-[12px] bg-transparent ring-0 focus:ring-0 focus-visible:ring-0 outline-none focus:outline-none`}
                     style={{ outline: "none" }}
                 />
                 {inputValue && (
