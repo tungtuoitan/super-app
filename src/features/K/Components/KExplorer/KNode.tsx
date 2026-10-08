@@ -47,7 +47,7 @@ function NodeFolderIcon({ nodeIcon, hasDeletedAncestor, isDirectlyDeleted, nodeC
     return (
         <CustomIcon
             className="w-4 h-4"
-            style={{ color: isDeleted ? "#6b7280" : (nodeColor || "#90A4AE") }}
+            style={{ color: isDeleted ? "hsl(var(--muted-foreground))" : (nodeColor || "#90A4AE") }}
             strokeWidth={2}
         />
     );
@@ -64,7 +64,7 @@ function ExpandCollapseButton({ phase, onClick }: ExpandCollapseButtonProps) {
         <button
             onClick={onClick}
             title={titles[phase]}
-            className="ml-0.5 shrink-0 p-0.5 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="ml-0.5 shrink-0 p-0.5 rounded-md text-muted-foreground hover:bg-sa-hover-strong hover:text-foreground transition-colors duration-100"
         >
             {phase === 2
                 ? <ChevronsDownUp className="w-3 h-3" />
@@ -237,10 +237,10 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                 marginLeft: `${node.level * -5}px`,
             }}
             className={`
-                ${ treeType === "workspaceTree" && isSelected ? "bg-editor-hover text-white" : "bg-transparent hover:bg-editor-hover-light"}
-                rounded
+                ${ treeType === "workspaceTree" && isSelected ? "bg-sa-hover-strong text-foreground" : "bg-transparent hover:bg-sa-hover"}
+                rounded-md transition-colors duration-100
                 border-l-2 
-                ${nodeItem.statusCode === "learning" && treeType === "workspaceTree" ? "border-blue-400/30" : "border-transparent"}
+                ${nodeItem.statusCode === "learning" && treeType === "workspaceTree" ? "border-sa-good/40" : "border-transparent"}
             `}
         >
             <div
@@ -261,8 +261,8 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                     flex items-center h-full w-full py-1 pr-2 cursor-pointer
                     ${isDimmed ? "opacity-20" : isDragging ? "opacity-40" : itemStatus.hasDeletedAncestor ? "opacity-60" : "opacity-100"}
                     ${isWorkspaceRoot ? "font-semibold" : ""}
-                    ${isDragging && isSelected ? "bg-primary/30 outline outline-1 outline-primary/60 -outline-offset-1 rounded" : ""}
-                    ${isDropTarget ? "bg-editor-hover outline outline-1 outline-primary/50 -outline-offset-1 rounded" : ""}
+                    ${isDragging && isSelected ? "bg-sa-amber/15 outline outline-1 outline-sa-amber/60 -outline-offset-1 rounded-md" : ""}
+                    ${isDropTarget ? "bg-sa-amber/10 outline outline-1 outline-sa-amber/50 -outline-offset-1 rounded-md" : ""}
                 `}
             >
                 {/* Expand/Collapse Button */}
@@ -273,7 +273,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                         node.toggle();
                     }}
                     disabled={!hasChildren}
-                    className={`p-0.5 ${hasChildren ? "" : "opacity-50"} text-editor-fg`}
+                    className={`p-0.5 ${hasChildren ? "" : "opacity-50"} text-muted-foreground hover:text-foreground`}
                 >
                     {hasChildren ? node.isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" /> : <div className="w-3 h-3" />}
                 </button>
@@ -305,7 +305,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                         />
                     ) : (
                         <Library
-                            className={`w-4 h-4 ${itemStatus.hasDeletedAncestor || itemStatus.isDirectlyDeleted ? "text-gray-500" : ""}`}
+                            className={`w-4 h-4 ${itemStatus.hasDeletedAncestor || itemStatus.isDirectlyDeleted ? "text-muted-foreground/60" : ""}`}
                             color={!itemStatus.hasDeletedAncestor && !itemStatus.isDirectlyDeleted ? nodeColor || "#90A4AE" : ""}
                         />
                     )}
@@ -322,7 +322,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                                 onKeyDown={handleEditKeyDown}
                                 onBlur={submitEdit}
                                 onClick={(e) => e.stopPropagation()}
-                                className={`text-sm flex-1 min-w-0 bg-transparent text-editor-fg outline outline-1 outline-white/15 rounded-sm px-0.5 selection:bg-white/20 ${hasChildren ? "font-semibold" : "font-normal"}`}
+                                className={`text-[13px] flex-1 min-w-0 bg-transparent text-foreground outline outline-1 outline-sa-amber/60 rounded-sm px-0.5 selection:bg-sa-amber/30 ${hasChildren ? "font-medium" : "font-normal"}`}
                                 style={{ border: "none" }}
                             />
                         ) : (
@@ -330,11 +330,11 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                                 text={`${nodeName}`}
                                 highlight={treeType === "workspaceTree" ? searchQuery : ""}
                                 className={`
-                                text-sm truncate
-                                ${hasChildren ? "font-semibold" : "font-normal"}
+                                text-[13px] truncate
+                                ${hasChildren ? "font-medium" : "font-normal"}
                                 ${isWorkspaceRoot ? "uppercase tracking-wide" : ""}
                                 ${itemStatus.isDirectlyDeleted ? "line-through" : ""}
-                                ${itemStatus.hasDeletedAncestor || itemStatus.isDirectlyDeleted ? "text-gray-500" : "text-editor-fg"}
+                                ${itemStatus.hasDeletedAncestor || itemStatus.isDirectlyDeleted ? "text-muted-foreground/60" : "text-foreground"}
                             `}
                             />
                         )}
@@ -342,25 +342,25 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                         {!isEditing && nodeItem.statusCode === "learning" && treeType === "workspaceTree" && (nodeItem.dueSrsCount ?? 0) > 0 && (
                             <span
                                 title={`${nodeItem.dueSrsCount} question${nodeItem.dueSrsCount !== 1 ? "s" : ""} due`}
-                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400"
+                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-sa-amber"
                             />
                         )}
                         {!isEditing && isCollapsed && treeType === "workspaceTree" && !(nodeItem.statusCode === "learning" && (nodeItem.dueSrsCount ?? 0) > 0) && $hasDescendantWithBlueDot(node.data.children ?? []) && (
                             <span
                                 title="Descendants have questions due"
-                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400 opacity-40"
+                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-sa-amber opacity-40"
                             />
                         )}
                         {!isEditing && treeType === "workspaceTree" && (nodeItem.draftQuestionCount ?? 0) > 0 && (
                             <span
                                 title={`${nodeItem.draftQuestionCount} draft question${nodeItem.draftQuestionCount !== 1 ? "s" : ""}`}
-                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-800"
+                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-muted-foreground/70"
                             />
                         )}
                         {!isEditing && isCollapsed && treeType === "workspaceTree" && (nodeItem.draftQuestionCount ?? 0) <= 0 && $hasDescendantWithBrownDot(node.data.children ?? []) && (
                             <span
                                 title="Descendants have draft questions"
-                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-800 opacity-60"
+                                className="shrink-0 w-1.5 h-1.5 rounded-full bg-muted-foreground/70 opacity-50"
                             />
                         )}
                         {/* Draft badge — commented out, kept for reference */}
@@ -393,7 +393,7 @@ export function KNode({ node, style, dragHandle, treeData, treeType = "workspace
                     <button
                         onClick={handleToggleMark}
                         title={isMarked ? "Remove mark" : "Mark subtree"}
-                        className={`ml-1 shrink-0 p-0.5 rounded transition-colors ${isMarked ? "text-amber-400 hover:text-amber-300" : "text-zinc-500 hover:text-zinc-300"}`}
+                        className={`ml-1 shrink-0 p-0.5 rounded-md transition-colors duration-100 ${isMarked ? "text-sa-amber hover:text-sa-amber/80" : "text-muted-foreground hover:text-foreground"}`}
                     >
                         <Bookmark className="w-3 h-3" fill={isMarked ? "currentColor" : "none"} />
                     </button>

@@ -128,10 +128,10 @@ export function KView() {
                     <button
                         onClick={handleRefresh}
                         disabled={isRefreshing || isLoadingK}
-                        className="pl-1 rounded-md hover:opacity-100 opacity-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                        className="p-1 rounded-md text-muted-foreground hover:bg-sa-hover hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-100 shrink-0"
                         title="Refresh knowledge list"
                     >
-                        <RotateCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        <RotateCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
                     </button>
 
                 </div>
@@ -141,11 +141,11 @@ export function KView() {
             {/* {dailyReviewDueCount > 0 && (
                 <button
                     onClick={openGlobalDailyReviewTab}
-                    className="mx-3 mb-1 flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-blue-400 hover:bg-blue-500/10 transition-colors"
+                    className="mx-3 mb-1 flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] text-foreground hover:bg-sa-hover transition-colors duration-100"
                 >
                     <CalendarClock className="w-3.5 h-3.5 shrink-0" />
                     <span className="truncate">Daily Review</span>
-                    <span className="ml-auto shrink-0 bg-blue-600 text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+                    <span className="ml-auto shrink-0 bg-sa-amber/15 text-sa-amber-ink font-mono text-[10px] font-medium rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
                         {dailyReviewDueCount}
                     </span>
                 </button>
@@ -159,7 +159,7 @@ export function KView() {
                 {/* Loading Overlay */}
                 {(isLoadingK || isLoadingTree || isLoadingTreeByOpeningNode) && (
                     <div className="absolute inset-0 bg-background__ backdrop-blur-sm__ flex items-center justify-center z-10">
-                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
                     </div>
                 )}
             </div>

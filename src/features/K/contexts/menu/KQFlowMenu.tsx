@@ -24,8 +24,8 @@ export function KQFlowMenu() {
                         </MenuItem>
                     )}
                     <MenuItem onClick={() => executeDirectly({ callback: contextData?.onDeleteSelected })}>
-                        <Trash2 className="w-4 h-4 mr-2 text-red-400" />
-                        <span className="text-red-400">
+                        <Trash2 className="w-4 h-4 mr-2 text-sa-danger" />
+                        <span className="text-sa-danger">
                             Delete{contextData.selectedIds.length > 1 ? ` (${contextData.selectedIds.length})` : ""}
                         </span>
                     </MenuItem>

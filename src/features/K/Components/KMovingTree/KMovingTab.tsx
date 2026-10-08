@@ -65,7 +65,7 @@ export function KMovingTab() {
         <div className="h-full flex overflow-hidden" ref={treeContainerRef} data-workspace-tree="true">
 
             {/* Left Panel - Workspace Selector & Status */}
-            <div className="w-1/2 flex flex-col border-r border-editor-border">
+            <div className="w-1/2 flex flex-col border-r border-sa-border">
                 <div className="px-4 py-3">
                     <GenericAutoComplete
                         allOptions={availableWorkspaces}
@@ -84,11 +84,11 @@ export function KMovingTab() {
 
                 <div className="flex-1 flex flex-col justify-start px-4">
                     {targetWorkspaceId && !isLoadingTargetTree ? (
-                        <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg flex items-start gap-3">
-                            <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <div className="text-sm text-blue-800 dark:text-blue-400">
+                        <div className="p-3 bg-sa-surface border border-sa-border rounded-xl flex items-start gap-2.5">
+                            <CheckCircle2 className="w-4 h-4 text-sa-good flex-shrink-0 mt-0.5" />
+                            <div className="text-[13px] text-foreground">
                                 <div className="font-medium">Ready to move items</div>
-                                <div className="mt-1 opacity-80">Drag items from workspace tree and drop into folders or root on the right</div>
+                                <div className="mt-1 text-muted-foreground">Drag items from workspace tree and drop into folders or root on the right</div>
                             </div>
                         </div>
                     ) : null}
@@ -99,19 +99,19 @@ export function KMovingTab() {
             <div ref={drop} className={`w-5/6 flex flex-col overflow-hidden relative`}>
                 {isLoadingTargetTree ? (
                     <div className="h-full flex items-center justify-center">
-                        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                        <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
                     </div>
                 ) : targetWorkspaceId && targetWorkspace ? (
                     <KMovingTree />
                 ) : targetWorkspaceId ? (
                     <div className="h-full flex items-center justify-center text-muted-foreground">
-                        <p className="text-sm">Workspace is empty</p>
+                        <p className="text-[13px]">Workspace is empty</p>
                     </div>
                 ) : (
                     <div className="h-full flex items-center justify-center text-muted-foreground">
                         <div className="text-center">
-                            <ArrowRightLeft className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">Select a target workspace</p>
+                            <ArrowRightLeft className="w-8 h-8 mx-auto mb-3 opacity-40" strokeWidth={1.5} />
+                            <p className="text-[13px] text-foreground">Select a target workspace</p>
                             <p className="text-xs mt-1 opacity-70">Then drag items here to move them</p>
                         </div>
                     </div>

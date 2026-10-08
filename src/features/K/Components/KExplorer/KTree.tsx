@@ -187,10 +187,10 @@ export function KTree() {
             >
                 {/* Loading overlay when dragging */}
                 {isDragging && (
-                    <div className="absolute inset-0 bg-black/5 z-[1000] flex items-center justify-center pointer-events-none">
-                        <div className="bg-editor-sidebar p-4 px-6 rounded-lg shadow-lg flex items-center gap-3">
-                            <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                            <span className="text-sm text-editor-fg">Moving folder...</span>
+                    <div className="absolute inset-0 bg-background/40 z-[1000] flex items-center justify-center pointer-events-none">
+                        <div className="bg-popover border border-sa-border-strong sa-shadow-pop px-4 py-3 rounded-xl flex items-center gap-2.5">
+                            <Loader2 className="w-4 h-4 text-sa-amber animate-spin" />
+                            <span className="text-[13px] text-foreground">Moving folder...</span>
                         </div>
                     </div>
                 )}
