@@ -41,7 +41,7 @@ function BubbleBtn({ onClick, active, title, children }: {
             type="button"
             onMouseDown={(e) => { e.preventDefault(); onClick(); }}
             title={title}
-            className={`p-1 rounded transition-colors ${active ? "bg-zinc-600 text-zinc-100" : "text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200"}`}
+            className={`p-1 rounded-md transition-colors duration-100 ${active ? "bg-sa-hover-strong text-foreground" : "text-muted-foreground hover:bg-sa-hover hover:text-foreground"}`}
         >
             {children}
         </button>
@@ -139,7 +139,7 @@ export function KNodeDescEditor({ value, onChange, placeholder, autoFocus, onEsc
                 <div
                     ref={bubbleRef}
                     style={{ position: "fixed", top: bubblePos.top, left: bubblePos.left, zIndex: 9999 }}
-                    className="flex items-center gap-0.5 px-1 py-0.5 bg-zinc-800 border border-zinc-700 rounded shadow-lg"
+                    className="flex items-center gap-0.5 px-1 py-0.5 bg-popover border border-sa-border-strong rounded-lg sa-shadow-pop"
                     onMouseDown={(e) => e.preventDefault()}
                 >
                     <BubbleBtn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Bold (Ctrl+B)">
@@ -151,7 +151,7 @@ export function KNodeDescEditor({ value, onChange, placeholder, autoFocus, onEsc
                     <BubbleBtn onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive("underline")} title="Underline (Ctrl+U)">
                         <UnderlineIcon className="w-3 h-3" />
                     </BubbleBtn>
-                    <div className="w-px h-3.5 bg-zinc-600 mx-0.5" />
+                    <div className="w-px h-3.5 bg-sa-border-strong mx-0.5" />
                     <BubbleBtn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")} title="Bullet list">
                         <List className="w-3 h-3" />
                     </BubbleBtn>
@@ -190,7 +190,7 @@ function highlightInHtml(html: string, query: string): string {
                 const matchIdx = normalizedPart.indexOf(normalizedQuery, i);
                 if (matchIdx === -1) { result += nfcPart.slice(i); break; }
                 result += nfcPart.slice(i, matchIdx);
-                result += `<mark style="background:rgb(250 204 21/0.8);color:black;border-radius:2px;padding:0 2px">${nfcPart.slice(matchIdx, matchIdx + normalizedQuery.length)}</mark>`;
+                result += `<mark style="background:hsl(var(--sa-accent-amber) / 0.35);color:inherit;border-radius:2px;padding:0 2px">${nfcPart.slice(matchIdx, matchIdx + normalizedQuery.length)}</mark>`;
                 i = matchIdx + normalizedQuery.length;
             }
             return result;
@@ -204,7 +204,7 @@ export function KNodeDescView({ value, highlight }: { value: string | null | und
     const displayHtml = highlight ? highlightInHtml(html, highlight) : html;
     return (
         <div
-            className="k-node-desc-view text-xs text-zinc-400 leading-relaxed break-words min-h-full"
+            className="k-node-desc-view text-xs text-muted-foreground leading-relaxed break-words min-h-full"
             dangerouslySetInnerHTML={{ __html: displayHtml }}
         />
     );

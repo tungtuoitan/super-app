@@ -138,12 +138,12 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
     const iconColor = node.color || (isRoot ? "#A1887F" : "#90A4AE");
 
     const bgStyle = compact
-    ? { backgroundColor: "#0f1014" }
+    ? { backgroundColor: "hsl(var(--sa-surface))" }
     : isRoot
-    ? { backgroundColor: "#000000" }
-    : level - scopeDepth === 1 ? { backgroundColor: "#111318" }
-    : level - scopeDepth === 2 ? { backgroundColor: "#181A20" }
-    : { backgroundColor: "#1B1D23" };
+    ? { backgroundColor: "hsl(var(--background))" }
+    : level - scopeDepth === 1 ? { backgroundColor: "hsl(var(--sa-surface))" }
+    : level - scopeDepth === 2 ? { backgroundColor: "hsl(var(--sa-surface-2))" }
+    : { backgroundColor: "hsl(var(--accent))" };
 
     const setDraft = <K extends keyof typeof editDraft>(key: K, value: typeof editDraft[K]) =>
         setEditDraft((prev) => ({ ...prev, [key]: value }));
@@ -230,20 +230,20 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
     // ── Unsaved changes prompt overlay ─────────────────────────────────────────
     const UnsavedPrompt = isPrompting ? (
         <div
-            className={`absolute inset-0 rounded-lg bg-zinc-950/96 flex flex-col items-center justify-center gap-3 z-30 transition-all duration-150 ${isFlashing ? "ring-2 ring-amber-400/20 scale-[1.02] brightness-125" : ""}`}
+            className={`absolute inset-0 rounded-xl bg-popover/95 flex flex-col items-center justify-center gap-3 z-30 transition-all duration-150 ${isFlashing ? "ring-2 ring-sa-amber/40 scale-[1.02]" : ""}`}
             onMouseDown={(e) => e.stopPropagation()}
         >
-            <p className="text-xs text-zinc-400 font-medium">Save changes?</p>
+            <p className="text-[13px] text-foreground font-medium">Save changes?</p>
             <div className="flex gap-2">
                 <button
                     onClick={() => submitEdit(node, editDraft)}
-                    className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors"
+                    className="text-xs h-7 px-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors duration-100"
                 >
                     Save
                 </button>
                 <button
                     onClick={handleCancelEdit}
-                    className="text-xs px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded transition-colors"
+                    className="text-xs h-7 px-3 border border-sa-border-strong text-muted-foreground hover:bg-sa-hover hover:text-foreground rounded-md transition-colors duration-100"
                 >
                     Discard
                 </button>
@@ -253,20 +253,20 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
 
     // ── unified render (single DOM tree — no remount on mode switch) ───────────
     const cardState = dropActive
-        ? "border-blue-400 cursor-copy"
+        ? "border-sa-amber cursor-copy"
         : isDragging
-        ? "border-zinc-700 opacity-40"
-        : "border-zinc-700/50 hover:border-zinc-600";
+        ? "border-sa-border opacity-40"
+        : "border-sa-border hover:border-sa-border-strong";
 
     const hoverBorderColor = isHoveredFromTree && !dropActive && !isDragging
-        ? "#75beff44"
+        ? "hsl(var(--foreground) / 0.3)"
         : undefined;
-    const markedBorderColor = isMarked && !isEditing && !dropActive ? "#f59e0b66" : undefined;
+    const markedBorderColor = isMarked && !isEditing && !dropActive ? "hsl(var(--sa-accent-amber) / 0.5)" : undefined;
 
     return (
         <div
             ref={cardRef}
-            className={`group relative rounded-lg border flex flex-col ${heightClass} ${spanClass} ${rowClass} transition-colors duration-150 ${isEditing ? "border-blue-500/20" : cardState} ${isDeleted && !isEditing ? "opacity-50" : ""}`}
+            className={`group relative rounded-xl border flex flex-col ${heightClass} ${spanClass} ${rowClass} transition-colors duration-100 ${isEditing ? "border-sa-amber/40" : cardState} ${isDeleted && !isEditing ? "opacity-50" : ""}`}
             style={{ ...bgStyle, borderColor: !isEditing ? (markedBorderColor ?? hoverBorderColor) : undefined }}
             data-node-card
             onMouseEnter={!isKnowledge ? () => setHoveredNodeId(node.id) : undefined}
@@ -278,8 +278,8 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
 
             {/* Drop-to-reparent overlay */}
             {dropActive && !isEditing && (
-                <div className="absolute inset-0 rounded-lg flex items-center justify-center pointer-events-none z-10">
-                    <span className="text-xs text-blue-300 bg-blue-900/80 px-2 py-1 rounded">Drop to set parent</span>
+                <div className="absolute inset-0 rounded-xl flex items-center justify-center pointer-events-none z-10">
+                    <span className="text-xs text-sa-amber-ink bg-popover border border-sa-amber/40 px-2 py-1 rounded-md">Drop to set parent</span>
                 </div>
             )}
 
@@ -295,8 +295,8 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
                         onChange={(v) => setDraft("name", v)}
                         placeholder="Name"
                         rows={1}
-                        className={`${compact ? "text-xs" : "text-sm"} font-semibold text-left border-b border-zinc-700 pb-2`}
-                        style={{ color:"#808080" }}
+                        className={`${compact ? "text-xs" : "text-sm"} font-medium text-left border-b border-sa-border pb-2`}
+                        style={{ color:"hsl(var(--foreground))" }}
                         onKeyDown={(e) => {
                             if (e.key === "Escape") { e.preventDefault(); handleCancelEdit(); }
                             if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); submitEdit(node, editDraft); }
@@ -304,9 +304,9 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
                     />
                 ) :
                     <button
-                        className={`${compact ? "text-xs" : "text-sm"} cursor-text font-semibold text-left leading-snug mt-[3px] w-full whitespace-pre-wrap`}
+                        className={`${compact ? "text-xs" : "text-sm"} cursor-text font-medium text-left leading-snug mt-[3px] w-full whitespace-pre-wrap`}
                         // style={{ color: isQuestion ? "#808080" : (node.color || "#f4f4f5") }}
-                        style={{ color:"#808080" }}
+                        style={{ color:"hsl(var(--foreground) / 0.9)" }}
                         onDoubleClick={(e) => {
                             e.stopPropagation();
                             if (isEditing) return;
@@ -315,7 +315,7 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
                         }}
                         
                         >
-                        <span className="cursor-text underline-offset-2 decoration-zinc-600 transition-colors hover:opacity-80"
+                        <span className="cursor-text underline-offset-2 decoration-muted-foreground transition-colors hover:opacity-80"
                         title={`Drill into ${node.name}`}
                         >
                             <HighlightText text={node.name} highlight={searchQuery} />
@@ -333,7 +333,7 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
                             value={editDraft.description}
                             onChange={(v) => setDraft("description", v)}
                             placeholder="Description…"
-                            className="text-xs text-zinc-400 leading-relaxed"
+                            className="text-xs text-muted-foreground leading-relaxed"
                             onKeyDown={(e) => {
                                 if (e.key === "Escape") { e.preventDefault(); handleCancelEdit(); }
                                 if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); submitEdit(node, editDraft); }
@@ -348,7 +348,7 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
                             } : undefined}
                             style={{ cursor: !isKnowledge && !isDeleted ? "text" : undefined, height: "100%" }}
                         >
-                            <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap break-words">
+                            <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
                                 <HighlightText text={node.description ?? ''} highlight={searchQuery} />
                             </p>
                         </div>
@@ -363,7 +363,7 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
                     <button
                         onClick={handleToggleMark}
                         title={isMarked ? "Remove mark" : "Mark this node"}
-                        className={`p-0.5 rounded transition-all ${isMarked ? "text-amber-400" : "text-zinc-600 hover:text-zinc-400 opacity-0 group-hover:opacity-100"}`}
+                        className={`p-0.5 rounded transition-all ${isMarked ? "text-sa-amber" : "text-muted-foreground/60 hover:text-foreground opacity-0 group-hover:opacity-100"}`}
                     >
                         <Bookmark className="w-3 h-3" fill={isMarked ? "currentColor" : "none"} />
                     </button>
@@ -372,7 +372,7 @@ export function KNodeCard({ node, isRoot, compact, onSubmitEdit }: { node: KItem
                 {!isKnowledge && (
                     <button
                         onClick={cycleSize}
-                        className={`p-0.5 rounded transition-all text-zinc-600 hover:text-zinc-400 ${cardSize !== "1x1" ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                        className={`p-0.5 rounded transition-all text-muted-foreground/60 hover:text-foreground ${cardSize !== "1x1" ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                         title={cardSize === "2x2" ? "Collapse card" : "Expand card"}
                     >
                         {cardSize === "2x2"

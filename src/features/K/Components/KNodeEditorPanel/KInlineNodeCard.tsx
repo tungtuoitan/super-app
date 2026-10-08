@@ -40,29 +40,29 @@ export function KInlineNodeCard() {
 
     return (
         <div
-            className={`relative rounded-lg border flex flex-col ${CARD_HEIGHT} transition-all duration-150 border-blue-500/60`}
-            style={{ backgroundColor: "#0a0a0a" }}
+            className={`relative rounded-xl border flex flex-col ${CARD_HEIGHT} transition-all duration-150 border-sa-amber/50`}
+            style={{ backgroundColor: "hsl(var(--sa-surface))" }}
         >
             {/* Icon button — top left */}
             <div className="absolute top-2 left-2 z-10" ref={pickerRef}>
                 {isQuestion ? (
                     <div className="w-5 h-5 flex items-center justify-center pointer-events-none">
-                        <HelpCircle className="w-3.5 h-3.5" style={{ color: "#6b7280" }} strokeWidth={2} />
+                        <HelpCircle className="w-3.5 h-3.5" style={{ color: "hsl(var(--muted-foreground))" }} strokeWidth={2} />
                     </div>
                 ) : (
                     <button
                         onClick={() => setShowIconPicker(v => !v)}
-                        className="w-5 h-5 flex items-center justify-center rounded hover:bg-zinc-800 transition-colors"
+                        className="w-5 h-5 flex items-center justify-center rounded-md hover:bg-sa-hover-strong transition-colors duration-100"
                         title="Pick icon"
                     >
                         {IconComponent
-                            ? <IconComponent className="w-3.5 h-3.5" style={{ color: draft.color || "#75beff" }} strokeWidth={2} />
-                            : <span className="text-[10px] text-zinc-600">+icon</span>
+                            ? <IconComponent className="w-3.5 h-3.5" style={{ color: draft.color || "hsl(var(--sa-accent-amber))" }} strokeWidth={2} />
+                            : <span className="text-[10px] text-muted-foreground">+icon</span>
                         }
                     </button>
                 )}
                 {!isQuestion && showIconPicker && (
-                    <div className="absolute top-6 left-0 z-50 bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl" style={{ width: 280 }}>
+                    <div className="absolute top-6 left-0 z-50 bg-popover border border-sa-border-strong rounded-lg sa-shadow-pop" style={{ width: 280 }}>
                         <IconPicker
                             value={draft.icon as IconKey | null}
                             onChange={handleIconChange}
@@ -77,20 +77,20 @@ export function KInlineNodeCard() {
 
             {/* header */}
             <div className="flex items-center gap-1.5 px-4 pt-3.5 pb-2 shrink-0 h-8">
-                <span className="text-[10px] font-mono text-zinc-600 border border-zinc-800 rounded px-1.5 py-0.5 leading-none">
+                <span className="text-[10px] font-mono text-muted-foreground border border-sa-border-strong rounded-md px-1.5 py-0.5 leading-none">
                     New
                 </span>
                 <div className="ml-auto flex items-center gap-1">
                     <button
                         onClick={() => handleInlineCreate(draft, inlineNewParentId ?? null)}
                         disabled={!draft.name.trim()}
-                        className="text-[11px] text-zinc-400 hover:text-green-400 disabled:opacity-30 px-1.5 py-0.5 rounded"
+                        className="text-[11px] text-foreground hover:bg-sa-hover-strong disabled:opacity-30 px-1.5 py-0.5 rounded-md transition-colors duration-100"
                     >
                         Save
                     </button>
                     <button
                         onClick={handleCancelInline}
-                        className="text-zinc-600 hover:text-zinc-300 p-0.5 rounded"
+                        className="text-muted-foreground hover:text-foreground hover:bg-sa-hover p-0.5 rounded-md"
                     >
                         <X className="w-3.5 h-3.5" />
                     </button>
@@ -104,8 +104,8 @@ export function KInlineNodeCard() {
                     value={draft.name}
                     onChange={(e) => setDraft(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="Name"
-                    className="w-full bg-transparent text-sm font-semibold text-left outline-none border-b border-zinc-700 pb-0.5"
-                    style={{ color: isQuestion ? "#ffffff" : (draft.color || "#f4f4f5") }}
+                    className="w-full bg-transparent text-sm font-medium text-left outline-none border-b border-sa-border pb-0.5"
+                    style={{ color: isQuestion ? "hsl(var(--foreground))" : (draft.color || "hsl(var(--foreground))") }}
                     onKeyDown={(e) => {
                         if (e.key === "Escape") handleCancelInline();
                         if (e.key === "Enter") handleInlineCreate(draft, inlineNewParentId ?? null);
@@ -119,7 +119,7 @@ export function KInlineNodeCard() {
                     value={draft.description}
                     onChange={(v) => setDraft(prev => ({ ...prev, description: v }))}
                     placeholder="Description… (Shift+Enter for new line)"
-                    className="text-xs text-zinc-400 leading-relaxed w-full text-left"
+                    className="text-xs text-muted-foreground leading-relaxed w-full text-left"
                     onKeyDown={(e) => {
                         if (e.key === "Escape") handleCancelInline();
                         if (e.key === "Enter" && !e.shiftKey) {
@@ -130,7 +130,7 @@ export function KInlineNodeCard() {
                 />
             </div>
 
-            <div className="px-4 pb-3 pt-2 shrink-0 border-t border-zinc-800/60" />
+            <div className="px-4 pb-3 pt-2 shrink-0 border-t border-sa-border" />
         </div>
     );
 }

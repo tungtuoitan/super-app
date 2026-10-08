@@ -131,7 +131,7 @@ function KNodeEditorContent() {
 
     if (currentK?.id !== rootNode.knowledgeId) {
         return (
-            <div className="flex-1 flex items-center justify-center text-zinc-600 text-sm">
+            <div className="flex-1 flex items-center justify-center text-muted-foreground text-[13px]">
                 Select the knowledge in the sidebar to view this node
             </div>
         );
@@ -140,7 +140,7 @@ function KNodeEditorContent() {
     return (
         <div className="flex flex-col h-full w-full">
             {/* breadcrumb + stats */}
-            <div className="flex items-center gap-2 px-6 py-2.5 border-b border-zinc-800 shrink-0 min-w-0">
+            <div className="flex items-center gap-2 px-6 h-10 border-b border-sa-border shrink-0 min-w-0">
                 <div className="flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
                     {/* Knowledge prefix — always first */}
                     {kName && (
@@ -151,13 +151,13 @@ function KNodeEditorContent() {
                                     // Open workspace root in KTree so direct children are visible
                                     KtreeMiniHelper.expandPathToItem(_treeRef, treeData, workspaceConstants.root.workspaceItemId);
                                 }}
-                                className="flex items-center gap-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                                className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors duration-100"
                                 title={kName}
                             >
                                 <LibraryBig className="w-3.5 h-3.5 shrink-0" style={{ color: "#A1887F" }} />
-                                <span className="text-sm truncate max-w-[120px]">{kName}</span>
+                                <span className="text-[13px] truncate max-w-[120px]">{kName}</span>
                             </button>
-                            <ChevronRight className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
                         </span>
                     )}
                     {/* Breadcrumb items — skip null-id entry (knowledge root sentinel, already shown via kName prefix) */}
@@ -169,39 +169,39 @@ function KNodeEditorContent() {
                             const entryColor = entry.color || undefined;
                             return (
                                 <span key={entry.id ?? i} className="flex items-center gap-1 min-w-0 shrink-0">
-                                    {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-zinc-600 shrink-0" />}
+                                    {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />}
                                     <button
                                         onClick={() => !isLast && setBreadcrumb(prev => prev.slice(0, origIdx + 1))}
                                         disabled={isLast}
-                                        className={`text-sm truncate max-w-[140px] transition-colors ${
+                                        className={`text-[13px] truncate max-w-[140px] transition-colors duration-100 ${
                                             isLast
-                                                ? "font-semibold cursor-default"
-                                                : "text-zinc-500 hover:text-zinc-300"
+                                                ? "font-medium text-foreground cursor-default"
+                                                : "text-muted-foreground hover:text-foreground"
                                         }`}
                                         style={isLast && entryColor ? { color: entryColor } : undefined}
                                     >
                                         {entry.name}
                                     </button>
                                     {entry.id === markedNodeId && (
-                                        <Bookmark className="w-3 h-3 text-amber-400 shrink-0" fill="currentColor" />
+                                        <Bookmark className="w-3 h-3 text-sa-amber shrink-0" fill="currentColor" />
                                     )}
                                 </span>
                             );
                         });
                     })()}
                 </div>
-                <div className="ml-auto flex items-center gap-2 text-[11px] text-zinc-600 shrink-0">
-                    <span>{filteredNodes.length} node{filteredNodes.length !== 1 ? "s" : ""}</span>
+                <div className="ml-auto flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
+                    <span className="mr-1"><span className="font-mono">{filteredNodes.length}</span> node{filteredNodes.length !== 1 ? "s" : ""}</span>
                     <button
                         onClick={() => setShowAllChild(v => !v)}
-                        className={`p-1 rounded transition-colors ${!showAllChild ? "text-blue-400 bg-blue-900/20" : "text-zinc-600 hover:text-zinc-400"}`}
+                        className={`p-1 rounded-md transition-colors duration-100 ${!showAllChild ? "text-foreground bg-sa-hover-strong" : "text-muted-foreground hover:bg-sa-hover hover:text-foreground"}`}
                         title={showAllChild ? "Show direct children only" : "Show all levels"}
                     >
                         <Layers className="w-3.5 h-3.5" />
                     </button>
                     <button
                         onClick={() => setShowDeleted(v => !v)}
-                        className={`p-1 rounded transition-colors ${showDeleted ? "text-red-400 bg-red-900/20" : "text-zinc-600 hover:text-zinc-400"}`}
+                        className={`p-1 rounded-md transition-colors duration-100 ${showDeleted ? "text-sa-danger bg-sa-danger/10" : "text-muted-foreground hover:bg-sa-hover hover:text-foreground"}`}
                         title={showDeleted ? "Hide deleted" : "Show deleted"}
                     >
                         <Trash className="w-3.5 h-3.5" />

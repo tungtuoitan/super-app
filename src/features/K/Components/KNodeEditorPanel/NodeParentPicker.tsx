@@ -17,18 +17,18 @@ export function NodeParentPicker() {
     );
 
     return (
-        <div className="absolute left-0 top-full mt-1 z-20 w-full min-w-[200px] bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl overflow-hidden">
-            <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800">
-                <span className="text-[11px] text-zinc-500 uppercase tracking-widest">Set parent</span>
-                <button onClick={() => setParentPickerNodeId(null)} className="text-zinc-600 hover:text-zinc-300">
+        <div className="absolute left-0 top-full mt-1 z-20 w-full min-w-[200px] bg-popover border border-sa-border-strong rounded-lg sa-shadow-pop overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-sa-border">
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Set parent</span>
+                <button onClick={() => setParentPickerNodeId(null)} className="rounded-md p-0.5 text-muted-foreground hover:bg-sa-hover hover:text-foreground">
                     <X className="w-3.5 h-3.5" />
                 </button>
             </div>
             <div className="max-h-48 overflow-y-auto py-1">
                 <button
                     onClick={() => handleSaveParent(parentPickerNodeId, null)}
-                    className={`w-full text-left px-3 py-1.5 text-xs transition-colors
-                        ${currentParentId === null ? "text-zinc-200 bg-zinc-800" : "text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"}`}
+                    className={`w-full text-left px-3 h-7 text-[13px] transition-colors duration-100
+                        ${currentParentId === null ? "text-foreground bg-sa-hover-strong" : "text-muted-foreground hover:bg-sa-hover hover:text-foreground"}`}
                 >
                     — No parent (Level 1)
                 </button>
@@ -36,11 +36,11 @@ export function NodeParentPicker() {
                     <button
                         key={n.id}
                         onClick={() => handleSaveParent(parentPickerNodeId, n.id)}
-                        className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 transition-colors
-                            ${currentParentId === n.id ? "text-zinc-200 bg-zinc-800" : "text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"}`}
+                        className={`w-full text-left px-3 h-7 text-[13px] flex items-center gap-2 transition-colors duration-100
+                            ${currentParentId === n.id ? "text-foreground bg-sa-hover-strong" : "text-muted-foreground hover:bg-sa-hover hover:text-foreground"}`}
                     >
                         <span className="truncate">{n.name}</span>
-                        {currentParentId === n.id && <Check className="w-3 h-3 ml-auto shrink-0 text-blue-400" />}
+                        {currentParentId === n.id && <Check className="w-3 h-3 ml-auto shrink-0 text-sa-amber" />}
                     </button>
                 ))}
             </div>
