@@ -21,12 +21,12 @@ export function TaskNotesLinksRow({ workspaceItemId }: { workspaceItemId: number
 
     return (
         <div
-            className="group flex items-center gap-2 px-2 py-1.5 rounded-md text-sm bg-muted/50 hover:bg-muted cursor-pointer"
+            className="group flex h-7 cursor-pointer items-center gap-2 rounded-md px-1.5 text-[13px] transition-colors duration-100 hover:bg-sa-hover"
             onClick={() => openNotesLinksItem(item)}
             title={url ?? name}
         >
             {kind === "link" ? (
-                <LinkKindIcon url={url} className="h-3.5 w-3.5 text-sky-500 shrink-0" />
+                <LinkKindIcon url={url} className={iconClass} />
             ) : kind === "note" ? (
                 <FileText className={iconClass} />
             ) : kind === "folder" ? (
@@ -34,10 +34,10 @@ export function TaskNotesLinksRow({ workspaceItemId }: { workspaceItemId: number
             ) : (
                 <FileIcon className={iconClass} />
             )}
-            <span className="flex-1 truncate hover:text-primary hover:underline text-left">{name}</span>
+            <span className="flex-1 truncate text-left hover:underline">{name}</span>
             {isFromElsewhere && (
                 <span
-                    className="shrink-0 text-[10px] leading-none px-1 py-0.5 rounded border border-border text-muted-foreground"
+                    className="shrink-0 rounded-md border border-sa-border-strong px-1.5 text-[11px] leading-4 text-muted-foreground"
                     title="Linked from elsewhere in the workspace"
                 >
                     linked
@@ -49,7 +49,7 @@ export function TaskNotesLinksRow({ workspaceItemId }: { workspaceItemId: number
                         e.stopPropagation();
                         _openLocalUrl(url);
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-background transition-opacity"
+                    className="rounded p-0.5 text-muted-foreground opacity-0 transition-opacity duration-100 hover:text-foreground group-hover:opacity-100"
                     title="Open local (VS Code)"
                 >
                     <Laptop className="h-3 w-3" />
@@ -61,7 +61,7 @@ export function TaskNotesLinksRow({ workspaceItemId }: { workspaceItemId: number
                         e.stopPropagation();
                         editTaskLink(selectedTask, link);
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-background transition-opacity"
+                    className="rounded p-0.5 text-muted-foreground opacity-0 transition-opacity duration-100 hover:text-foreground group-hover:opacity-100"
                     title="Edit link"
                 >
                     <Pencil className="h-3 w-3" />
@@ -73,7 +73,7 @@ export function TaskNotesLinksRow({ workspaceItemId }: { workspaceItemId: number
                         e.stopPropagation();
                         removeTaskLink(e, selectedTask, link);
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-opacity"
+                    className="rounded p-0.5 text-muted-foreground opacity-0 transition-opacity duration-100 hover:text-sa-danger group-hover:opacity-100"
                     title={isFromElsewhere ? "Unlink" : "Remove link"}
                 >
                     <X className="h-3 w-3" />

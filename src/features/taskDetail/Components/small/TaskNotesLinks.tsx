@@ -3,12 +3,13 @@
  * Notes and links of the task folder in the project's workspace, plus items linked from elsewhere,
  * in one list (oldest first) told apart by icon.
  */
-import { Loader2, FilePlus, Paperclip, Link } from "lucide-react";
+import { FilePlus, Link } from "lucide-react";
 import { useTaskDetailSelector } from "../../Selectors/TaskDetailSelector";
 import { useTaskNotesLinksSelector } from "../../Selectors/TaskNotesLinksSelector";
 import { useTaskLinksHelper } from "../../hooks/useTaskLinks.helper";
 import { useTaskWorkspaceItemHelper } from "../../hooks/useTaskWorkspaceItem.helper";
 import { TaskNotesLinksRow } from "./TaskNotesLinksRow";
+import { SectionTitle } from "./SectionTitle";
 
 export function TaskNotesLinks() {
     const { selectedTask, currentProject, isDisabled } = useTaskDetailSelector();
@@ -19,39 +20,36 @@ export function TaskNotesLinks() {
     if (!selectedTask || selectedTask.id <= 0) return null;
 
     return (
-        <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center gap-2">
-                <Paperclip className="h-4 w-4" />
-                Notes & Links
-                {isLoadingNotesLinks && <Loader2 className="h-3 w-3 animate-spin" />}
+        <div className="space-y-1">
+            <SectionTitle title="Notes & links" isLoading={isLoadingNotesLinks}>
                 {!isDisabled && (
-                    <div className="ml-auto flex items-center gap-1">
+                    <>
                         <button
                             onClick={() => createTaskNote(selectedTask, currentProject?.workspaceId)}
-                            className="p-0.5 rounded hover:bg-muted transition-colors"
+                            className="rounded-md p-1 text-muted-foreground transition-colors duration-100 hover:bg-sa-hover hover:text-foreground"
                             title="New note"
                         >
                             <FilePlus className="h-3.5 w-3.5" />
                         </button>
                         <button
                             onClick={() => addTaskLink(selectedTask)}
-                            className="p-0.5 rounded hover:bg-muted transition-colors"
+                            className="rounded-md p-1 text-muted-foreground transition-colors duration-100 hover:bg-sa-hover hover:text-foreground"
                             title="Add link (URL, GitHub, Drive…)"
                         >
                             <Link className="h-3.5 w-3.5" />
                         </button>
-                    </div>
+                    </>
                 )}
-            </label>
+            </SectionTitle>
 
             {notesLinksItems.length > 0 ? (
-                <div className="space-y-1 max-h-[240px] overflow-y-auto">
+                <div className="max-h-[240px] space-y-px overflow-y-auto">
                     {notesLinksItems.map((item) => (
                         <TaskNotesLinksRow key={item.workspaceItemId} workspaceItemId={item.workspaceItemId} />
                     ))}
                 </div>
             ) : (
-                !isLoadingNotesLinks && <p className="text-xs text-muted-foreground">No notes or links yet</p>
+                !isLoadingNotesLinks && <p className="px-1.5 text-xs text-muted-foreground">No notes or links yet</p>
             )}
         </div>
     );

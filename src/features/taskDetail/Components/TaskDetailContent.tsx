@@ -3,31 +3,23 @@
  * Form for editing task details
  * Used within ProjectDetailContent TabBar when a task tab is active
  *
- * Layout: fixed header + flex two-column body.
- * Left column: header fields (shrink) + TaskDetailSection (fills remaining).
- * Right column: metadata, scrolls independently.
- * Comment section scrolls inside its own container.
+ * Layout (#1514, Linear-style): header (id · large title · property chips) on top,
+ * then a flex two-column body separated by hairlines.
+ * Left column: TaskDetailSection (fills remaining height).
+ * Right column: Notes & Links, linked keywords, timestamps — scrolls independently.
  */
 
 import React from "react";
-import {
-    GenericTextField,
-    StatusAutoComplete,
-    DateRangePicker,
-    GenericAutoComplete,
-} from "@/shared";
-import { CardContent } from "@/shared";
-import { AlertCircle, Link2, X, Loader2, Plus, Diamond } from "lucide-react";
-import { Alert, AlertDescription, KeywordStaticIcon, Checkbox } from "@/shared";
+import { AlertCircle, Diamond } from "lucide-react";
+import { GenericTextField, Alert, AlertDescription } from "@/shared";
 import { TaskDetailSection } from "./TaskDetailSection";
 import { TaskNotesLinks } from "./small/TaskNotesLinks";
+import { TaskPropertyChips } from "./small/TaskPropertyChips";
+import { TaskLinkedKeywords } from "./small/TaskLinkedKeywords";
+import { SectionTitle } from "./small/SectionTitle";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
-import { useTaskDetailKeywordSelector } from "../Selectors/TaskDetailKeywordSelector";
-import { useTaskDetailFormSelector } from "../Selectors/TaskDetailFormSelector";
-import { useTaskDetailHelper } from "../hooks/useTaskDetail.helper";
 import { formatDate } from "../utils/TaskDetail.utils";
 import { useTaskDetailFormHelper } from "../hooks/useTaskDetailForm.helper";
-import { useTaskDetailStore } from "../store/useTaskDetail.store";
 
 /**
  * TaskDetailContent
@@ -35,253 +27,87 @@ import { useTaskDetailStore } from "../store/useTaskDetail.store";
  */
 export function TaskDetailContent() {
     // ── Computed values (from selectors) ──────────────────────────────────────
-    const {
-        selectedTask,
-        currentProject,
-        isDeleted,
-        isDisabled,
-        isProjectInactive,
-        hasSubtasks,
-        statusOptions,
-        priorityOptions,
-        taskTypeOptions,
-        currentStatusValue,
-        currentPriorityValue,
-        currentTaskTypeValue,
-        limitDates,
-    } = useTaskDetailSelector();
-
-    const { sortedLinkedKeywords } = useTaskDetailKeywordSelector();
-    const { currentProjectValue, currentParentTaskValue } = useTaskDetailFormSelector();
-
-    // ── State (from store) ────────────────────────────────────────────────────
-    const {
-        linkedKeywords,
-        isLoadingLinkedKeywords,
-        projectOptions,
-        isLoadingProjects,
-        parentTaskOptions,
-        isLoadingParentTasks,
-    } = useTaskDetailStore();
+    const { selectedTask, currentProject, isDisabled, isProjectInactive } = useTaskDetailSelector();
 
     // ── Handlers (from helpers — each called directly) ─────────────────────
-    const {
-        handleFieldChange,
-        handleStatusChange,
-        handlePriorityChange,
-        handleTaskTypeChange,
-        handleProjectChange,
-        handleParentTaskChange,
-    } = useTaskDetailFormHelper();
-
-    const {
-        handleOpenLinkPalette,
-        handleNavigateKeyword,
-        handleUnlinkKeyword,
-    } = useTaskDetailHelper();
+    const { handleFieldChange } = useTaskDetailFormHelper();
 
     // ── Early return ──────────────────────────────────────────────────────────
     if (!selectedTask) {
         return (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
+            <div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
                 <p>No task selected</p>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-full overflow-hidden px-6 py-4">
+        <div className="flex h-full flex-col overflow-hidden px-6 pt-4">
             {/* Project inactive alert */}
             {isProjectInactive && (
-                <Alert variant="default" className="mb-4 border-yellow-500/50 bg-yellow-500/10 shrink-0">
-                    <AlertCircle className="h-4 w-4 text-yellow-500" />
-                    <AlertDescription className="text-yellow-500">
+                <Alert variant="default" className="mb-3 shrink-0 border-sa-amber/35 bg-sa-amber/10 py-2">
+                    <AlertCircle className="h-4 w-4 text-sa-amber-ink" />
+                    <AlertDescription className="text-[13px] text-sa-amber-ink">
                         This task belongs to a {currentProject?.status} project. Editing is disabled.
                     </AlertDescription>
                 </Alert>
             )}
 
-            {/* Two-column layout: Left (3/4) fills height | Right (1/4) scrolls independently */}
-            <div className="flex flex-1 min-h-0">
-                {/* ── Left Column ── */}
-                <div className="flex-[3] min-w-0 flex flex-col">
-                    <CardContent className="flex flex-col flex-1 min-h-0 space-y-4">
-                        {/* Header fields — fixed at top */}
-                        <div className="flex gap-4 items-start shrink-0">
-                            <div className="w-[80px] shrink-0">
-                                <GenericTextField
-                                    label="ID"
-                                    value={selectedTask.id > 0 ? selectedTask.id.toString() : "New"}
-                                    disabled
-                                    size="small"
-                                />
-                            </div>
-                            <div className="flex-[2]">
-                                <GenericTextField
-                                    label="Title"
-                                    value={selectedTask.title}
-                                    onChange={(e) => handleFieldChange("title", e.target.value)}
-                                    placeholder="Enter task title..."
-                                    size="small"
-                                    disabled={isDisabled}
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <DateRangePicker
-                                    label="Date Range"
-                                    startDate={selectedTask.startDate}
-                                    endDate={selectedTask.endDate}
-                                    onStartDateChange={(date: Date | null) => handleFieldChange("startDate", date)}
-                                    onEndDateChange={(date: Date | null) => handleFieldChange("endDate", date)}
-                                    placeholder="Pick date range..."
-                                    disabled={isDisabled}
-                                    showTime={false}
-                                    className="w-full"
-                                    limitStartDate={limitDates.limitStartDate}
-                                    limitEndDate={limitDates.limitEndDate}
-                                />
-                            </div>
-                        </div>
+            {/* ── Header: id · title · property chips ── */}
+            <div className="shrink-0 space-y-1.5 pb-3">
+                <div className="flex h-5 items-center gap-2 text-xs">
+                    <span className="font-mono text-muted-foreground">
+                        {selectedTask.id > 0 ? `#${selectedTask.id}` : "New task"}
+                    </span>
+                    {selectedTask.isMilestone && (
+                        <span className="inline-flex items-center gap-1 text-muted-foreground">
+                            <Diamond className="h-3 w-3 text-sa-amber" />
+                            Milestone
+                        </span>
+                    )}
+                </div>
+                <GenericTextField
+                    value={selectedTask.title}
+                    onChange={(e) => handleFieldChange("title", e.target.value)}
+                    placeholder="Task title"
+                    aria-label="Title"
+                    disabled={isDisabled}
+                    className="-mx-1.5 h-9 border-transparent bg-transparent px-1.5 text-xl font-medium tracking-tight hover:border-sa-border focus-visible:border-sa-border-strong focus-visible:ring-0 disabled:cursor-default disabled:opacity-100 disabled:hover:border-transparent"
+                />
+                <div className="-mx-1.5">
+                    <TaskPropertyChips />
+                </div>
+            </div>
 
-                        {/* 4-Section Tabs — fills remaining height */}
-                        <div className="flex-1 min-h-0">
-                            <TaskDetailSection />
-                        </div>
-                    </CardContent>
+            {/* ── Body: sections (left) | side info (right) ── */}
+            <div className="flex min-h-0 flex-1 border-t border-sa-border">
+                {/* ── Left Column ── */}
+                <div className="flex min-w-0 flex-[3] flex-col pb-4 pr-6 pt-2">
+                    <div className="min-h-0 flex-1">
+                        <TaskDetailSection />
+                    </div>
                 </div>
 
                 {/* ── Right Column — scrolls independently ── */}
-                <div className="flex-1 min-w-0 overflow-y-auto">
-                    <CardContent className="space-y-4">
-                        <StatusAutoComplete
-                            value={currentStatusValue}
-                            onChange={handleStatusChange}
-                            options={statusOptions}
-                            inputProps={{ name: "status", label: "Status" }}
-                            disabled={isDeleted}
-                            placeholder="Select status..."
-                        />
-
-                        <StatusAutoComplete
-                            value={currentPriorityValue}
-                            onChange={handlePriorityChange}
-                            options={priorityOptions}
-                            inputProps={{ name: "priority", label: "Priority" }}
-                            disabled={isDisabled}
-                            placeholder="Select priority..."
-                        />
-
-                        <StatusAutoComplete
-                            value={currentTaskTypeValue}
-                            onChange={handleTaskTypeChange}
-                            options={taskTypeOptions}
-                            inputProps={{ name: "taskType", label: "Task Type" }}
-                            disabled={isDisabled}
-                            placeholder="Select task type..."
-                        />
-
-                        <GenericAutoComplete
-                            value={currentProjectValue}
-                            onChange={handleProjectChange}
-                            allOptions={projectOptions}
-                            inputProps={{
-                                name: "project",
-                                label: isLoadingProjects ? "Project (loading...)" : "Project",
-                            }}
-                            disabled={isDisabled || isLoadingProjects}
-                            disableClearable
-                        />
-
-                        <GenericAutoComplete
-                            value={currentParentTaskValue}
-                            onChange={handleParentTaskChange}
-                            allOptions={parentTaskOptions}
-                            inputProps={{
-                                name: "parentTask",
-                                label: hasSubtasks
-                                    ? "Parent Task (Has subtasks - cannot be subtask)"
-                                    : "Parent Task (Subtask of)",
-                            }}
-                            disabled={isDisabled || isLoadingParentTasks || hasSubtasks}
-                        />
-
-                        <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <Checkbox
-                                checked={!!selectedTask.isMilestone}
-                                onCheckedChange={(v) => handleFieldChange("isMilestone", v === true)}
-                                disabled={isDisabled}
-                            />
-                            <Diamond className="h-4 w-4 text-amber-500" />
-                            <span className="text-sm font-medium">Milestone</span>
-                        </label>
-
+                <div className="min-w-[220px] max-w-[320px] flex-1 overflow-y-auto border-l border-sa-border pb-4 pl-5 pt-3">
+                    <div className="space-y-4">
                         {/* Notes & Links — task folder notes + links (task #1487) */}
                         <TaskNotesLinks />
 
                         {/* Linked Keywords */}
-                        {selectedTask.id > 0 && (
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium flex items-center gap-2">
-                                    <Link2 className="h-4 w-4" />
-                                    Linked Keywords
-                                    {isLoadingLinkedKeywords && <Loader2 className="h-3 w-3 animate-spin" />}
-                                    {!isDisabled && (
-                                        <div className="ml-auto flex items-center gap-1">
-                                            <button
-                                                onClick={handleOpenLinkPalette}
-                                                className="p-0.5 rounded hover:bg-muted transition-colors"
-                                                title="Link a keyword"
-                                            >
-                                                <Plus className="h-3.5 w-3.5" />
-                                            </button>
-                                        </div>
-                                    )}
-                                </label>
-                                {linkedKeywords.length > 0 ? (
-                                    <div className="space-y-1 max-h-[200px] overflow-y-auto">
-                                        {sortedLinkedKeywords
-                                            .map((lk) => (
-                                                <div
-                                                    key={lk.linkId}
-                                                    className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm bg-muted/50 hover:bg-muted group"
-                                                >
-                                                    <KeywordStaticIcon
-                                                        type={lk.type}
-                                                        className="h-3.5 w-3.5 text-muted-foreground shrink-0"
-                                                    />
-                                                    <span
-                                                        className="flex-1 text-left truncate cursor-pointer hover:text-primary hover:underline"
-                                                        onClick={() => handleNavigateKeyword(lk as any)}
-                                                        title={lk.longLink || lk.name}
-                                                    >
-                                                        {lk.name.length > 26 ? lk.name.slice(0, 26) + "..." : lk.name}
-                                                    </span>
-                                                    {!isDisabled && (
-                                                        <button
-                                                            onClick={(e) => handleUnlinkKeyword(e, lk.linkId, lk.name)}
-                                                            className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/20 hover:text-destructive transition-opacity"
-                                                            title="Unlink keyword"
-                                                        >
-                                                            <X className="h-3.5 w-3.5" />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                    </div>
-                                ) : (
-                                    !isLoadingLinkedKeywords && (
-                                        <p className="text-xs text-muted-foreground">No linked keywords</p>
-                                    )
-                                )}
-                            </div>
-                        )}
+                        <TaskLinkedKeywords />
 
-                        <p className="text-xs text-left text-muted-foreground leading-relaxed">
-                            Created: {formatDate(selectedTask.createdAt)}
-                            {selectedTask.updatedAt && <> · Updated: {formatDate(selectedTask.updatedAt)}</>}
-                            {selectedTask.deletedAt && <> · Deleted: {formatDate(selectedTask.deletedAt)}</>}
-                        </p>
-                    </CardContent>
+                        <div className="space-y-1">
+                            <SectionTitle title="Activity" />
+                            <p className="text-left text-xs leading-relaxed text-muted-foreground">
+                                Created {formatDate(selectedTask.createdAt)}
+                                {selectedTask.updatedAt && <><br />Updated {formatDate(selectedTask.updatedAt)}</>}
+                                {selectedTask.deletedAt && (
+                                    <><br /><span className="text-sa-danger">Deleted {formatDate(selectedTask.deletedAt)}</span></>
+                                )}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
