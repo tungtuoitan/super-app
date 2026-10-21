@@ -119,7 +119,7 @@ export function HomeTotpDialog() {
                         <div style={{ minHeight: 18, fontSize: 13, color: "#f0a58a" }}>{totp.error}</div>
                         <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8 }}>
                             {totp.mode === "code" && (
-                                <button type="button" className="home-ghost-btn" onClick={() => setResetting((v) => !v)} style={{ marginRight: "auto", fontSize: 13 }}>
+                                <button type="button" className="home-ghost-btn" onClick={() => setResetting((v) => !v)} style={{ marginRight: "auto", fontSize: 13, whiteSpace: "nowrap", width: "auto", padding: "0 4px", flexShrink: 0 }}>
                                     {resetting ? "Quay lại nhập mã" : "Đổi mã xác thực"}
                                 </button>
                             )}
