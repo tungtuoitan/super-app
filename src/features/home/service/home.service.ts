@@ -57,4 +57,7 @@ const _totpSetup = () => _totp<TotpSetupDTO>("POST", "setup");
 const _totpConfirm = (code: string) => _totp<UnlockTokenDTO>("POST", "confirm", { code });
 const _totpUnlock = (code: string) => _totp<UnlockTokenDTO>("POST", "unlock", { code });
 
-export const homeService = { _getActivity, _getHabits, _getFinance, _getTask, _totpStatus, _totpSetup, _totpConfirm, _totpUnlock };
+/** Turns TOTP off (needs the current code); the next open shows a fresh QR. */
+const _totpDisable = (code: string) => _totp<unknown>("POST", "disable", { code });
+
+export const homeService = { _getActivity, _getHabits, _getFinance, _getTask, _totpStatus, _totpSetup, _totpConfirm, _totpUnlock, _totpDisable };

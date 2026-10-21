@@ -152,6 +152,23 @@ export function useHomeHelper() {
         setTotpError(res?.status === 400 ? "Mã không đúng, thử lại" : res?.message || "Không mở khoá được");
     };
 
+    /** Change authenticator: the current code turns TOTP off, then the setup (new QR) opens. */
+    const resetTotp = async (code: string) => {
+        const { totpBusy, setTotpBusy, setTotpError, setTotpLockedUntil } = getHomeState();
+        if (totpBusy) return;
+        setTotpBusy(true);
+        setTotpError(null);
+        const res = await homeService._totpDisable(code).catch(() => null);
+        setTotpBusy(false);
+        if (getHomeState().totpMode === "closed") return;
+        if (res?.status === 200) return openTotp();
+        if (res?.status === 423) {
+            setTotpLockedUntil((res.object as unknown as TotpStatusDTO | null)?.lockedUntil ?? null);
+            return;
+        }
+        setTotpError(res?.status === 400 ? "Mã không đúng, thử lại" : res?.message || "Không đổi được mã xác thực");
+    };
+
     /** Restart the full-mode countdown (no refetch). */
     const extendFull = () => {
         const { privacyMode, setFullUntil, setNowMs } = getHomeState();
@@ -190,5 +207,5 @@ export function useHomeHelper() {
 
     const showView = (view: HomeView) => getHomeState().setView(view);
 
-    return { loadPublic, unlock, lock, togglePrivacy, openTotp, closeTotp, submitTotpCode, extendFull, tick, refreshIfNeeded, toggleView, showView };
+    return { loadPublic, unlock, lock, togglePrivacy, openTotp, closeTotp, submitTotpCode, resetTotp, extendFull, tick, refreshIfNeeded, toggleView, showView };
 }

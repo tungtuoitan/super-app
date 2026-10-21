@@ -11,21 +11,26 @@ const fmtUntil = (iso: string) => new Date(iso).toLocaleString("vi-VN", { hour: 
  */
 export function HomeTotpDialog() {
     const { totp } = useHomeSelector();
-    const { closeTotp, submitTotpCode } = useHomeHelper();
+    const { closeTotp, submitTotpCode, resetTotp } = useHomeHelper();
     const [code, setCode] = useState("");
     const [copied, setCopied] = useState(false);
+    const [resetting, setResetting] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const locked = !!totp.lockedUntil && Date.parse(totp.lockedUntil) > Date.now();
 
     useEffect(() => {
         setCode("");
         inputRef.current?.focus();
-    }, [totp.mode, totp.error]);
+    }, [totp.mode, totp.error, resetting]);
+
+    useEffect(() => {
+        if (totp.mode !== "code") setResetting(false);
+    }, [totp.mode]);
 
     if (totp.mode === "closed") return null;
 
     const submit = (value: string) => {
-        if (value.length === 6 && !totp.busy && !locked) submitTotpCode(value);
+        if (value.length === 6 && !totp.busy && !locked) (resetting ? resetTotp(value) : submitTotpCode(value));
     };
     const onChange = (raw: string) => {
         const digits = raw.replace(/\D/g, "").slice(0, 6);
@@ -81,7 +86,9 @@ export function HomeTotpDialog() {
                 )}
 
                 {totp.mode === "code" && !locked && (
-                    <div className="home-muted" style={{ fontSize: 14 }}>Mở app Authenticator, nhập mã 6 số của SuperApp.</div>
+                    <div className="home-muted" style={{ fontSize: 14 }}>
+                        {resetting ? "Đổi mã xác thực: nhập mã 6 số hiện tại, sau đó quét QR mới." : "Mở app Authenticator, nhập mã 6 số của SuperApp."}
+                    </div>
                 )}
 
                 {(totp.mode === "setup" || totp.mode === "code") && (
@@ -110,7 +117,12 @@ export function HomeTotpDialog() {
                             />
                         )}
                         <div style={{ minHeight: 18, fontSize: 13, color: "#f0a58a" }}>{totp.error}</div>
-                        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8 }}>
+                            {totp.mode === "code" && (
+                                <button type="button" className="home-ghost-btn" onClick={() => setResetting((v) => !v)} style={{ marginRight: "auto", fontSize: 13 }}>
+                                    {resetting ? "Quay lại nhập mã" : "Đổi mã xác thực"}
+                                </button>
+                            )}
                             <button type="button" className="home-btn home-btn-outline" onClick={closeTotp} style={{ height: 36, padding: "0 16px", fontSize: 14 }}>Huỷ</button>
                             <button
                                 type="button"
@@ -120,7 +132,7 @@ export function HomeTotpDialog() {
                                 style={{ height: 36, padding: "0 18px", fontSize: 14, opacity: code.length !== 6 || totp.busy || locked ? 0.5 : 1 }}
                             >
                                 {totp.busy ? <Loader2 size={15} className="home-spin" /> : null}
-                                {totp.mode === "setup" ? "Bật & mở khoá" : "Mở khoá"}
+                                {totp.mode === "setup" ? "Bật & mở khoá" : resetting ? "Đổi mã" : "Mở khoá"}
                             </button>
                         </div>
                     </>
