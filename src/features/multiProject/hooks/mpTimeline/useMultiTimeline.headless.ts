@@ -6,7 +6,7 @@
 
 import { useEffect } from "react";
 import { useMultiProjectTaskGridHelper } from "../mpTaskList/useMultiProjectTaskGrid.helper";
-import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
+import { useMultiTimelineStore, PRO_SCALE_STORAGE_KEY } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "./useMultiTimeline.helper";
 import { storageService } from "@/shared";
@@ -26,7 +26,7 @@ export function useMultiTimelineHeadless() {
     const {
         projectIds, storageKey, mode,
         timelineRange, setTimelineRange,
-        dayWidth, weekWidth, timelineScale, hasScrolledToToday, setHasScrolledToToday, timelineScrollRef,
+        dayWidth, weekWidth, timelineScale, projectScale, hasScrolledToToday, setHasScrolledToToday, timelineScrollRef,
     } = useMultiTimelineStore();
     const { items, todayPosition } = useMultiTimelineSelector();
     const { checkTodayVisibility } = useMultiTimelineHelper();
@@ -95,6 +95,11 @@ export function useMultiTimelineHeadless() {
         storageService.set(TIMELINE_SCALE_STORAGE_KEY, timelineScale);
     }, [timelineScale]);
 
+    // Effect 2c: Persist project-mode scale
+    useEffect(() => {
+        storageService.set(PRO_SCALE_STORAGE_KEY, projectScale);
+    }, [projectScale]);
+
     // Effect 3: Scroll to today on initial load
     useEffect(() => {
         if (!hasScrolledToToday && timelineScrollRef.current && timelineRange) {
@@ -113,5 +118,5 @@ export function useMultiTimelineHeadless() {
     // Effect 5: Recheck today visibility on zoom change
     useEffect(() => {
         checkTodayVisibility();
-    }, [dayWidth, weekWidth, timelineScale]);
+    }, [dayWidth, weekWidth, timelineScale, projectScale]);
 }

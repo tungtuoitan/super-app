@@ -13,8 +13,10 @@ import {
 } from "@/features/multiProject/store/useMultiTimeline.store";
 import { generateDateRange, formatMonthHeader, TIMELINE_SCALE_PX_PER_DAY, buildScaleHeader } from "@/features/taskDetail";
 
+const PRO_DAY_PX = 36;
+
 export const useMultiTimelineSelector = () => {
-    const { projectIds, projects, mode, timelineRange, dayWidth, weekWidth, timelineScale } = useMultiTimelineStore();
+    const { projectIds, projects, mode, timelineRange, dayWidth, weekWidth, timelineScale, projectScale } = useMultiTimelineStore();
     const { tasks } = useMpTaskStore();
 
     // ── Filtered & sorted tasks (for mode === "task") ────
@@ -70,7 +72,11 @@ export const useMultiTimelineSelector = () => {
 
     // ── Scale: project mode packs 7 days into 1 week column; task mode picks day/week/month/quarter/year ──
     const isCoarseScale = mode === "task" && timelineScale !== "day";
-    const pxPerDay = mode === "project" ? weekWidth / 7 : timelineScale === "day" ? dayWidth : TIMELINE_SCALE_PX_PER_DAY[timelineScale];
+    // Project mode: "week" = zoomable week columns, other scales use a fixed px-per-day (no zoom)
+    const isProWeek = mode === "project" && projectScale === "week";
+    const pxPerDay = mode === "project"
+        ? projectScale === "week" ? weekWidth / 7 : projectScale === "day" ? PRO_DAY_PX : TIMELINE_SCALE_PX_PER_DAY[projectScale]
+        : timelineScale === "day" ? dayWidth : TIMELINE_SCALE_PX_PER_DAY[timelineScale];
 
     // ── Dates from range (project mode: snapped to whole Mon–Sun weeks) ──
     const { timelineStart, dates } = useMemo(() => {
@@ -159,11 +165,32 @@ export const useMultiTimelineSelector = () => {
         [isCoarseScale, timelineScale, dates, pxPerDay],
     );
 
+    // ── Header cells for project mode when the scale is not "week" ──
+    const proScaleHeader = useMemo(() => {
+        if (mode !== "project" || projectScale === "week") return null;
+        if (projectScale !== "day") return buildScaleHeader(dates, projectScale, pxPerDay);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return {
+            groups: monthGroups.map((g) => ({ label: g.month, width: g.days * pxPerDay })),
+            columns: dates.map((d, i) => {
+                const next = dates[i + 1];
+                return {
+                    label: String(d.getDate()),
+                    title: d.toLocaleDateString(),
+                    width: pxPerDay,
+                    isCurrent: d.getTime() === today.getTime(),
+                    isMajor: !!next && next.getMonth() !== d.getMonth(),
+                };
+            }),
+        };
+    }, [mode, projectScale, dates, pxPerDay, monthGroups]);
+
     // ── Zoom info ────────────────────────────────────────
     const timelineWidth = dates.length * pxPerDay;
     const zoomPercent = mode === "project" ? Math.round((weekWidth / DEFAULT_WEEK_WIDTH) * 100) : Math.round((dayWidth / DEFAULT_DAY_WIDTH) * 100);
-    const canZoomIn = mode === "project" ? weekWidth < MAX_WEEK_WIDTH : dayWidth < MAX_DAY_WIDTH;
-    const canZoomOut = mode === "project" ? weekWidth > MIN_WEEK_WIDTH : dayWidth > MIN_DAY_WIDTH;
+    const canZoomIn = mode === "project" ? isProWeek && weekWidth < MAX_WEEK_WIDTH : dayWidth < MAX_DAY_WIDTH;
+    const canZoomOut = mode === "project" ? isProWeek && weekWidth > MIN_WEEK_WIDTH : dayWidth > MIN_DAY_WIDTH;
 
     return {
         filteredTasks,
@@ -179,6 +206,7 @@ export const useMultiTimelineSelector = () => {
         monthGroups,
         timelineWidth,
         scaleHeader,
+        proScaleHeader,
         zoomPercent,
         canZoomIn,
         canZoomOut,

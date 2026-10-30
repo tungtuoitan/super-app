@@ -16,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shar
 import { useProjectTabHelper } from "@/features/project";
 import { TaskStatusIcon } from "@/shared";
 import { cn } from "@/lib/utils";
-import { TIMELINE_HEADER_HEIGHT } from "@/features/taskDetail";
+import { TIMELINE_HEADER_HEIGHT, TimelineScaleSelector } from "@/features/taskDetail";
 import { useMultiTimelineStore, WEEK_WIDTH_STORAGE_KEY } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "../hooks/mpTimeline/useMultiTimeline.helper";
@@ -38,13 +38,13 @@ export function MultiProjectProTimelineView() {
     useMultiTimelineHeadless();
 
     // ── State (from store) ───────────────────────────────
-    const { hoveredItemId, setHoveredItemId, isTodayVisible, weekWidth, timelineScrollRef } = useMultiTimelineStore();
+    const { hoveredItemId, setHoveredItemId, isTodayVisible, weekWidth, projectScale, timelineScrollRef } = useMultiTimelineStore();
 
     // ── Computed values (from selector) ──────────────────
-    const { filteredProjects, timelineStart, timelineEnd, pxPerDay, weeks, weekMonthGroups, todayPosition, timelineWidth, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
+    const { filteredProjects, timelineStart, timelineEnd, pxPerDay, weeks, weekMonthGroups, proScaleHeader, todayPosition, timelineWidth, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
 
     // ── Handlers (from helper) ───────────────────────────
-    const { handleScroll, scrollToToday, handleZoomIn, handleZoomOut, handleProjectDateChange } = useMultiTimelineHelper();
+    const { handleScroll, scrollToToday, handleZoomIn, handleZoomOut, handleProjectScaleChange, handleProjectDateChange } = useMultiTimelineHelper();
 
     const totalHeight = Math.max(filteredProjects.length * PRO_ROW_HEIGHT, 200);
 
@@ -91,14 +91,31 @@ export function MultiProjectProTimelineView() {
 
                         <div className="sticky top-0 z-10 bg-background border-b" style={{ height: TIMELINE_HEADER_HEIGHT }}>
                             <div className="flex border-b" style={{ height: 30 }}>
-                                {weekMonthGroups.map((g, i) => (
-                                    <div key={i} className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface overflow-hidden whitespace-nowrap" style={{ width: g.weeks * weekWidth }}>
-                                        {g.month}
-                                    </div>
-                                ))}
+                                {proScaleHeader
+                                    ? proScaleHeader.groups.map((g, i) => (
+                                        <div key={i} className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface overflow-hidden whitespace-nowrap" style={{ width: g.width }}>
+                                            {g.label}
+                                        </div>
+                                    ))
+                                    : weekMonthGroups.map((g, i) => (
+                                        <div key={i} className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface overflow-hidden whitespace-nowrap" style={{ width: g.weeks * weekWidth }}>
+                                            {g.month}
+                                        </div>
+                                    ))}
                             </div>
                             <div className="flex" style={{ height: 30 }}>
-                                {weeks.map((week, i) => (
+                                {proScaleHeader
+                                    ? proScaleHeader.columns.map((c, i) => (
+                                        <div
+                                            key={i}
+                                            title={c.title}
+                                            className={cn("flex items-center justify-center text-[11px] text-muted-foreground overflow-hidden whitespace-nowrap", c.isCurrent && "font-semibold text-sa-amber-ink bg-sa-amber/5", c.isMajor ? "border-r border-border" : "border-r border-dashed border-border/50")}
+                                            style={{ width: c.width }}
+                                        >
+                                            {c.label}
+                                        </div>
+                                    ))
+                                    : weeks.map((week, i) => (
                                     <div
                                         key={i}
                                         title={week.title}
@@ -116,7 +133,15 @@ export function MultiProjectProTimelineView() {
                         </div>
 
                         <div className="absolute left-0 right-0 flex pointer-events-none" style={{ top: TIMELINE_HEADER_HEIGHT, height: totalHeight }}>
-                            {weeks.map((week, i) => (
+                            {proScaleHeader
+                                ? proScaleHeader.columns.map((c, i) => (
+                                    <div
+                                        key={i}
+                                        className={cn("h-full", c.isCurrent && "bg-sa-amber/5")}
+                                        style={{ width: c.width, borderRight: c.isMajor ? "1px solid hsl(var(--border))" : "1px dashed hsl(var(--border) / 0.5)" }}
+                                    />
+                                ))
+                                : weeks.map((week, i) => (
                                 <div
                                     key={i}
                                     className={cn("h-full", week.isCurrent && "bg-sa-amber/5")}
@@ -172,6 +197,7 @@ export function MultiProjectProTimelineView() {
                             </Tooltip>
                         </TooltipProvider>
                     )}
+                    <TimelineScaleSelector value={projectScale} onChange={handleProjectScaleChange} />
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>

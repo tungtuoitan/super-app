@@ -20,6 +20,8 @@ export const MIN_WEEK_WIDTH = 35;
 export const MAX_WEEK_WIDTH = 210;
 export const WEEK_ZOOM_STEP = 21;
 export const WEEK_WIDTH_STORAGE_KEY = "pro_timeline_week_width";
+export const PRO_SCALE_STORAGE_KEY = "pro_timeline_scale";
+export const DEFAULT_PRO_SCALE: TimelineScale = "week";
 
 export interface MultiTimelineContextData {
     // Config (set by parent via setters)
@@ -48,6 +50,9 @@ export interface MultiTimelineContextData {
     /** Task mode only: day (zoomable) / week / month / quarter / year */
     timelineScale: TimelineScale;
     setTimelineScale: Dispatch<SetStateAction<TimelineScale>>;
+    /** Project mode only: week (zoomable week columns) / day / month / quarter / year */
+    projectScale: TimelineScale;
+    setProjectScale: Dispatch<SetStateAction<TimelineScale>>;
     timelineScrollRef: RefObject<HTMLDivElement>;
 }
 
@@ -74,6 +79,8 @@ const multiTimelineContextDefaultValue: MultiTimelineContextData = {
     setWeekWidth: () => {},
     timelineScale: "day", // literal: DEFAULT_TIMELINE_SCALE is not yet initialised here (circular import via @/features/taskDetail)
     setTimelineScale: () => {},
+    projectScale: "week",
+    setProjectScale: () => {},
     timelineScrollRef: { current: null },
 };
 
@@ -107,6 +114,11 @@ export const MultiTimelineProvider: React.FC<React.PropsWithChildren<unknown>> =
         return TIMELINE_SCALE_OPTIONS.some((o) => o.value === stored) ? (stored as TimelineScale) : DEFAULT_TIMELINE_SCALE;
     });
 
+    const [projectScale, setProjectScale] = useState<TimelineScale>(() => {
+        const stored = storageService.get<TimelineScale>(PRO_SCALE_STORAGE_KEY);
+        return TIMELINE_SCALE_OPTIONS.some((o) => o.value === stored) ? (stored as TimelineScale) : DEFAULT_PRO_SCALE;
+    });
+
     return (
         <MultiTimelineStore.Provider
             value={{
@@ -121,6 +133,7 @@ export const MultiTimelineProvider: React.FC<React.PropsWithChildren<unknown>> =
                 dayWidth, setDayWidth,
                 weekWidth, setWeekWidth,
                 timelineScale, setTimelineScale,
+                projectScale, setProjectScale,
                 timelineScrollRef,
             }}
         >

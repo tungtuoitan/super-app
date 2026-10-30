@@ -30,7 +30,7 @@ export const useMultiTimelineHelper = () => {
     const {
         projectIds, mode, timelineRange, setTimelineRange,
         dayWidth, setDayWidth, weekWidth, setWeekWidth, setIsTodayVisible, timelineScrollRef,
-        setTimelineScale, setHasScrolledToToday,
+        setTimelineScale, setProjectScale, setHasScrolledToToday,
     } = useMultiTimelineStore();
 
     // ── Selector ─────────────────────────────────────────
@@ -116,6 +116,24 @@ export const useMultiTimelineHelper = () => {
         setHasScrolledToToday(false);
     };
 
+    // ── Scale change (project mode): same idea, week keeps its zoomable columns ──
+    const handleProjectScaleChange = (scale: TimelineScale) => {
+        if (scale !== "week" && scale !== "day" && timelineRange) {
+            const minDays = getMinRangeDays(timelineScrollRef.current?.clientWidth ?? 0, TIMELINE_SCALE_PX_PER_DAY[scale]);
+            const spanDays = Math.ceil((timelineRange.end.getTime() - timelineRange.start.getTime()) / (1000 * 60 * 60 * 24));
+            if (spanDays < minDays) {
+                const extra = Math.ceil((minDays - spanDays) / 2);
+                const start = new Date(timelineRange.start);
+                start.setDate(start.getDate() - extra);
+                const end = new Date(timelineRange.end);
+                end.setDate(end.getDate() + extra);
+                setTimelineRange({ start, end });
+            }
+        }
+        setProjectScale(scale);
+        setHasScrolledToToday(false);
+    };
+
     // ── Task date change (optimistic) ──────────────────
     const handleTaskDateChange = async (taskId: number, startDate: Date | null, endDate: Date | null) => {
         const task = filteredTasks.find((t) => t.id === taskId);
@@ -189,6 +207,7 @@ export const useMultiTimelineHelper = () => {
         handleZoomIn,
         handleZoomOut,
         handleScaleChange,
+        handleProjectScaleChange,
         handleTaskDateChange,
         handleProjectDateChange,
     };
