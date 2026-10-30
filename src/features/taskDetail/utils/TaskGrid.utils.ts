@@ -14,11 +14,18 @@ import {projectConstants} from "@/features/project/project.constants";
 // ──────────────────────────────────────────────────────────
 
 /** Format month for timeline header — "Oct 2025" */
+// Creating an Intl.DateTimeFormat per call is slow and this runs once per date column — build it once and cache per month.
+const MONTH_HEADER_FORMAT = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" });
+const monthHeaderCache = new Map<number, string>();
+
 export function formatMonthHeader(date: Date): string {
-    return new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        year: "numeric",
-    }).format(date);
+    const key = date.getFullYear() * 12 + date.getMonth();
+    let label = monthHeaderCache.get(key);
+    if (label === undefined) {
+        label = MONTH_HEADER_FORMAT.format(date);
+        monthHeaderCache.set(key, label);
+    }
+    return label;
 }
 
 /** Generate array of dates between start and end (inclusive) */

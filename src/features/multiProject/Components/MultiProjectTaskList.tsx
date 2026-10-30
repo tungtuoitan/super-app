@@ -7,7 +7,7 @@
  * NO props — reads projectIds/projects from useMultiTimelineStore.
  */
 
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { Loader2, CornerDownRight, Diamond } from "lucide-react";
 import { Checkbox } from "@/shared";
@@ -24,6 +24,13 @@ import { StatusCell, PriorityCell, ProjectCell } from "./small/MultiProjectTaskL
 import { DateRangeCell, DraggableRow } from "./small/MultiProjectTaskListRow";
 import { MakeIndependentDropZone } from "@/features/taskDetail";
 import {useMultiProjectTaskListHelper} from "../hooks/mpTaskList/useMultiProjectTaskList.helper";
+
+/** Stable function identity that always calls the latest closure — lets memoized rows keep fresh behaviour. */
+function useStableCallback<A extends unknown[], R>(fn: (...args: A) => R): (...args: A) => R {
+    const ref = useRef(fn);
+    ref.current = fn;
+    return useCallback((...args: A) => ref.current(...args), []);
+}
 
 /**
  * MultiProjectTaskList - task grid with table display for multiple projects
@@ -51,11 +58,24 @@ export function MultiProjectTaskList() {
     useMultiProjectTaskListHeadless();
 
     // Handle context menu
-    const handleContextMenu = (event: React.MouseEvent, row?: any) => {
+    const handleContextMenuRaw = (event: React.MouseEvent, row?: any) => {
         openMultiProjectTaskContextMenu(event, row, projectIds, (task: Task) => {
             openTaskTab(task);
         });
     };
+
+    // Stable identities so memoized rows (DraggableRow) are not re-rendered by unrelated state changes
+    const handleContextMenu = useStableCallback(handleContextMenuRaw);
+    const onInlineUpdate = useStableCallback(handleInlineUpdate);
+    const onInlineDateUpdate = useStableCallback(handleInlineDateUpdate);
+    const onChangeProject = useStableCallback(handleChangeProject);
+    const onDropTask = useStableCallback(handleDropTaskOntoTask);
+    const onReorderTasks = useStableCallback(handleReorderTasks);
+    const onShowDropError = useStableCallback(showDropError);
+    const onOpenTaskTab = useStableCallback(openTaskTab);
+    const allTasksRef = useRef<Task[]>(filteredTasks);
+    allTasksRef.current = filteredTasks;
+    const cellDeps = useMemo(() => ({ allProjects, statusOptions, priorityOptions }), [allProjects, statusOptions, priorityOptions]);
 
     // Column definitions — deps (statusOptions, priorityOptions, callbacks) are already
     // memoized in selector/helper; cell components are React.memo'd. No useMemo needed.
@@ -99,7 +119,7 @@ export function MultiProjectTaskList() {
                 <ProjectCell
                     task={row.original}
                     allProjects={allProjects}
-                    onChange={handleChangeProject}
+                    onChange={onChangeProject}
                 />
             ),
         },
@@ -123,13 +143,13 @@ export function MultiProjectTaskList() {
             accessorKey: "status",
             header: () => <div className="text-left">Status</div>,
             size: 120,
-            cell: ({ row }) => <StatusCell task={row.original} statusOptions={statusOptions} onUpdate={handleInlineUpdate} />,
+            cell: ({ row }) => <StatusCell task={row.original} statusOptions={statusOptions} onUpdate={onInlineUpdate} />,
         },
         {
             accessorKey: "priority",
             header: () => <div className="text-left">Priority</div>,
             size: 120,
-            cell: ({ row }) => <PriorityCell task={row.original} priorityOptions={priorityOptions} onUpdate={handleInlineUpdate} />,
+            cell: ({ row }) => <PriorityCell task={row.original} priorityOptions={priorityOptions} onUpdate={onInlineUpdate} />,
         },
         {
             id: "dateRange",
@@ -138,12 +158,18 @@ export function MultiProjectTaskList() {
             cell: ({ row }) => (
                 <DateRangeCell
                     task={row.original}
-                    onStartDateUpdate={handleInlineDateUpdate}
-                    onEndDateUpdate={handleInlineDateUpdate}
+                    onStartDateUpdate={onInlineDateUpdate}
+                    onEndDateUpdate={onInlineDateUpdate}
                 />
             ),
         },
     ];
+
+    // Mounting ~100 rows of heavy cells in one commit blocks the tab switch. Rows are memoized, so paint the first
+    // ones right away and append the rest in chunks — earlier rows are not re-rendered by the later chunks.
+    const FIRST_ROWS = 20;
+    const ROW_CHUNK = 20;
+    const [renderedRowCount, setRenderedRowCount] = useState(FIRST_ROWS);
 
     // Create table instance
     const table = useReactTable({
@@ -163,6 +189,13 @@ export function MultiProjectTaskList() {
         getRowId: (row) => String(row.id),
         enableRowSelection: true,
     });
+
+    const totalRows = table.getRowModel().rows.length;
+    useEffect(() => {
+        if (renderedRowCount >= totalRows) return;
+        const id = window.setTimeout(() => setRenderedRowCount((n) => n + ROW_CHUNK), 0);
+        return () => window.clearTimeout(id);
+    }, [renderedRowCount, totalRows]);
 
     return (
         <div ref={taskContainerRef} className="w-full h-full bg-background flex flex-col relative">
@@ -217,17 +250,19 @@ export function MultiProjectTaskList() {
                                 </td>
                             </tr>
                         ) : (
-                            table.getRowModel().rows.map((row) => (
+                            table.getRowModel().rows.slice(0, renderedRowCount).map((row) => (
                                 <DraggableRow
                                     key={row.id}
                                     row={row}
-                                    allTasks={filteredTasks}
-                                    onDrop={handleDropTaskOntoTask}
+                                    allTasksRef={allTasksRef}
+                                    isSelected={row.getIsSelected()}
+                                    cellDeps={cellDeps}
+                                    onDrop={onDropTask}
                                     onMakeIndependent={handleMakeIndependent}
-                                    onReorder={handleReorderTasks}
-                                    onRowClick={openTaskTab}
+                                    onReorder={onReorderTasks}
+                                    onRowClick={onOpenTaskTab}
                                     onContextMenu={handleContextMenu}
-                                    showError={showDropError}
+                                    showError={onShowDropError}
                                 />
                             ))
                         )}

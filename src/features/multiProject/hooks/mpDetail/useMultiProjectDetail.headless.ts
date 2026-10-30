@@ -5,7 +5,7 @@
  * and loads tasks once at the parent level (shared by TaskList, Kanban, Timeline tabs).
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useProjectStore } from "@/features/project";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
@@ -16,9 +16,9 @@ import { projectConstants } from "@/features/project/project.constants";
 
 export function useMultiProjectDetailHeadless() {
     const { projects } = useProjectStore();
-    const { projectIds, mode} = useMultiTimelineStore();
+    const { projectIds } = useMultiTimelineStore();
     const { setProjectIds, setProjects } = useMultiTimelineStore();
-    const { currentTab, filteredProjectIds, filteredProjects } = useMultiProjectDetailSelector();
+    const { currentTab, activeTab, filteredProjectIds, filteredProjects } = useMultiProjectDetailSelector();
     const { setSelectedProjectIds } = useMultiProjectDetailHelper();
     const { loadTasksForProjects } = useMultiProjectTaskGridHelper();
     const { $user } = useAuthStore();
@@ -37,9 +37,15 @@ export function useMultiProjectDetailHeadless() {
         }
     }, [projects, currentTab?.metadata?.selectedProjectIds]);
 
-    // Load tasks once at the parent level — shared by TaskList, Kanban, Timeline tabs
+    // Load tasks once per (projects, filters) at the parent level — shared by TaskList, Kanban, Timeline tabs.
+    // Not tied to the timeline mode / tab: switching tabs must not refetch (use the Refresh button for that).
+    // The Project timeline doesn't need tasks, so skip while it is the active tab.
+    const loadedKeyRef = useRef("");
     useEffect(() => {
-        if (!$user.userId || projectIds.length === 0 || mode !== "task") return;
+        if (!$user.userId || projectIds.length === 0 || activeTab === "proTimeline") return;
+        const key = `${projectIds.join(",")}|${JSON.stringify($user.filters?.taskGrid ?? null)}`;
+        if (loadedKeyRef.current === key) return;
+        loadedKeyRef.current = key;
         loadTasksForProjects(projectIds);
-    }, [$user.userId, projectIds, $user.filters?.taskGrid, mode]);
+    }, [$user.userId, projectIds, $user.filters?.taskGrid, activeTab]);
 }

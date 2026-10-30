@@ -8,17 +8,23 @@ import { useEditorTabBarHelper } from "@/shell";
 import { useMultiProjectDetailSelector } from "../../Selectors/useMultiProjectDetail.selector";
 import type { TabType } from "../../types/multiProjectDetail.type";
 import { useMpTaskStore } from "../../store/useMpTask.store";
+import { useMultiTimelineStore, WEEK_WIDTH_STORAGE_KEY } from "../../store/useMultiTimeline.store";
 import { projectConstants } from "@/features/project/project.constants";
 
 export const useMultiProjectDetailHelper = () => {
     const { getActiveTab, patchTab } = useEditorTabBarHelper();
     const { availableProjects } = useMultiProjectDetailSelector();
     const { setTaskSearchQuery } = useMpTaskStore();
+    const { setMode, setStorageKey } = useMultiTimelineStore();
 
     // Update inner tab in editor tab metadata
     const setActiveTab = (newTab: TabType) => {
         const activeTabId = getActiveTab()?.id;
         if (!activeTabId) return;
+        // Set the timeline mode in the same batch as the tab switch so the new view renders once with the right mode
+        // (the views' mount effects stay as a fallback for the initial / restored tab).
+        if (newTab === "proTimeline") { setMode("project"); setStorageKey(WEEK_WIDTH_STORAGE_KEY); }
+        else if (newTab === "timeline") { setMode("task"); setStorageKey("timeline_day_width"); }
         patchTab(activeTabId, (cur) => ({ metadata: { ...cur.metadata, innerTab: newTab } }));
     };
 

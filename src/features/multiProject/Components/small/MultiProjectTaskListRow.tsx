@@ -60,7 +60,7 @@ function getHoverPosition(ref: React.RefObject<HTMLTableRowElement>, monitor: Dr
 /**
  * Draggable & Droppable Table Row for Multi-Project view
  */
-export function DraggableRow({ row, allTasks, onDrop, onReorder, onRowClick, onContextMenu, showError }: DraggableRowProps) {
+function DraggableRowInner({ row, allTasksRef, onDrop, onReorder, onRowClick, onContextMenu, showError }: DraggableRowProps) {
     const ref = useRef<HTMLTableRowElement>(null);
     const task = row.original;
     const isSubtask = !!task.parentTaskId;
@@ -87,7 +87,7 @@ export function DraggableRow({ row, allTasks, onDrop, onReorder, onRowClick, onC
                 return;
             }
             if (getIsShiftHeld()) {
-                const validation = validateDropTaskOntoTask(item.task, task, allTasks);
+                const validation = validateDropTaskOntoTask(item.task, task, allTasksRef.current);
                 setHover({ mode: "nest", canDrop: validation.canDrop });
             } else {
                 const position = getHoverPosition(ref, monitor);
@@ -101,7 +101,7 @@ export function DraggableRow({ row, allTasks, onDrop, onReorder, onRowClick, onC
         drop: (item, monitor) => {
             if (item.taskId === task.id) return;
             if (getIsShiftHeld()) {
-                const validation = validateDropTaskOntoTask(item.task, task, allTasks);
+                const validation = validateDropTaskOntoTask(item.task, task, allTasksRef.current);
                 if (validation.canDrop) {
                     onDrop(item.task, task, validation.warningMessage);
                 } else if (validation.errorMessage) {
@@ -163,3 +163,20 @@ export function DraggableRow({ row, allTasks, onDrop, onReorder, onRowClick, onC
         </tr>
     );
 }
+
+/**
+ * Re-render a row only when its own task, selection or cell inputs change. All callbacks must be stable
+ * (see useStableCallback in MultiProjectTaskList), so they are compared by identity too.
+ */
+export const DraggableRow = React.memo(DraggableRowInner, (prev, next) =>
+    prev.row.id === next.row.id
+    && prev.row.original === next.row.original
+    && prev.isSelected === next.isSelected
+    && prev.cellDeps === next.cellDeps
+    && prev.allTasksRef === next.allTasksRef
+    && prev.onDrop === next.onDrop
+    && prev.onReorder === next.onReorder
+    && prev.onRowClick === next.onRowClick
+    && prev.onContextMenu === next.onContextMenu
+    && prev.showError === next.showError,
+);
