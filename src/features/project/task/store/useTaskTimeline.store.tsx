@@ -6,7 +6,7 @@
 
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { storageService } from "@/shared";
-import { DEFAULT_TIMELINE_SCALE, TIMELINE_SCALE_OPTIONS, TASK_TIMELINE_SCALE_STORAGE_KEY } from "@/features/taskDetail";
+import { DEFAULT_TIMELINE_SCALE, TIMELINE_SCALE_OPTIONS, TASK_TIMELINE_SCALE_STORAGE_KEY } from "@/features/taskDetail/utils/taskTimelineScale.constants";
 import type { TimelineScale } from "@/features/taskDetail";
 
 // Constants
