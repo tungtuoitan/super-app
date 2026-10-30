@@ -155,7 +155,7 @@ export const useMultiTimelineSelector = () => {
 
     // ── Header cells for week/month/quarter/year scales (task mode) ──
     const scaleHeader = useMemo(
-        () => (isCoarseScale && timelineScale !== "day" ? buildScaleHeader(dates, timelineScale, pxPerDay) : null),
+        () => (isCoarseScale ? buildScaleHeader(dates, timelineScale, pxPerDay) : null),
         [isCoarseScale, timelineScale, dates, pxPerDay],
     );
 
