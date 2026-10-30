@@ -6,6 +6,8 @@
 
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { storageService } from "@/shared";
+import { DEFAULT_TIMELINE_SCALE, TIMELINE_SCALE_OPTIONS, TASK_TIMELINE_SCALE_STORAGE_KEY } from "@/features/taskDetail";
+import type { TimelineScale } from "@/features/taskDetail";
 
 // Constants
 export const STORAGE_KEY_ZOOM = "timeline_day_width";
@@ -24,6 +26,8 @@ export interface TaskTimelineContextData {
     setHasScrolledToToday: Dispatch<SetStateAction<boolean>>;
     dayWidth: number;
     setDayWidth: Dispatch<SetStateAction<number>>;
+    timelineScale: TimelineScale;
+    setTimelineScale: Dispatch<SetStateAction<TimelineScale>>;
     timelineScrollRef: RefObject<HTMLDivElement>;
 }
 
@@ -38,6 +42,8 @@ const taskTimelineContextDefaultValue: TaskTimelineContextData = {
     setHasScrolledToToday: () => {},
     dayWidth: DEFAULT_DAY_WIDTH,
     setDayWidth: () => {},
+    timelineScale: DEFAULT_TIMELINE_SCALE,
+    setTimelineScale: () => {},
     timelineScrollRef: { current: null },
 };
 
@@ -57,6 +63,11 @@ export const TaskTimelineProvider: React.FC<React.PropsWithChildren<unknown>> = 
         return stored && stored >= MIN_DAY_WIDTH && stored <= MAX_DAY_WIDTH ? stored : DEFAULT_DAY_WIDTH;
     });
 
+    const [timelineScale, setTimelineScale] = useState<TimelineScale>(() => {
+        const stored = storageService.get<TimelineScale>(TASK_TIMELINE_SCALE_STORAGE_KEY);
+        return TIMELINE_SCALE_OPTIONS.some((o) => o.value === stored) ? (stored as TimelineScale) : DEFAULT_TIMELINE_SCALE;
+    });
+
     return (
         <TaskTimelineStore.Provider
             value={{
@@ -65,6 +76,7 @@ export const TaskTimelineProvider: React.FC<React.PropsWithChildren<unknown>> = 
                 isTodayVisible, setIsTodayVisible,
                 hasScrolledToToday, setHasScrolledToToday,
                 dayWidth, setDayWidth,
+                timelineScale, setTimelineScale,
                 timelineScrollRef,
             }}
         >

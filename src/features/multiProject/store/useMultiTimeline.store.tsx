@@ -7,8 +7,8 @@
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { Project } from "@/features/project";
 import { storageService } from "@/shared";
-import type { TimelineScale } from "../types/multiTimeline.type";
-import { DEFAULT_TIMELINE_SCALE, TIMELINE_SCALE_OPTIONS, TIMELINE_SCALE_STORAGE_KEY } from "../utils/multiTimeline.constants";
+import { DEFAULT_TIMELINE_SCALE, TIMELINE_SCALE_OPTIONS, TIMELINE_SCALE_STORAGE_KEY } from "@/features/taskDetail";
+import type { TimelineScale } from "@/features/taskDetail";
 
 // Constants
 export const DEFAULT_DAY_WIDTH = 40;

@@ -11,9 +11,7 @@ import {
     useMultiTimelineStore, DEFAULT_DAY_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH,
     DEFAULT_WEEK_WIDTH, MIN_WEEK_WIDTH, MAX_WEEK_WIDTH,
 } from "@/features/multiProject/store/useMultiTimeline.store";
-import { generateDateRange, formatMonthHeader } from "@/features/taskDetail";
-import { TIMELINE_SCALE_PX_PER_DAY } from "../utils/multiTimeline.constants";
-import { buildScaleHeader } from "../utils/multiTimelineScale.utils";
+import { generateDateRange, formatMonthHeader, TIMELINE_SCALE_PX_PER_DAY, buildScaleHeader } from "@/features/taskDetail";
 
 export const useMultiTimelineSelector = () => {
     const { projectIds, projects, mode, timelineRange, dayWidth, weekWidth, timelineScale } = useMultiTimelineStore();

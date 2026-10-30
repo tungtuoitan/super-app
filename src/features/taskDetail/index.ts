@@ -68,3 +68,15 @@ export { useTaskFolderHelper } from "./hooks/useTaskFolderHelper";
 // Services (only expose what other features need)
 export { taskService } from "./service/task.service";
 export { registerTaskFilters } from "./shell/task.filterConfig";
+
+// Timeline scale (day / week / month / quarter / year) — shared by project + multiProject timelines
+export type { TimelineScale, TimelineHeaderCell, TimelineScaleHeader } from "./types/taskTimelineScale.type";
+export {
+    DEFAULT_TIMELINE_SCALE,
+    TIMELINE_SCALE_STORAGE_KEY,
+    TASK_TIMELINE_SCALE_STORAGE_KEY,
+    TIMELINE_SCALE_PX_PER_DAY,
+    TIMELINE_SCALE_OPTIONS,
+} from "./utils/taskTimelineScale.constants";
+export { buildScaleHeader, getMinRangeDays, getExtendDays } from "./utils/taskTimelineScale.utils";
+export { TimelineScaleSelector } from "./Components/small/TimelineScaleSelector";

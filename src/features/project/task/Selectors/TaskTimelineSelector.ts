@@ -5,7 +5,7 @@
  */
 
 import { useTaskTimelineStore } from "../store/useTaskTimeline.store";
-import { sortTasksHierarchically, formatMonthHeader, generateDateRange } from "@/features/taskDetail";
+import { sortTasksHierarchically, formatMonthHeader, generateDateRange, TIMELINE_SCALE_PX_PER_DAY, buildScaleHeader } from "@/features/taskDetail";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { useProjectStore } from "@/features/project/store/useProject.store";
 import {usePTaskStore} from "../../store/usePTask.store";
@@ -51,7 +51,7 @@ export const useTaskTimelineSelector = () => {
     const { tasks } = usePTaskStore();
     const { projectId } = useProjectDetailStore();
     const { projects } = useProjectStore();
-    const { timelineRange, dayWidth } = useTaskTimelineStore();
+    const { timelineRange, dayWidth, timelineScale } = useTaskTimelineStore();
 
     // Get current project
     const currentProject = projects.find((p) => p.id === projectId);
@@ -64,9 +64,13 @@ export const useTaskTimelineSelector = () => {
     const timelineStart = timelineRange?.start ?? new Date();
     const dates = timelineRange ? generateDateRange(timelineRange.start, timelineRange.end) : ([] as Date[]);
 
+    // Scale: "day" uses the zoomable dayWidth, coarser scales use fixed px-per-day
+    const pxPerDay = timelineScale === "day" ? dayWidth : TIMELINE_SCALE_PX_PER_DAY[timelineScale];
+
     // Derived position / grouping
-    const todayPosition = calcTodayPosition(timelineStart, dayWidth);
+    const todayPosition = calcTodayPosition(timelineStart, pxPerDay);
     const monthGroups = groupDatesByMonth(dates);
+    const scaleHeader = timelineScale === "day" ? null : buildScaleHeader(dates, timelineScale, pxPerDay);
 
     return {
         currentProject,
@@ -75,5 +79,7 @@ export const useTaskTimelineSelector = () => {
         dates,
         todayPosition,
         monthGroups,
+        pxPerDay,
+        scaleHeader,
     };
 };

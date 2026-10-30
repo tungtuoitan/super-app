@@ -4,7 +4,7 @@
  * (month/year/decade). Widths are days * pxPerDay so bars and header stay aligned.
  */
 
-import type { TimelineHeaderCell, TimelineScale, TimelineScaleHeader } from "../types/multiTimeline.type";
+import type { TimelineHeaderCell, TimelineScale, TimelineScaleHeader } from "../types/taskTimelineScale.type";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 

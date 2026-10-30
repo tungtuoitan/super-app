@@ -17,9 +17,8 @@ import {
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
 import {useAuthStore} from "@/shared";
-import type { TimelineScale } from "../../types/multiTimeline.type";
-import { TIMELINE_SCALE_PX_PER_DAY } from "../../utils/multiTimeline.constants";
-import { getMinRangeDays, getExtendDays } from "../../utils/multiTimelineScale.utils";
+import type { TimelineScale } from "@/features/taskDetail";
+import { TIMELINE_SCALE_PX_PER_DAY, getMinRangeDays, getExtendDays } from "@/features/taskDetail";
 
 export const useMultiTimelineHelper = () => {
     // ── Stores ───────────────────────────────────────────

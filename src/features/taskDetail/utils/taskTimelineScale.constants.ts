@@ -1,6 +1,7 @@
-import type { TimelineScale } from "../types/multiTimeline.type";
+import type { TimelineScale } from "../types/taskTimelineScale.type";
 
-export const TIMELINE_SCALE_STORAGE_KEY = "multi_timeline_scale";
+export const TIMELINE_SCALE_STORAGE_KEY = "multi_timeline_scale"
+export const TASK_TIMELINE_SCALE_STORAGE_KEY = "task_timeline_scale";
 export const DEFAULT_TIMELINE_SCALE: TimelineScale = "day";
 
 /** Fixed px-per-day for coarse scales ("day" uses the zoomable dayWidth) */

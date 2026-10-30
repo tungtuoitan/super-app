@@ -19,14 +19,13 @@ import { useTaskTabHelper } from "@/features/taskDetail";
 import type { Task } from "@/features/taskDetail";
 import { useConsoleHelper, formatTaskLabel, useMenuContextHelper, MENU_CONTEXT_TYPES } from "@/shared";
 import { cn } from "@/lib/utils";
-import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/taskDetail";
+import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth, TimelineScaleSelector } from "@/features/taskDetail";
 import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTimeline.store";
 import { useMultiTimelineSelector } from "../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "../hooks/mpTimeline/useMultiTimeline.helper";
 import { useMultiTimelineHeadless } from "../hooks/mpTimeline/useMultiTimeline.headless";
 import { useMultiProjectTaskGridHelper } from "../hooks/mpTaskList/useMultiProjectTaskGrid.helper";
 import { TaskBar } from "@/features/multiProject/Components/small/TaskBar";
-import { TimelineScaleSelector } from "@/features/multiProject/Components/small/TimelineScaleSelector";
 
 export function MultiProjectTimelineView() {
     const { taskGridIsLoading, taskGridError } = useMpTaskStore();

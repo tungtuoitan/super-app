@@ -3,9 +3,10 @@ import { useTaskTimelineStore, STORAGE_KEY_ZOOM } from "../../store/useTaskTimel
 import { useTaskTimelineSelector } from "../../Selectors/TaskTimelineSelector";
 import { useTaskTimelineHelper } from "./useTaskTimeline.helper";
 import { storageService } from "@/shared";
+import { TASK_TIMELINE_SCALE_STORAGE_KEY, TIMELINE_SCALE_PX_PER_DAY, getMinRangeDays } from "@/features/taskDetail";
 
 export function useTaskTimelineHeadless() {
-    const { timelineRange, setTimelineRange, dayWidth, hasScrolledToToday, setHasScrolledToToday, timelineScrollRef } = useTaskTimelineStore();
+    const { timelineRange, setTimelineRange, dayWidth, timelineScale, hasScrolledToToday, setHasScrolledToToday, timelineScrollRef } = useTaskTimelineStore();
     const { filteredTasks, todayPosition } = useTaskTimelineSelector();
     const { checkTodayVisibility } = useTaskTimelineHelper();
 
@@ -41,7 +42,9 @@ export function useTaskTimelineHeadless() {
         end.setDate(end.getDate() + 14);
         end.setHours(0, 0, 0, 0);
 
-        const minRange = 60;
+        const minRange = timelineScale !== "day"
+            ? Math.max(60, getMinRangeDays(timelineScrollRef.current?.clientWidth ?? 0, TIMELINE_SCALE_PX_PER_DAY[timelineScale]))
+            : 60;
         const currentRange = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
         if (currentRange < minRange) {
             const toAdd = Math.ceil((minRange - currentRange) / 2);
@@ -57,6 +60,10 @@ export function useTaskTimelineHeadless() {
     }, [dayWidth]);
 
     useEffect(() => {
+        storageService.set(TASK_TIMELINE_SCALE_STORAGE_KEY, timelineScale);
+    }, [timelineScale]);
+
+    useEffect(() => {
         if (!hasScrolledToToday && timelineScrollRef.current && timelineRange) {
             const clientWidth = timelineScrollRef.current.clientWidth;
             timelineScrollRef.current.scrollLeft = todayPosition - clientWidth / 2;
@@ -66,5 +73,5 @@ export function useTaskTimelineHeadless() {
 
     useEffect(() => {
         checkTodayVisibility();
-    }, [dayWidth]);
+    }, [dayWidth, timelineScale]);
 }

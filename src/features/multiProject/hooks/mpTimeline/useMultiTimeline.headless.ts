@@ -10,8 +10,7 @@ import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTim
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "./useMultiTimeline.helper";
 import { storageService } from "@/shared";
-import { TIMELINE_SCALE_PX_PER_DAY, TIMELINE_SCALE_STORAGE_KEY } from "../../utils/multiTimeline.constants";
-import { getMinRangeDays } from "../../utils/multiTimelineScale.utils";
+import { TIMELINE_SCALE_PX_PER_DAY, TIMELINE_SCALE_STORAGE_KEY, getMinRangeDays } from "@/features/taskDetail";
 import { resolveTimelineSpan } from "../../utils/multiTimelineSpan.utils";
 import { isStatusNonDraggable } from "@/features/taskDetail";
 import {useAuthStore} from "@/shared";

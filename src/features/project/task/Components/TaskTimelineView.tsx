@@ -20,7 +20,7 @@ import { useTaskTimelineSelector } from "../Selectors/TaskTimelineSelector";
 import { useTaskTimelineHelper } from "../hooks/taskTimeline/useTaskTimeline.helper";
 import { TaskTimelineProvider, useTaskTimelineStore, DEFAULT_DAY_WIDTH, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../store/useTaskTimeline.store";
 import { useTaskTimelineHeadless } from "../hooks/taskTimeline/useTaskTimeline.headless";
-import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth } from "@/features/taskDetail";
+import { TIMELINE_ROW_HEIGHT, TIMELINE_HEADER_HEIGHT, WEEKEND_STRIPE_BG, formatDateHeader, isWeekend, isToday, isFirstDayOfMonth, TimelineScaleSelector } from "@/features/taskDetail";
 import {TaskBar} from "./TaskBar";
 import {usePTaskStore} from "../../store/usePTask.store";
 
@@ -36,11 +36,11 @@ function TaskTimelineViewInner() {
     useTaskTimelineHeadless();
 
     // Call stores/selectors/helpers directly — no params passing
-    const { hoveredTaskId, setHoveredTaskId, isTodayVisible, dayWidth, timelineScrollRef } = useTaskTimelineStore();
-    const { currentProject, filteredTasks, timelineStart, dates, todayPosition, monthGroups } = useTaskTimelineSelector();
-    const { handleDateChange, handleScroll, scrollToToday, handleZoomIn, handleZoomOut } = useTaskTimelineHelper();
+    const { hoveredTaskId, setHoveredTaskId, isTodayVisible, dayWidth, timelineScale, timelineScrollRef } = useTaskTimelineStore();
+    const { currentProject, filteredTasks, timelineStart, dates, todayPosition, monthGroups, pxPerDay, scaleHeader } = useTaskTimelineSelector();
+    const { handleDateChange, handleScroll, scrollToToday, handleZoomIn, handleZoomOut, handleScaleChange } = useTaskTimelineHelper();
 
-    const timelineWidth = dates.length * dayWidth;
+    const timelineWidth = dates.length * pxPerDay;
     const totalHeight = Math.max(filteredTasks.length * TIMELINE_ROW_HEIGHT, 200);
 
     return (
@@ -139,20 +139,28 @@ function TaskTimelineViewInner() {
                         <div className="sticky top-0 z-10 bg-background border-b border-sa-border" style={{ height: TIMELINE_HEADER_HEIGHT }}>
                             {/* Month row */}
                             <div className="flex border-b border-sa-border" style={{ height: 30 }}>
-                                {monthGroups.map((group, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface"
-                                        style={{ width: group.days * dayWidth }}
-                                    >
-                                        {group.month}
-                                    </div>
-                                ))}
+                                {scaleHeader
+                                    ? scaleHeader.groups.map((g, index) => (
+                                        <div key={index} className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface overflow-hidden whitespace-nowrap" style={{ width: g.width }}>
+                                            {g.label}
+                                        </div>
+                                    ))
+                                    : monthGroups.map((group, index) => (
+                                        <div key={index} className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface" style={{ width: group.days * dayWidth }}>
+                                            {group.month}
+                                        </div>
+                                    ))}
                             </div>
 
                             {/* Day row */}
                             <div className="flex" style={{ height: 30 }}>
-                                {dates.map((date, index) => (
+                                {scaleHeader
+                                    ? scaleHeader.columns.map((c, index) => (
+                                        <div key={index} title={c.title} className={cn("flex items-center justify-center text-[11px] text-muted-foreground overflow-hidden whitespace-nowrap", c.isCurrent && "font-semibold text-sa-amber-ink bg-sa-amber/5", c.isMajor ? "border-r border-border" : "border-r border-dashed border-border/50")} style={{ width: c.width }}>
+                                            {c.label}
+                                        </div>
+                                    ))
+                                    : dates.map((date, index) => (
                                     <div
                                         key={index}
                                         className={cn(
@@ -176,7 +184,15 @@ function TaskTimelineViewInner() {
                             className="absolute left-0 right-0 flex pointer-events-none"
                             style={{ top: TIMELINE_HEADER_HEIGHT, height: totalHeight }}
                         >
-                            {dates.map((date, index) => (
+                            {scaleHeader
+                                ? scaleHeader.columns.map((c, index) => (
+                                    <div
+                                        key={index}
+                                        className={cn("h-full", c.isCurrent && "bg-sa-amber/5")}
+                                        style={{ width: c.width, borderRight: c.isMajor ? '1px solid hsl(var(--border))' : '1px dashed hsl(var(--border) / 0.5)' }}
+                                    />
+                                ))
+                                : dates.map((date, index) => (
                                 <div
                                     key={index}
                                     className="h-full"
@@ -212,7 +228,7 @@ function TaskTimelineViewInner() {
                                         <TaskBar
                                             task={task}
                                             timelineStart={timelineStart}
-                                            dayWidth={dayWidth}
+                                            dayWidth={pxPerDay}
                                             onDateChange={handleDateChange}
                                             onTaskClick={openTaskTab}
                                             isSubtask={isSubtask}
@@ -263,7 +279,11 @@ function TaskTimelineViewInner() {
                         </TooltipProvider>
                     )}
 
-                    {/* Zoom controls */}
+                    <TimelineScaleSelector value={timelineScale} onChange={handleScaleChange} />
+
+                    {/* Zoom controls — fine zoom only applies to the day scale */}
+                    {timelineScale === "day" && (
+                        <>
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -301,6 +321,8 @@ function TaskTimelineViewInner() {
                             <TooltipContent>Zoom in</TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

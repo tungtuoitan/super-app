@@ -12,7 +12,8 @@ import { toDateOnly } from "@/shared";
 import { constants } from "@/shared";
 import { useTaskTimelineStore, MIN_DAY_WIDTH, MAX_DAY_WIDTH } from "../../store/useTaskTimeline.store";
 import { useTaskTimelineSelector } from "../../Selectors/TaskTimelineSelector";
-import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
+import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP, TIMELINE_SCALE_PX_PER_DAY, getMinRangeDays, getExtendDays } from "@/features/taskDetail";
+import type { TimelineScale } from "@/features/taskDetail";
 import { useProjectDetailStore } from "@/features/project/store/useProjectDetail.store";
 import { useAuthStore } from "@/shared";
 import { useEditorTabBarHelper } from "@/shell";
@@ -26,8 +27,8 @@ export const useTaskTimelineHelper = () => {
     const _console = useConsoleHelper();
 
     // Call stores/selectors directly
-    const { timelineRange, setTimelineRange, dayWidth, setDayWidth, setIsTodayVisible, timelineScrollRef } = useTaskTimelineStore();
-    const { filteredTasks, currentProject, todayPosition } = useTaskTimelineSelector();
+    const { timelineRange, setTimelineRange, dayWidth, setDayWidth, setIsTodayVisible, setTimelineScale, setHasScrolledToToday, timelineScrollRef } = useTaskTimelineStore();
+    const { filteredTasks, currentProject, todayPosition, pxPerDay } = useTaskTimelineSelector();
 
     // Check if today is visible
     const checkTodayVisibility = () => {
@@ -133,21 +134,24 @@ export const useTaskTimelineHelper = () => {
 
         checkTodayVisibility();
 
+        // Coarse scales pack many days per px — extend by enough days to be worth ~400px
+        const extendDays = getExtendDays(pxPerDay, TIMELINE_EXTEND_DAYS);
+
         if (scrollLeft < 100) {
             const newStart = new Date(timelineRange.start);
-            newStart.setDate(newStart.getDate() - TIMELINE_EXTEND_DAYS);
+            newStart.setDate(newStart.getDate() - extendDays);
             setTimelineRange(prev => prev ? { ...prev, start: newStart } : null);
 
             setTimeout(() => {
                 if (timelineScrollRef.current) {
-                    timelineScrollRef.current.scrollLeft = scrollLeft + TIMELINE_EXTEND_DAYS * dayWidth;
+                    timelineScrollRef.current.scrollLeft = scrollLeft + extendDays * pxPerDay;
                 }
             }, 0);
         }
 
         if (scrollLeft + clientWidth > scrollWidth - 100) {
             const newEnd = new Date(timelineRange.end);
-            newEnd.setDate(newEnd.getDate() + TIMELINE_EXTEND_DAYS);
+            newEnd.setDate(newEnd.getDate() + extendDays);
             setTimelineRange(prev => prev ? { ...prev, end: newEnd } : null);
         }
     }
@@ -187,8 +191,27 @@ export const useTaskTimelineHelper = () => {
         handleZoom(Math.max(dayWidth - TIMELINE_ZOOM_STEP, MIN_DAY_WIDTH));
     }
 
+    // Scale change: widen the range so the new scale fills the viewport, then re-center on today
+    const handleScaleChange = (scale: TimelineScale) => {
+        if (scale !== "day" && timelineRange) {
+            const minDays = getMinRangeDays(timelineScrollRef.current?.clientWidth ?? 0, TIMELINE_SCALE_PX_PER_DAY[scale]);
+            const spanDays = Math.ceil((timelineRange.end.getTime() - timelineRange.start.getTime()) / (1000 * 60 * 60 * 24));
+            if (spanDays < minDays) {
+                const extra = Math.ceil((minDays - spanDays) / 2);
+                const start = new Date(timelineRange.start);
+                start.setDate(start.getDate() - extra);
+                const end = new Date(timelineRange.end);
+                end.setDate(end.getDate() + extra);
+                setTimelineRange({ start, end });
+            }
+        }
+        setTimelineScale(scale);
+        setHasScrolledToToday(false);
+    }
+
     return {
         handleDateChange,
+        handleScaleChange,
         handleScroll,
         scrollToToday,
         handleZoomIn,

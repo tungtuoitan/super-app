@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import type { TimelineScale } from "../../types/multiTimeline.type";
-import { TIMELINE_SCALE_OPTIONS } from "../../utils/multiTimeline.constants";
+import type { TimelineScale } from "../../types/taskTimelineScale.type";
+import { TIMELINE_SCALE_OPTIONS } from "../../utils/taskTimelineScale.constants";
 
 interface TimelineScaleSelectorProps {
     value: TimelineScale;
