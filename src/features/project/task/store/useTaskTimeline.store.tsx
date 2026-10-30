@@ -6,7 +6,7 @@
 
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { storageService } from "@/shared";
-import { DEFAULT_TIMELINE_SCALE, TIMELINE_SCALE_OPTIONS, TASK_TIMELINE_SCALE_STORAGE_KEY } from "@/features/taskDetail/utils/taskTimelineScale.constants";
+import { DEFAULT_TIMELINE_SCALE, TIMELINE_SCALE_OPTIONS, TASK_TIMELINE_SCALE_STORAGE_KEY } from "@/features/taskDetail";
 import type { TimelineScale } from "@/features/taskDetail";
 
 // Constants
@@ -42,7 +42,7 @@ const taskTimelineContextDefaultValue: TaskTimelineContextData = {
     setHasScrolledToToday: () => {},
     dayWidth: DEFAULT_DAY_WIDTH,
     setDayWidth: () => {},
-    timelineScale: DEFAULT_TIMELINE_SCALE,
+    timelineScale: "day", // literal: DEFAULT_TIMELINE_SCALE is not yet initialised here (circular import via @/features/taskDetail)
     setTimelineScale: () => {},
     timelineScrollRef: { current: null },
 };

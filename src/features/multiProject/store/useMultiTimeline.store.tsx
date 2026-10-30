@@ -7,7 +7,7 @@
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { Project } from "@/features/project";
 import { storageService } from "@/shared";
-import { DEFAULT_TIMELINE_SCALE, TIMELINE_SCALE_OPTIONS, TIMELINE_SCALE_STORAGE_KEY } from "@/features/taskDetail/utils/taskTimelineScale.constants";
+import { DEFAULT_TIMELINE_SCALE, TIMELINE_SCALE_OPTIONS, TIMELINE_SCALE_STORAGE_KEY } from "@/features/taskDetail";
 import type { TimelineScale } from "@/features/taskDetail";
 
 // Constants
@@ -72,7 +72,7 @@ const multiTimelineContextDefaultValue: MultiTimelineContextData = {
     setDayWidth: () => {},
     weekWidth: DEFAULT_WEEK_WIDTH,
     setWeekWidth: () => {},
-    timelineScale: DEFAULT_TIMELINE_SCALE,
+    timelineScale: "day", // literal: DEFAULT_TIMELINE_SCALE is not yet initialised here (circular import via @/features/taskDetail)
     setTimelineScale: () => {},
     timelineScrollRef: { current: null },
 };
