@@ -10,6 +10,8 @@ import { useMultiTimelineStore } from "@/features/multiProject/store/useMultiTim
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { useMultiTimelineHelper } from "./useMultiTimeline.helper";
 import { storageService } from "@/shared";
+import { TIMELINE_SCALE_PX_PER_DAY, TIMELINE_SCALE_STORAGE_KEY } from "../../utils/multiTimeline.constants";
+import { getMinRangeDays } from "../../utils/multiTimelineScale.utils";
 import { resolveTimelineSpan } from "../../utils/multiTimelineSpan.utils";
 import { isStatusNonDraggable } from "@/features/taskDetail";
 import {useAuthStore} from "@/shared";
@@ -25,7 +27,7 @@ export function useMultiTimelineHeadless() {
     const {
         projectIds, storageKey, mode,
         timelineRange, setTimelineRange,
-        dayWidth, weekWidth, hasScrolledToToday, setHasScrolledToToday, timelineScrollRef,
+        dayWidth, weekWidth, timelineScale, hasScrolledToToday, setHasScrolledToToday, timelineScrollRef,
     } = useMultiTimelineStore();
     const { items, todayPosition } = useMultiTimelineSelector();
     const { checkTodayVisibility } = useMultiTimelineHelper();
@@ -60,7 +62,9 @@ export function useMultiTimelineHeadless() {
         end.setDate(end.getDate() + 14);
         end.setHours(0, 0, 0, 0);
 
-        const minRange = 60;
+        const minRange = mode === "task" && timelineScale !== "day"
+            ? Math.max(60, getMinRangeDays(timelineScrollRef.current?.clientWidth ?? 0, TIMELINE_SCALE_PX_PER_DAY[timelineScale]))
+            : 60;
         const currentRange = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
         if (currentRange < minRange) {
             const toAdd = Math.ceil((minRange - currentRange) / 2);
@@ -87,6 +91,11 @@ export function useMultiTimelineHeadless() {
         storageService.set(storageKey, mode === "project" ? weekWidth : dayWidth);
     }, [storageKey, mode, dayWidth, weekWidth]);
 
+    // Effect 2b: Persist task-mode scale
+    useEffect(() => {
+        storageService.set(TIMELINE_SCALE_STORAGE_KEY, timelineScale);
+    }, [timelineScale]);
+
     // Effect 3: Scroll to today on initial load
     useEffect(() => {
         if (!hasScrolledToToday && timelineScrollRef.current && timelineRange) {
@@ -105,5 +114,5 @@ export function useMultiTimelineHeadless() {
     // Effect 5: Recheck today visibility on zoom change
     useEffect(() => {
         checkTodayVisibility();
-    }, [dayWidth, weekWidth]);
+    }, [dayWidth, weekWidth, timelineScale]);
 }

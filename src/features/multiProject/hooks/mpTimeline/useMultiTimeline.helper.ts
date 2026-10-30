@@ -17,6 +17,9 @@ import {
 import { useMultiTimelineSelector } from "../../Selectors/useMultiTimeline.selector";
 import { TIMELINE_EXTEND_DAYS, TIMELINE_ZOOM_STEP } from "@/features/taskDetail";
 import {useAuthStore} from "@/shared";
+import type { TimelineScale } from "../../types/multiTimeline.type";
+import { TIMELINE_SCALE_PX_PER_DAY } from "../../utils/multiTimeline.constants";
+import { getMinRangeDays, getExtendDays } from "../../utils/multiTimelineScale.utils";
 
 export const useMultiTimelineHelper = () => {
     // ── Stores ───────────────────────────────────────────
@@ -28,6 +31,7 @@ export const useMultiTimelineHelper = () => {
     const {
         projectIds, mode, timelineRange, setTimelineRange,
         dayWidth, setDayWidth, weekWidth, setWeekWidth, setIsTodayVisible, timelineScrollRef,
+        setTimelineScale, setHasScrolledToToday,
     } = useMultiTimelineStore();
 
     // ── Selector ─────────────────────────────────────────
@@ -46,18 +50,21 @@ export const useMultiTimelineHelper = () => {
         const { scrollLeft, scrollWidth, clientWidth } = timelineScrollRef.current;
         checkTodayVisibility();
 
+        // Coarse scales pack many days per px — extend by enough days to be worth ~400px
+        const extendDays = getExtendDays(pxPerDay, TIMELINE_EXTEND_DAYS);
+
         if (scrollLeft < 100) {
             const newStart = new Date(timelineRange.start);
-            newStart.setDate(newStart.getDate() - TIMELINE_EXTEND_DAYS);
+            newStart.setDate(newStart.getDate() - extendDays);
             setTimelineRange((prev) => (prev ? { ...prev, start: newStart } : null));
             setTimeout(() => {
-                if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = scrollLeft + TIMELINE_EXTEND_DAYS * pxPerDay;
+                if (timelineScrollRef.current) timelineScrollRef.current.scrollLeft = scrollLeft + extendDays * pxPerDay;
             }, 0);
         }
 
         if (scrollLeft + clientWidth > scrollWidth - 100) {
             const newEnd = new Date(timelineRange.end);
-            newEnd.setDate(newEnd.getDate() + TIMELINE_EXTEND_DAYS);
+            newEnd.setDate(newEnd.getDate() + extendDays);
             setTimelineRange((prev) => (prev ? { ...prev, end: newEnd } : null));
         }
     };
@@ -90,6 +97,24 @@ export const useMultiTimelineHelper = () => {
     const handleZoomOut = () => {
         if (mode === "project") handleZoom(Math.max(weekWidth - WEEK_ZOOM_STEP, MIN_WEEK_WIDTH));
         else handleZoom(Math.max(dayWidth - TIMELINE_ZOOM_STEP, MIN_DAY_WIDTH));
+    };
+
+    // ── Scale change (task mode): widen the range so the new scale fills the viewport, then re-center on today ──
+    const handleScaleChange = (scale: TimelineScale) => {
+        if (scale !== "day" && timelineRange) {
+            const minDays = getMinRangeDays(timelineScrollRef.current?.clientWidth ?? 0, TIMELINE_SCALE_PX_PER_DAY[scale]);
+            const spanDays = Math.ceil((timelineRange.end.getTime() - timelineRange.start.getTime()) / (1000 * 60 * 60 * 24));
+            if (spanDays < minDays) {
+                const extra = Math.ceil((minDays - spanDays) / 2);
+                const start = new Date(timelineRange.start);
+                start.setDate(start.getDate() - extra);
+                const end = new Date(timelineRange.end);
+                end.setDate(end.getDate() + extra);
+                setTimelineRange({ start, end });
+            }
+        }
+        setTimelineScale(scale);
+        setHasScrolledToToday(false);
     };
 
     // ── Task date change (optimistic) ──────────────────
@@ -164,6 +189,7 @@ export const useMultiTimelineHelper = () => {
         scrollToToday,
         handleZoomIn,
         handleZoomOut,
+        handleScaleChange,
         handleTaskDateChange,
         handleProjectDateChange,
     };

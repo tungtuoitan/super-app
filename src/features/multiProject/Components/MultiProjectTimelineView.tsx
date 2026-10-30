@@ -26,6 +26,7 @@ import { useMultiTimelineHelper } from "../hooks/mpTimeline/useMultiTimeline.hel
 import { useMultiTimelineHeadless } from "../hooks/mpTimeline/useMultiTimeline.headless";
 import { useMultiProjectTaskGridHelper } from "../hooks/mpTaskList/useMultiProjectTaskGrid.helper";
 import { TaskBar } from "@/features/multiProject/Components/small/TaskBar";
+import { TimelineScaleSelector } from "@/features/multiProject/Components/small/TimelineScaleSelector";
 
 export function MultiProjectTimelineView() {
     const { taskGridIsLoading, taskGridError } = useMpTaskStore();
@@ -40,13 +41,13 @@ export function MultiProjectTimelineView() {
     useMultiTimelineHeadless();
 
     // ── State (from store) ───────────────────────────────
-    const { projects, projectIds, hoveredItemId, setHoveredItemId, isTodayVisible, dayWidth, timelineScrollRef } = useMultiTimelineStore();
+    const { projects, projectIds, hoveredItemId, setHoveredItemId, isTodayVisible, dayWidth, timelineScale, timelineScrollRef } = useMultiTimelineStore();
 
     // ── Computed values (from selector) ──────────────────
-    const { filteredTasks, timelineStart, timelineEnd, dates, todayPosition, monthGroups, timelineWidth, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
+    const { filteredTasks, timelineStart, timelineEnd, dates, todayPosition, monthGroups, timelineWidth, pxPerDay, scaleHeader, zoomPercent, canZoomIn, canZoomOut } = useMultiTimelineSelector();
 
     // ── Handlers (from helper) ───────────────────────────
-    const { handleScroll, scrollToToday, handleZoomIn, handleZoomOut, handleTaskDateChange } = useMultiTimelineHelper();
+    const { handleScroll, scrollToToday, handleZoomIn, handleZoomOut, handleScaleChange, handleTaskDateChange } = useMultiTimelineHelper();
     const { openMultiProjectTaskContextMenu } = useMultiProjectTaskGridHelper();
     const { showContextMenu } = useMenuContextHelper();
 
@@ -98,19 +99,25 @@ export function MultiProjectTimelineView() {
 
                         <div className="sticky top-0 z-10 bg-background border-b" style={{ height: TIMELINE_HEADER_HEIGHT }}>
                             <div className="flex border-b" style={{ height: 30 }}>
-                                {monthGroups.map((g, i) => <div key={i} className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface" style={{ width: g.days * dayWidth }}>{g.month}</div>)}
+                                {scaleHeader
+                                    ? scaleHeader.groups.map((g, i) => <div key={i} className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface overflow-hidden whitespace-nowrap" style={{ width: g.width }}>{g.label}</div>)
+                                    : monthGroups.map((g, i) => <div key={i} className="flex items-center px-2 text-xs font-medium text-foreground border-r border-sa-border bg-sa-surface" style={{ width: g.days * dayWidth }}>{g.month}</div>)}
                             </div>
                             <div className="flex" style={{ height: 30 }}>
-                                {dates.map((date, i) => (
-                                    <div key={i} className={cn("flex items-center justify-center text-[11px] text-muted-foreground", isToday(date) && "font-semibold text-sa-amber-ink", isFirstDayOfMonth(date) ? "border-r border-border" : "border-r border-dashed border-border/50")} style={{ width: dayWidth, background: isWeekend(date) && !isToday(date) ? WEEKEND_STRIPE_BG : undefined }}>
-                                        {formatDateHeader(date)}
-                                    </div>
-                                ))}
+                                {scaleHeader
+                                    ? scaleHeader.columns.map((c, i) => <div key={i} title={c.title} className={cn("flex items-center justify-center text-[11px] text-muted-foreground overflow-hidden whitespace-nowrap", c.isCurrent && "font-semibold text-sa-amber-ink bg-sa-amber/5", c.isMajor ? "border-r border-border" : "border-r border-dashed border-border/50")} style={{ width: c.width }}>{c.label}</div>)
+                                    : dates.map((date, i) => (
+                                        <div key={i} className={cn("flex items-center justify-center text-[11px] text-muted-foreground", isToday(date) && "font-semibold text-sa-amber-ink", isFirstDayOfMonth(date) ? "border-r border-border" : "border-r border-dashed border-border/50")} style={{ width: dayWidth, background: isWeekend(date) && !isToday(date) ? WEEKEND_STRIPE_BG : undefined }}>
+                                            {formatDateHeader(date)}
+                                        </div>
+                                    ))}
                             </div>
                         </div>
 
                         <div className="absolute left-0 right-0 flex pointer-events-none" style={{ top: TIMELINE_HEADER_HEIGHT, height: totalHeight }}>
-                            {dates.map((date, i) => <div key={i} className="h-full" style={{ width: dayWidth, borderRight: isFirstDayOfMonth(date) ? "1px solid hsl(var(--border))" : "1px dashed hsl(var(--border) / 0.5)", background: isWeekend(date) ? WEEKEND_STRIPE_BG : undefined }} />)}
+                            {scaleHeader
+                                ? scaleHeader.columns.map((c, i) => <div key={i} className={cn("h-full", c.isCurrent && "bg-sa-amber/5")} style={{ width: c.width, borderRight: c.isMajor ? "1px solid hsl(var(--border))" : "1px dashed hsl(var(--border) / 0.5)" }} />)
+                                : dates.map((date, i) => <div key={i} className="h-full" style={{ width: dayWidth, borderRight: isFirstDayOfMonth(date) ? "1px solid hsl(var(--border))" : "1px dashed hsl(var(--border) / 0.5)", background: isWeekend(date) ? WEEKEND_STRIPE_BG : undefined }} />)}
                         </div>
 
                         <div style={{ position: "relative" }}>
@@ -120,7 +127,7 @@ export function MultiProjectTimelineView() {
                                 const taskProject = projects.find((p) => p.id === task.projectId) || null;
                                 return (
                                     <div key={task.id} className={cn("relative", hoveredItemId === task.id && "bg-sa-hover")} style={{ height: TIMELINE_ROW_HEIGHT }} onMouseEnter={() => setHoveredItemId(task.id)} onMouseLeave={() => setHoveredItemId(null)}>
-                                        <TaskBar task={task} timelineStart={timelineStart} timelineEnd={timelineEnd} dayWidth={dayWidth} onDateChange={handleTaskDateChange} onTaskClick={openTaskTab} isSubtask={isSubtask} parentTask={parentTask} project={taskProject} allTasks={filteredTasks} onValidationError={(msg) => _console.warning(msg)} />
+                                        <TaskBar task={task} timelineStart={timelineStart} timelineEnd={timelineEnd} dayWidth={pxPerDay} onDateChange={handleTaskDateChange} onTaskClick={openTaskTab} isSubtask={isSubtask} parentTask={parentTask} project={taskProject} allTasks={filteredTasks} onValidationError={(msg) => _console.warning(msg)} />
                                     </div>
                                 );
                             })}
@@ -137,9 +144,14 @@ export function MultiProjectTimelineView() {
                     {!isTodayVisible && (
                         <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="sm" onClick={scrollToToday} className="h-7 px-2 text-xs"><Calendar className="h-3.5 w-3.5 mr-1" />Today</Button></TooltipTrigger><TooltipContent>Go to today</TooltipContent></Tooltip></TooltipProvider>
                     )}
+                    <TimelineScaleSelector value={timelineScale} onChange={handleScaleChange} />
+                    {timelineScale === "day" && (
+                        <>
                     <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="sm" onClick={handleZoomOut} disabled={!canZoomOut} className="h-7 w-7 p-0"><ZoomOut className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Zoom out</TooltipContent></Tooltip></TooltipProvider>
                     <span className="text-xs text-muted-foreground w-8 text-center">{zoomPercent}%</span>
                     <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="sm" onClick={handleZoomIn} disabled={!canZoomIn} className="h-7 w-7 p-0"><ZoomIn className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Zoom in</TooltipContent></Tooltip></TooltipProvider>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

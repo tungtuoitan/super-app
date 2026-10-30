@@ -7,6 +7,8 @@
 import React, { useContext, createContext, Dispatch, SetStateAction, useState, useRef, RefObject } from "react";
 import { Project } from "@/features/project";
 import { storageService } from "@/shared";
+import type { TimelineScale } from "../types/multiTimeline.type";
+import { DEFAULT_TIMELINE_SCALE, TIMELINE_SCALE_OPTIONS, TIMELINE_SCALE_STORAGE_KEY } from "../utils/multiTimeline.constants";
 
 // Constants
 export const DEFAULT_DAY_WIDTH = 40;
@@ -43,6 +45,9 @@ export interface MultiTimelineContextData {
     setDayWidth: Dispatch<SetStateAction<number>>;
     weekWidth: number;
     setWeekWidth: Dispatch<SetStateAction<number>>;
+    /** Task mode only: day (zoomable) / week / month / quarter / year */
+    timelineScale: TimelineScale;
+    setTimelineScale: Dispatch<SetStateAction<TimelineScale>>;
     timelineScrollRef: RefObject<HTMLDivElement>;
 }
 
@@ -67,6 +72,8 @@ const multiTimelineContextDefaultValue: MultiTimelineContextData = {
     setDayWidth: () => {},
     weekWidth: DEFAULT_WEEK_WIDTH,
     setWeekWidth: () => {},
+    timelineScale: DEFAULT_TIMELINE_SCALE,
+    setTimelineScale: () => {},
     timelineScrollRef: { current: null },
 };
 
@@ -95,6 +102,11 @@ export const MultiTimelineProvider: React.FC<React.PropsWithChildren<unknown>> =
         return stored && stored >= MIN_WEEK_WIDTH && stored <= MAX_WEEK_WIDTH ? stored : DEFAULT_WEEK_WIDTH;
     });
 
+    const [timelineScale, setTimelineScale] = useState<TimelineScale>(() => {
+        const stored = storageService.get<TimelineScale>(TIMELINE_SCALE_STORAGE_KEY);
+        return TIMELINE_SCALE_OPTIONS.some((o) => o.value === stored) ? (stored as TimelineScale) : DEFAULT_TIMELINE_SCALE;
+    });
+
     return (
         <MultiTimelineStore.Provider
             value={{
@@ -108,6 +120,7 @@ export const MultiTimelineProvider: React.FC<React.PropsWithChildren<unknown>> =
                 hasScrolledToToday, setHasScrolledToToday,
                 dayWidth, setDayWidth,
                 weekWidth, setWeekWidth,
+                timelineScale, setTimelineScale,
                 timelineScrollRef,
             }}
         >
