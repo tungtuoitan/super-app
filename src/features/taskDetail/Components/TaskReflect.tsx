@@ -14,7 +14,7 @@ const CELL_TEXTAREA =
     "block min-h-[2.25rem] w-full resize-none overflow-hidden rounded-none border-0 bg-transparent px-3 py-2 text-[13px] leading-5 shadow-none focus-visible:bg-sa-hover focus-visible:ring-0 disabled:cursor-default disabled:opacity-100";
 
 const TYPE_CELL =
-    "[&_button]:h-9 [&_button]:rounded-none [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-3 [&_button]:text-[13px] [&_button]:shadow-none [&_button:hover]:bg-sa-hover";
+    "group/type [&_button_span.rounded-sm]:opacity-0 [&_button_span.rounded-sm]:transition-opacity group-hover/type:[&_button_span.rounded-sm]:opacity-100 group-focus-within/type:[&_button_span.rounded-sm]:opacity-100 [&_button]:h-9 [&_button]:rounded-none [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-3 [&_button]:text-[13px] [&_button]:shadow-none [&_button:hover]:bg-sa-hover";
 
 function HeaderRow() {
     return (
