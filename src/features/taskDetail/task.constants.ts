@@ -40,7 +40,7 @@ export const BUILTIN_TABS: Array<{ key: BuiltinTab; label: string; icon: React.E
 
 // ── Reflect tab (type / I think / Reality) ────────────────────────────────────
 
-export const REFLECT_DEFAULT_TYPES = ["Kế hoạch", "Dự đoán", "Cách nghĩ", "Suy nghĩ", "Quyết định", "Mục tiêu", "Rủi ro"];
+export const REFLECT_DEFAULT_TYPES = ["Plan", "Prediction", "Mindset", "Thought", "Decision", "Goal", "Risk", "Unknown"];
 
 // ── Version comment / collapsible ─────────────────────────────────────────────
 
