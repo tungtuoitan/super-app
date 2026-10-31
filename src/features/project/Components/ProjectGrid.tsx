@@ -24,6 +24,7 @@ import { useProjectGridSelector } from "../Selectors/useProjectGrid.selector";
 import { useProjectGridHeadless } from "../hooks/useProjectGrid.headless";
 import { TaskStatusIcon } from "@/shared";
 import {Project} from "../types/project.types";
+import { shellConstants, useEditorTabBarHelper } from "@/shell";
 
 /**
  * ProjectGrid - project grid with table display
@@ -46,6 +47,14 @@ export function ProjectGrid() {
     // ── Handlers (from helper) ───────────────────────────
     const { openProjectContextMenu } = useProjectGridHelper();
     const { openProjectTab } = useProjectTabHelper();
+
+    // Highlight the row whose project tab is currently active in the editor
+    const { getActiveTab } = useEditorTabBarHelper();
+    const activeTab = getActiveTab();
+    const activeProjectId =
+        activeTab?.type === shellConstants.vscode.tab.tabTypes.project
+            ? (activeTab.data as { id: number }).id
+            : null;
 
     // ── Computed values (from selector) ──────────────────
     const { getStatusLabel, filteredData } = useProjectGridSelector();
@@ -163,9 +172,9 @@ export function ProjectGrid() {
                             <tr
                                 key={row.id}
                                 data-row
-                                className={`h-9 cursor-pointer hover:bg-sa-hover transition-colors duration-100 ${
-                                    row.original.deletedAt ? "opacity-60" : ""
-                                }`}
+                                className={`h-9 cursor-pointer transition-colors duration-100 ${
+                                    row.original.id === activeProjectId ? "bg-sa-hover-strong" : "hover:bg-sa-hover"
+                                } ${row.original.deletedAt ? "opacity-60" : ""}`}
                                 onClick={() => openProjectTab(row.original)}
                                 onContextMenu={(e) => {
                                     e.stopPropagation();
