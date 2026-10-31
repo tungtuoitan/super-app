@@ -18,7 +18,7 @@ const TYPE_CELL =
 
 function HeaderRow() {
     return (
-        <div className={cn(GRID, "hidden border-b border-sa-border bg-sa-surface-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground md:grid")}>
+        <div className={cn(GRID, "hidden border-b border-sa-border bg-sa-surface-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground md:grid")}>
             <div className="px-3 py-1.5">Type</div>
             <div className="border-l border-sa-border px-3 py-1.5">I think</div>
             <div className="border-l border-sa-border px-3 py-1.5">Reality</div>
