@@ -31,11 +31,11 @@ export const COMMENT_FILTERS: Array<{ key: CommentFilterType; label: string }> =
 // ── Detail section tabs ───────────────────────────────────────────────────────
 
 export const BUILTIN_TABS: Array<{ key: BuiltinTab; label: string; icon: React.ElementType }> = [
+    { key: "reflect", label: "Reflect", icon: Columns2 },
     { key: "process", label: "Process", icon: ListOrdered },
     { key: "checklist", label: "Checklist", icon: CheckSquare },
     { key: "desc", label: "Description", icon: FileText },
     { key: "comment", label: "Comment", icon: MessageSquare },
-    { key: "reflect", label: "Reflect", icon: Columns2 },
 ];
 
 // ── Reflect tab (type / I think / Reality) ────────────────────────────────────
