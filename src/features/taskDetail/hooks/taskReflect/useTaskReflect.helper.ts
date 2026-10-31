@@ -1,7 +1,7 @@
 /**
  * Task Reflect Helper
- * Holds the rows of the Reflect tab and saves them into Task.customTabsJson (`reflect` key).
- * Cells save themselves when the user leaves them; saves run one after another.
+ * Rows of the Reflect tab are edited locally; the section's Save button (Ctrl+S when only this section is dirty)
+ * writes them into Task.customTabsJson (`reflect` key), Discard restores the saved rows.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -12,7 +12,14 @@ import { useTaskDetailSectionStore } from "../../store/useTaskDetailSection.stor
 import { taskService } from "../../service/task.service";
 import type { ReflectField, ReflectRow } from "../../types/taskReflect.types";
 import type { Task } from "../../types/task.types";
-import { applyReflectCell, buildReflectTypeOptions, createReflectRow, parseReflectRows, withReflectRows } from "../../utils/taskReflect.utils";
+import {
+    buildReflectTypeOptions,
+    createReflectRow,
+    isSameReflectRows,
+    keepFilledReflectRows,
+    parseReflectRows,
+    withReflectRows,
+} from "../../utils/taskReflect.utils";
 
 export const useTaskReflectHelper = () => {
     const { selectedTask, isDisabled } = useTaskDetailSelector();
@@ -23,55 +30,52 @@ export const useTaskReflectHelper = () => {
     const taskId = selectedTask?.id ?? 0;
     const taskJson = selectedTask?.customTabsJson ?? null;
 
-    const [rows, setRows] = useState<ReflectRow[]>(() => parseReflectRows(taskJson));
-    /** Bumped when the task changes from outside (another task, AI edit) so the cells reload */
-    const [syncVersion, setSyncVersion] = useState(0);
-
     const containerRef = useRef<HTMLDivElement>(null);
-    const rowsRef = useRef(rows);
-    const jsonRef = useRef(taskJson);
+    const [rows, setRows] = useState<ReflectRow[]>(() => parseReflectRows(taskJson));
+    const savedRef = useRef<ReflectRow[]>(rows);
     const ownStampRef = useRef(`${taskId}:${taskJson}`);
-    const queueRef = useRef<Promise<void>>(Promise.resolve());
 
-    // Reload only when the stored JSON is not the one this tab just wrote itself
+    const isDirty = !isSameReflectRows(rows, savedRef.current);
+
+    // Reload when the task changes from outside (another task, an AI edit), not after our own save
     useEffect(() => {
         const stamp = `${taskId}:${taskJson}`;
         if (stamp === ownStampRef.current) return;
         ownStampRef.current = stamp;
-        jsonRef.current = taskJson;
         const next = parseReflectRows(taskJson);
-        rowsRef.current = next;
+        savedRef.current = next;
         setRows(next);
-        setSyncVersion((v) => v + 1);
     }, [taskId, taskJson]);
 
-    const persist = (next: ReflectRow[]) => {
-        rowsRef.current = next;
-        setRows(next);
+    const handleFieldChange = (rowId: string, field: ReflectField, value: string) => {
+        setRows((prev) => prev.map((r) => (r.id === rowId ? { ...r, [field]: value, updatedAt: new Date().toISOString() } : r)));
+    };
+
+    const handleAddRow = () => setRows((prev) => [...prev, createReflectRow()]);
+
+    const save = async () => {
         if (taskId <= 0) return;
-        const json = withReflectRows(jsonRef.current, next);
-        jsonRef.current = json;
+        const toSave = keepFilledReflectRows(rows);
+        const json = withReflectRows(taskJson, toSave);
+        try {
+            await taskService._patchTask($user.userToken, taskId, { customTabsJson: json });
+        } catch (error) {
+            console.error("Reflect save failed", error);
+            return; // stay dirty so Save stays lit
+        }
         ownStampRef.current = `${taskId}:${json}`;
-        queueRef.current = queueRef.current
-            .then(async () => {
-                await taskService._patchTask($user.userToken, taskId, { customTabsJson: json });
-                const activeTabId = getActiveTab()?.id;
-                if (activeTabId) {
-                    patchTab(activeTabId, (cur) => ({
-                        data: { ...(cur.data as Task), customTabsJson: json },
-                        data0: { ...(cur.data as Task), customTabsJson: json },
-                    }));
-                }
-            })
-            .catch((error) => console.error("Reflect save failed", error));
+        savedRef.current = toSave;
+        setRows(toSave);
+        const activeTabId = getActiveTab()?.id;
+        if (activeTabId) {
+            patchTab(activeTabId, (cur) => ({
+                data: { ...(cur.data as Task), customTabsJson: json },
+                data0: { ...(cur.data as Task), customTabsJson: json },
+            }));
+        }
     };
 
-    const handleCellCommit = (rowId: string, field: ReflectField, value: string) => {
-        const next = applyReflectCell(rowsRef.current, rowId, field, value);
-        if (next !== rowsRef.current) persist(next);
-    };
-
-    const handleAddRow = () => persist([...rowsRef.current, createReflectRow()]);
+    const discard = () => setRows(savedRef.current);
 
     const autoGrow = (el: HTMLTextAreaElement | null) => {
         if (!el) return;
@@ -86,16 +90,18 @@ export const useTaskReflectHelper = () => {
             containerRef.current?.querySelectorAll("textarea").forEach(autoGrow);
         });
         return () => cancelAnimationFrame(frame);
-    }, [activeSection, rows, syncVersion]);
+    }, [activeSection, rows]);
 
     return {
         containerRef,
         rows,
-        syncVersion,
+        isDirty,
         isDisabled,
         typeOptions: buildReflectTypeOptions(rows),
-        handleCellCommit,
+        handleFieldChange,
         handleAddRow,
         autoGrow,
+        save,
+        discard,
     };
 };

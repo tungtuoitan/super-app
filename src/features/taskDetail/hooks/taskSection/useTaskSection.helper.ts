@@ -33,7 +33,7 @@ export const useTaskSectionHelper = () => {
     const {
         descDirty, setDescDirty, savedNoteRef, setDescKey,
         triggerDescFocus, triggerCommentFocus, triggerCommentLoad, triggerCustomFocus,
-        customTabHandlersRef, builtinSectionHandlersRef,
+        customTabHandlersRef, builtinSectionHandlersRef, saveRequestedRef, discardRequestedRef,
     } = useTaskSectionStore();
 
     /** Update a field in the active editor tab's data without marking hasUnsavedChanges */
@@ -77,16 +77,26 @@ export const useTaskSectionHelper = () => {
         customTabHandlersRef.current[tabId]?.discard();
     }
     const handleSectionSave = async () => {
+        saveRequestedRef.current = true;
+        discardRequestedRef.current = false;
         if (activeSection === "process") await builtinSectionHandlersRef.current.process?.save();
         else if (activeSection === "checklist") await builtinSectionHandlersRef.current.checklist?.save();
+        else if (activeSection === "reflect") await builtinSectionHandlersRef.current.reflect?.save();
         else if (activeSection === "desc") await handleDescSave();
         else if (isCustomTab(activeSection)) await handleCustomTabSave();
     }
     const handleSectionDiscard = () => {
+        saveRequestedRef.current = false;
         if (activeSection === "process") builtinSectionHandlersRef.current.process?.discard();
         else if (activeSection === "checklist") builtinSectionHandlersRef.current.checklist?.discard();
+        else if (activeSection === "reflect") builtinSectionHandlersRef.current.reflect?.discard();
         else if (activeSection === "desc") handleDescDiscard();
         else if (isCustomTab(activeSection)) handleCustomTabDiscard();
+    }
+    /** Discard pressed by the user (button or Esc) — plays the "Discarded" confirmation; silent discards (tab switch) do not */
+    const handleSectionDiscardByUser = () => {
+        handleSectionDiscard();
+        discardRequestedRef.current = true;
     }
     const doSwitchTab = (key: SectionTab) => {
         setActiveSection(key);
@@ -143,6 +153,7 @@ export const useTaskSectionHelper = () => {
         handleDescDiscard,
         handleSectionSave,
         handleSectionDiscard,
+        handleSectionDiscardByUser,
         handleTabClick,
         handleAddCustomTab,
         handleDeleteCustomTab,

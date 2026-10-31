@@ -44,13 +44,26 @@ export interface TaskSectionContextData {
     /** Mutable ref — custom tabs register/unregister their save/discard handlers */
     customTabHandlersRef: React.MutableRefObject<Record<string, CustomTabHandler>>;
     /** Mutable ref — process/checklist providers register their save/discard handlers */
-    builtinSectionHandlersRef: React.MutableRefObject<Partial<Record<'process' | 'checklist', CustomTabHandler>>>;
+    builtinSectionHandlersRef: React.MutableRefObject<Partial<Record<'process' | 'checklist' | 'reflect', CustomTabHandler>>>;
 
     // ── Section dirty flags (set by local checklist/process providers) ────────
     isChecklistDirty: boolean;
     setIsChecklistDirty: (v: boolean) => void;
     isProcessDirty: boolean;
     setIsProcessDirty: (v: boolean) => void;
+    isReflectDirty: boolean;
+    setIsReflectDirty: (v: boolean) => void;
+
+    // ── "Saved" toast over the Save/Discard buttons ───────────────────────────
+    /** Counter — each increment plays the toast once */
+    savedToastKey: number;
+    triggerSavedToast: () => void;
+    /** True from the moment a section save is requested until the section turns clean */
+    saveRequestedRef: React.MutableRefObject<boolean>;
+    /** Same for Discard — only set when the user pressed Discard (or Esc), not on tab switches */
+    discardedToastKey: number;
+    triggerDiscardedToast: () => void;
+    discardRequestedRef: React.MutableRefObject<boolean>;
 
     // ── Comment scroll container ref ─────────────────────────────────────────
     scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -84,6 +97,14 @@ export const taskSectionContextDefaultValue: TaskSectionContextData = {
     setIsChecklistDirty: () => {},
     isProcessDirty: false,
     setIsProcessDirty: () => {},
+    isReflectDirty: false,
+    setIsReflectDirty: () => {},
+    savedToastKey: 0,
+    triggerSavedToast: () => {},
+    saveRequestedRef: nullRef(false),
+    discardedToastKey: 0,
+    triggerDiscardedToast: () => {},
+    discardRequestedRef: nullRef(false),
     scrollContainerRef: nullRef(null),
 };
 
@@ -110,11 +131,16 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
 
     const [customTabDirty, setCustomTabDirtyState] = useState(false);
     const customTabHandlersRef = useRef<Record<string, CustomTabHandler>>({});
-    const builtinSectionHandlersRef = useRef<Partial<Record<'process' | 'checklist', CustomTabHandler>>>({});
+    const builtinSectionHandlersRef = useRef<Partial<Record<'process' | 'checklist' | 'reflect', CustomTabHandler>>>({});
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
     const [isChecklistDirty, setIsChecklistDirtyState] = useState(false);
     const [isProcessDirty, setIsProcessDirtyState] = useState(false);
+    const [isReflectDirty, setIsReflectDirtyState] = useState(false);
+    const [savedToastKey, setSavedToastKey] = useState(0);
+    const saveRequestedRef = useRef(false);
+    const [discardedToastKey, setDiscardedToastKey] = useState(0);
+    const discardRequestedRef = useRef(false);
 
     const setDescDirty = (v: boolean) => setDescDirtyState(v)
     const triggerDescFocus = () => setDescFocusTrigger((p) => p + 1)
@@ -135,6 +161,9 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
     const setCustomTabDirty = (v: boolean) => setCustomTabDirtyState(v)
     const setIsChecklistDirty = (v: boolean) => setIsChecklistDirtyState(v)
     const setIsProcessDirty = (v: boolean) => setIsProcessDirtyState(v)
+    const setIsReflectDirty = (v: boolean) => setIsReflectDirtyState(v)
+    const triggerSavedToast = () => setSavedToastKey((p) => p + 1)
+    const triggerDiscardedToast = () => setDiscardedToastKey((p) => p + 1)
 
     return (
         <TaskSectionStore.Provider value={{
@@ -152,6 +181,9 @@ export const TaskSectionProvider: React.FC<React.PropsWithChildren<unknown>> = (
             builtinSectionHandlersRef,
             isChecklistDirty, setIsChecklistDirty,
             isProcessDirty, setIsProcessDirty,
+            isReflectDirty, setIsReflectDirty,
+            savedToastKey, triggerSavedToast, saveRequestedRef,
+            discardedToastKey, triggerDiscardedToast, discardRequestedRef,
             scrollContainerRef,
         }}>
             {children}

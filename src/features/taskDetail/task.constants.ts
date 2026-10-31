@@ -40,6 +40,24 @@ export const BUILTIN_TABS: Array<{ key: BuiltinTab; label: string; icon: React.E
 
 // ── Reflect tab (type / I think / Reality) ────────────────────────────────────
 
+/**
+ * Section Save / Discard confirmation timing (ms) and easing: a quiet spring settle, a short hold, then a
+ * dissolve; SectionSaveBar reports back when the dissolve ends.
+ */
+export const SAVED_TOAST = {
+    /**
+     * false = play the confirmation even when the OS has animations turned off (Windows "Show animations" off
+     * reports prefers-reduced-motion). The effect is small and short; set true to honor the OS setting again.
+     */
+    honorReducedMotion: false,
+    holdMs: 1100,
+    dissolveMs: 320,
+    /** Gently damped spring (zeta 0.78), about 2% overshoot, settles in about 0.5s */
+    spring: "linear(0, 0.0722, 0.2301, 0.4117, 0.5817, 0.7238, 0.8329, 0.9109, 0.9627, 0.9942, 1.0112, 1.0185, 1.0199, 1.018, 1.0147, 1.0111, 1.0078, 1.005, 1.003, 1.0015, 1)",
+    /** For browsers without CSS linear() */
+    springFallback: "cubic-bezier(0.25, 1.05, 0.5, 1)",
+} as const;
+
 export const REFLECT_DEFAULT_TYPES = ["Plan", "Prediction", "Mindset", "Thought", "Decision", "Goal", "Risk", "Unknown"];
 
 // ── Version comment / collapsible ─────────────────────────────────────────────

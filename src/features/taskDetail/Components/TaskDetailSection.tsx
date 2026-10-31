@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { Save, X, Star, Plus } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Star, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BuiltinTab, SectionTab, useTaskDetailSectionStore } from "../store/useTaskDetailSection.store";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
@@ -16,8 +16,10 @@ import { TaskCustomTab } from "./TaskCustomTab";
 import { CommentFilterDropdown } from "./small/CommentFilterDropdown";
 import { CustomTabButton } from "./small/CustomTabButton";
 import { useTaskSectionHeadless } from "../hooks/taskSection/useTaskSection.headless";
-import { RichTextEditor, ShadcnButton } from "@/shared";
+import { RichTextEditor } from "@/shared";
 import { BUILTIN_TABS } from "../task.constants";
+import { SectionSaveBar } from "./small/SectionSaveBar";
+import type { SectionFeedback } from "../types/sectionFeedback.types";
 import {TaskProcessProvider} from "../store/useTaskProcess.store";
 import {TaskCommentProvider} from "../store/useTaskComment.store";
 
@@ -56,34 +58,27 @@ function SectionNameList({ activeKey, onTabClick } : {activeKey: string, onTabCl
   );
 }
 
-function SaveAndDiscard({
-  onSave,
-  onDiscard,
-}: {
-    onSave: () => void,
-    onDiscard: () => void,
-
-}) {
-  return (
-    <div className="absolute right-0 flex shrink-0 items-center gap-1 bg-background pl-2">
-      <ShadcnButton size="sm" onClick={onSave} className="[&_svg]:size-3.5">
-        <Save /> Save
-      </ShadcnButton>
-
-      <ShadcnButton size="sm" variant="ghost" onClick={onDiscard} className="text-muted-foreground [&_svg]:size-3.5">
-        <X /> Discard
-      </ShadcnButton>
-    </div>
-  );
-}
 export function TaskDetailSection() {
     const { activeSection } = useTaskDetailSectionStore();
     const { selectedTask, isDisabled } = useTaskDetailSelector();
     const { isSectionDirty } = useTaskSectionSelector();
-    const { descKey, descFocusTrigger, commentFilter, commentShowDetail, setCommentFilter, setCommentShowDetail } = useTaskSectionStore();
-    const { handleTabClick, handleAddCustomTab, handleSectionSave, handleSectionDiscard, handleDescChange } = useTaskSectionHelper();
+    const { descKey, descFocusTrigger, commentFilter, commentShowDetail, setCommentFilter, setCommentShowDetail, savedToastKey, discardedToastKey, saveRequestedRef, discardRequestedRef } = useTaskSectionStore();
+    const { handleTabClick, handleAddCustomTab, handleSectionSave, handleSectionDiscardByUser, handleDescChange } = useTaskSectionHelper();
     const { customTabs } = useTaskCustomTabSelector();
     useTaskSectionHeadless();
+
+    // Derived while rendering (not in an effect) so the bar never unmounts between "saved" and its confirmation
+    const [feedback, setFeedback] = useState<SectionFeedback | null>(null);
+    const [seenKeys, setSeenKeys] = useState({ saved: savedToastKey, discarded: discardedToastKey });
+    if (savedToastKey !== seenKeys.saved || discardedToastKey !== seenKeys.discarded) {
+        setSeenKeys({ saved: savedToastKey, discarded: discardedToastKey });
+        setFeedback(savedToastKey !== seenKeys.saved ? { kind: "saved", key: savedToastKey } : { kind: "discarded", key: discardedToastKey });
+    }
+    useEffect(() => {
+        if (isSectionDirty) setFeedback(null);
+    }, [isSectionDirty]);
+    // Between the section turning clean and the confirmation starting, keep the bar mounted
+    const confirmationPending = saveRequestedRef.current || discardRequestedRef.current;
 
     const isNewTask = !selectedTask || selectedTask.id <= 0;
 
@@ -117,10 +112,12 @@ export function TaskDetailSection() {
                 </div>
 
                 {/* Right: Save/Discard or Filter */}
-                {isSectionDirty && !isDisabled && (
-                    <SaveAndDiscard 
-                        onSave={handleSectionSave} 
-                        onDiscard={handleSectionDiscard} 
+                {(isSectionDirty || feedback || confirmationPending) && !isDisabled && (
+                    <SectionSaveBar
+                        onSave={handleSectionSave}
+                        onDiscard={handleSectionDiscardByUser}
+                        feedback={isSectionDirty ? null : feedback}
+                        onFeedbackDone={() => setFeedback(null)}
                     />
                 )}
 

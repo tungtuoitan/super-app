@@ -10,12 +10,13 @@ import { isCustomTab } from "../utils/taskDetailSection.utils";
 
 export const useTaskSectionSelector = () => {
     const { activeSection } = useTaskDetailSectionStore();
-    const { descDirty, customTabDirty, isChecklistDirty, isProcessDirty } = useTaskSectionStore();
+    const { descDirty, customTabDirty, isChecklistDirty, isProcessDirty, isReflectDirty } = useTaskSectionStore();
 
     const isSectionDirty = (() =>
         (activeSection === "process" && isProcessDirty) ||
         (activeSection === "checklist" && isChecklistDirty) ||
         (activeSection === "desc" && descDirty) ||
+        (activeSection === "reflect" && isReflectDirty) ||
         (isCustomTab(activeSection) && customTabDirty))()
 
     return { isSectionDirty };

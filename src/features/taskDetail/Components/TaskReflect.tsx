@@ -1,12 +1,13 @@
 /**
  * TaskReflect — the Reflect tab: a three-column sheet (Type | I think | Reality).
- * Every cell is an input and saves when the user leaves it; clearing a whole row removes it.
+ * Every cell is an input. Changes light up the section Save button (Ctrl+S when only this section is dirty); a row cleared completely is dropped on save.
  */
 
 import { Plus } from "lucide-react";
 import { GenericAutoComplete, Textarea } from "@/shared";
 import { cn } from "@/lib/utils";
 import { useTaskReflectHelper } from "../hooks/taskReflect/useTaskReflect.helper";
+import { useTaskReflectHeadless } from "../hooks/taskReflect/useTaskReflect.headless";
 
 const GRID = "grid grid-cols-1 md:grid-cols-[9.5rem_minmax(0,1fr)_minmax(0,1fr)]";
 
@@ -27,7 +28,8 @@ function HeaderRow() {
 }
 
 export function TaskReflect() {
-    const { containerRef, rows, syncVersion, isDisabled, typeOptions, handleCellCommit, handleAddRow, autoGrow } = useTaskReflectHelper();
+    const { containerRef, rows, isDirty, isDisabled, typeOptions, handleFieldChange, handleAddRow, autoGrow, save, discard } = useTaskReflectHelper();
+    useTaskReflectHeadless({ isDirty, save, discard });
 
     return (
         <div ref={containerRef} className="flex h-full flex-col gap-2 overflow-y-auto pt-1">
@@ -39,7 +41,7 @@ export function TaskReflect() {
                     </div>
                 )}
                 {rows.map((row, index) => (
-                    <div key={`${syncVersion}-${row.id}`} className={cn(GRID, index > 0 && "border-t border-sa-border")}>
+                    <div key={row.id} className={cn(GRID, index > 0 && "border-t border-sa-border")}>
                         <div className={TYPE_CELL}>
                             <GenericAutoComplete
                                 size="tiny"
@@ -47,33 +49,31 @@ export function TaskReflect() {
                                 allOptions={typeOptions}
                                 disabled={isDisabled}
                                 inputProps={{ name: "reflect-type", label: "", placeholder: "Type" }}
-                                onChange={(_, option) => handleCellCommit(row.id, "type", option?.label ?? "")}
+                                onChange={(_, option) => handleFieldChange(row.id, "type", option?.label ?? "")}
                             />
                         </div>
                         <div className="md:border-l md:border-sa-border">
                             <Textarea
                                 ref={autoGrow}
                                 rows={1}
-                                defaultValue={row.think}
+                                value={row.think}
                                 disabled={isDisabled}
                                 placeholder="I think…"
                                 aria-label="I think"
                                 className={CELL_TEXTAREA}
-                                onInput={(e) => autoGrow(e.currentTarget)}
-                                onBlur={(e) => handleCellCommit(row.id, "think", e.currentTarget.value.trim())}
+                                onChange={(e) => handleFieldChange(row.id, "think", e.target.value)}
                             />
                         </div>
                         <div className="md:border-l md:border-sa-border">
                             <Textarea
                                 ref={autoGrow}
                                 rows={1}
-                                defaultValue={row.real}
+                                value={row.real}
                                 disabled={isDisabled}
                                 placeholder="Reality…"
                                 aria-label="Reality"
                                 className={CELL_TEXTAREA}
-                                onInput={(e) => autoGrow(e.currentTarget)}
-                                onBlur={(e) => handleCellCommit(row.id, "real", e.currentTarget.value.trim())}
+                                onChange={(e) => handleFieldChange(row.id, "real", e.target.value)}
                             />
                         </div>
                     </div>

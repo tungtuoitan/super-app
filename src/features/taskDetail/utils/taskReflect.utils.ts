@@ -1,6 +1,6 @@
 import type { IAutoCompleteOptions } from "@/shared";
 import { REFLECT_DEFAULT_TYPES } from "../task.constants";
-import type { ReflectField, ReflectRow } from "../types/taskReflect.types";
+import type { ReflectRow } from "../types/taskReflect.types";
 import { parseCustomTabs, serializeCustomTabs } from "./customTab.utils";
 
 export function generateReflectId(): string {
@@ -26,13 +26,18 @@ export function isReflectRowEmpty(row: ReflectRow): boolean {
     return !row.type.trim() && !row.think.trim() && !row.real.trim();
 }
 
-/** New row list after one cell changed; a row the user clears completely is removed */
-export function applyReflectCell(rows: ReflectRow[], rowId: string, field: ReflectField, value: string): ReflectRow[] {
-    const current = rows.find((r) => r.id === rowId);
-    if (!current || current[field] === value) return rows;
-    const changed: ReflectRow = { ...current, [field]: value, updatedAt: new Date().toISOString() };
-    if (isReflectRowEmpty(changed) && !isReflectRowEmpty(current)) return rows.filter((r) => r.id !== rowId);
-    return rows.map((r) => (r.id === rowId ? changed : r));
+/** Rows with some text in them, ends trimmed — what gets stored */
+export function keepFilledReflectRows(rows: ReflectRow[]): ReflectRow[] {
+    return rows
+        .map((r) => ({ ...r, type: r.type.trim(), think: r.think.trim(), real: r.real.trim() }))
+        .filter((r) => !isReflectRowEmpty(r));
+}
+
+/** True when both lists hold the same filled rows (blank rows are ignored) */
+export function isSameReflectRows(a: ReflectRow[], b: ReflectRow[]): boolean {
+    const left = keepFilledReflectRows(a);
+    const right = keepFilledReflectRows(b);
+    return left.length === right.length && left.every((r, i) => r.id === right[i].id && r.type === right[i].type && r.think === right[i].think && r.real === right[i].real);
 }
 
 /** Autocomplete options: built-in types plus every type already used in this task */
