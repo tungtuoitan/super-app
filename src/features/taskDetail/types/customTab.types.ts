@@ -3,6 +3,8 @@
  * Stored as JSON string in Task.customTabsJson.
  */
 
+import type { ReflectRow } from "./taskReflect.types";
+
 export interface CustomTab {
     id: string;
     name: string;
@@ -14,6 +16,8 @@ export interface CustomTab {
 
 export interface CustomTabsJSON {
     tabs: CustomTab[];
+    /** Rows of the built-in Reflect tab; stored here so no backend change is needed */
+    reflect?: ReflectRow[];
 }
 
 export interface CustomTabHandle {

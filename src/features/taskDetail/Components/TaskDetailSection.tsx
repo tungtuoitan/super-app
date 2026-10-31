@@ -10,6 +10,7 @@ import { useTaskCustomTabSelector } from "../Selectors/TaskCustomTabSelector";
 import { TaskProcess } from "./TaskProcess";
 import { TaskChecklist } from "./TaskChecklist";
 import { TaskComment } from "./TaskComment";
+import { TaskReflect } from "./TaskReflect";
 import { TaskChecklistProvider } from "../store/useTaskChecklist.store";
 import { TaskCustomTab } from "./TaskCustomTab";
 import { CommentFilterDropdown } from "./small/CommentFilterDropdown";
@@ -168,6 +169,9 @@ export function TaskDetailSection() {
                         {isNewTask ? <NewTaskPlaceholder /> : <TaskComment />}
                     </div>
                 </TaskCommentProvider>
+                <div className={cn("h-full", activeSection !== "reflect" && "hidden")}>
+                    {isNewTask ? <NewTaskPlaceholder /> : <TaskReflect />}
+                </div>
 
                     {customTabs.tabs.map((tab) => (
                         <div key={tab.id} className={cn("h-full", activeSection !== `custom:${tab.id}` && "hidden")}>

@@ -112,7 +112,7 @@ export const useTaskSectionHelper = () => {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         };
-        const updated = { tabs: [...customTabs.tabs, newTab] };
+        const updated = { ...customTabs, tabs: [...customTabs.tabs, newTab] };
         updateTabDataSilent("customTabsJson", serializeCustomTabs(updated));
         setTimeout(() => setActiveSection(`custom:${newTab.id}`), 50);
     }
@@ -129,7 +129,7 @@ export const useTaskSectionHelper = () => {
             cancelColor: "outline",
             anchorEl,
             onConfirm: async () => {
-                const updated = { tabs: customTabs.tabs.filter((t) => t.id !== tabId) };
+                const updated = { ...customTabs, tabs: customTabs.tabs.filter((t) => t.id !== tabId) };
                 updateTabDataSilent("customTabsJson", serializeCustomTabs(updated));
                 if (activeSection === `custom:${tabId}`) setActiveSection("desc");
                 submitComment(`[Deleted tab "${tabToDelete.name}" v${tabToDelete.version}]`);

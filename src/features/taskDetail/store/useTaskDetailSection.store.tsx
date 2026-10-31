@@ -6,7 +6,7 @@
 import React, { useContext, createContext, Dispatch, SetStateAction, useState } from "react";
 
 /** Built-in section tabs */
-export type BuiltinTab = "process" | "checklist" | "desc" | "comment";
+export type BuiltinTab = "process" | "checklist" | "desc" | "comment" | "reflect";
 
 /** Section tab can be a built-in or a custom tab (prefixed with "custom:") */
 export type SectionTab = BuiltinTab | `custom:${string}`;

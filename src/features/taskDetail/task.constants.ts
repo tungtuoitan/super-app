@@ -1,5 +1,5 @@
 import React from "react";
-import { ListOrdered, CheckSquare, FileText, MessageSquare, FilePlus } from "lucide-react";
+import { ListOrdered, CheckSquare, FileText, MessageSquare, FilePlus, Columns2 } from "lucide-react";
 import type { BuiltinTab } from "./store/useTaskDetailSection.store";
 import type { CommentFilterType } from "./types/taskComment.types";
 
@@ -35,7 +35,12 @@ export const BUILTIN_TABS: Array<{ key: BuiltinTab; label: string; icon: React.E
     { key: "checklist", label: "Checklist", icon: CheckSquare },
     { key: "desc", label: "Description", icon: FileText },
     { key: "comment", label: "Comment", icon: MessageSquare },
+    { key: "reflect", label: "Reflect", icon: Columns2 },
 ];
+
+// ── Reflect tab (type / I think / Reality) ────────────────────────────────────
+
+export const REFLECT_DEFAULT_TYPES = ["Kế hoạch", "Dự đoán", "Cách nghĩ", "Suy nghĩ", "Quyết định", "Mục tiêu", "Rủi ro"];
 
 // ── Version comment / collapsible ─────────────────────────────────────────────
 

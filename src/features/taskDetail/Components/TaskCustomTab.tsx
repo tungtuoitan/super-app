@@ -79,7 +79,7 @@ export function TaskCustomTab({ tabId }: { tabId: string }) {
         const updatedTab: CustomTab = {
             ...tab, name: newName, version: newVersion, content: editContent, updatedAt: now,
         };
-        const newTabs = { tabs: customTabs.tabs.map((t) => (t.id === tabId ? updatedTab : t)) };
+        const newTabs = { ...customTabs, tabs: customTabs.tabs.map((t) => (t.id === tabId ? updatedTab : t)) };
         const json = serializeCustomTabs(newTabs);
 
         if (selectedTask.id <= 0) {
