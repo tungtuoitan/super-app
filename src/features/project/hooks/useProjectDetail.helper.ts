@@ -38,6 +38,7 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         deletedAt: parseInstant(dto.deletedAt),
         workspaceId: dto.workspaceId,
         image: dto.image,
+        reflectJson: dto.reflectJson,
     }));
 };
 
@@ -182,6 +183,7 @@ export const useProjectDetailHelper = () => {
                 deletedAt: parseInstant(savedProject.deletedAt),
                 workspaceId: savedProject.workspaceId,
                 image: savedProject.image,
+                reflectJson: savedProject.reflectJson,
             };
 
             // ============================================================

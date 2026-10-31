@@ -30,7 +30,6 @@ export const useTaskReflectHelper = () => {
     const taskId = selectedTask?.id ?? 0;
     const taskJson = selectedTask?.customTabsJson ?? null;
 
-    const containerRef = useRef<HTMLDivElement>(null);
     const [rows, setRows] = useState<ReflectRow[]>(() => parseReflectRows(taskJson));
     const savedRef = useRef<ReflectRow[]>(rows);
     const ownStampRef = useRef(`${taskId}:${taskJson}`);
@@ -77,30 +76,14 @@ export const useTaskReflectHelper = () => {
 
     const discard = () => setRows(savedRef.current);
 
-    const autoGrow = (el: HTMLTextAreaElement | null) => {
-        if (!el) return;
-        el.style.height = "auto";
-        if (el.scrollHeight > 0) el.style.height = `${el.scrollHeight}px`;
-    };
-
-    // The tab is mounted while hidden (height 0), so size the cells again once it is shown
-    useEffect(() => {
-        if (activeSection !== "reflect") return;
-        const frame = requestAnimationFrame(() => {
-            containerRef.current?.querySelectorAll("textarea").forEach(autoGrow);
-        });
-        return () => cancelAnimationFrame(frame);
-    }, [activeSection, rows]);
-
     return {
-        containerRef,
         rows,
+        activeSection,
         isDirty,
         isDisabled,
         typeOptions: buildReflectTypeOptions(rows),
         handleFieldChange,
         handleAddRow,
-        autoGrow,
         save,
         discard,
     };

@@ -34,6 +34,7 @@ const transformProjectData = (dtos: ProjectDTO[]): Project[] => {
         deletedAt: parseInstant(dto.deletedAt),
         workspaceId: dto.workspaceId,
         image: dto.image,
+        reflectJson: dto.reflectJson,
     }));
 };
 

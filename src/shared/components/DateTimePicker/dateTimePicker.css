@@ -146,3 +146,14 @@
 .calendar-with-indicators .today-highlight:hover {
     background-color: hsl(var(--sa-accent-amber) / 0.26) !important;
 }
+
+/* The day being edited ("From" or "To" mode) — a border around it so it is clear which date the next click replaces */
+.calendar-green-red-range .active-edge {
+    outline: 2px solid hsl(var(--foreground) / 0.9);
+    outline-offset: 2px;
+}
+
+/* A greyed "outside" day (the same date shown at the edge of the next month) never gets the border */
+.calendar-green-red-range .active-edge[data-outside="true"] {
+    outline: none;
+}

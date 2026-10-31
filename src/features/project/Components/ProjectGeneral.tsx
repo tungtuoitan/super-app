@@ -1,38 +1,33 @@
 /**
- * Project Detail Tab Component
- * Two-column layout: Details (2/3) | Metadata (1/3)
- * Used in ProjectDetailContent as the first tab for editing project details
- * Pure UI — reads from selector, helper, headless. NO props.
+ * Project General page — cover layout:
+ * hero (image, name, status, due date, links) on top, then underline tabs "Description | Reflect"
+ * over a full-width content area. The Save / Discard bar (with its Saved / Discarded confirmation)
+ * sits at the right of the tab row while the Reflect rows have unsaved changes.
+ * Pure UI — reads from selector, helpers and headless. NO props.
  */
 
-
-import { GenericTextField, StatusAutoComplete, RichTextEditor, DateRangePicker } from "@/shared";
-import { CardContent } from "@/shared";
-import { ScrollArea } from "@/shared";
-import { useProjectDetailStore } from "../store/useProjectDetail.store";
+import { useState } from "react";
+import { RichTextEditor, ScrollArea } from "@/shared";
+import { ReflectSheet, SectionSaveBar, countReflectRows } from "@/features/taskDetail";
+import { cn } from "@/lib/utils";
 import { useProjectDetailHelper } from "../hooks/useProjectDetail.helper";
 import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector";
 import { useProjectGeneralHeadless } from "../hooks/useProjectGeneral.headless";
-import { formatDateTime } from "@/shared";
-import { ProjectImagePicker } from "./ProjectImagePicker";
-import { ProjectLinks } from "./small/ProjectLinks";
+import { useProjectReflectHelper } from "../hooks/useProjectReflect.helper";
+import { useProjectReflectHeadless } from "../hooks/useProjectReflect.headless";
+import { ProjectHero } from "./small/ProjectHero";
 
-/**
- * ProjectGeneral
- * Form for editing project details
- * Gets data from selector — NO props.
- */
+type GeneralSection = "description" | "reflect";
+
+const TAB = "relative flex h-9 items-center gap-1.5 border-b-2 px-0.5 text-[13px] transition-colors duration-100";
+
 export function ProjectGeneral() {
-    const { projectNameRef, nameError, setNameError } = useProjectDetailStore();
-
-    // ── Computed values (from selector) ──────────────────
-    const { selectedProject, statusOptions, currentStatusValue, isDisabled, isDeleted } = useProjectDetailSelector();
-
-    // ── Handlers (from helper) ───────────────────────────
-    const { handleNameChange, handleStatusChange, handleStartDateChange, handleEndDateChange, handleDescriptionChange, handleImageChange } = useProjectDetailHelper();
-
-    // ── Side-effects (headless) ──────────────────────────
+    const { selectedProject, isDisabled } = useProjectDetailSelector();
+    const { handleDescriptionChange } = useProjectDetailHelper();
     const { projectKey } = useProjectGeneralHeadless();
+    const reflect = useProjectReflectHelper();
+    useProjectReflectHeadless({ isDirty: reflect.isDirty, hasProjectChanges: reflect.hasProjectChanges, save: reflect.save, discard: reflect.discard });
+    const [section, setSection] = useState<GeneralSection>("description");
 
     if (!selectedProject) {
         return (
@@ -42,121 +37,63 @@ export function ProjectGeneral() {
         );
     }
 
+    const showSaveBar = section === "reflect" && (reflect.isDirty || reflect.feedback) && !reflect.isDisabled;
+
     return (
         <ScrollArea className="h-full w-full">
-            <div className="px-6 py-2 mx-auto h-full pt-5">
-                {/* Project Header */}
-                <div className="mb-5 pb-4 border-b border-sa-border">
-                    <h1 className="text-[22px] font-medium leading-tight text-foreground">
-                        {selectedProject.name || "Untitled Project"}
-                    </h1>
-                    <p className="mt-1 font-mono text-[12px] text-muted-foreground">
-                        {selectedProject.id > 0 ? `#${selectedProject.id}` : "New project"}
-                    </p>
+            <div className="mx-auto max-w-[1100px] px-6 pb-8 pt-6">
+                <ProjectHero />
+
+                {/* Section tabs */}
+                <div className="relative flex items-end gap-6 border-b border-sa-border">
+                    <button
+                        onClick={() => setSection("description")}
+                        className={cn(TAB, section === "description" ? "border-foreground font-medium text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}
+                    >
+                        Description
+                    </button>
+                    <button
+                        onClick={() => setSection("reflect")}
+                        className={cn(TAB, section === "reflect" ? "border-foreground font-medium text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}
+                    >
+                        Reflect
+                        <span className="text-xs font-normal text-muted-foreground">{countReflectRows(reflect.rows)}</span>
+                        {reflect.isDirty && section !== "reflect" && <span className="h-1.5 w-1.5 rounded-full bg-sa-amber" aria-label="Unsaved changes" />}
+                    </button>
+                    {reflect.isNewProject && section === "reflect" && (
+                        <span className="pb-2 text-xs text-muted-foreground">Save the project first to use Reflect.</span>
+                    )}
+                    {showSaveBar && (
+                        <div className="absolute bottom-1.5 right-0 h-7 w-0">
+                            <SectionSaveBar onSave={reflect.save} onDiscard={reflect.discard} feedback={reflect.isDirty ? null : reflect.feedback} onFeedbackDone={reflect.clearFeedback} />
+                        </div>
+                    )}
                 </div>
 
-                {/* Two-column layout: Details (2/3) | Metadata (1/3) */}
-                <div className="flex gap-6">
-                    {/* Left Column - Project Details (2/3 width) */}
-                    <div className="flex-[2] min-w-0">
-                        <CardContent className="space-y-4">
-                            {/* Project Name and Due Date on same row */}
-                            <div className="flex gap-4 items-start">
-                                {/* Project ID - fixed width */}
-                                <div className="w-[80px] shrink-0">
-                                    <GenericTextField label="ID" value={selectedProject.id > 0 ? selectedProject.id.toString() : "New"} disabled size="small" />
-                                </div>
-
-                                {/* Project Name - takes more space */}
-                                <div className="flex-[2]">
-                                    <GenericTextField
-                                        ref={projectNameRef}
-                                        label="Project name"
-                                        value={selectedProject.name}
-                                        onChange={(e) => handleNameChange(e.target.value, setNameError)}
-                                        placeholder="Enter project name..."
-                                        size="small"
-                                        disabled={isDisabled}
-                                        error={!!nameError}
-                                        helperText={nameError || `${selectedProject.name?.length || 0}/50`}
-                                        maxLength={50}
-                                    />
-                                </div>
-
-                                {/* Due Date */}
-                                <div className="flex-1">
-                                    <DateRangePicker
-                                        label="Due date"
-                                        startDate={selectedProject.startDate}
-                                        endDate={selectedProject.endDate}
-                                        onStartDateChange={handleStartDateChange}
-                                        onEndDateChange={handleEndDateChange}
-                                        disabled={isDisabled}
-                                        placeholder="Set due dates..."
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Description - RichText Editor */}
-                            <div className="space-y-2 text-left">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-[11px] text-left font-medium uppercase tracking-wide text-muted-foreground">
-                                        Description
-                                    </label>
-                                </div>
-                                <div className="border border-sa-border rounded-xl overflow-hidden">
-                                    <RichTextEditor
-                                        key={`description-${projectKey}`}
-                                        value={selectedProject.description || ""}
-                                        onChange={handleDescriptionChange}
-                                        placeholder="Enter project description..."
-                                        disabled={isDisabled}
-                                        minHeight="300px"
-                                        uploadContext="project"
-                                        uploadContextId={selectedProject.id > 0 ? selectedProject.id : undefined}
-                                    />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </div>
-
-                    {/* Right Column - Metadata (1/3 width) */}
-                    <div className="flex-1 min-w-0">
-                        <CardContent className="space-y-3.5">
-
-                            {/* Project Status - moved to right column */}
-                            <StatusAutoComplete
-                                value={currentStatusValue}
-                                onChange={handleStatusChange}
-                                options={statusOptions}
-                                inputProps={{
-                                    name: "status",
-                                    label: "Status",
-                                }}
-                                disabled={isDeleted}
-                                placeholder="Select status..."
+                <div className="pt-4 text-left">
+                    {section === "description" ? (
+                        <div className="overflow-hidden rounded-xl border border-sa-border">
+                            <RichTextEditor
+                                key={`description-${projectKey}`}
+                                value={selectedProject.description || ""}
+                                onChange={handleDescriptionChange}
+                                placeholder="Enter project description..."
+                                disabled={isDisabled}
+                                minHeight="360px"
+                                uploadContext="project"
+                                uploadContextId={selectedProject.id > 0 ? selectedProject.id : undefined}
                             />
-                                {/* Project Image */}
-                                <div className="space-y-1 text-left mt-[-16px]">
-                                    <label className="text-[11px] text-left font-medium uppercase tracking-wide text-muted-foreground">
-                                        Image
-                                    </label>
-                                    <ProjectImagePicker
-                                        value={selectedProject.image ?? ""}
-                                        onChange={handleImageChange}
-                                    />
-                                </div>
-
-                            {/* Project Links — task #1477 */}
-                            <ProjectLinks />
-
-                            <p className="text-xs text-left text-muted-foreground leading-relaxed">
-                                Created: {selectedProject.createdAt ? formatDateTime(selectedProject.createdAt) : "N/A"}
-                                {selectedProject.updatedAt && <> · Updated: {formatDateTime(selectedProject.updatedAt)}</>}
-                                {selectedProject.deletedAt && <> · Deleted: {formatDateTime(selectedProject.deletedAt)}</>}
-                            </p>
-                        </CardContent>
-                    </div>
+                        </div>
+                    ) : (
+                        <ReflectSheet
+                            rows={reflect.rows}
+                            isDisabled={reflect.isDisabled}
+                            typeOptions={reflect.typeOptions}
+                            onFieldChange={reflect.handleFieldChange}
+                            onAddRow={reflect.handleAddRow}
+                            regrowKey="project-reflect"
+                        />
+                    )}
                 </div>
             </div>
         </ScrollArea>

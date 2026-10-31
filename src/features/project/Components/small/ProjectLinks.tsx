@@ -7,13 +7,11 @@ import { LinkKindIcon, _isGithubRepoUrl, _openLocalUrl } from "@/shared";
 import { useProjectDetailSelector } from "../../Selectors/useProjectDetail.selector";
 import { useProjectLinksStore } from "../../store/useProjectLinks.store";
 import { useProjectLinksHelper } from "../../hooks/useProjectLinks.helper";
-import { useProjectLinksHeadless } from "../../hooks/useProjectLinks.headless";
 
 export function ProjectLinks() {
     const { selectedProject, isDeleted } = useProjectDetailSelector();
     const { projectLinks, isLoadingProjectLinks } = useProjectLinksStore();
     const { addProjectLink, editProjectLink, removeProjectLink, openProjectLink } = useProjectLinksHelper();
-    useProjectLinksHeadless();
 
     if (!selectedProject || selectedProject.id <= 0) return null;
     const canEdit = !isDeleted && !!selectedProject.workspaceId;

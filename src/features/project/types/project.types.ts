@@ -10,4 +10,6 @@ export interface Project {
     deletedAt?: Date | null;
     workspaceId?: number | null;
     image?: string | null;
+    /** Rows of the Reflect tab as a JSON array string */
+    reflectJson?: string | null;
 }

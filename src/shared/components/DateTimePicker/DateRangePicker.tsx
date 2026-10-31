@@ -6,8 +6,8 @@
  */
 
 import React, { useState, useEffect, useMemo } from "react";
-import { format, isToday, isBefore, isAfter, startOfDay, isSameDay } from "date-fns";
-import { Calendar as CalendarIcon, Clock, X, ArrowRight } from "lucide-react";
+import { format, isToday, isBefore, isAfter, startOfDay, startOfMonth, isSameDay } from "date-fns";
+import { Calendar as CalendarIcon, Clock, X, ArrowRight, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared";
 import { Calendar } from "@/shared";
@@ -66,6 +66,8 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
     const [open, setOpenState] = useState(false);
     const [selectionMode, setSelectionMode] = useState<SelectionMode>("start");
+    // First month shown by the calendar; undefined = start at the From (or To) date. Follows the From / To switch.
+    const [visibleMonth, setVisibleMonth] = useState<Date | undefined>(undefined);
 
     // Use ref to track if we should keep open (to handle race conditions)
     const keepOpenRef = React.useRef(false);
@@ -75,6 +77,7 @@ export function DateRangePicker({
         if (!value && keepOpenRef.current) {
             return; // Block close if we're in the middle of selecting
         }
+        if (value) setVisibleMonth(undefined);
         setOpenState(value);
     };
     const [selectedRange, setSelectedRange] = useState<DateRange | undefined>(() => {
@@ -142,6 +145,13 @@ export function DateRangePicker({
         setOpen(true);
     };
 
+    // From / To switch in the popup: pick which date the next click sets and bring that date into view
+    const focusEdge = (mode: SelectionMode) => {
+        setSelectionMode(mode);
+        const edge = mode === "start" ? startDate : endDate;
+        if (edge) setVisibleMonth(startOfMonth(edge));
+    };
+
     // Handle clicking on the button (not on start/end specifically)
     const handleButtonClick = () => {
         setOpen(true);
@@ -174,21 +184,12 @@ export function DateRangePicker({
                 onStartDateChange(clickedDate);
                 setSelectedRange({ from: clickedDate, to: endDate || undefined });
             }
-            // Switch to end mode
-            setSelectionMode("end");
+            // Move on to "To" only when there is no end yet (or it was just cleared); otherwise stay on "From"
+            if (!endDate || clickedDate > endDate) setSelectionMode("end");
         } else {
-            // Setting end date
-            if (startDate && clickedDate < startDate) {
-                // End < start: set end, clear start, switch to start mode
-                onEndDateChange(clickedDate);
-                onStartDateChange(null);
-                setSelectedRange({ from: undefined, to: clickedDate });
-                setSelectionMode("start");
-            } else {
-                // Normal: set end, keep start
-                onEndDateChange(clickedDate);
-                setSelectedRange({ from: startDate || undefined, to: clickedDate });
-            }
+            // Setting end date (days before the start are disabled, so it is always >= start); stay on "To"
+            onEndDateChange(clickedDate);
+            setSelectedRange({ from: startDate || undefined, to: clickedDate });
         }
         // Popup stays open - user must click outside to close
     };
@@ -210,8 +211,8 @@ export function DateRangePicker({
                 onStartDateChange(newDate);
                 setSelectedRange({ from: newDate, to: selectedRange?.to });
             }
-            // Switch to end mode
-            setSelectionMode("end");
+            // Move on to "To" only when there is no end yet (or it was just cleared)
+            if (!endDate || newDate > endDate) setSelectionMode("end");
         } else {
             // Set end date
             if (startDate && newDate < startDate) {
@@ -278,16 +279,27 @@ export function DateRangePicker({
         }
     };
 
-    // Clear all dates
-    const handleClear = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
+    // Empty both dates (shared by the trigger's X and the popup's Reset)
+    const clearDates = () => {
         setSelectedRange(undefined);
         setHasStartTime(false);
         setHasEndTime(false);
         onStartDateChange(null);
         onEndDateChange(null);
+    };
+
+    // The trigger's X: clear and close
+    const handleClear = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        clearDates();
         setOpen(false);
+    };
+
+    // The popup's Reset: clear but keep the popup open, ready to pick a new From
+    const handleReset = () => {
+        clearDates();
+        setSelectionMode("start");
     };
 
     // Check if a date is within the allowed range
@@ -295,12 +307,14 @@ export function DateRangePicker({
         const day = startOfDay(date);
         if (minDate && isBefore(day, startOfDay(minDate))) return true;
         if (maxDate && isAfter(day, startOfDay(maxDate))) return true;
+        // Picking "To": an end before the start is not allowed, so it never wipes the start by accident
+        if (selectionMode === "end" && startDate && isBefore(day, startOfDay(startDate))) return true;
         return false;
     };
 
     // Create disabled matcher for Calendar component
     const disabledMatcher = (() => {
-        if (!minDate && !maxDate) return undefined;
+        if (!minDate && !maxDate && !(selectionMode === "end" && startDate)) return undefined;
         return (date: Date) => isDateDisabled(date);
     })();
 
@@ -316,6 +330,11 @@ export function DateRangePicker({
         // End date modifier
         if (endDate) {
             modifiers.rangeEnd = (date: Date) => isSameDay(date, endDate);
+        }
+        // The edge being edited (From in "From" mode, To in "To" mode) gets a border
+        const activeEdgeDate = selectionMode === "start" ? startDate : endDate;
+        if (activeEdgeDate) {
+            modifiers.activeEdge = (date: Date) => isSameDay(date, activeEdgeDate);
         }
         // Range middle modifier
         if (startDate && endDate) {
@@ -343,6 +362,7 @@ export function DateRangePicker({
         rangeStart: "range-start",
         rangeEnd: "range-end",
         rangeMiddle: "range-middle",
+        activeEdge: "active-edge",
         limitStart: "limit-start",
         limitEnd: "limit-end",
     }
@@ -519,7 +539,7 @@ export function DateRangePicker({
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Quick options sidebar */}
-                        <div className="border-r border-sa-border p-1.5 space-y-0.5 min-w-[104px]">
+                        <div className="flex flex-col gap-0.5 border-r border-sa-border p-1.5 min-w-[104px]">
                             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-2 py-1">
                                 Quick select
                             </p>
@@ -528,7 +548,7 @@ export function DateRangePicker({
                                     key={option.label}
                                     variant="ghost"
                                     size="sm"
-                                    className="w-full justify-start text-xs font-normal h-7"
+                                    className="justify-start text-xs font-normal h-7"
                                     onClick={() => handleQuickDateOption(option.getValue)}
                                 >
                                     {option.label}
@@ -539,10 +559,49 @@ export function DateRangePicker({
                                     No options
                                 </p>
                             )}
+                            {(startDate || endDate) && !isConstraintDisabled && (
+                                <div className="mt-1 flex flex-col border-t border-sa-border pt-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="justify-start gap-1.5 text-xs font-normal h-7 text-muted-foreground hover:text-foreground"
+                                        onClick={handleReset}
+                                    >
+                                        <RotateCcw className="h-3 w-3" />
+                                        Reset
+                                    </Button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Calendar */}
                         <div className="calendar-green-red-range">
+
+                            {/* From / To switch — the user decides which date the next click sets */}
+                            <div className="flex items-center gap-1.5 border-b border-sa-border p-2" onMouseDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+                                {([["start", "From", startDisplayStr, "bg-sa-good"], ["end", "To", endDisplayStr, "bg-sa-danger"]] as const).map(([mode, label, value, dot], index) => (
+                                    <React.Fragment key={mode}>
+                                        {index === 1 && <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+                                        <button
+                                            type="button"
+                                            aria-pressed={selectionMode === mode}
+                                            onClick={() => focusEdge(mode)}
+                                            className={cn(
+                                                "flex min-w-[150px] flex-1 flex-col gap-0.5 rounded-md border px-3 py-1.5 text-left transition-colors duration-100",
+                                                selectionMode === mode
+                                                    ? "border-sa-border-strong bg-sa-hover-strong text-foreground"
+                                                    : "border-transparent text-muted-foreground hover:bg-sa-hover hover:text-foreground"
+                                            )}
+                                        >
+                                            <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide">
+                                                <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+                                                {label}
+                                            </span>
+                                            <span className="text-[13px]">{value || "Not set"}</span>
+                                        </button>
+                                    </React.Fragment>
+                                ))}
+                            </div>
 
                             <div
                                 onMouseDown=
@@ -567,6 +626,8 @@ export function DateRangePicker({
                                     modifiers={calendarModifiers}
                                     modifiersClassNames={modifiersClassNames}
                                     numberOfMonths={2}
+                                    month={visibleMonth}
+                                    onMonthChange={setVisibleMonth}
                                     defaultMonth={startDate || endDate || undefined}
                                     autoFocus={false}
                                 />

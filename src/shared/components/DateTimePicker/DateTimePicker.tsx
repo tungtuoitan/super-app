@@ -312,14 +312,14 @@ export function DateTimePicker({
                 <PopoverContent className="w-auto p-0" align="start">
                     <div className="flex">
                         {/* Quick options sidebar */}
-                        <div className="border-r border-sa-border p-1.5 space-y-0.5">
+                        <div className="flex flex-col gap-0.5 border-r border-sa-border p-1.5">
                             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground px-2 py-1">Quick select</p>
                             {filteredQuickOptions.map((option) => (
                                 <Button
                                     key={option.label}
                                     variant="ghost"
                                     size="sm"
-                                    className="w-full justify-start text-xs font-normal h-7"
+                                    className="justify-start text-xs font-normal h-7"
                                     onClick={() => handleQuickOption(option.getValue)}
                                 >
                                     {option.label}

@@ -1,7 +1,7 @@
 /**
- * ProjectImagePicker - upload custom image for a project
- * No image → default FolderOpen icon
- * Upload: crop to square, resize to 64×64, compress to <100KB, store as base64
+ * ProjectImagePicker - the cover image tile of a project
+ * No image → dashed "Add cover image" tile; with an image → the image, with replace / remove on hover
+ * Upload: crop to square, resize to 256×256, compress to <100KB, store as base64
  */
 
 import { useRef, useState } from "react";
@@ -13,7 +13,7 @@ interface ProjectImagePickerProps {
     onChange: (v: string) => void;
 }
 
-const TARGET_SIZE = 64;
+const TARGET_SIZE = 256;
 const MAX_BYTES = 100 * 1024;
 
 function processImage(file: File): Promise<string> {
@@ -74,10 +74,9 @@ export function ProjectImagePicker({ value, onChange }: ProjectImagePickerProps)
         <div
             tabIndex={0}
             className={cn(
-                "relative flex items-center gap-3 rounded-xl h-[64px] border border-dashed px-3 py-3 cursor-pointer transition-colors duration-100 outline-none focus-visible:border-ring",
-                dragging
-                    ? "border-sa-amber bg-sa-amber/10"
-                    : "border-sa-border-strong hover:bg-sa-hover"
+                "group relative flex h-[148px] w-[148px] cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border text-center outline-none transition-colors duration-100 focus-visible:border-ring",
+                hasImage ? "border-sa-border" : "border-dashed",
+                dragging ? "border-sa-amber bg-sa-amber/10" : !hasImage && "border-sa-border-strong hover:bg-sa-hover"
             )}
             onClick={(e) => {
                 if (e.shiftKey) return;
@@ -91,52 +90,36 @@ export function ProjectImagePicker({ value, onChange }: ProjectImagePickerProps)
                 if (item) { const f = item.getAsFile(); if (f) handleFile(f); }
             }}
         >
-            {/* Preview */}
             {hasImage ? (
-                <img src={value} alt="project" className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
+                <img src={value} alt="project" className="h-full w-full object-cover" />
             ) : (
-                <span className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0 text-muted-foreground">
-                    <FolderOpen className="w-6 h-6" />
-                </span>
+                <>
+                    <FolderOpen className="h-7 w-7 text-muted-foreground" />
+                    <span className="px-3 text-xs leading-snug text-muted-foreground">
+                        {processing ? "Processing..." : "Add cover image"}
+                    </span>
+                </>
             )}
 
-            {/* Label */}
-            <div className="flex-1 min-w-0">
-                {processing ? (
-                    <span className="text-xs text-muted-foreground">Processing...</span>
-                ) : hasImage ? (
-                    <span className="text-xs text-muted-foreground">Custom image</span>
-                ) : (
-                    <span className="text-xs text-muted-foreground">
-                        Click, drag & drop, or paste to upload
-                    </span>
-                )}
-            </div>
-
-            {/* Actions */}
             {hasImage && !processing && (
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="absolute right-1.5 top-1.5 flex items-center gap-0.5 opacity-0 transition-opacity duration-100 group-hover:opacity-100 group-focus-within:opacity-100">
                     <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                        className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong transition-colors"
+                        className="rounded-md bg-background/85 p-1.5 text-muted-foreground transition-colors hover:text-foreground"
                         title="Replace image"
                     >
-                        <Upload className="w-3.5 h-3.5" />
+                        <Upload className="h-3.5 w-3.5" />
                     </button>
                     <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); onChange(""); }}
-                        className="p-1 rounded text-muted-foreground hover:text-sa-danger hover:bg-sa-hover-strong transition-colors"
+                        className="rounded-md bg-background/85 p-1.5 text-muted-foreground transition-colors hover:text-sa-danger"
                         title="Remove image"
                     >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="h-3.5 w-3.5" />
                     </button>
                 </div>
-            )}
-
-            {!hasImage && !processing && (
-                <Upload className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             )}
 
             <input

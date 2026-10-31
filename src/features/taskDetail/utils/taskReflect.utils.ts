@@ -22,6 +22,23 @@ export function withReflectRows(json: string | null | undefined, rows: ReflectRo
     return serializeCustomTabs({ ...parseCustomTabs(json), reflect: rows });
 }
 
+/** Rows stored as a plain JSON array string (project `reflectJson`); empty list when absent or invalid */
+export function parseReflectList(json: string | null | undefined): ReflectRow[] {
+    if (!json) return [];
+    try {
+        const parsed = JSON.parse(json);
+        return Array.isArray(parsed) ? (parsed as ReflectRow[]) : [];
+    } catch {
+        return [];
+    }
+}
+
+/** Filled rows as a JSON array string, or null when nothing is left */
+export function stringifyReflectList(rows: ReflectRow[]): string | null {
+    const filled = keepFilledReflectRows(rows);
+    return filled.length ? JSON.stringify(filled) : null;
+}
+
 export function isReflectRowEmpty(row: ReflectRow): boolean {
     return !row.type.trim() && !row.think.trim() && !row.real.trim();
 }
@@ -31,6 +48,11 @@ export function keepFilledReflectRows(rows: ReflectRow[]): ReflectRow[] {
     return rows
         .map((r) => ({ ...r, type: r.type.trim(), think: r.think.trim(), real: r.real.trim() }))
         .filter((r) => !isReflectRowEmpty(r));
+}
+
+/** Number of rows that hold some text (blank rows not counted) */
+export function countReflectRows(rows: ReflectRow[]): number {
+    return keepFilledReflectRows(rows).length;
 }
 
 /** True when both lists hold the same filled rows (blank rows are ignored) */

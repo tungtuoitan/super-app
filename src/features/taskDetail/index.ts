@@ -9,6 +9,22 @@ export { TaskEditorPanel } from "./Components/TaskEditorPanel";
 export { MakeIndependentDropZone } from "./Components/small/MakeIndependentDropZone";
 export { TASK_ROW } from "./task.constants";
 
+// Reflect (shared by the task and project Reflect tabs)
+export { ReflectSheet } from "./Components/small/ReflectSheet";
+export { PropertyChip } from "./Components/small/PropertyChip";
+export { SectionSaveBar } from "./Components/small/SectionSaveBar";
+export {
+    createReflectRow,
+    buildReflectTypeOptions,
+    keepFilledReflectRows,
+    countReflectRows,
+    isSameReflectRows,
+    parseReflectList,
+    stringifyReflectList,
+} from "./utils/taskReflect.utils";
+export type { ReflectRow, ReflectField } from "./types/taskReflect.types";
+export type { SectionFeedback } from "./types/sectionFeedback.types";
+
 // Types
 export type { Task, TaskPaginationState } from "./types/task.types";
 export type { TaskDragItem } from "./types/taskGrid.types";

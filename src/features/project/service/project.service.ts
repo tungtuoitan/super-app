@@ -18,6 +18,7 @@ export interface ProjectDTO {
     deletedAt?: string | null;
     workspaceId?: number | null;
     image?: string | null;
+    reflectJson?: string | null;
 }
 
 const getProjects = async (
@@ -70,6 +71,21 @@ const upsertProjectBatch = async (
     return Promise.reject(res);
 };
 
+/** Partial update — only the sent fields change (null/absent = unchanged; list a field in clearFields to empty it) */
+const patchProject = async (
+    _token: string,
+    projectId: number,
+    patch: { reflectJson?: string; clearFields?: Array<"reflectJson"> },
+): Promise<ResultOptions<ProjectDTO>> => {
+    const res = await apiFetch(`${config.api.baseURL}/api/project/${projectId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+    });
+    if (res.ok) return (await res.json()) as ResultOptions<ProjectDTO>;
+    return Promise.reject(res);
+};
+
 const getProjectById = async (_token: string, id: number): Promise<ResultOptions<ProjectDTO>> => {
     const res = await apiFetch(`${config.api.baseURL}/api/project/${id}`, {
         method: "GET",
@@ -82,5 +98,6 @@ const getProjectById = async (_token: string, id: number): Promise<ResultOptions
 export const projectService = {
     getProjects,
     getProjectById,
+    patchProject,
     upsertProjectBatch,
 };
