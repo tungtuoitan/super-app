@@ -98,10 +98,12 @@
   function minWidth(list, depth, narrow) {
     let w = depth === 1 ? TOP_BOX_MIN : MIN_LANE;
     for (const n of list) {
-      if (n.kind === "branch") {
+      if (LL.flow.LANED[n.kind]) {
         const lanes = n.lanes.map((l) => Math.max(MIN_LANE, minWidth(l.steps, depth + 1, narrow)));
         const need = narrow ? Math.max(...lanes) + 24 : lanes.reduce((a, b) => a + b, 0) + LANE_GAP * (lanes.length - 1);
         w = Math.max(w, need);
+      } else if (n.kind === "section") {
+        w = Math.max(w, minWidth(n.steps, 1, narrow));
       } else if (n.kind === "loop") {
         w = Math.max(w, minWidth(n.steps, depth + 1, narrow) + LOOP_PAD * 2 + 16);
       } else if (n.kind === "group") {
@@ -144,14 +146,16 @@
       let prev = from && from.length ? from : null;
       let merged = false; // prev is a merge-bus point: connect straight down
       let ended = false;
+      let prevRemoved = false; // the box above is a removed one: connectors around it are dashed
       const cx = x + w / 2;
 
-      const connect = (to) => {
+      const connect = (to, removed) => {
         if (!prev) return;
+        const dashed = removed || prevRemoved;
         if (merged || prev.length === 1) {
           const p = prev[0];
-          if (Math.abs(p.x - to.x) < 0.5) arrowTo(p, to);
-          else { const midY = to.y - BUS; edges.push({ d: `M${p.x} ${p.y}V${midY}H${to.x}V${to.y}`, arrow: true }); }
+          if (Math.abs(p.x - to.x) < 0.5) edges.push({ d: `M${p.x} ${p.y}V${to.y}`, arrow: true, removed: dashed });
+          else { const midY = to.y - BUS; edges.push({ d: `M${p.x} ${p.y}V${midY}H${to.x}V${to.y}`, arrow: true, removed: dashed }); }
         } else {
           const busY = to.y - BUS;
           for (const p of prev) edges.push({ d: `M${p.x} ${p.y}V${busY}`, arrow: false });
@@ -165,12 +169,27 @@
         const id = path + i;
         const isLast = i === list.length - 1;
 
-        if (node.kind === "branch") {
-          const r = narrow ? branchNarrow(node, id, x, w, cursor, depth, !!prev) : branchWide(node, id, x, w, cursor, depth, isLast, !!prev);
+        if (LL.flow.LANED[node.kind]) {
+          const r = (narrow ? LL.layout._branchNarrow : LL.layout._branchWide)(ctx, node, id, x, w, cursor, depth, isLast, !!prev);
           prev = r.tails.length ? r.tails : null;
           merged = r.merged;
           ended = r.ended;
+          prevRemoved = false;
           cursor = r.next;
+          return;
+        }
+
+        if (node.kind === "section") {
+          // an independent entry point: its own header, no arrow from what came before
+          if (i > 0) cursor += 34;
+          const tb = textBlock(node, w);
+          boxes.push({ id, x, y: cursor, w, h: tb.h, kind: "section", attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node, change: node.change, clipped: tb.clipped });
+          const hb = cursor + tb.h;
+          const r = node.steps.length ? seq(node.steps, x, w, hb + GAP, id + ".", 1, [{ x: cx, y: hb }]) : { bottom: hb };
+          prev = null;
+          merged = false;
+          prevRemoved = false;
+          cursor = r.bottom + GAP;
           return;
         }
 
@@ -204,7 +223,7 @@
             const total = r.reduce((a, q) => a + q.w, 0) + 12 * (r.length - 1);
             let xx = gx + (gw - total) / 2;
             for (const q of r) {
-              itemBoxes.push({ id: id + ".i" + itemBoxes.length, x: xx, y: yy, w: q.w, h: rh, kind: "item", attention: q.it.attention, titleLines: q.tl, subLines: q.sl, groupId: id, lines: q.it.lines || null, full: q.it.title + (q.it.sub ? " — " + q.it.sub : "") });
+              itemBoxes.push({ id: id + ".i" + itemBoxes.length, x: xx, y: yy, w: q.w, h: rh, kind: "item", attention: q.it.attention, titleLines: q.tl, subLines: q.sl, groupId: id, lines: q.it.lines || null, change: q.it.change, full: q.it.title + (q.it.sub ? " — " + q.it.sub : "") });
               xx += q.w + 12;
             }
             yy += rh + 10;
@@ -212,11 +231,12 @@
           const noteLines = node.note ? wrap(node.note, FONT.note, inner, 3) : [];
           if (noteLines.length) yy += 2 + noteLines.length * FONT.note.lh;
           const gh = Math.max(yy - gy + (rows.length || noteLines.length ? 6 : 0) + PAD_Y - 4, head.h);
-          boxes.push({ id, x: gx, y: gy, w: gw, h: gh, kind: "group", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, noteLines, node, noteY: yy - noteLines.length * FONT.note.lh, container: true });
+          boxes.push({ id, x: gx, y: gy, w: gw, h: gh, kind: "group", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, noteLines, node, noteY: yy - noteLines.length * FONT.note.lh, container: true, change: node.change });
           for (const b of itemBoxes) boxes.push(b);
-          connect({ x: cx, y: gy });
+          connect({ x: cx, y: gy }, node.change === "removed");
           prev = [{ x: cx, y: gy + gh }];
           merged = false;
+          prevRemoved = node.change === "removed";
           cursor = gy + gh + GAP;
           return;
         }
@@ -226,7 +246,7 @@
           const fx = x + (w - fw) / 2;
           const head = textBlock({ title: "↻ " + (node.title || ""), sub: node.sub }, fw - 24);
           const fy = cursor;
-          connect({ x: cx, y: fy });
+          connect({ x: cx, y: fy }, node.change === "removed");
           const headH = PAD_Y + head.titleLines.length * FONT.title.lh + (head.subLines.length ? 3 + head.subLines.length * FONT.sub.lh : 0) + 4;
           const ix = fx + LOOP_PAD;
           const iw = fw - LOOP_PAD * 2 - 16; // leave room for the return arrow on the right
@@ -242,23 +262,27 @@
             if (!r.ended) edges.push({ d: `M${from.x} ${from.y}V${bottom + 10}H${rx}V${headMid}H${rx - 12}`, arrow: true, loop: true });
           }
           const fh = bottom - fy + (node.steps.length ? 22 : PAD_Y);
-          boxes.push({ id, x: fx, y: fy, w: fw, h: fh, kind: "loop", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, node, container: true, headH });
+          boxes.push({ id, x: fx, y: fy, w: fw, h: fh, kind: "loop", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, node, container: true, headH, change: node.change });
           prev = [{ x: cx, y: fy + fh }];
           merged = false;
+          prevRemoved = node.change === "removed";
           cursor = fy + fh + GAP;
           return;
         }
 
-        // step / stage / end
+        // start / step / call / stage / end
         const bw = depth === 1 ? Math.min(w, Math.max(TOP_BOX_MIN, w * 0.56)) : Math.max(60, w - 8);
-        const tb = textBlock(node, bw);
+        // room for the effect tag and the change chip so they never cover the title
+        const tb = textBlock(node, bw - (node.tag || node.change ? 20 : 0) - (node.kind === "call" ? 12 : 0));
+        tb.h += node.tag || node.change ? 8 : 0;
         const bx = x + (w - bw) / 2;
-        const isEnd = node.kind === "end";
-        boxes.push({ id, x: bx, y: cursor, w: bw, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node, clipped: tb.clipped });
-        connect({ x: cx, y: cursor });
+        const removed = node.change === "removed";
+        boxes.push({ id, x: bx, y: cursor, w: bw, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node, clipped: tb.clipped, change: node.change });
+        connect({ x: cx, y: cursor }, removed);
         merged = false;
-        if (isEnd) { prev = null; ended = true; }
+        if (node.kind === "end" && !removed) { prev = null; ended = true; }
         else prev = [{ x: cx, y: cursor + tb.h }];
+        prevRemoved = removed;
         cursor += tb.h + GAP;
       });
 
@@ -276,118 +300,28 @@
       return Number.isFinite(head) && head < n;
     }
 
-    function laneHead(lane, lid, x, y, w) {
+    function laneHead(lane, lid, x, y, w, parallel) {
       const tb = textBlock(lane, w);
-      boxes.push({ id: lid, x, y, w, h: tb.h, kind: "lane", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane, clipped: tb.clipped });
+      boxes.push({ id: lid, x, y, w, h: tb.h, kind: parallel ? "plane" : "lane", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane, clipped: tb.clipped, change: lane.change });
       return tb.h;
     }
 
-    function questionLabel(text, x, y, anchor) {
+    function questionLabel(text, x, y, anchor, parallel) {
       if (!text) return;
       const f = FONT.label;
       const t = wrap(text, f, 260, 1)[0];
       const tw = measure(t, f) + 14;
       const lx = anchor === "end" ? x - tw : x;
-      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text });
+      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text, parallel: !!parallel });
     }
 
-    function branchWide(node, id, x, w, top, depth, isLast, hasPrev) {
-      const n = node.lanes.length;
-      const mins = node.lanes.map((l) => Math.max(MIN_LANE, minWidth(l.steps, depth + 1, false)));
-      const sumMin = mins.reduce((a, b) => a + b, 0);
-      const spare = Math.max(0, w - sumMin - LANE_GAP * (n - 1));
-      const widths = mins.map((m) => m + (spare * m) / sumMin);
-      const lefts = [];
-      let acc = x;
-      for (const lw of widths) { lefts.push(acc); acc += lw + LANE_GAP; }
-      const centers = widths.map((lw, j) => lefts[j] + lw / 2);
-      const cx = x + w / 2;
-      // fork bus sits just above the lanes; the previous box's arrow ends on it
-      const busY = top - GAP + BUS;
-      const laneTop = busY + 22 + (node.title ? 8 : 0);
-      if (hasPrev) {
-        edges.push({ d: `M${cx} ${top - GAP}V${busY}`, arrow: false, fork: true });
-        const xs = centers.concat([cx]);
-        if (n > 1 || Math.abs(centers[0] - cx) > 0.5) edges.push({ d: `M${Math.min(...xs)} ${busY}H${Math.max(...xs)}`, arrow: false });
-      }
-      if (hasPrev) for (const c of centers) edges.push({ d: `M${c} ${busY}V${laneTop}`, arrow: true });
-      if (node.title) questionLabel(node.title, Math.min(...centers) + 8, busY + 13, "start");
-
-      const tails = [];
-      let maxBottom = laneTop;
-      node.lanes.forEach((lane, j) => {
-        const lid = id + ".l" + j;
-        const lw = widths[j];
-        const hh = laneHead(lane, lid, lefts[j] + 4, laneTop, lw - 8);
-        let bottom = laneTop + hh;
-        let laneTails = [{ x: centers[j], y: bottom }];
-        let laneEnded = false;
-        if (lane.steps.length) {
-          const r = seq(lane.steps, lefts[j], lw, bottom + GAP, lid + ".", depth + 1, laneTails);
-          laneTails = r.tails;
-          laneEnded = r.ended;
-          bottom = r.bottom;
-        }
-        maxBottom = Math.max(maxBottom, bottom);
-        if (!laneEnded) tails.push(...laneTails);
-      });
-      if (!tails.length) return { tails: [], merged: false, ended: true, next: maxBottom + GAP };
-      if (isLast && depth === 1) return { tails, merged: false, ended: false, next: maxBottom + GAP };
-      // merge: drop each continuing lane to a shared bus; the next box hangs off the bus center
-      const mergeY = maxBottom + BUS;
-      for (const p of tails) edges.push({ d: `M${p.x} ${p.y}V${mergeY}`, arrow: false });
-      const xs = tails.map((p) => p.x).concat([cx]);
-      if (Math.max(...xs) - Math.min(...xs) > 0.5) edges.push({ d: `M${Math.min(...xs)} ${mergeY}H${Math.max(...xs)}`, arrow: false });
-      return { tails: [{ x: cx, y: mergeY }], merged: true, ended: false, next: mergeY + GAP - BUS + 6 };
-    }
-
-    /**
-     * Phones: lanes stacked under one another, hanging off a rail on the left. The rail starts at the fork and
-     * continues past the last lane to where the paths join again; lanes that end early stop at their end box.
-     */
-    function branchNarrow(node, id, x, w, top, depth, hasPrev) {
-      const railX = x + 9;
-      const lx = x + 24;
-      const lw = w - 24;
-      const cx = x + w / 2;
-      const forkY = top - GAP + BUS;
-      if (hasPrev) edges.push({ d: `M${cx} ${top - GAP}V${forkY}H${railX}`, arrow: false });
-      let y = forkY + 14;
-      if (node.title) { questionLabel(node.title, railX + 10, y + 4, "start"); y += 24; }
-      const n = node.lanes.length;
-      let anyContinues = false;
-      let lastHeadMid = forkY;
-      node.lanes.forEach((lane, j) => {
-        const lid = id + ".l" + j;
-        // the lane number makes it clear these are alternatives, not a sequence
-        const head = Object.assign({}, lane, { sub: `nhánh ${j + 1}/${n}` + (lane.sub ? " · " + lane.sub : "") });
-        const hh = laneHead(head, lid, lx, y, lw);
-        const mid = y + hh / 2;
-        edges.push({ d: `M${railX} ${mid}H${lx}`, arrow: true });
-        lastHeadMid = mid;
-        let bottom = y + hh;
-        if (lane.steps.length) {
-          const r = seq(lane.steps, lx, lw, bottom + GAP, lid + ".", depth + 1, [{ x: lx + lw / 2, y: bottom }]);
-          if (!r.ended) anyContinues = true;
-          bottom = r.bottom;
-        } else anyContinues = true;
-        y = bottom + 22;
-      });
-      if (!anyContinues) {
-        edges.push({ d: `M${railX} ${forkY}V${lastHeadMid}`, arrow: false });
-        return { tails: [], merged: false, ended: true, next: y - 22 + GAP };
-      }
-      // the rail runs on to the join point, then back to the middle where the main path continues
-      const joinY = y - 4;
-      edges.push({ d: `M${railX} ${forkY}V${joinY}H${cx}`, arrow: false });
-      return { tails: [{ x: cx, y: joinY }], merged: true, ended: false, next: joinY + GAP - BUS + 6 };
-    }
-
+    // shared with the lane layouts in layout-lanes.js
+    const ctx = { boxes, edges, labels, seq, laneHead, questionLabel, textBlock };
     const r = seq(flow.steps, margin, W - margin * 2, 16, "", 1, null);
     let bottom = r.bottom;
     for (const b of boxes) bottom = Math.max(bottom, b.y + b.h);
     return { width: W, height: Math.ceil(bottom + 20), boxes, edges, labels, narrow };
   }
 
-  LL.layout = Object.assign(LL.layout || {}, { layout, wrap, setMeasure, browserMeasure, minWidth, BASE_W, FAMILY, FONT, MIN_LANE, PAD_Y });
+  LL.layout = Object.assign(LL.layout || {}, { layout, wrap, setMeasure, browserMeasure, minWidth, measure, BASE_W, FAMILY, FONT, MIN_LANE, PAD_Y, GAP, BUS, LANE_GAP });
 })(globalThis.LL = globalThis.LL || {});

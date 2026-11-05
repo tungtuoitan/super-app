@@ -214,3 +214,44 @@ test("the 'never reached' mark is not written to the text, so fixing the order c
   const fixed = F.parseText("step after | real sub\nend stop\n").flow;
   assert.ok(!fixed.steps[0].unreachable && !fixed.steps[0].attention && fixed.steps[0].sub === "real sub");
 });
+
+test("new kinds: start, call, parallel, section, end exits, tags, changes (normalize + text round-trip)", () => {
+  const f = F.normalize({ title: "t", changeSummary: "fixes double charge", steps: [
+    { kind: "section", title: "On load", steps: [{ kind: "entry", title: "useEffect" }, { kind: "fetch", title: "load", tag: "api" }] },
+    { kind: "section", title: "On save", steps: [
+      { kind: "start", title: "onSave()", tag: "ui" },
+      { kind: "promise.all", lanes: [{ title: "a", tag: "DB", steps: [] }, { title: "b", change: "added", changeNote: "new", steps: [] }] },
+      { kind: "invoke", title: "api.save", change: "modified", why: "now idempotent" },
+      { kind: "throw", title: "Fail" },
+      { kind: "step", title: "Old", change: "deleted", changeNote: "gone" },
+    ] },
+  ] });
+  assert.equal(f.changeSummary, "fixes double charge");
+  assert.equal(f.steps[0].kind, "section");
+  assert.equal(f.steps[0].steps[0].kind, "start");
+  assert.equal(f.steps[0].steps[1].tag, "API");
+  const save = f.steps[1].steps;
+  assert.equal(save[1].kind, "parallel");
+  assert.equal(save[1].lanes[1].change, "added");
+  assert.equal(save[2].kind, "call");
+  assert.equal(save[2].change, "modified");
+  assert.equal(save[2].changeNote, "now idempotent");
+  assert.equal(save[3].kind, "end");
+  assert.equal(save[3].exit, "throw");
+  assert.equal(save[4].change, "removed");
+  assert.ok(!save[4].unreachable, "a removed box after an end is not 'unreachable'");
+  const back = F.parseText(F.toText(f));
+  assert.deepEqual(back.errors, []);
+  assert.deepEqual(back.flow, f);
+  const m = F.toMermaid(f);
+  assert.ok(m.includes("subgraph") && m.includes("[[") && m.includes("classDef added"));
+});
+
+test("change prompt shows the merged listing and the change rules", () => {
+  const cmp = LL.diff.compare("a\nb\nc", "a\nB\nc\nd");
+  const p = F.buildPrompt("a\nB\nc\nd", { change: cmp, language: "vi" });
+  assert.ok(p.includes("This is a CODE CHANGE"));
+  assert.ok(p.includes("2+| B") && p.includes(" -| b") && p.includes("4+| d"));
+  assert.ok(p.includes('"changeSummary"'));
+  assert.ok(!F.buildPrompt("x", {}).includes("CODE CHANGE"));
+});

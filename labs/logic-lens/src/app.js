@@ -1,74 +1,86 @@
-/* Logic Lens — asking Claude, exports, and wiring the page together (boot). */
+/* Logic Lens — asking Claude (code or code change), examples, exports, and wiring the page together (boot). */
 (function (LL) {
   "use strict";
 
-  const { S, $, F, LAY, toast, copyText, setStatus, linesLabel, capability, setCode, updateCodeInfo, buildCodeView, setCodeMode, highlightLines, loadDraft, writeDraft, saveDraft, flushDraft } = LL.app;
-  const { setFlow, renderDiagram, MIN_FIT, applyZoom, zoomBy, applySelection, select, sheetMode, boxForLine, renderExplain, whereText, snippet, updateTourUi, step, toggleTour } = LL.app;
+  const { S, $, F, LAY, toast, copyText, setStatus, capability, loadDraft, saveDraft, flushDraft, createEditors, diagramCode, diagramEditor, refreshChange, updateCodeInfo, showTab, setMode } = LL.app;
+  const { setFlow, renderDiagram, applyZoom, zoomBy, toggleFit, select, boxForLine, renderExplain, step, toggleTour, setOnlyChanges } = LL.app;
 
-  // ───────────────────────── Claude ─────────────────────────
   const ERR = {
     not_granted: "Bạn chưa cho phép trang này dùng Claude. Có thể dùng Claude ở nơi khác (mục bên dưới).",
     sampling_disabled: "Tài khoản này không dùng được Claude trong trang. Có thể dùng Claude ở nơi khác (mục bên dưới).",
+    capability_disabled: "Claude không dùng được trong cửa sổ này. Có thể dùng Claude ở nơi khác (mục bên dưới).",
+    not_declared: "Trang này không còn được phép gọi Claude. Có thể dùng Claude ở nơi khác (mục bên dưới).",
     rate_limited: "Đang gọi Claude quá nhiều hoặc đã chạm giới hạn sử dụng. Chờ một lúc rồi thử lại.",
     prompt_too_large: "Code quá dài cho một lần vẽ. Hãy dán một hàm hoặc một đoạn nhỏ hơn.",
     session_expired: "Phiên đăng nhập đã hết hạn. Đăng nhập lại rồi thử lần nữa.",
     refused: "Claude từ chối đoạn code này. Thử bỏ bớt phần nhạy cảm rồi vẽ lại.",
     invalid_json: "Claude trả lời không đúng định dạng. Bấm vẽ lại, hoặc chọn mức “Gọn”.",
+    bad_shape: "Claude trả về sơ đồ sai cấu trúc. Bấm vẽ lại, hoặc chọn mức “Gọn”.",
     empty_completion: "Claude không trả lời gì. Thử lại với đoạn code ngắn hơn.",
     upstream_error: "Kết nối tới Claude bị gián đoạn. Thử lại.",
-    capability_disabled: "Claude không dùng được trong cửa sổ này. Có thể dùng Claude ở nơi khác (mục bên dưới).",
-    not_declared: "Trang này không còn được phép gọi Claude. Có thể dùng Claude ở nơi khác (mục bên dưới).",
-    bad_shape: "Claude trả về sơ đồ sai cấu trúc. Bấm vẽ lại, hoặc chọn mức “Gọn”.",
   };
+  const NO_CLAUDE = { not_granted: 1, sampling_disabled: 1, capability_disabled: 1, not_declared: 1 };
+
+  /** The prompt for what is on screen now, or an error message. */
+  function promptNow() {
+    const code = diagramCode();
+    if (!code.trim()) return { error: S.mode === "change" ? "Chưa có code Sau. Dán code sau khi sửa (hoặc dán git diff)." : "Chưa có code. Dán code vào khung bên trái trước." };
+    if (S.mode === "change") {
+      if (!S.ed.before.getValue().trim()) return { error: "Chưa có code Trước. Dán code trước khi sửa, hoặc dùng “Dán git diff”." };
+      const cmp = refreshChange();
+      if (!cmp || !cmp.stats.changed) return { error: "Code Trước và Sau giống hệt nhau: chưa có thay đổi nào để vẽ." };
+    }
+    return { code, prompt: F.buildPrompt(code, { language: S.lang, detail: S.detail, change: S.mode === "change" ? S.cmp : null }) };
+  }
+
+  function drawn(flow, startedMsg) {
+    S.codeAtDraw = diagramCode();
+    S.selected = null;
+    S.tour = false;
+    $("example").value = "";
+    setFlow(flow);
+    updateCodeInfo();
+    setStatus(startedMsg);
+    showPane("canvas");
+  }
 
   async function draw() {
-    const code = $("code").hidden ? S.code : $("code").value;
-    S.code = code.replace(/\r\n/g, "\n");
-    if (!S.code.trim()) { setStatus("Chưa có code. Dán code vào khung bên trên trước.", "err"); return; }
+    const p = promptNow();
+    if (p.error) { setStatus(p.error, "err"); return; }
     if (S.sample === undefined) { setStatus("Đang kết nối Claude…", "busy"); S.sample = await capability("sample"); }
     if (!S.sample) {
       setStatus("Trang này không gọi trực tiếp được Claude. Dùng cách bên dưới: copy prompt sang Claude rồi dán câu trả lời về.", "err");
       $("alt").open = true;
       return;
     }
-    const prompt = F.buildPrompt(S.code, { language: S.lang, detail: S.detail });
-    if (new Blob([prompt]).size > 250000) { setStatus(ERR.prompt_too_large, "err"); return; }
+    if (new Blob([p.prompt]).size > 250000) { setStatus(ERR.prompt_too_large, "err"); return; }
     S.ctl = new AbortController();
     $("draw").disabled = true;
     $("stop").hidden = false;
-    const nLines = S.code.split("\n").length;
-    setStatus(nLines > 400
-      ? `Claude đang đọc ${nLines} dòng code… Code dài: sơ đồ sẽ chỉ giữ luồng chính. Muốn rõ hơn, hãy dán từng hàm. (thường mất 30–90 giây)`
-      : "Claude đang đọc code và tìm các bước chính… (thường mất 20–60 giây)", "busy");
+    const n = p.code.split("\n").length;
+    setStatus(n > 400 ? `Claude đang đọc ${n} dòng code… Code dài: sơ đồ sẽ chỉ giữ luồng chính. (thường mất 30–90 giây)` : "Claude đang đọc code và tìm các bước chính… (thường mất 20–60 giây)", "busy");
     const started = Date.now();
     try {
-      const result = await S.sample.json(prompt, {
+      const result = await S.sample.json(p.prompt, {
         signal: S.ctl.signal,
         modelTier: "default",
         onText: ({ text }) => {
           const titles = [...text.matchAll(/"title"\s*:\s*"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1]).slice(1);
-          setStatus(titles.length ? `Claude đã thấy ${titles.length} bước: ${titles.slice(-6).join(" · ")}…` : "Claude đang viết sơ đồ…", "busy");
+          setStatus(titles.length ? `Claude đã thấy ${titles.length} bước: ${titles.slice(-5).join(" · ")}…` : "Claude đang viết sơ đồ…", "busy");
         },
       });
       let flow;
       try { flow = F.normalize(result); } catch (err) { throw { code: "bad_shape" }; }
       if (!flow.steps.length) throw { code: "bad_shape" };
-      buildCodeView();
-      S.codeAtDraw = S.code;
-      S.selected = null;
-      S.tour = false;
-      $("example").value = "";
-      setFlow(flow);
-      setCodeMode("view");
-      const limit = { simple: 10, normal: 16, detailed: 26 }[S.detail] || 16;
-      const dense = S.nodes.length > limit * 1.5;
-      setStatus(`Xong sau ${Math.round((Date.now() - started) / 1000)} giây: ${S.nodes.length} ô. Bấm vào ô để xem giải thích.` + (dense ? " Sơ đồ khá dày: thử mức “Gọn” hoặc dán từng hàm để dễ đọc hơn." : ""));
+      const limit = { simple: 10, normal: 18, detailed: 28 }[S.detail] || 18;
+      const secs = Math.round((Date.now() - started) / 1000);
+      drawn(flow, `Xong sau ${secs} giây: ${F.countBoxes(flow)} ô. Bấm vào ô để xem giải thích.` + (F.countBoxes(flow) > limit * 1.5 ? " Sơ đồ khá dày: thử mức “Gọn” hoặc dán từng hàm." : ""));
     } catch (e) {
       const code = e && e.code;
       if (code === "cancelled") setStatus("Đã dừng.");
       else {
         setStatus(ERR[code] || ERR.upstream_error, "err");
-        if (code === "not_granted" || code === "sampling_disabled" || code === "capability_disabled" || code === "not_declared") { S.sample = null; $("alt").open = true; }
+        if (NO_CLAUDE[code]) { S.sample = null; $("alt").open = true; }
       }
     } finally {
       $("draw").disabled = false;
@@ -77,11 +89,49 @@
     }
   }
 
-  // ───────────────────────── exports ─────────────────────────
+  // ───────────────────────── examples ─────────────────────────
+  function allExamples() {
+    const own = LL.sample.EXAMPLES.map((e) => ({ id: e.id, name: e.name, group: "code" }));
+    const corpus = (LL.corpus || []).map((e) => ({ id: e.id, name: e.name, group: e.group }));
+    return own.concat(corpus);
+  }
+  function loadExample(id) {
+    const own = LL.sample.EXAMPLES.find((e) => e.id === id);
+    if (own) {
+      const ex = LL.sample.getExample(id);
+      setMode("code");
+      S.ed.code.setValue(ex.code);
+      afterExample(F.normalize(ex.flow), ex.code);
+      return;
+    }
+    const ex = (LL.corpus || []).find((e) => e.id === id);
+    if (!ex) return;
+    if (ex.group === "change") {
+      setMode("change");
+      S.ed.before.setValue(ex.before);
+      S.ed.after.setValue(ex.after);
+      refreshChange();
+      afterExample(F.normalize(ex.flow), ex.after);
+    } else {
+      setMode("code");
+      S.ed.code.setValue(ex.code);
+      afterExample(F.normalize(ex.flow), ex.code);
+    }
+  }
+  function afterExample(flow, code) {
+    S.codeAtDraw = code;
+    S.selected = null;
+    S.tour = false;
+    S.onlyChanges = false;
+    $("only-changes").checked = false;
+    updateCodeInfo();
+    setFlow(flow);
+    setStatus(S.mode === "change" ? "Ví dụ có sẵn sơ đồ thay đổi. Bấm vào ô có nhãn + / ~ / − để xem đã đổi gì." : "Ví dụ có sẵn sơ đồ. Thử sửa code rồi bấm “Vẽ sơ đồ” để Claude vẽ lại.");
+  }
+
+  // ───────────────────────── exports, legend, diff dialog ─────────────────────────
   function svgForExport() {
-    if (!S.flow || !S.flow.steps.length) return null;
-    // exported files always use the light palette (the fallbacks inside the SVG's own style block)
-    return LAY.toSvg(S.flow, S.lay || LAY.layout(S.flow), { interactive: false, background: "#ffffff" });
+    return S.flow && S.flow.steps.length ? LAY.toSvg(S.flow, LAY.layout(S.flow), { interactive: false, background: "#ffffff" }) : null;
   }
   function fileBase() {
     const t = (S.flow && S.flow.title) || "so-do";
@@ -89,154 +139,155 @@
   }
   async function saveFile(filename, data) {
     if (!S.downloads) return;
-    try {
-      await S.downloads.save({ filename, data });
-    } catch (e) {
-      if (e && e.code !== "declined") toast("Không tải được file ở đây.");
-    }
+    try { await S.downloads.save({ filename, data }); } catch (e) { if (e && e.code !== "declined") toast("Không tải được file ở đây."); }
   }
   async function downloadPng() {
     const svg = svgForExport();
     if (!svg) return;
-    const blob = new Blob([svg], { type: "image/svg+xml" });
-    const url = URL.createObjectURL(blob);
+    const lay = LAY.layout(S.flow);
+    const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
     try {
       const img = new Image();
       await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
-      const scale = 2;
       const c = document.createElement("canvas");
-      c.width = S.lay.width * scale;
-      c.height = S.lay.height * scale;
+      c.width = lay.width * 2;
+      c.height = lay.height * 2;
       const ctx = c.getContext("2d");
-      ctx.scale(scale, scale);
-      ctx.drawImage(img, 0, 0, S.lay.width, S.lay.height);
+      ctx.scale(2, 2);
+      ctx.drawImage(img, 0, 0, lay.width, lay.height);
       const png = await new Promise((res) => c.toBlob(res, "image/png"));
       if (png) await saveFile(fileBase() + ".png", png);
-    } catch (e) {
-      toast("Không tạo được ảnh PNG.");
-    } finally {
-      URL.revokeObjectURL(url);
-    }
+    } catch (e) { toast("Không tạo được ảnh PNG."); } finally { URL.revokeObjectURL(url); }
+  }
+  const LEGEND = [
+    ["start", "Điểm bắt đầu (request, sự kiện, lời gọi)"], ["", "Một bước"], ["call", "Gọi hàm / dịch vụ khác"], ["stage", "Giai đoạn chính"],
+    ["lane", "Rẽ nhánh: chỉ một nhánh chạy"], ["plane", "Song song: các nhánh chạy cùng lúc"], ["loop", "Lặp lại"], ["end", "Dừng tại đây (return / throw…)"],
+    ["attn", "Đáng chú ý"], ["added", "Thay đổi: thêm mới"], ["modified", "Thay đổi: đã sửa"], ["removed", "Thay đổi: đã xoá"],
+  ];
+  function buildLegend() {
+    $("legend").innerHTML = LEGEND.map(([k, t]) => `<div><i class="lg ${k}"></i>${t}</div>`).join("") + '<div class="muted">Bấm một ô để xem giải thích và đúng dòng code.</div>';
+  }
+  function toggleMenu(btn, menu, force) {
+    const open = force != null ? force : menu.hidden;
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+  }
+  function applyDiff() {
+    const text = $("diff-input").value;
+    if (!LL.diff.isUnifiedDiff(text)) { toast("Không thấy diff hợp lệ (cần các dòng @@ -a,b +c,d @@)."); return; }
+    const files = LL.diff.parseUnified(text);
+    const after = S.ed.after.getValue();
+    const before = S.ed.before.getValue();
+    const fd = files[0];
+    if (files.length > 1) toast(`Diff có ${files.length} file, dùng file đầu: ${fd.newPath || fd.oldPath}.`);
+    let r;
+    if (after.trim()) { r = LL.diff.applyPatch(after, fd, "reverse"); S.ed.before.setValue(r.code); showTab("after"); }
+    else if (before.trim()) { r = LL.diff.applyPatch(before, fd, "forward"); S.ed.after.setValue(r.code); showTab("after"); }
+    else { toast("Dán code Trước hoặc Sau trước, rồi mới dán diff."); return; }
+    refreshChange();
+    updateCodeInfo();
+    $("diff-dialog").hidden = true;
+    setStatus(r.failed ? `Áp được ${r.applied}/${r.applied + r.failed} đoạn của diff. Kiểm tra lại code Trước / Sau.` : `Đã dựng lại từ diff (+${S.cmp ? S.cmp.stats.added : 0} −${S.cmp ? S.cmp.stats.removed : 0} dòng). Bấm “Vẽ sơ đồ thay đổi”.`, r.failed ? "err" : "");
+    saveDraft();
   }
 
-  // ───────────────────────── wiring ─────────────────────────
-  function segment(id, key) {
-    const seg = $(id);
-    const sync = () => seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === S[key])));
-    seg.addEventListener("click", (e) => {
-      const b = e.target.closest("button");
-      if (!b) return;
-      S[key] = b.dataset.v;
-      sync();
-      saveDraft();
-    });
-    return sync;
+  // ───────────────────────── panes (phones) ─────────────────────────
+  function showPane(pane) {
+    document.querySelector(".app").dataset.pane = pane;
+    document.querySelectorAll(".mobile-tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.pane === pane)));
+    if (pane === "canvas") requestAnimationFrame(() => { if (S.flow) applyZoom(); });
   }
+  LL.app.showPane = showPane;
 
-  function loadExample(id) {
-    const ex = LL.sample.getExample(id);
-    setCode(ex.code, "view");
-    S.codeAtDraw = ex.code;
-    S.selected = null;
-    S.tour = false;
-    setFlow(ex.flow);
-    setStatus(`Ví dụ có sẵn sơ đồ. Thử sửa code rồi bấm “Vẽ sơ đồ bằng Claude” để Claude vẽ lại.`);
-  }
-
+  // ───────────────────────── boot ─────────────────────────
   function boot() {
     LAY.setMeasure(LAY.browserMeasure());
+    let inputTimer = 0;
+    createEditors(() => {
+      $("example").value = "";
+      clearTimeout(inputTimer);
+      inputTimer = setTimeout(() => { refreshChange(); updateCodeInfo(); saveDraft(); if (S.selected) renderExplain(); }, 250);
+    }, (line) => {
+      if (!S.nodes.length) return;
+      const hit = boxForLine(line);
+      if (hit) select(hit.id, { fromCode: true });
+    });
 
     const exSel = $("example");
-    exSel.appendChild(new Option("Code của bạn", ""));
-    for (const ex of LL.sample.EXAMPLES) exSel.appendChild(new Option(ex.name, ex.id));
+    exSel.appendChild(new Option("Ví dụ…", ""));
+    const groups = { code: "Ví dụ code", change: "Ví dụ thay đổi code (sửa bug)" };
+    for (const [g, label] of Object.entries(groups)) {
+      const og = document.createElement("optgroup");
+      og.label = label;
+      for (const ex of allExamples().filter((e) => e.group === g)) og.appendChild(new Option(ex.name, ex.id));
+      if (og.children.length) exSel.appendChild(og);
+    }
     exSel.addEventListener("change", () => { if (exSel.value) loadExample(exSel.value); });
 
-    const syncLang = segment("lang-seg", "lang");
-    const syncDetail = segment("detail-seg", "detail");
-
-    const code = $("code");
-    let codeTimer = 0;
-    code.addEventListener("input", () => {
-      S.code = code.value.replace(/\r\n/g, "\n");
-      $("example").value = "";
-      updateCodeInfo();
-      clearTimeout(codeTimer);
-      codeTimer = setTimeout(() => { buildCodeView(); saveDraft(); }, 300);
+    $("mode-seg").addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b || b.dataset.v === S.mode) return;
+      setMode(b.dataset.v);
+      saveDraft();
     });
-    $("code-toggle").addEventListener("click", () => {
-      if ($("code").hidden) { setCodeMode("edit"); $("code").focus(); }
-      else { S.code = code.value.replace(/\r\n/g, "\n"); buildCodeView(); setCodeMode("view"); if (S.selected) highlightLines(S.byId.get(S.selected).node.lines, true); }
-    });
+    $("code-tabs").addEventListener("click", (e) => { const b = e.target.closest("[role=tab]"); if (b) showTab(b.dataset.tab); });
+    document.querySelectorAll(".mobile-tabs button").forEach((b) => b.addEventListener("click", () => showPane(b.dataset.pane)));
+    for (const [id, key] of [["lang-seg", "lang"], ["detail-seg", "detail"]]) {
+      const seg = $(id);
+      seg.addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        S[key] = b.dataset.v;
+        seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.v === S[key])));
+        saveDraft();
+      });
+    }
 
     $("draw").addEventListener("click", draw);
-    // clicking a code line selects the smallest box that covers it
-    $("code-view").addEventListener("click", (e) => {
-      const row = e.target.closest(".code-line");
-      if (!row || (window.getSelection && String(window.getSelection()).length)) return;
-      const line = S.lineEls.indexOf(row) + 1;
-      const hit = line ? boxForLine(line) : null;
-      if (hit) select(hit.id, { fromCode: true });
-      else if (line && S.nodes.length) { select(null); toast("Dòng " + line + " không thuộc ô nào trên sơ đồ."); }
-    });
-    $("sheet-prev").addEventListener("click", () => step(-1));
-    $("sheet-next").addEventListener("click", () => step(1));
-    $("sheet-close").addEventListener("click", () => { S.tour = false; select(null); });
-    // switch between the side-by-side and stacked branch layouts when the frame width crosses 600px
-    if (window.ResizeObserver) {
-      new ResizeObserver(() => {
-        const w = $("canvas").clientWidth;
-        if (S.flow && w > 0 && (w < 600) !== !!S.narrow) renderDiagram();
-        else applyZoom();
-      }).observe($("canvas"));
-    }
     $("stop").addEventListener("click", () => S.ctl && S.ctl.abort());
     $("copy-prompt").addEventListener("click", async () => {
-      const c = $("code").hidden ? S.code : $("code").value;
-      if (!c.trim()) { toast("Chưa có code để tạo prompt."); return; }
-      const ok = await copyText(F.buildPrompt(c, { language: S.lang, detail: S.detail }));
+      const p = promptNow();
+      if (p.error) { toast(p.error); return; }
+      const ok = await copyText(p.prompt);
       toast(ok ? "Đã copy prompt. Dán vào Claude, rồi dán câu trả lời vào ô bên dưới." : "Trình duyệt chặn copy.");
     });
     $("use-reply").addEventListener("click", () => {
       const r = F.parseReply($("reply").value);
       if (!r.flow) { setStatus(r.error, "err"); return; }
-      S.code = $("code").hidden ? S.code : $("code").value;
-      buildCodeView();
-      S.codeAtDraw = S.code;
-      S.selected = null;
-      $("example").value = "";
-      setFlow(r.flow);
-      setCodeMode("view");
+      refreshChange();
       $("alt").open = false;
-      setStatus(`Đã vẽ từ câu trả lời: ${S.nodes.length} ô. Bấm vào ô để xem giải thích.`);
+      drawn(r.flow, `Đã vẽ từ câu trả lời: ${F.countBoxes(r.flow)} ô. Bấm vào ô để xem giải thích.`);
     });
+    $("paste-diff").addEventListener("click", () => { $("diff-dialog").hidden = false; $("diff-input").focus(); });
+    $("diff-cancel").addEventListener("click", () => { $("diff-dialog").hidden = true; });
+    $("diff-apply").addEventListener("click", applyDiff);
 
     $("tour").addEventListener("click", toggleTour);
-    $("paste-own").addEventListener("click", () => {
-      setCodeMode("edit");
-      $("code").scrollIntoView({ block: "center", behavior: "smooth" });
-      $("code").focus({ preventScroll: true });
-      $("code").select();
-      setStatus("Dán code của bạn vào khung (thay cho ví dụ), rồi bấm “Vẽ sơ đồ bằng Claude”.");
-    });
     $("prev").addEventListener("click", () => step(-1));
     $("next").addEventListener("click", () => step(1));
+    $("card-prev").addEventListener("click", () => step(-1));
+    $("card-next").addEventListener("click", () => step(1));
+    $("card-close").addEventListener("click", () => { S.tour = false; select(null); });
+    $("only-changes").addEventListener("change", () => setOnlyChanges($("only-changes").checked));
+    // phones clamp long summaries to 2 lines; a tap shows the rest
+    for (const id of ["d-summary", "change-bar"]) $(id).addEventListener("click", (e) => { const p = e.target.closest("p, .cs"); if (p) p.classList.toggle("open"); });
     $("zoom-in").addEventListener("click", () => zoomBy(1.2));
     $("zoom-out").addEventListener("click", () => zoomBy(1 / 1.2));
-    $("zoom-fit").addEventListener("click", () => {
-      const svg = $("canvas").querySelector("svg");
-      const shrunk = svg && S.lay && $("canvas").classList.contains("fit") && svg.getBoundingClientRect().width / S.lay.width < MIN_FIT;
-      S.zoom = typeof S.zoom === "number" ? "auto" : S.zoom === "all" || shrunk ? "auto" : "all";
-      applyZoom();
+    $("zoom-fit").addEventListener("click", toggleFit);
+
+    buildLegend();
+    $("export-btn").addEventListener("click", (e) => { e.stopPropagation(); toggleMenu($("export-btn"), $("export-menu")); toggleMenu($("legend-btn"), $("legend"), false); });
+    $("legend-btn").addEventListener("click", (e) => { e.stopPropagation(); toggleMenu($("legend-btn"), $("legend")); toggleMenu($("export-btn"), $("export-menu"), false); });
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".menu-wrap")) { toggleMenu($("export-btn"), $("export-menu"), false); toggleMenu($("legend-btn"), $("legend"), false); }
     });
     $("copy-mermaid").addEventListener("click", async () => {
       if (!S.flow) return;
       const ok = await copyText(F.toMermaid(S.flow));
       toast(ok ? "Đã copy Mermaid. Dán vào GitHub, Notion hoặc Obsidian trong khối ```mermaid." : "Trình duyệt chặn copy.");
     });
-    $("copy-dsl").addEventListener("click", async () => {
-      const ok = await copyText($("dsl").value);
-      toast(ok ? "Đã copy sơ đồ dạng chữ." : "Trình duyệt chặn copy.");
-    });
+    $("copy-dsl").addEventListener("click", async () => { if (S.flow) toast((await copyText(F.toText(S.flow))) ? "Đã copy sơ đồ dạng chữ." : "Trình duyệt chặn copy."); });
+    $("export-menu").addEventListener("click", (e) => { if (e.target.closest("[role=menuitem]")) toggleMenu($("export-btn"), $("export-menu"), false); });
     $("dl-svg").addEventListener("click", () => { const s = svgForExport(); if (s) saveFile(fileBase() + ".svg", s); });
     $("dl-png").addEventListener("click", downloadPng);
 
@@ -245,7 +296,7 @@
       clearTimeout(dslTimer);
       dslTimer = setTimeout(() => {
         const { flow, errors } = F.parseText($("dsl").value);
-        $("example").value = ""; // an edited example is the viewer's own diagram now
+        $("example").value = "";
         const ul = $("dsl-errors");
         ul.textContent = "";
         for (const e of errors.slice(0, 8)) { const li = document.createElement("li"); li.textContent = (e.line ? "Dòng " + e.line + ": " : "") + e.message; ul.appendChild(li); }
@@ -253,16 +304,14 @@
       }, 300);
     });
 
-    // keyboard: ← → move between boxes, Esc leaves the step-by-step mode
+    // keyboard: ← → move between boxes, Esc closes the explanation
     document.addEventListener("keydown", (e) => {
       const tag = (e.target && e.target.tagName) || "";
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.target && e.target.closest && e.target.closest("#code-view") && /^Arrow/.test(e.key)) return;
-      if (e.key === "ArrowRight" || e.key === "ArrowDown" && S.tour) { if (S.nodes.length) { e.preventDefault(); step(1); } }
-      else if (e.key === "ArrowLeft" || e.key === "ArrowUp" && S.tour) { if (S.nodes.length) { e.preventDefault(); step(-1); } }
-      else if (e.key === "Escape" && (S.tour || S.selected)) { S.tour = false; select(null); }
+      if (e.key === "ArrowRight" || (e.key === "ArrowDown" && S.tour)) { if (S.nodes.length) { e.preventDefault(); step(1); } }
+      else if (e.key === "ArrowLeft" || (e.key === "ArrowUp" && S.tour)) { if (S.nodes.length) { e.preventDefault(); step(-1); } }
+      else if (e.key === "Escape") { toggleMenu($("export-btn"), $("export-menu"), false); toggleMenu($("legend-btn"), $("legend"), false); if (S.selected || S.tour) { S.tour = false; select(null); } }
     });
-
     window.addEventListener("pagehide", flushDraft);
 
     // theme
@@ -280,35 +329,35 @@
 
     // start: the viewer's draft, else the first example
     const draft = loadDraft();
-    if (draft && (draft.code || (draft.flow && draft.flow.steps && draft.flow.steps.length))) {
+    if (draft && (draft.code || draft.after || (draft.flow && draft.flow.steps && draft.flow.steps.length))) {
       if (draft.lang === "en" || draft.lang === "vi") S.lang = draft.lang;
       if (["simple", "normal", "detailed"].includes(draft.detail)) S.detail = draft.detail;
-      syncLang(); syncDetail();
-      if (draft.example) { exSel.value = draft.example; loadExample(draft.example); }
+      for (const [id, key] of [["lang-seg", "lang"], ["detail-seg", "detail"]]) $(id).querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.v === S[key])));
+      if (draft.example && allExamples().some((x) => x.id === draft.example)) { exSel.value = draft.example; loadExample(draft.example); }
       else {
-        setCode(draft.code || "", draft.code ? "view" : "edit");
-        S.codeAtDraw = S.code;
+        S.ed.code.setValue(draft.code || "");
+        S.ed.before.setValue(draft.before || "");
+        S.ed.after.setValue(draft.after || "");
+        setMode(draft.mode);
+        S.codeAtDraw = draft.codeAtDraw != null ? draft.codeAtDraw : diagramCode();
         setFlow(draft.flow ? F.normalize(draft.flow) : null);
-        exSel.value = "";
       }
     } else {
       exSel.value = LL.sample.EXAMPLES[0].id;
       loadExample(exSel.value);
     }
+    showPane("canvas");
 
-    // re-measure once web fonts arrive
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { LAY.setMeasure(LAY.browserMeasure()); renderDiagram(); });
-
-    // capabilities light up later; the page works without them
-    capability("sample").then((s) => {
-      S.sample = s;
-      if (!s) $("draw").title = "Trang này không gọi trực tiếp được Claude: bấm để xem cách khác";
-    });
-    capability("downloads").then((d) => {
-      S.downloads = d;
-      $("dl-svg").hidden = !d;
-      $("dl-png").hidden = !d;
-    });
+    if (window.ResizeObserver) {
+      new ResizeObserver(() => {
+        const w = $("canvas").clientWidth;
+        if (S.flow && w > 0 && (w < 600) !== !!S.narrow) renderDiagram();
+        else applyZoom();
+      }).observe($("canvas"));
+    }
+    capability("sample").then((s) => { S.sample = s; });
+    capability("downloads").then((d) => { S.downloads = d; $("dl-svg").hidden = !d; $("dl-png").hidden = !d; });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

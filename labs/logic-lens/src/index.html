@@ -1,6 +1,6 @@
 <title>Logic Lens</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Dán code, nhận sơ đồ từng bước của logic để hiểu nhanh.">
+<meta name="description" content="Dán code hoặc một thay đổi code, nhận sơ đồ từng bước của logic, đánh dấu đúng chỗ đã thay đổi.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -8,129 +8,137 @@
 /*@STYLES@*/
 </style>
 <header class="topbar">
-  <div class="topbar-in wrap">
-    <div class="brand">
-      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
-        <rect x="8" y="2.5" width="12" height="6" rx="1.6" fill="var(--panel)" stroke="var(--ink)" stroke-width="1.5"/>
-        <rect x="2" y="17" width="10" height="6" rx="1.6" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5"/>
-        <rect x="16" y="17" width="10" height="6" rx="1.6" fill="var(--panel)" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="2.5 1.8"/>
-        <path d="M14 8.5v4.2M7 12.7h14M7 12.7v4.3M21 12.7v4.3" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+  <div class="topbar-in">
+    <div class="brand" aria-label="Logic Lens">
+      <svg width="26" height="26" viewBox="0 0 28 28" aria-hidden="true">
+        <rect x="8" y="2.5" width="12" height="6" rx="3" fill="var(--ink)"/>
+        <rect x="2" y="17" width="10" height="6" rx="2" fill="var(--panel)" stroke="var(--blue)" stroke-width="1.5"/>
+        <rect x="16" y="17" width="10" height="6" rx="2" fill="var(--panel)" stroke="var(--add)" stroke-width="1.5"/>
+        <path d="M14 8.5v4.2M7 12.7h14M7 12.7v4.3M21 12.7v4.3" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <b>Logic Lens</b><span>hiểu code qua sơ đồ từng bước</span>
+      <b>Logic Lens</b>
+    </div>
+    <div class="seg mode-seg" id="mode-seg" role="tablist" aria-label="Chế độ">
+      <button type="button" role="tab" data-v="code" aria-selected="true">Code</button>
+      <button type="button" role="tab" data-v="change" aria-selected="false">Thay đổi code</button>
     </div>
     <div class="top-right">
+      <label class="sr-only" for="example">Ví dụ</label>
+      <select id="example" class="select-quiet" aria-label="Mở một ví dụ"></select>
       <button class="icon-btn" id="theme" type="button" aria-label="Đổi giao diện sáng / tối"></button>
     </div>
   </div>
 </header>
-<main class="wrap">
-  <div class="grid">
-    <section class="col col-left" aria-label="Code và giải thích">
-      <div class="panel explain-panel" id="explain-panel" aria-label="Giải thích ô đang chọn">
-        <div class="panel-h"><h2>Giải thích</h2><span class="hint" id="explain-hint"></span><span class="spacer"></span>
-          <button class="icon-btn sheet-only" id="sheet-prev" type="button" aria-label="Ô trước">‹</button>
-          <button class="icon-btn sheet-only" id="sheet-next" type="button" aria-label="Ô sau">›</button>
-          <button class="icon-btn sheet-only" id="sheet-close" type="button" aria-label="Đóng giải thích">✕</button>
+
+<div class="mobile-tabs" role="tablist" aria-label="Khung">
+  <button type="button" role="tab" data-pane="code" aria-selected="false">Code</button>
+  <button type="button" role="tab" data-pane="canvas" aria-selected="true">Sơ đồ</button>
+</div>
+
+<main class="app">
+  <section class="pane pane-code" id="pane-code" aria-label="Code">
+    <div class="tabs" id="code-tabs" role="tablist" aria-label="Nội dung khung code">
+      <button type="button" role="tab" data-tab="code" aria-selected="true">Code</button>
+      <button type="button" role="tab" data-tab="before" aria-selected="false" hidden>Trước</button>
+      <button type="button" role="tab" data-tab="after" aria-selected="false" hidden>Sau</button>
+      <button type="button" role="tab" data-tab="text" aria-selected="false" title="Sơ đồ dạng chữ: sửa tay được">Dạng chữ</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost sm" id="paste-diff" hidden>Dán git diff</button>
+      <span class="code-info" id="code-info"></span>
+    </div>
+    <div class="editor-host" id="ed-code"></div>
+    <div class="editor-host" id="ed-before" hidden></div>
+    <div class="editor-host" id="ed-after" hidden></div>
+    <div class="text-host" id="text-host" hidden>
+      <textarea class="dsl" id="dsl" spellcheck="false" aria-label="Sơ đồ dạng chữ"></textarea>
+      <ul class="dsl-errors" id="dsl-errors"></ul>
+      <details class="cheat">
+        <summary>Cú pháp</summary>
+        <div><code>start</code> điểm bắt đầu · <code>step</code> một bước · <code>call</code> gọi hàm khác · <code>stage</code> giai đoạn chính · <code>end:throw</code> dừng tại đây</div>
+        <div><code>branch</code> + <code>lane</code> rẽ nhánh · <code>parallel</code> + <code>lane</code> chạy song song · <code>loop</code> lặp · <code>group</code> + <code>item</code> · <code>section</code> nhiều điểm vào</div>
+        <div><code>Tiêu đề | dòng phụ</code> · <code>[DB]</code> nhãn · <code>@12-40</code> dòng code · <code>!</code> đáng chú ý · <code>&gt;</code> giải thích · <code>+ ~ -</code> thêm / sửa / xoá · <code>&gt;&gt;</code> lý do thay đổi</div>
+      </details>
+    </div>
+    <div class="diff-dialog" id="diff-dialog" hidden>
+      <p>Dán kết quả <code>git diff</code>. Nếu khung <b>Sau</b> đang có code, bản <b>Trước</b> sẽ được dựng lại từ diff, và ngược lại.</p>
+      <textarea id="diff-input" spellcheck="false" aria-label="Nội dung git diff" placeholder="diff --git a/file.js b/file.js&#10;@@ -10,6 +10,9 @@&#10;…"></textarea>
+      <div class="row"><button type="button" class="btn primary sm" id="diff-apply">Dựng lại</button><button type="button" class="btn ghost sm" id="diff-cancel">Huỷ</button></div>
+    </div>
+    <footer class="pane-foot">
+      <div class="opts">
+        <div class="seg sm" id="lang-seg" role="group" aria-label="Ngôn ngữ của sơ đồ">
+          <button type="button" data-v="vi" aria-pressed="true">Tiếng Việt</button>
+          <button type="button" data-v="en" aria-pressed="false">English</button>
         </div>
-        <div class="panel-b explain" id="explain"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-h">
-          <h2>Code</h2>
-          <span class="spacer"></span>
-          <label class="lbl" for="example">Ví dụ</label>
-          <select id="example" aria-label="Chọn code ví dụ"></select>
-        </div>
-        <div class="panel-b stack">
-          <div class="code-wrap">
-            <div class="code-bar">
-              <span id="code-info">Dán code vào đây</span>
-              <span class="spacer"></span>
-              <button class="btn sm ghost" id="code-toggle" type="button">Sửa code</button>
-            </div>
-            <textarea class="code-edit" id="code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Code cần vẽ sơ đồ" placeholder="Dán một hàm, stored procedure, API handler… (SQL, TypeScript, C#, Python, Java, Go…)"></textarea>
-            <div class="code-view" id="code-view" hidden tabindex="0" aria-label="Code, dòng đang chọn được tô sáng"></div>
-          </div>
-          <div class="opt-grid">
-            <span class="lbl">Ngôn ngữ</span>
-            <div class="seg" id="lang-seg" role="group" aria-label="Ngôn ngữ của sơ đồ">
-              <button type="button" data-v="vi" aria-pressed="true">Tiếng Việt</button>
-              <button type="button" data-v="en" aria-pressed="false">English</button>
-            </div>
-            <span class="lbl">Mức chi tiết</span>
-            <div class="seg" id="detail-seg" role="group" aria-label="Mức chi tiết">
-              <button type="button" data-v="simple" aria-pressed="false">Gọn</button>
-              <button type="button" data-v="normal" aria-pressed="true">Vừa</button>
-              <button type="button" data-v="detailed" aria-pressed="false">Chi tiết</button>
-            </div>
-          </div>
-          <div class="row">
-            <button class="btn primary big" id="draw" type="button" style="flex:1">Vẽ sơ đồ bằng Claude</button>
-            <button class="btn" id="stop" type="button" hidden>Dừng</button>
-          </div>
-          <div class="status" id="status" role="status" aria-live="polite"></div>
-          <details class="alt" id="alt">
-            <summary>Không gọi được Claude ở đây? Dùng Claude ở nơi khác</summary>
-            <div class="stack">
-              <div class="cheat">1. Bấm “Copy prompt”, dán vào Claude (claude.ai, Claude Code…).<br>2. Copy câu trả lời của Claude, dán vào ô dưới rồi bấm “Vẽ từ câu trả lời”.</div>
-              <div class="row"><button class="btn" id="copy-prompt" type="button">Copy prompt</button></div>
-              <textarea id="reply" aria-label="Dán câu trả lời của Claude" placeholder="Dán câu trả lời (JSON) vào đây"></textarea>
-              <div class="row"><button class="btn" id="use-reply" type="button">Vẽ từ câu trả lời</button></div>
-            </div>
-          </details>
+        <div class="seg sm" id="detail-seg" role="group" aria-label="Mức chi tiết">
+          <button type="button" data-v="simple" aria-pressed="false">Gọn</button>
+          <button type="button" data-v="normal" aria-pressed="true">Vừa</button>
+          <button type="button" data-v="detailed" aria-pressed="false">Chi tiết</button>
         </div>
       </div>
-    </section>
-
-    <section class="col" aria-label="Sơ đồ">
-      <div class="panel" id="diagram-panel">
-        <div class="d-head">
-          <h1 id="d-title">Sơ đồ</h1>
-          <p id="d-summary"></p>
-        </div>
-        <div class="d-tools">
-          <button class="btn" id="tour" type="button" aria-pressed="false">▶ Đi từng bước</button>
-          <button class="icon-btn" id="prev" type="button" aria-label="Bước trước">‹</button>
-          <span class="counter" id="counter"></span>
-          <button class="icon-btn" id="next" type="button" aria-label="Bước sau">›</button>
-          <span class="spacer"></span>
-          <button class="btn sm" id="paste-own" type="button">Dán code của bạn</button>
-          <button class="icon-btn" id="zoom-out" type="button" aria-label="Thu nhỏ">−</button>
-          <button class="btn sm ghost" id="zoom-fit" type="button">Vừa khung</button>
-          <button class="icon-btn" id="zoom-in" type="button" aria-label="Phóng to">+</button>
-          <button class="btn sm" id="copy-mermaid" type="button" title="Dán vào GitHub, Notion, Obsidian… để hiện sơ đồ">Copy Mermaid</button>
-          <button class="btn sm" id="dl-svg" type="button" hidden>Tải SVG</button>
-          <button class="btn sm" id="dl-png" type="button" hidden>Tải PNG</button>
-        </div>
-        <div class="canvas fit" id="canvas"></div>
-        <div class="legend" aria-label="Chú thích">
-          <span><i class="lg"></i>Một bước</span>
-          <span><i class="lg stage"></i>Giai đoạn chính</span>
-          <span><i class="lg lane"></i>Một nhánh: chỉ một nhánh chạy, rồi gộp lại</span>
-          <span><i class="lg end"></i>Dừng tại đây (return / throw)</span>
-          <span><i class="lg loop"></i>Lặp lại</span>
-          <span><i class="lg attn"></i>Đáng chú ý</span>
-          <span><i class="lg qlabel"></i>Câu hỏi quyết định nhánh</span>
-        </div>
+      <div class="row draw-row">
+        <button class="btn primary big" id="draw" type="button">Vẽ sơ đồ</button>
+        <button class="btn" id="stop" type="button" hidden>Dừng</button>
       </div>
-
-
-      <details class="panel" id="dsl-panel">
-        <summary class="panel-h" style="cursor:pointer;list-style:none"><h2>Sửa sơ đồ bằng chữ</h2><span class="hint">mỗi dòng là một ô, sơ đồ cập nhật ngay</span></summary>
-        <div class="panel-b stack">
-          <textarea class="dsl" id="dsl" spellcheck="false" aria-label="Sơ đồ dạng chữ"></textarea>
-          <ul class="dsl-errors" id="dsl-errors"></ul>
-          <div class="cheat">
-            <div><code>step Tiêu đề | dòng phụ</code> một bước &nbsp; <code>stage …</code> giai đoạn chính (xanh) &nbsp; <code>warn …</code> đáng chú ý (viền đỏ) &nbsp; <code>end …</code> dừng tại đây</div>
-            <div><code>group …</code> rồi thụt vào <code>item …</code> và <code>note …</code> &nbsp; <code>loop …</code> rồi thụt vào các bước lặp</div>
-            <div><code>branch Câu hỏi</code> rồi thụt vào <code>lane Trường hợp</code>, các bước của nhánh thụt sâu hơn</div>
-            <div><code>@12-40</code> cuối dòng: dòng code tương ứng &nbsp; <code>!</code> cuối dòng: đánh dấu đáng chú ý &nbsp; <code>&gt; …</code> dòng giải thích</div>
-          </div>
-          <div class="row"><button class="btn sm" id="copy-dsl" type="button">Copy dạng chữ</button></div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <details class="alt" id="alt">
+        <summary>Không gọi được Claude ở đây? Dùng Claude ở nơi khác</summary>
+        <div class="stack">
+          <p class="muted">Bấm “Copy prompt”, dán vào Claude, rồi dán câu trả lời vào ô dưới.</p>
+          <button class="btn sm" id="copy-prompt" type="button">Copy prompt</button>
+          <textarea id="reply" aria-label="Dán câu trả lời của Claude" placeholder="Dán câu trả lời (JSON) vào đây"></textarea>
+          <button class="btn sm" id="use-reply" type="button">Vẽ từ câu trả lời</button>
         </div>
       </details>
-    </section>
-  </div>
+    </footer>
+  </section>
+
+  <section class="pane pane-canvas" id="pane-canvas" aria-label="Sơ đồ">
+    <div class="canvas-head">
+      <div class="titles">
+        <h1 id="d-title">Sơ đồ</h1>
+        <p id="d-summary"></p>
+        <div class="change-bar" id="change-bar" hidden></div>
+      </div>
+      <div class="toolbar" role="toolbar" aria-label="Công cụ sơ đồ">
+        <button class="icon-btn" id="zoom-out" type="button" aria-label="Thu nhỏ">−</button>
+        <button class="btn ghost sm zoom-label" id="zoom-fit" type="button">Vừa khung</button>
+        <button class="icon-btn" id="zoom-in" type="button" aria-label="Phóng to">+</button>
+        <span class="sep" aria-hidden="true"></span>
+        <div class="menu-wrap">
+          <button class="btn sm" id="export-btn" type="button" aria-haspopup="menu" aria-expanded="false">Xuất</button>
+          <div class="menu" id="export-menu" role="menu" hidden>
+            <button type="button" role="menuitem" id="copy-mermaid">Copy Mermaid</button>
+            <button type="button" role="menuitem" id="copy-dsl">Copy dạng chữ</button>
+            <button type="button" role="menuitem" id="dl-svg" hidden>Tải SVG</button>
+            <button type="button" role="menuitem" id="dl-png" hidden>Tải PNG</button>
+          </div>
+        </div>
+        <div class="menu-wrap">
+          <button class="icon-btn" id="legend-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Chú thích">?</button>
+          <div class="menu legend" id="legend" role="dialog" aria-label="Chú thích" hidden></div>
+        </div>
+      </div>
+    </div>
+    <div class="canvas fit" id="canvas"></div>
+    <div class="tour" id="tour-bar" role="group" aria-label="Đi từng bước">
+      <button class="icon-btn" id="prev" type="button" aria-label="Ô trước">‹</button>
+      <button class="tour-btn" id="tour" type="button" aria-pressed="false">Đi từng bước</button>
+      <span class="counter" id="counter"></span>
+      <button class="icon-btn" id="next" type="button" aria-label="Ô sau">›</button>
+      <label class="check sm" id="only-changes-wrap" hidden><input type="checkbox" id="only-changes"> chỉ chỗ thay đổi</label>
+    </div>
+    <aside class="card" id="explain-card" aria-label="Giải thích ô đang chọn" hidden>
+      <div class="card-h">
+        <span class="pos" id="explain-pos"></span>
+        <span class="spacer"></span>
+        <button class="icon-btn sm" id="card-prev" type="button" aria-label="Ô trước">‹</button>
+        <button class="icon-btn sm" id="card-next" type="button" aria-label="Ô sau">›</button>
+        <button class="icon-btn sm" id="card-close" type="button" aria-label="Đóng giải thích">✕</button>
+      </div>
+      <div class="card-b" id="explain"></div>
+    </aside>
+  </section>
 </main>
 <script>
 /*@SCRIPTS@*/
