@@ -40,6 +40,10 @@ test("run: a branch asks, the chosen lane is walked, an end stops the run", () =
 test("run: loops ask to go round again, continue skips to that question, parallel walks every lane, removed boxes are skipped", () => {
   const r = walk(LL.flowRun.create(flow), [1, 0, 0, 1, 1]);
   assert.deepEqual(r.seen, ["go", "ok", "each item", "skip", "next one", "use", "work", "A", "B", "done"]);
+  const run = LL.flowRun.create(flow, { picks: ["ok", "use"] });
+  let x;
+  while (!(x = run.next()).done) if (x.together) break;
+  assert.deepEqual(x.together.map((l) => l.title), ["A", "B"], "parallel lanes start together");
   assert.deepEqual(r.asked, ["branch:bad/ok", "branch:skip/use", "loop:Lặp lại lần nữa/Thoát vòng lặp", "branch:skip/use", "loop:Lặp lại lần nữa/Thoát vòng lặp"]);
   assert.equal(r.end, "done");
 });

@@ -65,6 +65,36 @@
   }
 
   /**
+   * A guard clause (if bad: stop) as a side exit: the normal path goes straight down; the failing case leaves to the
+   * right, to its end box. Only for a branch of two lanes where one lane is a single end box and the other is empty.
+   * Returns null when the branch is not a guard or the column is too narrow for a side exit.
+   */
+  function guardSide(ctx, node, id, x, w, top, depth, hasPrev) {
+    if (node.kind !== "branch" || node.lanes.length !== 2 || w < 440) return null;
+    const stopAt = node.lanes.findIndex((l) => l.steps.length === 1 && l.steps[0].kind === "end" && l.steps[0].change !== "removed");
+    const goAt = 1 - stopAt;
+    if (stopAt < 0 || node.lanes[goAt].steps.length || node.lanes[goAt].change || node.lanes[stopAt].change === "removed") return null;
+    const { edges, seq, laneHead, questionLabel } = ctx;
+    const stop = node.lanes[stopAt];
+    const go = node.lanes[goAt];
+    const cx = x + w / 2;
+    const sideW = Math.min(250, w / 2 - 40);
+    const sideX = x + w - sideW;
+    const laneTop = top - 6;
+    const hh = laneHead(stop, id + ".l" + stopAt, sideX, laneTop, sideW, false);
+    const rowY = laneTop + hh / 2;
+    if (hasPrev) edges.push({ d: `M${cx} ${top - GAP}V${rowY}`, arrow: false });
+    edges.push({ d: `M${cx} ${rowY}H${sideX}`, arrow: true });
+    // the question and the normal answer sit on the left of the main line
+    if (node.title) questionLabel(node.title, cx - 10, rowY - 12, "end", false, node.change);
+    if (go.title) questionLabel(go.title + " ↓", cx - 10, rowY + 12, "end", false);
+    ctx.hidden.push(id + ".l" + goAt);
+    const r = seq(stop.steps, sideX, sideW, laneTop + hh + GAP, id + ".l" + stopAt + ".", depth + 1, [{ x: sideX + sideW / 2, y: laneTop + hh }]);
+    const bottom = Math.max(r.bottom, rowY + 34);
+    return { tails: [{ x: cx, y: rowY }], merged: true, ended: false, next: bottom + GAP };
+  }
+
+  /**
    * Phones: lanes stacked under one another, hanging off a rail on the left. The rail starts at the fork and
    * continues past the last lane to where the paths join again; lanes that end early stop at their end box.
    */
@@ -118,5 +148,5 @@
     return { tails: [{ x: cx, y: joinY }], merged: true, ended: false, next: joinY + GAP - BUS + 6 };
   }
 
-  Object.assign(LL.layout, { _branchWide: branchWide, _branchNarrow: branchNarrow });
+  Object.assign(LL.layout, { _branchWide: branchWide, _branchNarrow: branchNarrow, _guardSide: guardSide });
 })(globalThis.LL = globalThis.LL || {});

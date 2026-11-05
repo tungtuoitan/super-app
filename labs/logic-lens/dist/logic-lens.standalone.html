@@ -1174,7 +1174,8 @@ label.check input { accent-color: var(--accent); }
  * choice. A lane of a user-choice branch that simply runs out counts as "back".
  *
  *   const run = LL.flowRun.create(flow, {picks: ["ok", "paid"]});
- *   run.next()  -> {node}                       a box to show (node is a flow node or lane)
+ *   run.next()  -> {node, together}             a box to show (node is a flow node or lane); at a parallel,
+ *                                               `together` lists every lane that starts at the same time
  *               -> {choice: {kind, node, question, options: [title], lanes}, back}   waiting for run.choose(i)
  *               -> {done: true, end: node|null, scenarioDone}   the path stopped
  *   run.choose(i)
@@ -1316,8 +1317,9 @@ label.check input { accent-color: var(--accent); }
           const lanes = n.lanes.filter((l) => l.change !== "removed");
           if (!lanes.length) continue;
           if (n.kind === "parallel") {
-            frames.push({ list: lanes.flatMap((l) => [{ laneBox: l }].concat(live(l.steps))), i: 0 });
-            continue;
+            // all lanes start together (shown at once), then each lane's steps are walked in turn
+            frames.push({ list: lanes.flatMap((l, j) => (j ? [{ laneBox: l }] : []).concat(live(l.steps))), i: 0 });
+            return show(lanes[0], { together: lanes });
           }
           const where = { node: n, frame: frames.length - 1, at: f.i - 1 };
           const choice = { kind: "branch", node: n, question: questionOf(n), options: lanes.map((l) => l.title || "…"), lanes };
@@ -2065,7 +2067,8 @@ label.check input { accent-color: var(--accent); }
         const isLast = i === list.length - 1;
 
         if (LL.flow.LANED[node.kind]) {
-          const r = (narrow ? LL.layout._branchNarrow : LL.layout._branchWide)(ctx, node, id, x, w, cursor, depth, isLast, !!prev);
+          const r = (!narrow && LL.layout._guardSide(ctx, node, id, x, w, cursor, depth, !!prev))
+            || (narrow ? LL.layout._branchNarrow : LL.layout._branchWide)(ctx, node, id, x, w, cursor, depth, isLast, !!prev);
           prev = r.tails.length ? r.tails : null;
           merged = r.merged;
           ended = r.ended;
@@ -2217,11 +2220,12 @@ label.check input { accent-color: var(--accent); }
     }
 
     // shared with the lane layouts in layout-lanes.js
-    const ctx = { boxes, edges, labels, seq, laneHead, questionLabel, textBlock };
+    const hidden = []; // ids drawn without a box of their own (the empty normal path of a guard)
+    const ctx = { boxes, edges, labels, hidden, seq, laneHead, questionLabel, textBlock };
     const r = seq(flow.steps, margin, W - margin * 2, 16, "", 1, null);
     let bottom = r.bottom;
     for (const b of boxes) bottom = Math.max(bottom, b.y + b.h);
-    return { width: W, height: Math.ceil(bottom + 20), boxes, edges, labels, narrow };
+    return { width: W, height: Math.ceil(bottom + 20), boxes, edges, labels, hidden, narrow };
   }
 
   LL.layout = Object.assign(LL.layout || {}, { layout, wrap, setMeasure, browserMeasure, minWidth, measure, BASE_W, FAMILY, FONT, MIN_LANE, PAD_Y, GAP, BUS, LANE_GAP });
@@ -2295,6 +2299,36 @@ label.check input { accent-color: var(--accent); }
   }
 
   /**
+   * A guard clause (if bad: stop) as a side exit: the normal path goes straight down; the failing case leaves to the
+   * right, to its end box. Only for a branch of two lanes where one lane is a single end box and the other is empty.
+   * Returns null when the branch is not a guard or the column is too narrow for a side exit.
+   */
+  function guardSide(ctx, node, id, x, w, top, depth, hasPrev) {
+    if (node.kind !== "branch" || node.lanes.length !== 2 || w < 440) return null;
+    const stopAt = node.lanes.findIndex((l) => l.steps.length === 1 && l.steps[0].kind === "end" && l.steps[0].change !== "removed");
+    const goAt = 1 - stopAt;
+    if (stopAt < 0 || node.lanes[goAt].steps.length || node.lanes[goAt].change || node.lanes[stopAt].change === "removed") return null;
+    const { edges, seq, laneHead, questionLabel } = ctx;
+    const stop = node.lanes[stopAt];
+    const go = node.lanes[goAt];
+    const cx = x + w / 2;
+    const sideW = Math.min(250, w / 2 - 40);
+    const sideX = x + w - sideW;
+    const laneTop = top - 6;
+    const hh = laneHead(stop, id + ".l" + stopAt, sideX, laneTop, sideW, false);
+    const rowY = laneTop + hh / 2;
+    if (hasPrev) edges.push({ d: `M${cx} ${top - GAP}V${rowY}`, arrow: false });
+    edges.push({ d: `M${cx} ${rowY}H${sideX}`, arrow: true });
+    // the question and the normal answer sit on the left of the main line
+    if (node.title) questionLabel(node.title, cx - 10, rowY - 12, "end", false, node.change);
+    if (go.title) questionLabel(go.title + " ↓", cx - 10, rowY + 12, "end", false);
+    ctx.hidden.push(id + ".l" + goAt);
+    const r = seq(stop.steps, sideX, sideW, laneTop + hh + GAP, id + ".l" + stopAt + ".", depth + 1, [{ x: sideX + sideW / 2, y: laneTop + hh }]);
+    const bottom = Math.max(r.bottom, rowY + 34);
+    return { tails: [{ x: cx, y: rowY }], merged: true, ended: false, next: bottom + GAP };
+  }
+
+  /**
    * Phones: lanes stacked under one another, hanging off a rail on the left. The rail starts at the fork and
    * continues past the last lane to where the paths join again; lanes that end early stop at their end box.
    */
@@ -2348,7 +2382,7 @@ label.check input { accent-color: var(--accent); }
     return { tails: [{ x: cx, y: joinY }], merged: true, ended: false, next: joinY + GAP - BUS + 6 };
   }
 
-  Object.assign(LL.layout, { _branchWide: branchWide, _branchNarrow: branchNarrow });
+  Object.assign(LL.layout, { _branchWide: branchWide, _branchNarrow: branchNarrow, _guardSide: guardSide });
 })(globalThis.LL = globalThis.LL || {});
 
 // ── svg.js
@@ -3405,7 +3439,8 @@ router.post("/checkout", requireAuth, async (req, res) => {
 
   // ───────────────────────── selection ─────────────────────────
   function tourList() {
-    return S.onlyChanges && changedNodes().length ? changedNodes() : S.nodes;
+    const hidden = new Set((S.lay && S.lay.hidden) || []); // an empty path drawn as a line, not a box
+    return (S.onlyChanges && changedNodes().length ? changedNodes() : S.nodes).filter((x) => !hidden.has(x.id));
   }
 
   function applySelection(scrollIntoView) {
@@ -3555,6 +3590,13 @@ router.post("/checkout", requireAuth, async (req, res) => {
     };
     if (n.kind === "end") box.appendChild(el("p", "", { throw: "Ném lỗi: đường đi dừng ở đây.", break: "Thoát khỏi vòng lặp.", continue: "Bỏ qua phần còn lại, sang vòng lặp kế tiếp.", respond: "Trả phản hồi và dừng xử lý.", exit: "Thoát chương trình.", navigate: "Chuyển sang trang khác: luồng trên trang này dừng ở đây.", back: "Về lại màn hình; người dùng chọn thao tác tiếp theo.", stay: "Vẫn ở hộp thoại / form đó; người dùng thử lại hoặc chọn nút khác." }[n.exit] || "Trả về: đường đi dừng ở đây."));
     else if (KIND_NOTE[n.kind]) box.appendChild(el("p", "hint-empty", KIND_NOTE[n.kind]));
+    const inside = sectionFor(n, entry.id);
+    if (inside) {
+      const b = el("button", "btn sm", "↪ Xem bên trong: " + (inside.node.title || "…"));
+      b.type = "button";
+      b.addEventListener("click", () => select(inside.id));
+      box.appendChild(b);
+    }
     const tags = el("div", "tags");
     if (n.tag) tags.appendChild(el("span", "tag", n.tag));
     if (n.kind === "stage" || n.kind === "group") tags.appendChild(el("span", "tag stage", "Giai đoạn chính"));
@@ -3575,6 +3617,21 @@ router.post("/checkout", requireAuth, async (req, res) => {
     if (live) box.appendChild(snippet(live, n.change === "removed"));
     else if (n.lines) box.appendChild(el("p", "hint-empty", "Các dòng code của ô này đã bị sửa hoặc xoá sau khi vẽ. Bấm vẽ lại để cập nhật."));
     if (live && S.codeAtDraw != null && S.codeAtDraw !== LL.app.diagramCode()) box.appendChild(el("p", "hint-empty", "Code đã sửa sau khi vẽ; số dòng đã được dời theo. Bấm vẽ lại nếu logic thay đổi."));
+  }
+
+  /** A call into a function that has its own section in this diagram (recursion, a helper, a handler): that section. */
+  function sectionFor(n, selfId) {
+    if (n.kind !== "call" && n.kind !== "step") return null;
+    const m = String(n.title || "").match(/([A-Za-z_$][\w$]*)\s*\(/);
+    if (!m) return null;
+    const name = m[1].toLowerCase() + "(";
+    for (const e of S.nodes) {
+      if (e.node.kind !== "section" || selfId.startsWith(e.id + ".")) continue;
+      const first = (e.node.steps || [])[0];
+      const hay = [e.node.title, e.node.sub, first && first.title].join(" ").toLowerCase();
+      if (hay.includes(name)) return e;
+    }
+    return null;
   }
 
   // ───────────────────────── tour ─────────────────────────
@@ -3772,6 +3829,9 @@ router.post("/checkout", requireAuth, async (req, res) => {
       const id = idOf(r.node);
       run.steps++;
       if (id) { run.current = id; if (!run.trail.includes(id)) run.trail.push(id); }
+      // parallel lanes light up together: they all start now
+      run.together = (r.together || []).map(idOf).filter(Boolean);
+      for (const t of run.together) if (!run.trail.includes(t)) run.trail.push(t);
       for (const d of r.node.data || []) if (d.op !== "read") run.written.set(d.table, d.op);
       LL.app.select(id);
     } else if (r.done) {
@@ -3834,6 +3894,10 @@ router.post("/checkout", requireAuth, async (req, res) => {
       box.appendChild(opts);
       return;
     }
+    if (r.together && r.together.length > 1) {
+      box.appendChild(el("div", "run-w", `${r.together.length} nhánh bắt đầu cùng lúc (song song); tiếp theo đi lần lượt từng nhánh.`));
+      return;
+    }
     box.hidden = true;
   }
 
@@ -3875,7 +3939,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
     const run = S.run;
     svg.querySelectorAll(".ll-node").forEach((g) => {
       const id = g.getAttribute("data-id");
-      g.classList.toggle("run-now", !!run && id === run.current);
+      g.classList.toggle("run-now", !!run && (id === run.current || (run.together || []).includes(id)));
       g.classList.toggle("run-trail", !!run && id !== run.current && run.trail.includes(id));
       const ask = !!run && run.asking.includes(id);
       g.classList.toggle("run-ask", ask);

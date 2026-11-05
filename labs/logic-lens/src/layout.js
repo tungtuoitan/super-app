@@ -203,7 +203,8 @@
         const isLast = i === list.length - 1;
 
         if (LL.flow.LANED[node.kind]) {
-          const r = (narrow ? LL.layout._branchNarrow : LL.layout._branchWide)(ctx, node, id, x, w, cursor, depth, isLast, !!prev);
+          const r = (!narrow && LL.layout._guardSide(ctx, node, id, x, w, cursor, depth, !!prev))
+            || (narrow ? LL.layout._branchNarrow : LL.layout._branchWide)(ctx, node, id, x, w, cursor, depth, isLast, !!prev);
           prev = r.tails.length ? r.tails : null;
           merged = r.merged;
           ended = r.ended;
@@ -355,11 +356,12 @@
     }
 
     // shared with the lane layouts in layout-lanes.js
-    const ctx = { boxes, edges, labels, seq, laneHead, questionLabel, textBlock };
+    const hidden = []; // ids drawn without a box of their own (the empty normal path of a guard)
+    const ctx = { boxes, edges, labels, hidden, seq, laneHead, questionLabel, textBlock };
     const r = seq(flow.steps, margin, W - margin * 2, 16, "", 1, null);
     let bottom = r.bottom;
     for (const b of boxes) bottom = Math.max(bottom, b.y + b.h);
-    return { width: W, height: Math.ceil(bottom + 20), boxes, edges, labels, narrow };
+    return { width: W, height: Math.ceil(bottom + 20), boxes, edges, labels, hidden, narrow };
   }
 
   LL.layout = Object.assign(LL.layout || {}, { layout, wrap, setMeasure, browserMeasure, minWidth, measure, BASE_W, FAMILY, FONT, MIN_LANE, PAD_Y, GAP, BUS, LANE_GAP });

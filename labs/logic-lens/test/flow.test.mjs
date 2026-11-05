@@ -113,7 +113,7 @@ test("walkNodes ids match the layout box ids", () => {
     const { flow } = LL.sample.getExample(ex.id);
     const ids = F.walkNodes(flow).map((x) => x.id).sort();
     const lay = LL.layout.layout(flow);
-    const boxIds = lay.boxes.filter((b) => b.kind !== "item").map((b) => b.id).sort();
+    const boxIds = lay.boxes.filter((b) => b.kind !== "item").map((b) => b.id).concat(lay.hidden).sort();
     assert.deepEqual(boxIds, ids, ex.id);
   }
 });

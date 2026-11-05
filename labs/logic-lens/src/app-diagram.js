@@ -118,7 +118,8 @@
 
   // ───────────────────────── selection ─────────────────────────
   function tourList() {
-    return S.onlyChanges && changedNodes().length ? changedNodes() : S.nodes;
+    const hidden = new Set((S.lay && S.lay.hidden) || []); // an empty path drawn as a line, not a box
+    return (S.onlyChanges && changedNodes().length ? changedNodes() : S.nodes).filter((x) => !hidden.has(x.id));
   }
 
   function applySelection(scrollIntoView) {
@@ -268,6 +269,13 @@
     };
     if (n.kind === "end") box.appendChild(el("p", "", { throw: "Ném lỗi: đường đi dừng ở đây.", break: "Thoát khỏi vòng lặp.", continue: "Bỏ qua phần còn lại, sang vòng lặp kế tiếp.", respond: "Trả phản hồi và dừng xử lý.", exit: "Thoát chương trình.", navigate: "Chuyển sang trang khác: luồng trên trang này dừng ở đây.", back: "Về lại màn hình; người dùng chọn thao tác tiếp theo.", stay: "Vẫn ở hộp thoại / form đó; người dùng thử lại hoặc chọn nút khác." }[n.exit] || "Trả về: đường đi dừng ở đây."));
     else if (KIND_NOTE[n.kind]) box.appendChild(el("p", "hint-empty", KIND_NOTE[n.kind]));
+    const inside = sectionFor(n, entry.id);
+    if (inside) {
+      const b = el("button", "btn sm", "↪ Xem bên trong: " + (inside.node.title || "…"));
+      b.type = "button";
+      b.addEventListener("click", () => select(inside.id));
+      box.appendChild(b);
+    }
     const tags = el("div", "tags");
     if (n.tag) tags.appendChild(el("span", "tag", n.tag));
     if (n.kind === "stage" || n.kind === "group") tags.appendChild(el("span", "tag stage", "Giai đoạn chính"));
@@ -288,6 +296,21 @@
     if (live) box.appendChild(snippet(live, n.change === "removed"));
     else if (n.lines) box.appendChild(el("p", "hint-empty", "Các dòng code của ô này đã bị sửa hoặc xoá sau khi vẽ. Bấm vẽ lại để cập nhật."));
     if (live && S.codeAtDraw != null && S.codeAtDraw !== LL.app.diagramCode()) box.appendChild(el("p", "hint-empty", "Code đã sửa sau khi vẽ; số dòng đã được dời theo. Bấm vẽ lại nếu logic thay đổi."));
+  }
+
+  /** A call into a function that has its own section in this diagram (recursion, a helper, a handler): that section. */
+  function sectionFor(n, selfId) {
+    if (n.kind !== "call" && n.kind !== "step") return null;
+    const m = String(n.title || "").match(/([A-Za-z_$][\w$]*)\s*\(/);
+    if (!m) return null;
+    const name = m[1].toLowerCase() + "(";
+    for (const e of S.nodes) {
+      if (e.node.kind !== "section" || selfId.startsWith(e.id + ".")) continue;
+      const first = (e.node.steps || [])[0];
+      const hay = [e.node.title, e.node.sub, first && first.title].join(" ").toLowerCase();
+      if (hay.includes(name)) return e;
+    }
+    return null;
   }
 
   // ───────────────────────── tour ─────────────────────────

@@ -162,6 +162,20 @@ await page.screenshot({ path: path.join(shots, "4a-tables.png") });
 await page.locator("#data-bar .dpill", { hasText: "acc.Period" }).click();
 ok((await page.locator(".ll-node.dt-dim").count()) === 0, "a second click clears the focus");
 
+console.log("Guards leave to the side; calls open the function they call");
+await page.selectOption("#example", "js");
+await page.waitForTimeout(150);
+const laneTitles = await page.$$eval('.ll-node[data-kind="lane"]', (g) => g.map((x) => x.getAttribute("aria-label")));
+ok(laneTitles.some((t) => t.startsWith("Giỏ trống")) && !laneTitles.some((t) => t.startsWith("Có hàng")), "a guard draws only its failing case, the normal path goes straight on");
+await page.selectOption("#example", "java-dependency-order");
+await page.waitForTimeout(150);
+await page.locator('.ll-node[aria-label^="visit(module, path)"]').first().click();
+const jump = page.locator("#explain button", { hasText: "Xem bên trong" });
+ok((await jump.count()) === 1, "a call to a function drawn in its own part offers to open it");
+await jump.click();
+ok((await page.locator("#explain h3").textContent()).startsWith("visit("), "and opens that part");
+await page.keyboard.press("Escape");
+
 console.log("Run: follow the path step by step");
 await page.selectOption("#example", "react-product-admin");
 await page.waitForTimeout(150);
@@ -170,7 +184,7 @@ ok(!(await page.locator("#run-bar").isHidden()), "the run bar replaces the tour 
 ok((await page.locator(".ll-node.run-now").count()) === 1, "the first box glows");
 for (let i = 0; i < 6 && !(await page.locator("#run-step").isDisabled()); i++) await page.locator("#run-step").click();
 ok((await page.locator("#run-box .run-q").textContent()).includes("Tải được không?"), "a branch asks its question");
-ok((await page.locator(".ll-node.run-ask").count()) === 2, "its two lanes light up on the diagram");
+ok((await page.locator(".ll-node.run-ask").count()) === 1, "its failing case lights up on the diagram (the normal path is the main line)");
 await page.locator("#run-box .run-opts button", { hasText: "tải được" }).click();
 for (let i = 0; i < 6 && !(await page.locator("#run-step").isDisabled()); i++) await page.locator("#run-step").click();
 ok((await page.locator("#run-box .run-q").textContent()).includes("Người dùng làm gì"), "then: what does the user do?");

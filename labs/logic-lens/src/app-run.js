@@ -59,6 +59,9 @@
       const id = idOf(r.node);
       run.steps++;
       if (id) { run.current = id; if (!run.trail.includes(id)) run.trail.push(id); }
+      // parallel lanes light up together: they all start now
+      run.together = (r.together || []).map(idOf).filter(Boolean);
+      for (const t of run.together) if (!run.trail.includes(t)) run.trail.push(t);
       for (const d of r.node.data || []) if (d.op !== "read") run.written.set(d.table, d.op);
       LL.app.select(id);
     } else if (r.done) {
@@ -121,6 +124,10 @@
       box.appendChild(opts);
       return;
     }
+    if (r.together && r.together.length > 1) {
+      box.appendChild(el("div", "run-w", `${r.together.length} nhánh bắt đầu cùng lúc (song song); tiếp theo đi lần lượt từng nhánh.`));
+      return;
+    }
     box.hidden = true;
   }
 
@@ -162,7 +169,7 @@
     const run = S.run;
     svg.querySelectorAll(".ll-node").forEach((g) => {
       const id = g.getAttribute("data-id");
-      g.classList.toggle("run-now", !!run && id === run.current);
+      g.classList.toggle("run-now", !!run && (id === run.current || (run.together || []).includes(id)));
       g.classList.toggle("run-trail", !!run && id !== run.current && run.trail.includes(id));
       const ask = !!run && run.asking.includes(id);
       g.classList.toggle("run-ask", ask);

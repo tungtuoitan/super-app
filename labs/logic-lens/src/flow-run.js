@@ -7,7 +7,8 @@
  * choice. A lane of a user-choice branch that simply runs out counts as "back".
  *
  *   const run = LL.flowRun.create(flow, {picks: ["ok", "paid"]});
- *   run.next()  -> {node}                       a box to show (node is a flow node or lane)
+ *   run.next()  -> {node, together}             a box to show (node is a flow node or lane); at a parallel,
+ *                                               `together` lists every lane that starts at the same time
  *               -> {choice: {kind, node, question, options: [title], lanes}, back}   waiting for run.choose(i)
  *               -> {done: true, end: node|null, scenarioDone}   the path stopped
  *   run.choose(i)
@@ -149,8 +150,9 @@
           const lanes = n.lanes.filter((l) => l.change !== "removed");
           if (!lanes.length) continue;
           if (n.kind === "parallel") {
-            frames.push({ list: lanes.flatMap((l) => [{ laneBox: l }].concat(live(l.steps))), i: 0 });
-            continue;
+            // all lanes start together (shown at once), then each lane's steps are walked in turn
+            frames.push({ list: lanes.flatMap((l, j) => (j ? [{ laneBox: l }] : []).concat(live(l.steps))), i: 0 });
+            return show(lanes[0], { together: lanes });
           }
           const where = { node: n, frame: frames.length - 1, at: f.i - 1 };
           const choice = { kind: "branch", node: n, question: questionOf(n), options: lanes.map((l) => l.title || "…"), lanes };
