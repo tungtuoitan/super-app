@@ -95,8 +95,15 @@
     const corpus = (LL.corpus || []).map((e) => ({ id: e.id, name: e.name, group: e.group }));
     return own.concat(corpus);
   }
+  /** Switching mode for an example keeps the diagram of the mode being left, like the mode buttons do. */
+  function parkFor(mode) {
+    if (mode !== S.mode) S.parked[S.mode] = S.flow ? { flow: S.flow, codeAtDraw: S.codeAtDraw } : null;
+    S.parked[mode] = null;
+  }
   function loadExample(id) {
     const own = LL.sample.EXAMPLES.find((e) => e.id === id);
+    const target = own ? "code" : ((LL.corpus || []).find((e) => e.id === id) || {}).group === "change" ? "change" : "code";
+    parkFor(target);
     if (own) {
       const ex = LL.sample.getExample(id);
       setMode("code");
@@ -288,7 +295,7 @@
     $("card-next").addEventListener("click", () => step(1));
     $("card-close").addEventListener("click", () => { S.tour = false; select(null); });
     $("only-changes").addEventListener("change", () => setOnlyChanges($("only-changes").checked));
-    // phones clamp long summaries to 1 line; a tap shows the rest
+    // long summaries are clamped (2 lines, 1 on phones); a click shows the rest
     for (const id of ["d-summary", "change-bar"]) $(id).addEventListener("click", (e) => { const p = e.target.closest("p, .cs"); if (p) p.classList.toggle("open"); });
     $("zoom-in").addEventListener("click", () => zoomBy(1.2));
     $("zoom-out").addEventListener("click", () => zoomBy(1 / 1.2));
@@ -354,14 +361,15 @@
       if (draft.lang === "en" || draft.lang === "vi") S.lang = draft.lang;
       if (["simple", "normal", "detailed"].includes(draft.detail)) S.detail = draft.detail;
       for (const [id, key] of [["lang-seg", "lang"], ["detail-seg", "detail"]]) $(id).querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.v === S[key])));
-      if (draft.example && allExamples().some((x) => x.id === draft.example)) { exSel.value = draft.example; loadExample(draft.example); }
+      const parked = draft.parked && typeof draft.parked === "object" ? draft.parked : {};
+      if (draft.example && allExamples().some((x) => x.id === draft.example)) { exSel.value = draft.example; loadExample(draft.example); S.parked = parked; }
       else {
         S.ed.code.setValue(draft.code || "");
         S.ed.before.setValue(draft.before || "");
         S.ed.after.setValue(draft.after || "");
         setMode(draft.mode);
         S.codeAtDraw = draft.codeAtDraw != null ? draft.codeAtDraw : diagramCode();
-        if (draft.parked && typeof draft.parked === "object") S.parked = draft.parked;
+        S.parked = parked;
         setFlow(draft.flow ? F.normalize(draft.flow) : null);
       }
     } else {

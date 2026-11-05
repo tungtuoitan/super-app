@@ -83,6 +83,7 @@
     const n = node.lanes.length;
     let anyContinues = false;
     let lastHeadMid = forkY;
+    let lastTails = [];
     node.lanes.forEach((lane, j) => {
       const lid = id + ".l" + j;
       // the lane number makes it clear these are alternatives, not a sequence
@@ -98,9 +99,10 @@
         tails = r.ended ? [] : r.tails;
         bottom = r.bottom;
       }
-      // a path that carries on drops back to the rail, which leads to the join
+      // a path that carries on drops back to the rail, which leads to the join (the last one drops straight into it)
       if (tails.length) anyContinues = true;
-      for (const t of tails) edges.push({ d: `M${t.x} ${t.y}V${bottom + 11}H${railX}`, arrow: false });
+      if (j === n - 1) lastTails = tails;
+      else for (const t of tails) edges.push({ d: `M${t.x} ${t.y}V${bottom + 11}H${railX}`, arrow: false });
       y = bottom + 22;
     });
     if (!anyContinues) {
@@ -110,7 +112,9 @@
     // the rail runs on to the join point, then back to the middle where the main path continues
     const joinY = y - 4;
     edges.push({ d: `M${railX} ${forkY}V${joinY}`, arrow: false, bar: parallel });
-    edges.push({ d: `M${railX} ${joinY}H${cx}`, arrow: false });
+    const joinEnd = Math.max(cx, ...lastTails.map((t) => t.x));
+    edges.push({ d: `M${railX} ${joinY}H${joinEnd}`, arrow: false });
+    for (const t of lastTails) edges.push({ d: `M${t.x} ${t.y}V${joinY}`, arrow: false });
     return { tails: [{ x: cx, y: joinY }], merged: true, ended: false, next: joinY + GAP - BUS + 6 };
   }
 

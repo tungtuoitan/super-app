@@ -191,6 +191,9 @@ label.check input { accent-color: var(--accent); }
 .titles { flex: 1; min-width: 0; }
 .titles h1 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
 .titles p { margin: 3px 0 0; color: var(--muted); font-size: 13.5px; max-width: 80ch; }
+/* long summaries stay short until clicked */
+.titles p, .change-bar .cs { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+.titles p.open, .change-bar .cs.open { display: block; }
 .change-bar { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12.5px; }
 .change-bar .cs { color: var(--ink-2); max-width: 90ch; flex-basis: 100%; }
 .pill { display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid transparent; }
@@ -277,7 +280,7 @@ label.check input { accent-color: var(--accent); }
   .mode-seg button { padding-left: 9px; padding-right: 9px; }
   .titles { flex: 1 1 100%; }
   .titles p, .change-bar .cs { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
-  .titles p.open, .change-bar .cs.open { -webkit-line-clamp: unset; display: block; }
+  .titles p.open, .change-bar .cs.open { display: block; }
   .mobile-tabs { display: flex; position: fixed; inset: calc(var(--top) + env(safe-area-inset-top, 0px)) 0 auto; height: 42px; z-index: 19; background: var(--panel); border-bottom: 1px solid var(--line); padding: 0 max(12px, env(safe-area-inset-left, 0px)); gap: 4px; }
   .mobile-tabs button { flex: 1; border: 0; background: transparent; font-weight: 600; font-size: 14px; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; }
   .mobile-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
@@ -1292,96 +1295,126 @@ label.check input { accent-color: var(--accent); }
     return ops;
   }
 
-  // blank lines and comment-only lines do not change behavior, so they never mark a box as changed
-  const TRIVIAL = /^\s*(\/\/.*|#(?!include|define|if|pragma|!).*|--.*|\/\*.*|\*.*|<!--.*|"""|''')?\s*$/;
-  const trivial = (line) => TRIVIAL.test(line);
+  // ───────────────────────── comments (per language) ─────────────────────────
+  const HASH = { python: 1, shell: 1, ruby: 1, php: 1 };
+  const SLASH = { python: 0, shell: 0, ruby: 0, sql: 0 }; // everything else: // and /* */
+  /**
+   * Which lines are blank or only a comment, so they never mark a box as changed. Uses the language's own comment
+   * syntax and follows block comments (/* … *\/, Python docstrings) across lines. Returns booleans by 0-based index.
+   */
+  function trivialLines(lines, lang) {
+    const slash = SLASH[lang] !== 0;
+    const hash = HASH[lang] === 1;
+    const dash = lang === "sql";
+    const block = slash || dash; // SQL has /* */ too
+    const out = [];
+    let inBlock = false;
+    let inDoc = false;
+    for (const raw of lines) {
+      const t = raw.trim();
+      if (inBlock) { out.push(true); if (t.includes("*/")) inBlock = false; continue; }
+      if (inDoc) { out.push(true); if (/"""|'''/.test(t)) inDoc = false; continue; }
+      if (!t) { out.push(true); continue; }
+      if (block && t.startsWith("/*")) { out.push(true); if (!t.includes("*/", 2)) inBlock = true; continue; }
+      if (lang === "python" && /^("""|''')/.test(t)) { out.push(true); if (!/("""|''').*("""|''')/.test(t)) inDoc = true; continue; }
+      out.push((slash && t.startsWith("//")) || (hash && /^#(?![[!])/.test(t)) || (dash && t.startsWith("--")) || t.startsWith("<!--"));
+    }
+    return out;
+  }
+  // trailing spaces and tabs vs spaces never matter; leading indentation does (a Python dedent changes behavior)
+  const norm = (l) => l.replace(/\t/g, "    ").replace(/\s+$/, "");
+
+  const words = (t) => new Set(String(t).toLowerCase().match(/[a-z_][a-z0-9_]*|\d+/g) || []);
+  function similarity(x, y) {
+    const a = words(x);
+    const b = words(y);
+    if (!a.size || !b.size) return 0;
+    let common = 0;
+    for (const w of a) if (b.has(w)) common++;
+    return common / Math.min(a.size, b.size);
+  }
 
   /**
-   * Compare two versions. Indentation-only edits count as unchanged.
-   * Returns {listing, added: Set(newLine), delAt: Map(newLine -> [old texts]), sigAdded, sigDel, lines, stats}.
-   * sigAdded / sigDel (Map newLine -> count) leave out blank and comment-only lines. Lines removed after the last
-   * line sit at newLine = lines + 1.
+   * Compare two versions.
+   * Returns {listing, added: Set(newLine), delAt: Map(newLine -> [old texts]), sigAdded, blocks, lines, stats}.
+   * Every "del" listing entry has an `owner`: the new line whose box the removed lines belong to. A block of removed
+   * lines followed by new lines goes to the new line it most resembles (an edit of it), or the first new line; a
+   * block followed by an unchanged line goes to the line above (code removed from the end of that box).
+   * blocks: [{owner, sig (count of non-comment lines), similar}]. sigAdded leaves out blank and comment lines.
    */
   function compare(oldCode, newCode) {
     const A = splitLines(oldCode);
     const B = splitLines(newCode);
-    const ops = diffLines(A.map((l) => l.trim()), B.map((l) => l.trim()));
+    const lang = LL.flow && LL.flow.guessLanguage ? LL.flow.guessLanguage(newCode + "\n" + oldCode) : "code";
+    const trivA = trivialLines(A, lang);
+    const trivB = trivialLines(B, lang);
+    const ops = diffLines(A.map(norm), B.map(norm));
     const listing = [];
     const added = new Set();
     const sigAdded = new Set();
     const delAt = new Map();
-    const sigDel = new Map();
     let nextNew = 1;
-    // removed lines sit before the next surviving new line
-    const pendingDel = [];
+    let pending = [];
+    const groups = [];
     const flush = (at) => {
-      if (!pendingDel.length) return;
-      delAt.set(at, (delAt.get(at) || []).concat(pendingDel.map((d) => d.text)));
-      const sig = pendingDel.filter((d) => !trivial(d.text)).length;
-      if (sig) sigDel.set(at, (sigDel.get(at) || 0) + sig);
-      for (const d of pendingDel) listing.push({ type: "del", text: d.text, oldLine: d.oldLine, newLine: at });
-      pendingDel.length = 0;
+      if (!pending.length) return;
+      delAt.set(at, (delAt.get(at) || []).concat(pending.map((d) => d.text)));
+      const entries = pending.map((d) => ({ type: "del", text: d.text, oldLine: d.oldLine, newLine: at, trivial: d.trivial }));
+      listing.push(...entries);
+      groups.push({ at, entries });
+      pending = [];
     };
-    for (const op of ops) {
-      if (op.type === "del") { pendingDel.push({ text: A[op.a], oldLine: op.a + 1 }); continue; }
+    ops.forEach((op) => {
+      if (op.type === "del") { pending.push({ text: A[op.a], oldLine: op.a + 1, trivial: trivA[op.a] }); return; }
       flush(nextNew);
       if (op.type === "eq") listing.push({ type: "eq", text: B[op.b], newLine: op.b + 1, oldLine: op.a + 1 });
       else {
         listing.push({ type: "add", text: B[op.b], newLine: op.b + 1 });
         added.add(op.b + 1);
-        if (!trivial(B[op.b])) sigAdded.add(op.b + 1);
+        if (!trivB[op.b]) sigAdded.add(op.b + 1);
       }
       nextNew = op.b + 2;
-    }
+    });
     flush(nextNew);
-    const removed = listing.filter((l) => l.type === "del").length;
-    return { listing, added, delAt, sigAdded, sigDel, lines: B.length, stats: { added: added.size, removed, changed: added.size + removed > 0 } };
-  }
-
-  /**
-   * Removed lines that belong to the range [a, b]: those inside it, those right after it (before line b + 1, when
-   * that line is not new), and those right before it only when line a is new (a replacement).
-   */
-  const ownsDeletionAt = (cmp, a, b, l) => (l > a && l <= b) || (l === a && cmp.added.has(a)) || (l === b + 1 && !cmp.added.has(b + 1));
-
-  function lineText(cmp, l) {
-    if (!cmp._text) { cmp._text = []; for (const x of cmp.listing) if (x.type !== "del") cmp._text[x.newLine] = x.text; }
-    return cmp._text[l] || "";
-  }
-
-  const words = (t) => new Set(String(t).toLowerCase().match(/[a-z_][a-z0-9_]*|\d+/g) || []);
-  /** Do the lines removed right before / inside [a, b] look like an earlier version of the lines in it? */
-  function resembles(cmp, a, b) {
-    const dels = cmp.listing.filter((l) => l.type === "del" && l.newLine >= a && l.newLine <= b && !trivial(l.text)).map((l) => words(l.text));
-    for (let l = a; l <= b; l++) {
-      const w = words(lineText(cmp, l));
-      for (const d of dels) {
-        let common = 0;
-        for (const x of w) if (d.has(x)) common++;
-        if (common / Math.max(1, Math.min(w.size, d.size)) >= 0.6) return true;
+    const blocks = groups.map(({ at, entries }) => {
+      const real = entries.filter((e) => !e.trivial);
+      let owner = at - 1; // removed from the end of the line above
+      let similar = false;
+      if (added.has(at)) {
+        owner = at;
+        let best = 0;
+        for (let l = at; added.has(l); l++) {
+          if (trivB[l - 1]) continue;
+          for (const e of real) { const s = similarity(e.text, B[l - 1]); if (s > best) { best = s; owner = l; } }
+        }
+        similar = best >= 0.5;
+        if (!similar) owner = at;
       }
-    }
-    return false;
+      owner = Math.max(1, Math.min(owner, B.length));
+      for (const e of entries) e.owner = owner;
+      return { owner, sig: real.length, similar };
+    });
+    const removed = listing.filter((l) => l.type === "del").length;
+    const trivialText = new Map();
+    trivB.forEach((t, i) => { if (t) trivialText.set(i + 1, true); });
+    return { listing, added, delAt, sigAdded, blocks, trivial: trivialText, lines: B.length, stats: { added: added.size, removed, changed: added.size + removed > 0 } };
   }
 
   /**
    * Which kind of change touched new-code lines [a, b]: "added" (all new), "modified" (some change), or "".
    * Blank and comment-only lines are ignored. `skip(line)` leaves lines out (a container's children).
+   * A box made only of new lines stays "added" unless removed lines that resemble them belong to it.
    */
   function changeIn(cmp, range, skip) {
     if (!cmp || !range) return "";
     const [a, b] = range;
+    const mine = (l) => l >= a && l <= b && (!skip || !skip(l));
     let own = 0;
     let addedCount = 0;
-    let deleted = false;
-    for (let l = a; l <= b + 1; l++) {
-      const mine = !skip || !skip(l);
-      if (l <= b && mine && !trivial(lineText(cmp, l))) { own++; if (cmp.sigAdded.has(l)) addedCount++; }
-      if (mine && cmp.sigDel.has(l) && ownsDeletionAt(cmp, a, b, l)) deleted = true;
-    }
-    // all-new lines after removed ones: an edit of those lines only if they look alike, else new logic
-    if (addedCount && addedCount === own && (!deleted || !resembles(cmp, a, b))) return "added";
-    if (addedCount || deleted) return "modified";
+    for (let l = a; l <= b; l++) if (mine(l) && !cmp.trivial.has(l)) { own++; if (cmp.sigAdded.has(l)) addedCount++; }
+    const owned = cmp.blocks.filter((bl) => bl.sig && mine(bl.owner));
+    if (addedCount && addedCount === own && !owned.some((bl) => bl.similar)) return "added";
+    if (addedCount || owned.length) return "modified";
     return "";
   }
 
@@ -1395,16 +1428,12 @@ label.check input { accent-color: var(--accent); }
     const counts = { added: 0, modified: 0, removed: 0, corrected: 0 };
     const visit = (n) => {
       if (n.change === "removed") { counts.removed++; return; }
-      // the paths of a new branch are new; only the first counts (the rest are drawn as new, not counted again)
-      if (n.changeKeep) { delete n.changeKeep; if (!n.changeInherited) counts.added++; return; }
       const kids = (n.steps || []).concat(n.lanes || []).filter((k) => k.lines);
       const skip = kids.length ? (l) => kids.some((k) => l >= k.lines[0] && l <= k.lines[1]) : null;
       const real = changeIn(cmp, n.lines, skip);
       if (real && !n.change) { n.change = real; n.changeAuto = true; counts.corrected++; }
       else if (!real && n.change && !n.changeNote && !kids.some((k) => k.change)) { delete n.change; counts.corrected++; }
       if (n.change) counts[n.change]++;
-      // a new branch makes its paths new too (lanes are visited right after their branch)
-      if (n.change === "added" && n.lanes) n.lanes.forEach((l, j) => { if (!l.change) { l.change = "added"; l.changeKeep = true; if (j > 0) l.changeInherited = true; } });
     };
     LL.flow.eachNode(flow, visit);
     LL.flow.eachNode(flow, (n) => { if (n.items) for (const it of n.items) { const real = changeIn(cmp, it.lines); if (real && !it.change) it.change = real; } });
@@ -1420,11 +1449,11 @@ label.check input { accent-color: var(--accent); }
     }).join("\n");
   }
 
-  /** The listing entries that belong to a box: its new lines plus the removed lines it owns (see ownsDeletionAt). */
+  /** The listing entries that belong to a box: its new lines plus the removed lines it owns (see compare). */
   function listingFor(cmp, range) {
     if (!cmp || !range) return [];
     const [a, b] = range;
-    return cmp.listing.filter((l) => (l.type === "del" ? ownsDeletionAt(cmp, a, b, l.newLine) : l.newLine >= a && l.newLine <= b));
+    return cmp.listing.filter((l) => (l.type === "del" ? l.owner >= a && l.owner <= b : l.newLine >= a && l.newLine <= b));
   }
 
   // ───────────────────────── unified diff ─────────────────────────
@@ -1653,6 +1682,11 @@ label.check input { accent-color: var(--accent); }
       const h = PAD_Y * 2 + titleLines.length * FONT.title.lh + (subLines.length ? 3 + subLines.length * FONT.sub.lh : 0);
       return { titleLines, subLines, h: Math.max(h, subLines.length ? 52 : 40), clipped: !!(titleLines.clipped || subLines.clipped) };
     };
+    /** The first sentence of why an edited / removed box changed, wrapped for the diagram (none for other boxes). */
+    const whyLines = (node, w) => {
+      const why = (node.change === "modified" || node.change === "removed") && node.changeNote ? node.changeNote.split(/(?<=[.!?])\s/)[0] : "";
+      return why ? wrap(why, FONT.note, w - 28, 2) : [];
+    };
     const arrowTo = (from, to) => edges.push({ d: `M${from.x} ${from.y}V${to.y}`, arrow: true });
 
     /**
@@ -1765,7 +1799,9 @@ label.check input { accent-color: var(--accent); }
           const head = textBlock({ title: "↻ " + (node.title || ""), sub: node.sub }, fw - 24);
           const fy = cursor;
           connect({ x: cx, y: fy }, node.change === "removed");
-          const headH = PAD_Y + head.titleLines.length * FONT.title.lh + (head.subLines.length ? 3 + head.subLines.length * FONT.sub.lh : 0) + 4;
+          const loopWhy = whyLines(node, fw);
+          const textH = PAD_Y + head.titleLines.length * FONT.title.lh + (head.subLines.length ? 3 + head.subLines.length * FONT.sub.lh : 0);
+          const headH = textH + 4 + (loopWhy.length ? 4 + loopWhy.length * FONT.note.lh : 0);
           const ix = fx + LOOP_PAD;
           const iw = fw - LOOP_PAD * 2 - LOOP_GUTTER + 8; // leave room for the return arrow on the right
           const icx = ix + iw / 2;
@@ -1780,7 +1816,7 @@ label.check input { accent-color: var(--accent); }
             if (!r.ended) edges.push({ d: `M${from.x} ${from.y}V${bottom + 14}H${rx}V${headMid}H${rx - 16}`, arrow: true, loop: true });
           }
           const fh = bottom - fy + (node.steps.length ? 28 : PAD_Y);
-          boxes.push({ id, x: fx, y: fy, w: fw, h: fh, kind: "loop", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, node, container: true, headH, change: node.change });
+          boxes.push({ id, x: fx, y: fy, w: fw, h: fh, kind: "loop", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, node, container: true, headH, change: node.change, noteLines: loopWhy, noteY: fy + textH + 2, noteKind: loopWhy.length ? node.change : "" });
           prev = [{ x: cx, y: fy + fh }];
           merged = false;
           prevRemoved = node.change === "removed";
@@ -1794,8 +1830,7 @@ label.check input { accent-color: var(--accent); }
         const tb = textBlock(node, bw - (node.tag || node.change ? 20 : 0) - (node.kind === "call" ? 12 : 0), 2, depth > 1 ? 3 : 2);
         tb.h += node.tag || node.change ? 8 : 0;
         // an edited or removed box says why, right on the diagram (first sentence of the change note)
-        const why = (node.change === "modified" || node.change === "removed") && node.changeNote ? node.changeNote.split(/(?<=[.!?])\s/)[0] : "";
-        const noteLines = why ? wrap(why, FONT.note, bw - 28, 2) : [];
+        const noteLines = whyLines(node, bw);
         const noteY = cursor + tb.h - PAD_Y + 4;
         if (noteLines.length) tb.h += 6 + noteLines.length * FONT.note.lh;
         const bx = x + (w - bw) / 2;
@@ -1825,7 +1860,10 @@ label.check input { accent-color: var(--accent); }
 
     function laneHead(lane, lid, x, y, w, parallel) {
       const tb = textBlock(lane, w, 2, 3); // lanes are narrow: one more line before cutting the text
-      boxes.push({ id: lid, x, y, w, h: tb.h, kind: parallel ? "plane" : "lane", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane, clipped: tb.clipped, change: lane.change });
+      const noteLines = whyLines(lane, w);
+      const noteY = y + tb.h - PAD_Y + 4;
+      if (noteLines.length) tb.h += 6 + noteLines.length * FONT.note.lh;
+      boxes.push({ id: lid, x, y, w, h: tb.h, noteLines, noteY, noteKind: noteLines.length ? lane.change : "", kind: parallel ? "plane" : "lane", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane, clipped: tb.clipped, change: lane.change });
       return tb.h;
     }
 
@@ -1936,6 +1974,7 @@ label.check input { accent-color: var(--accent); }
     const n = node.lanes.length;
     let anyContinues = false;
     let lastHeadMid = forkY;
+    let lastTails = [];
     node.lanes.forEach((lane, j) => {
       const lid = id + ".l" + j;
       // the lane number makes it clear these are alternatives, not a sequence
@@ -1951,9 +1990,10 @@ label.check input { accent-color: var(--accent); }
         tails = r.ended ? [] : r.tails;
         bottom = r.bottom;
       }
-      // a path that carries on drops back to the rail, which leads to the join
+      // a path that carries on drops back to the rail, which leads to the join (the last one drops straight into it)
       if (tails.length) anyContinues = true;
-      for (const t of tails) edges.push({ d: `M${t.x} ${t.y}V${bottom + 11}H${railX}`, arrow: false });
+      if (j === n - 1) lastTails = tails;
+      else for (const t of tails) edges.push({ d: `M${t.x} ${t.y}V${bottom + 11}H${railX}`, arrow: false });
       y = bottom + 22;
     });
     if (!anyContinues) {
@@ -1963,7 +2003,9 @@ label.check input { accent-color: var(--accent); }
     // the rail runs on to the join point, then back to the middle where the main path continues
     const joinY = y - 4;
     edges.push({ d: `M${railX} ${forkY}V${joinY}`, arrow: false, bar: parallel });
-    edges.push({ d: `M${railX} ${joinY}H${cx}`, arrow: false });
+    const joinEnd = Math.max(cx, ...lastTails.map((t) => t.x));
+    edges.push({ d: `M${railX} ${joinY}H${joinEnd}`, arrow: false });
+    for (const t of lastTails) edges.push({ d: `M${t.x} ${t.y}V${joinY}`, arrow: false });
     return { tails: [{ x: cx, y: joinY }], merged: true, ended: false, next: joinY + GAP - BUS + 6 };
   }
 
@@ -1976,7 +2018,9 @@ label.check input { accent-color: var(--accent); }
 (function (LL) {
   "use strict";
 
-  const { layout, FONT, FAMILY, PAD_Y } = LL.layout;
+  const { layout, FONT, FAMILY, PAD_Y, measure } = LL.layout;
+  const CHIP_FONT = { size: 10, weight: 600, lh: 12 };
+  const chipW = (text) => measure(text, CHIP_FONT) + text.length * 0.4 + 12; // + letter-spacing .04em
 
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const r1 = (v) => Math.round(v * 10) / 10;
@@ -1996,7 +2040,7 @@ label.check input { accent-color: var(--accent); }
   .ll-loop{fill:var(--ll-loop-bg,rgba(60,127,168,.04));stroke:var(--ll-stage-line,#8db3cd);stroke-width:1.2;stroke-dasharray:3 4}
   .ll-item{fill:var(--ll-step-bg,#fff);stroke:var(--ll-item-line,#cdd5dc);stroke-width:1}
   .ll-callbar{stroke:var(--ll-step-line,#c3ccd5);stroke-width:1.2}
-  .ll-attn{stroke:var(--ll-attn,#c8462f);stroke-width:1.6}
+  .ll-attn{stroke:var(--ll-attn,#c8462f);stroke-opacity:.5;stroke-width:1.3}
   .ll-attnbg{fill:var(--ll-attn,#c8462f)}
   .ll-ch-added{fill:var(--ll-add-bg,#eaf8f0);stroke:var(--ll-add,#1f8a52);stroke-width:2;stroke-dasharray:none}
   .ll-ch-modified{fill:var(--ll-mod-bg,#fff5dd);stroke:var(--ll-mod,#c08400);stroke-width:2;stroke-dasharray:none}
@@ -2078,7 +2122,7 @@ label.check input { accent-color: var(--accent); }
   const EXIT_LABEL = { return: "RETURN", throw: "THROW", break: "BREAK", continue: "CONTINUE", exit: "EXIT", respond: "RESPOND" };
 
   function chip(x, y, text, bgClass, textClass) {
-    const w = text.length * 6.3 + 10;
+    const w = chipW(text);
     return `<g class="ll-chipg"><rect class="${bgClass}" x="${r1(x)}" y="${r1(y)}" width="${r1(w)}" height="15" rx="7.5"/><text class="ll-chip ${textClass}" x="${r1(x + w / 2)}" y="${r1(y + 11)}" text-anchor="middle">${esc(text)}</text></g>`;
   }
 
@@ -2132,7 +2176,7 @@ label.check input { accent-color: var(--accent); }
       s += `<g class="ll-chipg"><title>Đáng chú ý</title><circle class="ll-attnbg" cx="${r1(right - 7.5)}" cy="${r1(b.y)}" r="7.5"/><text class="ll-chip ll-ct" x="${r1(right - 7.5)}" y="${r1(b.y + 3.6)}" text-anchor="middle">!</text></g>`;
       right -= 19;
     }
-    if (n.tag) { const w = n.tag.length * 6.3 + 10; s += chip(right - w, b.y - 7.5, n.tag, "ll-tagbg", "ll-tagt"); }
+    if (n.tag) { const w = chipW(n.tag); s += chip(right - w, b.y - 7.5, n.tag, "ll-tagbg", "ll-tagt"); }
     return s;
   }
 
@@ -2887,7 +2931,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
   }
 
   function changedNodes() {
-    return S.nodes.filter((x) => x.node.change && !x.node.changeInherited);
+    return S.nodes.filter((x) => x.node.change);
   }
 
   function renderChangeBar() {
@@ -2945,7 +2989,12 @@ router.post("/checkout", requireAuth, async (req, res) => {
     else if (S.zoom === "auto" && fit < MIN_FIT && !S.narrow) scale = MIN_FIT;
     // the open card adds room to scroll into instead of shrinking the diagram
     const shrunk = scale != null; // shown bigger than "fit" so it stays readable
-    if (scale == null && cardOn) scale = Math.min(1100, avail) / S.lay.width;
+    if (scale == null && cardOn) {
+      // shrink toward the readable minimum so less is cut off, but never below what fits beside the card
+      const full = Math.min(1100, avail) / S.lay.width;
+      const beside = Math.max(200, canvas.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) / S.lay.width;
+      scale = Math.max(beside, Math.min(full, MIN_FIT));
+    }
     canvas.classList.toggle("fit", scale == null);
     svg.style.width = scale == null ? "" : Math.round(S.lay.width * scale) + "px";
     svg.style.maxWidth = scale == null ? "" : "none";
@@ -3271,8 +3320,15 @@ router.post("/checkout", requireAuth, async (req, res) => {
     const corpus = (LL.corpus || []).map((e) => ({ id: e.id, name: e.name, group: e.group }));
     return own.concat(corpus);
   }
+  /** Switching mode for an example keeps the diagram of the mode being left, like the mode buttons do. */
+  function parkFor(mode) {
+    if (mode !== S.mode) S.parked[S.mode] = S.flow ? { flow: S.flow, codeAtDraw: S.codeAtDraw } : null;
+    S.parked[mode] = null;
+  }
   function loadExample(id) {
     const own = LL.sample.EXAMPLES.find((e) => e.id === id);
+    const target = own ? "code" : ((LL.corpus || []).find((e) => e.id === id) || {}).group === "change" ? "change" : "code";
+    parkFor(target);
     if (own) {
       const ex = LL.sample.getExample(id);
       setMode("code");
@@ -3464,7 +3520,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
     $("card-next").addEventListener("click", () => step(1));
     $("card-close").addEventListener("click", () => { S.tour = false; select(null); });
     $("only-changes").addEventListener("change", () => setOnlyChanges($("only-changes").checked));
-    // phones clamp long summaries to 1 line; a tap shows the rest
+    // long summaries are clamped (2 lines, 1 on phones); a click shows the rest
     for (const id of ["d-summary", "change-bar"]) $(id).addEventListener("click", (e) => { const p = e.target.closest("p, .cs"); if (p) p.classList.toggle("open"); });
     $("zoom-in").addEventListener("click", () => zoomBy(1.2));
     $("zoom-out").addEventListener("click", () => zoomBy(1 / 1.2));
@@ -3530,14 +3586,15 @@ router.post("/checkout", requireAuth, async (req, res) => {
       if (draft.lang === "en" || draft.lang === "vi") S.lang = draft.lang;
       if (["simple", "normal", "detailed"].includes(draft.detail)) S.detail = draft.detail;
       for (const [id, key] of [["lang-seg", "lang"], ["detail-seg", "detail"]]) $(id).querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.v === S[key])));
-      if (draft.example && allExamples().some((x) => x.id === draft.example)) { exSel.value = draft.example; loadExample(draft.example); }
+      const parked = draft.parked && typeof draft.parked === "object" ? draft.parked : {};
+      if (draft.example && allExamples().some((x) => x.id === draft.example)) { exSel.value = draft.example; loadExample(draft.example); S.parked = parked; }
       else {
         S.ed.code.setValue(draft.code || "");
         S.ed.before.setValue(draft.before || "");
         S.ed.after.setValue(draft.after || "");
         setMode(draft.mode);
         S.codeAtDraw = draft.codeAtDraw != null ? draft.codeAtDraw : diagramCode();
-        if (draft.parked && typeof draft.parked === "object") S.parked = draft.parked;
+        S.parked = parked;
         setFlow(draft.flow ? F.normalize(draft.flow) : null);
       }
     } else {

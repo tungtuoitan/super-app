@@ -3,7 +3,9 @@
 (function (LL) {
   "use strict";
 
-  const { layout, FONT, FAMILY, PAD_Y } = LL.layout;
+  const { layout, FONT, FAMILY, PAD_Y, measure } = LL.layout;
+  const CHIP_FONT = { size: 10, weight: 600, lh: 12 };
+  const chipW = (text) => measure(text, CHIP_FONT) + text.length * 0.4 + 12; // + letter-spacing .04em
 
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const r1 = (v) => Math.round(v * 10) / 10;
@@ -23,7 +25,7 @@
   .ll-loop{fill:var(--ll-loop-bg,rgba(60,127,168,.04));stroke:var(--ll-stage-line,#8db3cd);stroke-width:1.2;stroke-dasharray:3 4}
   .ll-item{fill:var(--ll-step-bg,#fff);stroke:var(--ll-item-line,#cdd5dc);stroke-width:1}
   .ll-callbar{stroke:var(--ll-step-line,#c3ccd5);stroke-width:1.2}
-  .ll-attn{stroke:var(--ll-attn,#c8462f);stroke-width:1.6}
+  .ll-attn{stroke:var(--ll-attn,#c8462f);stroke-opacity:.5;stroke-width:1.3}
   .ll-attnbg{fill:var(--ll-attn,#c8462f)}
   .ll-ch-added{fill:var(--ll-add-bg,#eaf8f0);stroke:var(--ll-add,#1f8a52);stroke-width:2;stroke-dasharray:none}
   .ll-ch-modified{fill:var(--ll-mod-bg,#fff5dd);stroke:var(--ll-mod,#c08400);stroke-width:2;stroke-dasharray:none}
@@ -105,7 +107,7 @@
   const EXIT_LABEL = { return: "RETURN", throw: "THROW", break: "BREAK", continue: "CONTINUE", exit: "EXIT", respond: "RESPOND" };
 
   function chip(x, y, text, bgClass, textClass) {
-    const w = text.length * 6.3 + 10;
+    const w = chipW(text);
     return `<g class="ll-chipg"><rect class="${bgClass}" x="${r1(x)}" y="${r1(y)}" width="${r1(w)}" height="15" rx="7.5"/><text class="ll-chip ${textClass}" x="${r1(x + w / 2)}" y="${r1(y + 11)}" text-anchor="middle">${esc(text)}</text></g>`;
   }
 
@@ -159,7 +161,7 @@
       s += `<g class="ll-chipg"><title>Đáng chú ý</title><circle class="ll-attnbg" cx="${r1(right - 7.5)}" cy="${r1(b.y)}" r="7.5"/><text class="ll-chip ll-ct" x="${r1(right - 7.5)}" y="${r1(b.y + 3.6)}" text-anchor="middle">!</text></g>`;
       right -= 19;
     }
-    if (n.tag) { const w = n.tag.length * 6.3 + 10; s += chip(right - w, b.y - 7.5, n.tag, "ll-tagbg", "ll-tagt"); }
+    if (n.tag) { const w = chipW(n.tag); s += chip(right - w, b.y - 7.5, n.tag, "ll-tagbg", "ll-tagt"); }
     return s;
   }
 

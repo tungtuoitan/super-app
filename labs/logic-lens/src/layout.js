@@ -136,6 +136,11 @@
       const h = PAD_Y * 2 + titleLines.length * FONT.title.lh + (subLines.length ? 3 + subLines.length * FONT.sub.lh : 0);
       return { titleLines, subLines, h: Math.max(h, subLines.length ? 52 : 40), clipped: !!(titleLines.clipped || subLines.clipped) };
     };
+    /** The first sentence of why an edited / removed box changed, wrapped for the diagram (none for other boxes). */
+    const whyLines = (node, w) => {
+      const why = (node.change === "modified" || node.change === "removed") && node.changeNote ? node.changeNote.split(/(?<=[.!?])\s/)[0] : "";
+      return why ? wrap(why, FONT.note, w - 28, 2) : [];
+    };
     const arrowTo = (from, to) => edges.push({ d: `M${from.x} ${from.y}V${to.y}`, arrow: true });
 
     /**
@@ -248,7 +253,9 @@
           const head = textBlock({ title: "↻ " + (node.title || ""), sub: node.sub }, fw - 24);
           const fy = cursor;
           connect({ x: cx, y: fy }, node.change === "removed");
-          const headH = PAD_Y + head.titleLines.length * FONT.title.lh + (head.subLines.length ? 3 + head.subLines.length * FONT.sub.lh : 0) + 4;
+          const loopWhy = whyLines(node, fw);
+          const textH = PAD_Y + head.titleLines.length * FONT.title.lh + (head.subLines.length ? 3 + head.subLines.length * FONT.sub.lh : 0);
+          const headH = textH + 4 + (loopWhy.length ? 4 + loopWhy.length * FONT.note.lh : 0);
           const ix = fx + LOOP_PAD;
           const iw = fw - LOOP_PAD * 2 - LOOP_GUTTER + 8; // leave room for the return arrow on the right
           const icx = ix + iw / 2;
@@ -263,7 +270,7 @@
             if (!r.ended) edges.push({ d: `M${from.x} ${from.y}V${bottom + 14}H${rx}V${headMid}H${rx - 16}`, arrow: true, loop: true });
           }
           const fh = bottom - fy + (node.steps.length ? 28 : PAD_Y);
-          boxes.push({ id, x: fx, y: fy, w: fw, h: fh, kind: "loop", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, node, container: true, headH, change: node.change });
+          boxes.push({ id, x: fx, y: fy, w: fw, h: fh, kind: "loop", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, node, container: true, headH, change: node.change, noteLines: loopWhy, noteY: fy + textH + 2, noteKind: loopWhy.length ? node.change : "" });
           prev = [{ x: cx, y: fy + fh }];
           merged = false;
           prevRemoved = node.change === "removed";
@@ -277,8 +284,7 @@
         const tb = textBlock(node, bw - (node.tag || node.change ? 20 : 0) - (node.kind === "call" ? 12 : 0), 2, depth > 1 ? 3 : 2);
         tb.h += node.tag || node.change ? 8 : 0;
         // an edited or removed box says why, right on the diagram (first sentence of the change note)
-        const why = (node.change === "modified" || node.change === "removed") && node.changeNote ? node.changeNote.split(/(?<=[.!?])\s/)[0] : "";
-        const noteLines = why ? wrap(why, FONT.note, bw - 28, 2) : [];
+        const noteLines = whyLines(node, bw);
         const noteY = cursor + tb.h - PAD_Y + 4;
         if (noteLines.length) tb.h += 6 + noteLines.length * FONT.note.lh;
         const bx = x + (w - bw) / 2;
@@ -308,7 +314,10 @@
 
     function laneHead(lane, lid, x, y, w, parallel) {
       const tb = textBlock(lane, w, 2, 3); // lanes are narrow: one more line before cutting the text
-      boxes.push({ id: lid, x, y, w, h: tb.h, kind: parallel ? "plane" : "lane", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane, clipped: tb.clipped, change: lane.change });
+      const noteLines = whyLines(lane, w);
+      const noteY = y + tb.h - PAD_Y + 4;
+      if (noteLines.length) tb.h += 6 + noteLines.length * FONT.note.lh;
+      boxes.push({ id: lid, x, y, w, h: tb.h, noteLines, noteY, noteKind: noteLines.length ? lane.change : "", kind: parallel ? "plane" : "lane", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane, clipped: tb.clipped, change: lane.change });
       return tb.h;
     }
 

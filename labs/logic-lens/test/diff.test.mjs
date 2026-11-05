@@ -91,12 +91,12 @@ test("a removed SQL comment ('--- …' inside a hunk) is content, not a new file
   assert.equal(D.applyPatch(before, files[0], "forward").code, "SELECT 1;\nSELECT 2;\nSELECT 4;");
 });
 
-test("change marks: comments and re-indentation do not count, new code after a deletion stays 'added'", () => {
+test("change marks: comments and trailing spaces do not count, new code after a deletion stays 'added'", () => {
   const before = "function f(x) {\n  // old note\n  if (x) {\n    save(x);\n  }\n  return x;\n}";
-  const after = "function f(x) {\n  // new note\n  if (!x) return null;\n  if (x) {\n      save(x);\n  }\n  return x;\n}";
+  const after = "function f(x) {\n  // new note\n  if (!x) return null;\n  if (x) {\n    save(x);   \n  }\n  return x;\n}";
   const c = D.compare(before, after);
   assert.equal(D.changeIn(c, [2, 2]), "", "comment-only edit");
-  assert.equal(D.changeIn(c, [5, 5]), "", "re-indented line");
+  assert.equal(D.changeIn(c, [5, 5]), "", "trailing spaces only");
   assert.equal(D.changeIn(c, [3, 3]), "added", "a new guard right after a removed comment");
   const tail = D.compare("a()\nb()\nc()", "a()\nb()");
   assert.equal(D.changeIn(tail, [2, 2]), "modified", "lines removed at the end belong to the last box");
@@ -104,7 +104,7 @@ test("change marks: comments and re-indentation do not count, new code after a d
   assert.equal(D.listingFor(tail, [1, 1]).filter((l) => l.type === "del").length, 0);
 });
 
-test("webhook bug fix: new branch paths are new, the new guard stays 'added', the edited call is 'modified'", () => {
+test("webhook bug fix: the new guard stays 'added', the edited call is 'modified' and owns the removed lines", () => {
   const fs = createRequire(import.meta.url)("node:fs");
   const read = (f) => fs.readFileSync(new URL("./corpus/" + f, import.meta.url), "utf8");
   const cmp = D.compare(read("changes/webhook.before.js"), read("changes/webhook.after.js"));
@@ -112,10 +112,27 @@ test("webhook bug fix: new branch paths are new, the new guard stays 'added', th
   D.reconcileChanges(flow, cmp);
   const by = {};
   LL.flow.eachNode(flow, (n) => { by[n.title] = n; });
-  assert.equal(by["Trùng"].change, "added");
-  assert.equal(by["Lần đầu"].change, "added");
-  assert.ok(by["Lần đầu"].changeInherited, "only the first path of a new branch is a stop of its own");
+  assert.equal(by["Lần đầu"].change, undefined, "the existing path through a new branch is not new");
+  const dels = (n) => D.listingFor(cmp, n.lines).filter((l) => l.type === "del").length;
+  assert.equal(dels(by["Đã paid"]), 0, "a new box shows no removed lines");
+  assert.ok(dels(by["db.tx: paid và giữ kho"]) >= 2, "the edited call shows the lines it replaced");
   assert.equal(by["200 already paid"].change, "added");
   assert.equal(by["db.tx: paid và giữ kho"].change, "modified");
   assert.equal(by["Kiểm tra chữ ký"].change, undefined);
+});
+
+test("language-aware comments: '--n;', '*p = 0;' and '#[cfg]' are code; a Python dedent is a change", () => {
+  const c1 = D.compare("while (n) {\n  work();\n  --n;\n}", "while (n) {\n  work();\n}");
+  assert.equal(D.changeIn(c1, [1, 3]), "modified");
+  const c2 = D.compare("void f(int *p) {\n}", "void f(int *p) {\n  *p = 0;\n}");
+  assert.equal(D.changeIn(c2, [2, 2]), "added");
+  const c3 = D.compare("fn main() {}\nmod tests {}", "fn main() {}\n#[cfg(test)]\nmod tests {}");
+  assert.equal(D.changeIn(c3, [2, 2]), "added");
+  const c4 = D.compare("def total(xs):\n    s = 0\n    for x in xs:\n        s += x\n        return s", "def total(xs):\n    s = 0\n    for x in xs:\n        s += x\n    return s");
+  assert.ok(c4.stats.changed, "dedent seen");
+  assert.equal(D.changeIn(c4, [5, 5]), "modified");
+  const c5 = D.compare("def f():\n    # old\n    return 2", "def f():\n    # new\n    return 2");
+  assert.equal(D.changeIn(c5, [1, 3]), "", "a Python comment edit");
+  const c6 = D.compare("SELECT a FROM t;\n-- old\nSELECT 2;", "SELECT a FROM t;\n-- new\nSELECT 2;");
+  assert.equal(D.changeIn(c6, [1, 3]), "", "a SQL comment edit");
 });

@@ -213,6 +213,19 @@ await page.locator("#paste-diff").click();
 await page.keyboard.press("Escape");
 ok(await page.locator("#diff-dialog").isHidden(), "Esc closes the git diff box");
 
+await page.selectOption("#example", "py");
+await page.waitForTimeout(150);
+await page.selectOption("#example", "change-sync");
+await page.waitForTimeout(150);
+await page.locator('#mode-seg [data-v="code"]').click();
+ok((await page.locator("#d-title").textContent()).includes("CSV"), "an example that switches mode keeps the left mode's diagram");
+await page.locator('#mode-seg [data-v="change"]').click();
+ok((await page.locator("#d-title").textContent()).includes("CRM"), "and the change example comes back");
+await page.reload();
+await page.waitForSelector(".ll-node");
+await page.locator('#mode-seg [data-v="code"]').click();
+ok((await page.locator("#d-title").textContent()).includes("CSV"), "the other mode's diagram survives a reload");
+
 console.log("Stop and errors");
 await page.close();
 page = await newPage({ viewport: { width: 1280, height: 860 } }, "denied");

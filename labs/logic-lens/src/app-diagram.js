@@ -25,7 +25,7 @@
   }
 
   function changedNodes() {
-    return S.nodes.filter((x) => x.node.change && !x.node.changeInherited);
+    return S.nodes.filter((x) => x.node.change);
   }
 
   function renderChangeBar() {
@@ -83,7 +83,12 @@
     else if (S.zoom === "auto" && fit < MIN_FIT && !S.narrow) scale = MIN_FIT;
     // the open card adds room to scroll into instead of shrinking the diagram
     const shrunk = scale != null; // shown bigger than "fit" so it stays readable
-    if (scale == null && cardOn) scale = Math.min(1100, avail) / S.lay.width;
+    if (scale == null && cardOn) {
+      // shrink toward the readable minimum so less is cut off, but never below what fits beside the card
+      const full = Math.min(1100, avail) / S.lay.width;
+      const beside = Math.max(200, canvas.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) / S.lay.width;
+      scale = Math.max(beside, Math.min(full, MIN_FIT));
+    }
     canvas.classList.toggle("fit", scale == null);
     svg.style.width = scale == null ? "" : Math.round(S.lay.width * scale) + "px";
     svg.style.maxWidth = scale == null ? "" : "none";
