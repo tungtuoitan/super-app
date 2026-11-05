@@ -74,6 +74,7 @@
   .ll-node:focus-visible .ll-shape,.ll-node.sel .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:2.6;stroke-dasharray:none}
   .ll-node.dim,.ll-itemg.dim,.ll-node.run-dim,.ll-node.dt-dim{opacity:.28}
   .ll-node.run-now .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:3;stroke-dasharray:none;filter:drop-shadow(0 0 9px var(--ll-glow,rgba(37,99,235,.35)))}
+  .ll-qg.run-ask rect{stroke:var(--ll-accent,#2563eb);stroke-width:2;stroke-dasharray:5 4}
   .ll-node.run-ask .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:2;stroke-dasharray:5 4}
   .ll-node.run-trail .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:1.8;stroke-opacity:.55;stroke-dasharray:none}
   .ll-node.hl .ll-shape{filter:drop-shadow(0 0 7px var(--ll-glow,rgba(37,99,235,.35)))}
@@ -230,7 +231,7 @@
       p.push(`<path class="${cls}" d="${e.bar ? e.d : roundPath(e.d, 7)}"${marker}/>`);
     }
     for (const b of L.boxes) if (!b.container) p.push(node(b));
-    for (const l of L.labels) p.push(`<g class="ll-qg${l.change ? " ll-qc-" + l.change : ""}"><rect class="${l.parallel ? "ll-pqbg" : "ll-qbg"}" x="${r1(l.x)}" y="${r1(l.y)}" width="${r1(l.w)}" height="${l.h}" rx="9"/><text class="${l.parallel ? "ll-pq" : "ll-q"}" x="${r1(l.x + 7)}" y="${r1(l.y + 12.5)}">${esc(l.text)}</text>${l.full !== l.text ? `<title>${esc(l.full)}</title>` : ""}</g>`);
+    for (const l of L.labels) p.push(`<g class="ll-qg${l.change ? " ll-qc-" + l.change : ""}"${l.laneId ? ` data-lane="${esc(l.laneId)}"` : ""}><rect class="${l.parallel ? "ll-pqbg" : "ll-qbg"}" x="${r1(l.x)}" y="${r1(l.y)}" width="${r1(l.w)}" height="${l.h}" rx="9"/><text class="${l.parallel ? "ll-pq" : "ll-q"}" x="${r1(l.x + 7)}" y="${r1(l.y + 12.5)}">${esc(l.text)}</text>${l.full !== l.text ? `<title>${esc(l.full)}</title>` : ""}</g>`);
     p.push("</svg>");
     return p.join("");
   }

@@ -1281,7 +1281,7 @@ label.check input { accent-color: var(--accent); }
       if (n.title) return n.title;
       const prev = lastShown;
       if (prev && prev.sub && /\?\s*$/.test(prev.sub)) return prev.sub;
-      if (prev && prev.title && prev.kind) return prev.title + ": đi nhánh nào?";
+      if (prev && prev.title && prev.kind) return "Kết quả của " + prev.title.replace(/[?.:]+$/, "") + "?";
       return "Đi nhánh nào?";
     }
 
@@ -2209,14 +2209,14 @@ label.check input { accent-color: var(--accent); }
       return tb.h;
     }
 
-    function questionLabel(text, x, y, anchor, parallel, change) {
+    function questionLabel(text, x, y, anchor, parallel, change, laneId) {
       if (!text) return;
       if (change) text = { added: "+ ", modified: "✎ ", removed: "− " }[change] + text;
       const f = FONT.label;
       const t = wrap(text, f, 260, 1)[0];
       const tw = measure(t, f) + 14;
       const lx = anchor === "end" ? x - tw : x;
-      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text, parallel: !!parallel, change: change || "" });
+      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text, parallel: !!parallel, change: change || "", laneId: laneId || "" });
     }
 
     // shared with the lane layouts in layout-lanes.js
@@ -2320,12 +2320,15 @@ label.check input { accent-color: var(--accent); }
     if (hasPrev) edges.push({ d: `M${cx} ${top - GAP}V${rowY}`, arrow: false });
     edges.push({ d: `M${cx} ${rowY}H${sideX}`, arrow: true });
     // the question and the normal answer sit on the left of the main line
-    if (node.title) questionLabel(node.title, cx - 10, rowY - 12, "end", false, node.change);
-    if (go.title) questionLabel(go.title + " ↓", cx - 10, rowY + 12, "end", false);
+    const real = (t) => t && t !== "…";
+    if (real(node.title)) questionLabel(node.title, cx - 10, rowY - 12, "end", false, node.change);
+    if (real(go.title)) questionLabel(go.title + " ↓", cx - 10, rowY + 12, "end", false, "", id + ".l" + goAt);
     ctx.hidden.push(id + ".l" + goAt);
     const r = seq(stop.steps, sideX, sideW, laneTop + hh + GAP, id + ".l" + stopAt + ".", depth + 1, [{ x: sideX + sideW / 2, y: laneTop + hh }]);
     const bottom = Math.max(r.bottom, rowY + 34);
-    return { tails: [{ x: cx, y: rowY }], merged: true, ended: false, next: bottom + GAP };
+    // the main line runs on past the side exit, so whatever comes next (a fork, another guard) hangs off it
+    edges.push({ d: `M${cx} ${rowY}V${bottom}`, arrow: false });
+    return { tails: [{ x: cx, y: bottom }], merged: true, ended: false, next: bottom + GAP };
   }
 
   /**
@@ -2462,6 +2465,7 @@ label.check input { accent-color: var(--accent); }
   .ll-node:focus-visible .ll-shape,.ll-node.sel .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:2.6;stroke-dasharray:none}
   .ll-node.dim,.ll-itemg.dim,.ll-node.run-dim,.ll-node.dt-dim{opacity:.28}
   .ll-node.run-now .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:3;stroke-dasharray:none;filter:drop-shadow(0 0 9px var(--ll-glow,rgba(37,99,235,.35)))}
+  .ll-qg.run-ask rect{stroke:var(--ll-accent,#2563eb);stroke-width:2;stroke-dasharray:5 4}
   .ll-node.run-ask .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:2;stroke-dasharray:5 4}
   .ll-node.run-trail .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:1.8;stroke-opacity:.55;stroke-dasharray:none}
   .ll-node.hl .ll-shape{filter:drop-shadow(0 0 7px var(--ll-glow,rgba(37,99,235,.35)))}
@@ -2618,7 +2622,7 @@ label.check input { accent-color: var(--accent); }
       p.push(`<path class="${cls}" d="${e.bar ? e.d : roundPath(e.d, 7)}"${marker}/>`);
     }
     for (const b of L.boxes) if (!b.container) p.push(node(b));
-    for (const l of L.labels) p.push(`<g class="ll-qg${l.change ? " ll-qc-" + l.change : ""}"><rect class="${l.parallel ? "ll-pqbg" : "ll-qbg"}" x="${r1(l.x)}" y="${r1(l.y)}" width="${r1(l.w)}" height="${l.h}" rx="9"/><text class="${l.parallel ? "ll-pq" : "ll-q"}" x="${r1(l.x + 7)}" y="${r1(l.y + 12.5)}">${esc(l.text)}</text>${l.full !== l.text ? `<title>${esc(l.full)}</title>` : ""}</g>`);
+    for (const l of L.labels) p.push(`<g class="ll-qg${l.change ? " ll-qc-" + l.change : ""}"${l.laneId ? ` data-lane="${esc(l.laneId)}"` : ""}><rect class="${l.parallel ? "ll-pqbg" : "ll-qbg"}" x="${r1(l.x)}" y="${r1(l.y)}" width="${r1(l.w)}" height="${l.h}" rx="9"/><text class="${l.parallel ? "ll-pq" : "ll-q"}" x="${r1(l.x + 7)}" y="${r1(l.y + 12.5)}">${esc(l.text)}</text>${l.full !== l.text ? `<title>${esc(l.full)}</title>` : ""}</g>`);
     p.push("</svg>");
     return p.join("");
   }
@@ -3622,14 +3626,18 @@ router.post("/checkout", requireAuth, async (req, res) => {
   /** A call into a function that has its own section in this diagram (recursion, a helper, a handler): that section. */
   function sectionFor(n, selfId) {
     if (n.kind !== "call" && n.kind !== "step") return null;
-    const m = String(n.title || "").match(/([A-Za-z_$][\w$]*)\s*\(/);
-    if (!m) return null;
-    const name = m[1].toLowerCase() + "(";
+    // the function names in the title: "visit(dep)", or a bare identifier like fetch_json / loadUser
+    const title = String(n.title || "");
+    const names = new Set();
+    for (const m of title.matchAll(/([A-Za-z_$][\w$]*)\s*\(/g)) names.add(m[1].toLowerCase());
+    for (const m of title.matchAll(/\b([a-z_$][\w$]*(?:_[\w$]+|[a-z][A-Z][\w$]*))\b/g)) names.add(m[1].toLowerCase());
+    if (!names.size) return null;
+    const starts = (hay, name) => new RegExp("(^|[^\\w$])" + name.replace(/\$/g, "\\$") + "\\s*(\\(|$|\\s)").test(hay);
     for (const e of S.nodes) {
       if (e.node.kind !== "section" || selfId.startsWith(e.id + ".")) continue;
       const first = (e.node.steps || [])[0];
       const hay = [e.node.title, e.node.sub, first && first.title].join(" ").toLowerCase();
-      if (hay.includes(name)) return e;
+      for (const name of names) if (starts(hay, name)) return e;
     }
     return null;
   }
@@ -3827,6 +3835,8 @@ router.post("/checkout", requireAuth, async (req, res) => {
     run.asking = [];
     if (r.node) {
       const id = idOf(r.node);
+      // the empty normal path of a guard has no box: it is the main line going on, so step straight past it
+      if (id && S.lay && (S.lay.hidden || []).includes(id)) return advance();
       run.steps++;
       if (id) { run.current = id; if (!run.trail.includes(id)) run.trail.push(id); }
       // parallel lanes light up together: they all start now
@@ -3842,7 +3852,8 @@ router.post("/checkout", requireAuth, async (req, res) => {
       if (r.back) run.trail = run.current ? [run.current] : [];
       // show the choices on the diagram too: the lanes light up and come into view
       run.asking = (r.choice.lanes || []).map(idOf).filter(Boolean);
-      if (run.asking[0]) LL.app.scrollToBox(run.asking[0]);
+      const shown = run.asking.find((x) => !((S.lay && S.lay.hidden) || []).includes(x));
+      if (shown) LL.app.scrollToBox(shown);
       if (run.playing) { setPlaying(false); run.wantPlay = true; } // a question pauses "Tự chạy" until answered
     }
     showBox(r);
@@ -3881,7 +3892,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
     $("run-step").disabled = !!r.done;
     if (r.done) {
       const end = r.end;
-      box.appendChild(el("div", "run-q", r.scenarioDone ? "Kịch bản xong: người dùng về lại màn hình." : end ? `Kết thúc: ${EXIT_WORD[end.exit] || "trả về"} tại “${end.title}”.` : "Đã chạy hết luồng."));
+      box.appendChild(el("div", "run-q", r.scenarioDone ? (end && end.exit === "stay" ? "Kịch bản xong: người dùng vẫn ở trong hộp thoại / form đó." : "Kịch bản xong: người dùng về lại màn hình.") : end ? `Kết thúc: ${EXIT_WORD[end.exit] || "trả về"} tại “${end.title}”.` : "Đã chạy hết luồng."));
       if (S.run.written.size) {
         const OPW = { insert: "thêm", update: "sửa", delete: "xoá", write: "ghi" };
         box.appendChild(el("div", "run-w", "Lần chạy này ghi vào: " + [...S.run.written].map(([t, op]) => `${t} (${OPW[op] || "ghi"})`).join(", ")));
@@ -3945,6 +3956,8 @@ router.post("/checkout", requireAuth, async (req, res) => {
       g.classList.toggle("run-ask", ask);
       g.classList.toggle("run-dim", !!run && !run.trail.includes(id) && !ask);
     });
+    // a guard's normal path is a label on the main line: it lights up as the other answer
+    svg.querySelectorAll(".ll-qg[data-lane]").forEach((g) => g.classList.toggle("run-ask", !!run && run.asking.includes(g.getAttribute("data-lane"))));
   }
 
   function boot() {

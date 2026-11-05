@@ -57,6 +57,8 @@
     run.asking = [];
     if (r.node) {
       const id = idOf(r.node);
+      // the empty normal path of a guard has no box: it is the main line going on, so step straight past it
+      if (id && S.lay && (S.lay.hidden || []).includes(id)) return advance();
       run.steps++;
       if (id) { run.current = id; if (!run.trail.includes(id)) run.trail.push(id); }
       // parallel lanes light up together: they all start now
@@ -72,7 +74,8 @@
       if (r.back) run.trail = run.current ? [run.current] : [];
       // show the choices on the diagram too: the lanes light up and come into view
       run.asking = (r.choice.lanes || []).map(idOf).filter(Boolean);
-      if (run.asking[0]) LL.app.scrollToBox(run.asking[0]);
+      const shown = run.asking.find((x) => !((S.lay && S.lay.hidden) || []).includes(x));
+      if (shown) LL.app.scrollToBox(shown);
       if (run.playing) { setPlaying(false); run.wantPlay = true; } // a question pauses "Tự chạy" until answered
     }
     showBox(r);
@@ -111,7 +114,7 @@
     $("run-step").disabled = !!r.done;
     if (r.done) {
       const end = r.end;
-      box.appendChild(el("div", "run-q", r.scenarioDone ? "Kịch bản xong: người dùng về lại màn hình." : end ? `Kết thúc: ${EXIT_WORD[end.exit] || "trả về"} tại “${end.title}”.` : "Đã chạy hết luồng."));
+      box.appendChild(el("div", "run-q", r.scenarioDone ? (end && end.exit === "stay" ? "Kịch bản xong: người dùng vẫn ở trong hộp thoại / form đó." : "Kịch bản xong: người dùng về lại màn hình.") : end ? `Kết thúc: ${EXIT_WORD[end.exit] || "trả về"} tại “${end.title}”.` : "Đã chạy hết luồng."));
       if (S.run.written.size) {
         const OPW = { insert: "thêm", update: "sửa", delete: "xoá", write: "ghi" };
         box.appendChild(el("div", "run-w", "Lần chạy này ghi vào: " + [...S.run.written].map(([t, op]) => `${t} (${OPW[op] || "ghi"})`).join(", ")));
@@ -175,6 +178,8 @@
       g.classList.toggle("run-ask", ask);
       g.classList.toggle("run-dim", !!run && !run.trail.includes(id) && !ask);
     });
+    // a guard's normal path is a label on the main line: it lights up as the other answer
+    svg.querySelectorAll(".ll-qg[data-lane]").forEach((g) => g.classList.toggle("run-ask", !!run && run.asking.includes(g.getAttribute("data-lane"))));
   }
 
   function boot() {

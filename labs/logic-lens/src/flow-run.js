@@ -114,7 +114,7 @@
       if (n.title) return n.title;
       const prev = lastShown;
       if (prev && prev.sub && /\?\s*$/.test(prev.sub)) return prev.sub;
-      if (prev && prev.title && prev.kind) return prev.title + ": đi nhánh nào?";
+      if (prev && prev.title && prev.kind) return "Kết quả của " + prev.title.replace(/[?.:]+$/, "") + "?";
       return "Đi nhánh nào?";
     }
 

@@ -345,14 +345,14 @@
       return tb.h;
     }
 
-    function questionLabel(text, x, y, anchor, parallel, change) {
+    function questionLabel(text, x, y, anchor, parallel, change, laneId) {
       if (!text) return;
       if (change) text = { added: "+ ", modified: "✎ ", removed: "− " }[change] + text;
       const f = FONT.label;
       const t = wrap(text, f, 260, 1)[0];
       const tw = measure(t, f) + 14;
       const lx = anchor === "end" ? x - tw : x;
-      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text, parallel: !!parallel, change: change || "" });
+      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text, parallel: !!parallel, change: change || "", laneId: laneId || "" });
     }
 
     // shared with the lane layouts in layout-lanes.js

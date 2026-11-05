@@ -301,14 +301,18 @@
   /** A call into a function that has its own section in this diagram (recursion, a helper, a handler): that section. */
   function sectionFor(n, selfId) {
     if (n.kind !== "call" && n.kind !== "step") return null;
-    const m = String(n.title || "").match(/([A-Za-z_$][\w$]*)\s*\(/);
-    if (!m) return null;
-    const name = m[1].toLowerCase() + "(";
+    // the function names in the title: "visit(dep)", or a bare identifier like fetch_json / loadUser
+    const title = String(n.title || "");
+    const names = new Set();
+    for (const m of title.matchAll(/([A-Za-z_$][\w$]*)\s*\(/g)) names.add(m[1].toLowerCase());
+    for (const m of title.matchAll(/\b([a-z_$][\w$]*(?:_[\w$]+|[a-z][A-Z][\w$]*))\b/g)) names.add(m[1].toLowerCase());
+    if (!names.size) return null;
+    const starts = (hay, name) => new RegExp("(^|[^\\w$])" + name.replace(/\$/g, "\\$") + "\\s*(\\(|$|\\s)").test(hay);
     for (const e of S.nodes) {
       if (e.node.kind !== "section" || selfId.startsWith(e.id + ".")) continue;
       const first = (e.node.steps || [])[0];
       const hay = [e.node.title, e.node.sub, first && first.title].join(" ").toLowerCase();
-      if (hay.includes(name)) return e;
+      for (const name of names) if (starts(hay, name)) return e;
     }
     return null;
   }

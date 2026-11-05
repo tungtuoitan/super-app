@@ -86,12 +86,15 @@
     if (hasPrev) edges.push({ d: `M${cx} ${top - GAP}V${rowY}`, arrow: false });
     edges.push({ d: `M${cx} ${rowY}H${sideX}`, arrow: true });
     // the question and the normal answer sit on the left of the main line
-    if (node.title) questionLabel(node.title, cx - 10, rowY - 12, "end", false, node.change);
-    if (go.title) questionLabel(go.title + " ↓", cx - 10, rowY + 12, "end", false);
+    const real = (t) => t && t !== "…";
+    if (real(node.title)) questionLabel(node.title, cx - 10, rowY - 12, "end", false, node.change);
+    if (real(go.title)) questionLabel(go.title + " ↓", cx - 10, rowY + 12, "end", false, "", id + ".l" + goAt);
     ctx.hidden.push(id + ".l" + goAt);
     const r = seq(stop.steps, sideX, sideW, laneTop + hh + GAP, id + ".l" + stopAt + ".", depth + 1, [{ x: sideX + sideW / 2, y: laneTop + hh }]);
     const bottom = Math.max(r.bottom, rowY + 34);
-    return { tails: [{ x: cx, y: rowY }], merged: true, ended: false, next: bottom + GAP };
+    // the main line runs on past the side exit, so whatever comes next (a fork, another guard) hangs off it
+    edges.push({ d: `M${cx} ${rowY}V${bottom}`, arrow: false });
+    return { tails: [{ x: cx, y: bottom }], merged: true, ended: false, next: bottom + GAP };
   }
 
   /**
