@@ -65,6 +65,16 @@ ok(pos1 !== pos2, `replay advances (${pos1} -> ${pos2})`);
 ok((await page.locator(".ev.future").count()) > 0, "future events are dimmed during replay");
 await page.locator(".play-btn").click();
 
+// keyboard
+await page.locator(".rec-title h1").click();
+const k0 = await page.locator(".player .pos").textContent();
+await page.keyboard.press("ArrowLeft");
+await page.keyboard.press("ArrowLeft");
+ok((await page.locator(".player .pos").textContent()) !== k0, "arrow keys step through events");
+await page.keyboard.press("/");
+ok(await page.evaluate(() => document.activeElement && document.activeElement.id === "rec-search"), "/ focuses the transcript search");
+await page.keyboard.press("Escape");
+
 // filters & search
 await page.fill("#rec-search", "npm test");
 ok((await page.locator(".feed .ev").count()) >= 2 && (await page.locator(".feed .ev").count()) < 10, "search narrows the transcript");

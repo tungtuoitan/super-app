@@ -2239,6 +2239,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       S.progress, S.notice, fileInput, dirInput);
     AFD.ui.dropzone(bar, loadEntries);
     S.content = h("div");
+    document.addEventListener("keydown", onKey);
     root.appendChild(bar);
     root.appendChild(S.content);
     loadExample();
@@ -2510,7 +2511,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     S.content.appendChild(h("section.rec-grid",
       h("div.rec-main",
         h("div.panel",
-          h("div.panel-h", h("h2", "Flight path"), h("span.hint", "Pauses over 1 minute are shortened; zigzags mark pauses over 5 minutes. Click to inspect.")),
+          h("div.panel-h", h("h2", "Flight path"), h("span.hint", "Pauses over 1 minute are shortened; zigzags mark pauses over 5 minutes. Click to inspect."), h("span.spacer"), h("span.hint", { style: { fontFamily: "var(--f-mono)", fontSize: "11px" } }, "Space play · ← → step · / search")),
           v.tlWrap, v.legend,
           h("div.player", v.playBtn, stepBtn(-1, "prev", "Previous event"), stepBtn(1, "next", "Next event"), v.scrub, v.pos, speedSeg)),
         h("div.panel",
@@ -3192,6 +3193,20 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       { key: "cost", label: "Cost", num: true, render: (r) => usd(r.cost) },
       { key: "bar", label: "", sortable: false, render: (r) => h("div.minibar", h("i", { style: { width: (r.cost / max) * 100 + "%", background: "var(--accent)" } })) },
     ], rows, { sortKey: "idx", asc: true, onRow: (r) => { stop(); select(r.startEvent, true); S.view.tlWrap.scrollIntoView({ block: "nearest", behavior: "smooth" }); } }));
+  }
+
+  /** Space: play/pause · ←/→: step · /: search. Ignored while typing or when this view is hidden. */
+  function onKey(e) {
+    if (!S.session || !S.view || S.root.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+    const tag = (e.target && e.target.tagName) || "";
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || (e.target && e.target.isContentEditable)) {
+      if (e.key === "Escape" && e.target === S.view.search) e.target.blur();
+      return;
+    }
+    if (e.key === " " && tag !== "BUTTON") { e.preventDefault(); togglePlay(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); stop(); step(1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); stop(); step(-1); }
+    else if (e.key === "/") { e.preventDefault(); S.view.search.focus(); }
   }
 
   function onHide() {
