@@ -79,9 +79,9 @@ await page.keyboard.press("Escape");
 await page.fill("#rec-search", "npm test");
 ok((await page.locator(".feed .ev").count()) >= 2 && (await page.locator(".feed .ev").count()) < 10, "search narrows the transcript");
 await page.fill("#rec-search", "");
+ok((await page.locator(".feed .ev.k-thinking").count()) === 0, "empty thinking rows are hidden by default");
 await page.locator(".filters button", { hasText: "Thinking" }).click();
-ok((await page.locator(".feed .ev.k-thinking").count()) === 0, "thinking filter hides thinking rows");
-await page.locator(".filters button", { hasText: "Thinking" }).click();
+ok((await page.locator(".feed .ev.k-thinking").count()) > 0, "the Thinking filter shows them on demand");
 
 // turns table row jumps
 await page.locator(".charts .panel").nth(3).locator("tbody tr").nth(1).click();
@@ -99,7 +99,7 @@ if (realLog) {
   await page.setInputFiles("#rec-file", realLog);
   await page.waitForFunction(() => !document.querySelector(".pill.example"));
   const title = await page.locator(".rec-title h1").textContent();
-  ok(title.length > 3, "real session title: " + title.slice(0, 60));
+  ok(title.length > 3, "real session has a title (not printed: it is private)");
   const cost = await page.locator(".gauge .v").first().textContent();
   ok(/^\$\d/.test(cost), "real session cost: " + cost);
   await page.screenshot({ path: path.join(shots, "2-recorder-real.png"), fullPage: false });

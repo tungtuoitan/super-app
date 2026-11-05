@@ -108,3 +108,54 @@ test("squarify covers the area without overlap", () => {
     assert.ok(!(ox > 1e-6 && oy > 1e-6), `overlap ${i} ${j}`);
   }
 });
+
+test("comment stripping never touches strings: template literals, triple quotes, SQL strings", () => {
+  const js = "const md = `\n// not a comment\n/* also not */\n`;\n// real comment\nconst x = 1; // trailing stays\n/* block\n   comment */\nconst s = '/* not a block';\nconst y = 2;\n";
+  const out = P.transform(js, "js", { stripComments: true });
+  assert.ok(out.includes("// not a comment") && out.includes("/* also not */"), "template literal kept:\n" + out);
+  assert.ok(!out.includes("// real comment"));
+  assert.ok(!out.includes("block\n") && !out.includes("comment */"));
+  assert.ok(out.includes("const s = '/* not a block';") && out.includes("const y = 2;"));
+  const py = 'DOC = """\n# Heading inside a string\n"""\n# real comment\nx = "#not"\n';
+  const pout = P.transform(py, "py", { stripComments: true });
+  assert.ok(pout.includes("# Heading inside a string"), pout);
+  assert.ok(!pout.includes("# real comment"));
+  const sql = "SELECT '\n-- inside a string\n' AS s;\n-- real\nSELECT 1;";
+  const sout = P.transform(sql, "sql", { stripComments: true });
+  assert.ok(sout.includes("-- inside a string") && !sout.includes("-- real"), sout);
+});
+
+test("nested .gitignore order does not depend on input order", () => {
+  const files = (order) => {
+    const list = [
+      { path: ".gitignore", text: "*.gen.ts\n" },
+      { path: "sub/.gitignore", text: "!keep.gen.ts\n" },
+      { path: "sub/keep.gen.ts", text: "x" },
+      { path: "sub/drop.gen.ts", text: "y" },
+    ];
+    return order ? list : list.slice().reverse();
+  };
+  for (const order of [true, false]) {
+    const { files: kept } = P.prepare(files(order));
+    const paths = kept.map((f) => f.path);
+    assert.ok(paths.includes("sub/keep.gen.ts"), "negation in the deeper file wins (" + order + ")");
+    assert.ok(!paths.includes("sub/drop.gen.ts"));
+  }
+});
+
+test("default ignores: output folders only at the root, .env.example kept, secrets skipped", () => {
+  const { files, skipped } = P.prepare(["src/out/x.ts", "out/bundle.js", "bin/tool", "scripts/bin/deploy.sh", ".env", ".env.example", "config/id_rsa", "certs/server.pem", ".npmrc", "keys/gcp-service-account.json"].map((p) => ({ path: p, text: "x = 1" })));
+  const kept = files.map((f) => f.path);
+  for (const p of ["src/out/x.ts", "scripts/bin/deploy.sh", ".env.example"]) assert.ok(kept.includes(p), p);
+  for (const p of ["out/bundle.js", "bin/tool", ".env"]) assert.ok(skipped.some((s) => s.path === p && s.reason === "ignored"), p);
+  for (const p of ["config/id_rsa", "certs/server.pem", ".npmrc", "keys/gcp-service-account.json"]) assert.ok(skipped.some((s) => s.path === p && s.reason === "possible secret"), p);
+});
+
+test("auto-select counts the wrapper around each file", () => {
+  const files = Array.from({ length: 300 }, (_, i) => ({ path: `src/very/long/path/to/module_${i}/index.ts`, text: "export const a = " + i + ";" }));
+  const { files: prepared } = P.prepare(files);
+  P.scoreFiles(prepared, "");
+  P.autoSelect(prepared, 4000, {});
+  const prompt = P.buildPrompt(prepared, { format: "xml", includeTree: false });
+  assert.ok(prompt.tokens <= 4400, "prompt with wrappers stays near the budget: " + prompt.tokens);
+});

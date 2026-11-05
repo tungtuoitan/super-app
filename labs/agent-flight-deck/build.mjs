@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const src = (f) => fs.readFileSync(path.join(here, "src", f), "utf8");
-const ORDER = ["pricing.js", "session.js", "sample.js", "packer.js", "ui.js", "recorder.js", "loadsheet.js", "app.js"];
+const ORDER = ["pricing.js", "session.js", "session-build.js", "insights.js", "sample.js", "packer.js", "packer-output.js", "ui.js", "recorder.js", "recorder-timeline.js", "recorder-session.js", "recorder-panels.js", "loadsheet.js", "loadsheet-render.js", "app.js"];
 
 const scripts = ORDER.map((f) => `// ── ${f}\n${src(f)}`).join("\n").replace(/<\/script/gi, "<\\/script");
 let html = src("index.html");

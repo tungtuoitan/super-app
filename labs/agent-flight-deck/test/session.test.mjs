@@ -40,7 +40,7 @@ test("dedupes usage across lines that share message.id and pairs tool results", 
   assert.equal(s.title, "read the file");
   assert.equal(s.project, "proj");
   // 5000 5m writes at 1.25 * $2 + 5000 reads at $0.20 + 20 input at $2 + 200 output at $10
-  const expected = (5000 * 2.5 + 5000 * 0.2 + 20 * 2 + 200 * 10) / 1e6;
+  const expected = (5000 * 2.5 + 5000 * 0.1 + 20 * 2 + 200 * 10) / 1e6;
   assert.ok(Math.abs(s.totals.cost - expected) < 1e-12);
 });
 
@@ -96,4 +96,37 @@ test("the built-in example session parses into the story it tells", () => {
 test("empty and garbage input does not throw", () => {
   const r = analyzeFiles([{ name: "e.jsonl", text: "" }, { name: "g.jsonl", text: "{{{\n[1,2]\n42\n" }]);
   assert.equal(r.sessions.length, 0);
+});
+
+test("loading subagent files does not move main-transcript lines between turns", () => {
+  const T = (s) => `2026-01-01T10:00:${String(s).padStart(2, "0")}.000Z`;
+  const main = [
+    L({ type: "user", timestamp: T(0), message: { role: "user", content: "first" } }),
+    L({ type: "assistant", timestamp: T(10), message: { id: "a1", model: "claude-opus-5-5", content: [{ type: "text", text: "ok" }], usage: usage() } }),
+    // a queued prompt written AFTER a later-timestamped line, as Claude Code does
+    L({ type: "assistant", timestamp: T(20), message: { id: "a2", model: "claude-opus-5-5", content: [{ type: "text", text: "more" }], usage: usage() } }),
+    L({ type: "attachment", timestamp: T(15), attachment: { type: "queued_command", prompt: "second", timestamp: T(15) } }),
+    L({ type: "assistant", timestamp: T(25), message: { id: "a3", model: "claude-opus-5-5", content: [{ type: "text", text: "answer" }], usage: usage() } }),
+  ].join("\n");
+  const sub = L({ type: "assistant", timestamp: T(12), message: { id: "s1", model: "claude-haiku-5-5", content: [{ type: "text", text: "sub" }], usage: usage() } });
+  const alone = analyzeFiles([{ name: "p/s1.jsonl", text: main }]).sessions[0];
+  const both = analyzeFiles([{ name: "p/s1.jsonl", text: main }, { name: "p/s1/subagents/agent-x.jsonl", text: sub }]).sessions[0];
+  const mainCalls = (s) => s.turns.map((t) => t.calls.map((c) => s.calls[c]).filter((c) => !c.sidechain).map((c) => c.id).join(","));
+  assert.deepEqual(mainCalls(both), mainCalls(alone));
+  assert.equal(both.calls.filter((c) => c.sidechain).length, 1);
+});
+
+test("findings: heredoc writes are not 'file dumps'; long pauses and model switches are expected rebuilds", () => {
+  const T = (m) => new Date(Date.UTC(2026, 0, 1, 10, m)).toISOString();
+  const lines = [L({ type: "user", timestamp: T(0), message: { role: "user", content: "go" } })];
+  for (let i = 0; i < 4; i++) {
+    lines.push(L({ type: "assistant", timestamp: T(i), message: { id: "b" + i, model: "claude-opus-5-5", content: [{ type: "tool_use", id: "t" + i, name: "Bash", input: { command: "cat > out.txt <<'EOF'\nhi\nEOF" } }], usage: usage({ cache_read_input_tokens: 50000 }) } }));
+    lines.push(L({ type: "user", timestamp: T(i), message: { role: "user", content: [{ type: "tool_result", tool_use_id: "t" + i, content: "x".repeat(30000) }] } }));
+  }
+  // 3-hour pause, then a rebuild: expected, not waste
+  lines.push(L({ type: "assistant", timestamp: T(200), message: { id: "late", model: "claude-opus-5-5", content: [{ type: "text", text: "back" }], usage: usage({ cache_creation_input_tokens: 60000 }) } }));
+  const s = analyzeFiles([{ name: "x.jsonl", text: lines.join("\n") }]).sessions[0];
+  assert.ok(!s.insights.some((i) => i.id === "bash-fileops"), "heredoc writes are not flagged");
+  const rb = s.insights.find((i) => i.id === "cache-rebuild");
+  assert.ok(rb && rb.level === "info" && /expected/.test(rb.title), rb && rb.title);
 });

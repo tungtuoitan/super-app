@@ -25,10 +25,10 @@ test("matches the most specific model", () => {
 });
 
 test("prices each usage component", () => {
-  // Sonnet 5.5: $2 in, $10 out, $0.20 cache read; 1h write = 2x input = $4, 5m write = 1.25x = $2.5
+  // Sonnet 5.5: $2 in, $10 out, $0.10 cache read; 1h write = 2x input = $4, 5m write = 1.25x = $2.5
   const c = costOf({ input_tokens: 1e6, output_tokens: 1e6, cache_read_input_tokens: 1e6, cache_creation_input_tokens: 2e6,
     cache_creation: { ephemeral_5m_input_tokens: 1e6, ephemeral_1h_input_tokens: 1e6 } }, "claude-sonnet-5-5");
-  close(c.input, 2); close(c.output, 10); close(c.cacheRead, 0.2); close(c.cacheWrite, 2.5 + 4); close(c.total, 18.7);
+  close(c.input, 2); close(c.output, 10); close(c.cacheRead, 0.1); close(c.cacheWrite, 2.5 + 4); close(c.total, 18.6);
 });
 
 test("cache writes without a TTL breakdown count as 5-minute writes", () => {

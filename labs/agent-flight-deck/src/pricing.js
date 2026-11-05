@@ -1,5 +1,5 @@
 /* Agent Flight Deck — model pricing and context windows.
- * Prices are USD per million tokens, Anthropic first-party API list prices (cached 2026-10).
+ * Prices are USD per million tokens, Anthropic first-party API list prices (checked against platform.claude.com/docs/en/about-claude/pricing, 2026-11).
  * Cache writes: 1.25x input (5-minute TTL), 2x input (1-hour TTL). Cache reads vary by model.
  */
 (function (AFD) {
@@ -19,7 +19,7 @@
     { id: "claude-opus-4-5", name: "Opus 4.5", input: 5, output: 25, cacheRead: 0.5, window: 200000 },
     { id: "claude-opus-4-1", name: "Opus 4.1", input: 15, output: 75, cacheRead: 1.5, window: 200000 },
     { id: "claude-opus-4", name: "Opus 4", input: 15, output: 75, cacheRead: 1.5, window: 200000 },
-    { id: "claude-sonnet-5-5", name: "Sonnet 5.5", input: 2, output: 10, cacheRead: 0.2, window: 1000000 },
+    { id: "claude-sonnet-5-5", name: "Sonnet 5.5", input: 2, output: 10, cacheRead: 0.1, window: 1000000 },
     { id: "claude-sonnet-5", name: "Sonnet 5", input: 2, output: 10, cacheRead: 0.2, window: 1000000 },
     { id: "claude-sonnet-4-6", name: "Sonnet 4.6", input: 3, output: 15, cacheRead: 0.3, window: 1000000 },
     { id: "claude-sonnet-4-5", name: "Sonnet 4.5", input: 3, output: 15, cacheRead: 0.3, window: 200000 },
@@ -120,5 +120,10 @@
     return Number.isFinite(n) && n > 0 ? n : 0;
   }
 
-  AFD.pricing = { MODELS, normalizeModel, findModel, displayName, costOf, promptCost, WEB_SEARCH_USD };
+  /** Rough tokens for a character count, for text we cannot tokenize (tool results). ~3 chars per token for code-heavy text. */
+  function charsToTokens(chars) {
+    return Math.ceil((Number(chars) || 0) / 3);
+  }
+
+  AFD.pricing = { MODELS, normalizeModel, findModel, displayName, costOf, promptCost, charsToTokens, WEB_SEARCH_USD };
 })(globalThis.AFD = globalThis.AFD || {});

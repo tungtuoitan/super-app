@@ -7,11 +7,16 @@
   // Always skipped, whatever .gitignore says.
   const DEFAULT_IGNORES = [
     ".git/", "node_modules/", "bower_components/", "vendor/", ".venv/", "venv/", "__pycache__/", ".mypy_cache/", ".pytest_cache/",
-    ".next/", ".nuxt/", ".svelte-kit/", ".turbo/", ".cache/", ".parcel-cache/", "dist/", "build/", "out/", "target/", "coverage/",
-    ".idea/", ".vscode/", ".gradle/", "Pods/", "DerivedData/", "bin/", "obj/",
+    ".next/", ".nuxt/", ".svelte-kit/", ".turbo/", ".cache/", ".parcel-cache/", "dist/", "build/", "coverage/",
+    ".idea/", ".vscode/", ".gradle/", "Pods/", "DerivedData/",
+    // common output folder names that are also used for source deeper down: only ignored at the root
+    "/out/", "/target/", "/bin/", "/obj/", "/vendor/",
     "*.min.js", "*.min.css", "*.map", "*.lock", "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb", "Cargo.lock", "poetry.lock", "composer.lock", "Gemfile.lock",
-    ".DS_Store", "*.log", ".env", ".env.*",
+    ".DS_Store", "*.log", ".env", ".env.*", "!.env.example", "!.env.sample", "!.env.template",
   ];
+
+  // Files that usually hold credentials: never read, never sent to a model.
+  const SECRET = /(^|\/)(id_(rsa|dsa|ecdsa|ed25519)(\.pub)?|\.npmrc|\.pypirc|\.netrc|\.htpasswd|credentials[^/]*\.json|[^/]*service[-_]?account[^/]*\.json|[^/]*\.(pem|key|p12|pfx|keystore|jks))$/i;
 
   const BINARY_EXT = new Set(("png jpg jpeg gif webp bmp ico icns tiff psd ai sketch fig pdf zip gz tgz bz2 xz 7z rar jar war " +
     "exe dll so dylib a o class pyc wasm bin dat db sqlite sqlite3 mp3 mp4 mov avi mkv webm wav flac ogg m4a " +
@@ -146,7 +151,9 @@
     // indentation runs: roughly one token per 4 spaces of leading whitespace
     const indent = (text.match(/^[ \t]+/gm) || []).reduce((a, s) => a + Math.ceil(s.length / 4), 0);
     // +10%: newer Claude tokenizers count more tokens than older ones; for a budget, overestimating is the safe side
-    return Math.ceil((words + longWordExtra + symbols * 0.7 + nonAscii * 0.75 + indent * 0.5) * 1.1);
+    // ×1.3: calibrated against context growth in real Claude Code logs (code reads ~2.8-3 chars per token).
+    // For a budget, overestimating is the safe side.
+    return Math.ceil((words + longWordExtra + symbols * 0.7 + nonAscii * 0.75 + indent * 0.5) * 1.3);
   }
 
   // ───────────────────────── loading ─────────────────────────
@@ -182,6 +189,8 @@
         gitignores.push(...compileIgnore(rawFiles[i].text, rel.includes("/") ? rel.slice(0, rel.lastIndexOf("/")) : ""));
       }
     }
+    // git applies a deeper .gitignore after a shallower one; sort so input order cannot change the result
+    gitignores.sort((a, b) => (a.base ? a.base.split("/").length : 0) - (b.base ? b.base.split("/").length : 0));
     const rules = o.useGitignore === false ? DEFAULT_RULES : DEFAULT_RULES.concat(gitignores);
 
     const files = [];
@@ -192,6 +201,7 @@
       if (!rel) continue;
       const size = f.size != null ? f.size : f.text ? f.text.length : 0;
       if (isIgnored(rel, rules)) { skipped.push({ path: rel, reason: "ignored", size }); continue; }
+      if (SECRET.test(rel)) { skipped.push({ path: rel, reason: "possible secret", size }); continue; }
       if (BINARY_EXT.has(ext(rel))) { skipped.push({ path: rel, reason: "binary", size }); continue; }
       if (size > MAX_FILE_BYTES) { skipped.push({ path: rel, reason: "too large", size }); continue; }
       if (typeof f.text !== "string") { skipped.push({ path: rel, reason: "unreadable", size }); continue; }
@@ -233,18 +243,24 @@
       return q;
     }
     const docFreq = new Map();
+    // term counts depend only on the file, so they are computed once and reused for every question
     const fileTerms = files.map((f) => {
-      const counts = new Map();
-      for (const t of terms(f.text)) {
-        const s = stem(t);
-        counts.set(s, (counts.get(s) || 0) + 1);
+      if (!f._terms || f._termsOf !== f.text) {
+        const counts = new Map();
+        for (const t of terms(f.text)) {
+          const st = stem(t);
+          counts.set(st, (counts.get(st) || 0) + 1);
+        }
+        f._terms = counts;
+        f._termsOf = f.text;
+        f._pathTerms = new Set(terms(f.path).map(stem));
       }
-      for (const k of counts.keys()) docFreq.set(k, (docFreq.get(k) || 0) + 1);
-      return counts;
+      for (const k of f._terms.keys()) docFreq.set(k, (docFreq.get(k) || 0) + 1);
+      return f._terms;
     });
     const N = files.length || 1;
     files.forEach((f, i) => {
-      const pathTerms = new Set(terms(f.path).map(stem));
+      const pathTerms = f._pathTerms;
       let s = 0;
       for (const t of q) {
         const idf = Math.log(1 + N / (1 + (docFreq.get(t) || 0)));
@@ -269,7 +285,7 @@
     let n = 0;
     const hasScores = ranked.some((f) => f.score > 0);
     for (const f of ranked) {
-      const cost = packedTokens(f, transformOpts);
+      const cost = AFD.packer.docTokens(f, transformOpts);
       if ((hasScores && f.score <= 0) || used + cost > budget) {
         f.include = false;
         continue;
@@ -281,206 +297,8 @@
     return n;
   }
 
-  // ───────────────────────── transforms ─────────────────────────
-
-  const LINE_COMMENT = { ts: "//", js: "//", go: "//", rs: "//", java: "//", cs: "//", php: "//", swift: "//", c: "//", css: null, py: "#", rb: "#", sh: "#", data: null, sql: "--" };
-  const BLOCK_COMMENT = { ts: 1, js: 1, go: 1, rs: 1, java: 1, cs: 1, php: 1, swift: 1, c: 1, css: 1 };
-
-  /**
-   * Remove whole-line comments and blank-line runs. Conservative: only lines that are entirely a comment
-   * (or inside a block comment that starts at the beginning of a line) are removed, so strings are never touched.
-   * Keeps license/doc headers? No — but keeps `#!` shebangs and type-directive comments.
-   */
-  function transform(text, lang, opts) {
-    const o = opts || {};
-    let lines = text.split("\n");
-    if (o.stripComments) {
-      const lc = LINE_COMMENT[lang];
-      const bc = BLOCK_COMMENT[lang];
-      const out = [];
-      let inBlock = false;
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const t = line.trim();
-        if (inBlock) {
-          if (t.includes("*/")) {
-            inBlock = false;
-            const rest = t.slice(t.indexOf("*/") + 2).trim();
-            if (rest) out.push(line.slice(0, line.length - line.trimStart().length) + rest);
-          }
-          continue;
-        }
-        if (bc && t.startsWith("/*")) {
-          const end = t.indexOf("*/", 2);
-          if (end === -1) { inBlock = true; continue; }
-          const rest = t.slice(end + 2).trim();
-          if (!rest) continue;
-          out.push(line);
-          continue;
-        }
-        if (lc && t.startsWith(lc) && !(i === 0 && t.startsWith("#!")) && !/^\/\/\/\s*<reference|^\/\/\s*@ts-|^#\s*(type:|noqa|pragma)|eslint-disable/.test(t)) continue;
-        out.push(line);
-      }
-      lines = out;
-    }
-    if (o.trimTrailing) lines = lines.map((l) => l.replace(/[ \t]+$/, ""));
-    let result = lines.join("\n");
-    if (o.collapseBlank) result = result.replace(/\n{3,}/g, "\n\n");
-    return result;
-  }
-
-  const anyTransform = (o) => !!(o && (o.stripComments || o.collapseBlank || o.trimTrailing));
-
-  function packedText(f, o) {
-    if (!anyTransform(o)) return f.text;
-    const key = (o.stripComments ? "c" : "") + (o.collapseBlank ? "b" : "") + (o.trimTrailing ? "t" : "");
-    if (f._tkey !== key) {
-      f._tkey = key;
-      f._ttext = transform(f.text, f.lang, o);
-      f._ttokens = estimateTokens(f._ttext);
-    }
-    return f._ttext;
-  }
-
-  function packedTokens(f, o) {
-    if (!anyTransform(o)) return f.tokens;
-    packedText(f, o);
-    return f._ttokens;
-  }
-
-  // ───────────────────────── output ─────────────────────────
-
-  /** ASCII tree of included paths. */
-  function tree(paths) {
-    const rootNode = {};
-    for (const p of paths) {
-      let node = rootNode;
-      for (const part of p.split("/")) node = node[part] = node[part] || {};
-    }
-    const lines = [];
-    const walk = (node, prefix) => {
-      const keys = Object.keys(node).sort((a, b) => {
-        const ad = Object.keys(node[a]).length > 0;
-        const bd = Object.keys(node[b]).length > 0;
-        return ad === bd ? a.localeCompare(b) : ad ? -1 : 1;
-      });
-      keys.forEach((k, i) => {
-        const last = i === keys.length - 1;
-        const isDir = Object.keys(node[k]).length > 0;
-        lines.push(prefix + (last ? "└── " : "├── ") + k + (isDir ? "/" : ""));
-        if (isDir) walk(node[k], prefix + (last ? "    " : "│   "));
-      });
-    };
-    walk(rootNode, "");
-    return lines.join("\n");
-  }
-
-  const FENCE_LANG = { ts: "ts", js: "js", py: "python", rb: "ruby", go: "go", rs: "rust", java: "java", cs: "csharp", php: "php", swift: "swift", c: "c", css: "css", html: "html", data: "", doc: "markdown", sh: "bash", sql: "sql", other: "" };
-
-  function escapeXml(s) {
-    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  }
-
-  /**
-   * Build the final prompt. Long documents go first and the question last, which is what Anthropic's
-   * long-context guidance recommends.
-   * opts: {format: "xml"|"markdown"|"plain", includeTree, question, projectName, transform:{...}}
-   */
-  function buildPrompt(files, opts) {
-    const o = opts || {};
-    const chosen = files.filter((f) => f.include);
-    const parts = [];
-    const fmt = o.format || "xml";
-    const name = o.projectName || "project";
-    if (fmt === "xml") {
-      if (o.includeTree) parts.push(`<directory_structure project="${escapeXml(name)}">\n${tree(chosen.map((f) => f.path))}\n</directory_structure>\n`);
-      parts.push("<documents>");
-      chosen.forEach((f, i) => {
-        parts.push(`<document index="${i + 1}">\n<source>${escapeXml(f.path)}</source>\n<document_content>\n${packedText(f, o.transform)}\n</document_content>\n</document>`);
-      });
-      parts.push("</documents>");
-      if (o.question && o.question.trim()) parts.push(`\n<question>\n${o.question.trim()}\n</question>`);
-    } else if (fmt === "markdown") {
-      parts.push(`# ${name}\n`);
-      if (o.includeTree) parts.push("## Files\n\n```\n" + tree(chosen.map((f) => f.path)) + "\n```\n");
-      for (const f of chosen) {
-        const body = packedText(f, o.transform);
-        const fence = body.includes("```") ? "````" : "```";
-        parts.push(`## ${f.path}\n\n${fence}${FENCE_LANG[f.lang] || ""}\n${body}\n${fence}\n`);
-      }
-      if (o.question && o.question.trim()) parts.push("## Question\n\n" + o.question.trim());
-    } else {
-      if (o.includeTree) parts.push(tree(chosen.map((f) => f.path)) + "\n");
-      for (const f of chosen) parts.push(`===== ${f.path} =====\n${packedText(f, o.transform)}\n`);
-      if (o.question && o.question.trim()) parts.push("===== question =====\n" + o.question.trim());
-    }
-    const text = parts.join("\n");
-    return { text, tokens: estimateTokens(text), files: chosen.length };
-  }
-
-  // ───────────────────────── treemap ─────────────────────────
-
-  /**
-   * Squarified treemap (Bruls, Huizing, van Wijk). items: [{value, ...}] -> [{x, y, w, h, item}]
-   */
-  function squarify(items, x, y, w, h) {
-    const data = items.filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
-    const total = data.reduce((s, d) => s + d.value, 0);
-    const out = [];
-    if (!total || w <= 0 || h <= 0) return out;
-    const scale = (w * h) / total;
-    const areas = data.map((d) => ({ item: d, area: d.value * scale }));
-    let rect = { x, y, w, h };
-    let row = [];
-    let i = 0;
-    const worst = (r, side) => {
-      const s = r.reduce((a, b) => a + b.area, 0);
-      let max = 0;
-      let min = Infinity;
-      for (const c of r) { if (c.area > max) max = c.area; if (c.area < min) min = c.area; }
-      const s2 = s * s;
-      const side2 = side * side;
-      return Math.max((side2 * max) / s2, s2 / (side2 * min));
-    };
-    const layoutRow = (r) => {
-      const s = r.reduce((a, b) => a + b.area, 0);
-      if (rect.w >= rect.h) {
-        const colW = s / rect.h;
-        let yy = rect.y;
-        for (const c of r) {
-          const hh = c.area / colW;
-          out.push({ x: rect.x, y: yy, w: colW, h: hh, item: c.item });
-          yy += hh;
-        }
-        rect = { x: rect.x + colW, y: rect.y, w: rect.w - colW, h: rect.h };
-      } else {
-        const rowH = s / rect.w;
-        let xx = rect.x;
-        for (const c of r) {
-          const ww = c.area / rowH;
-          out.push({ x: xx, y: rect.y, w: ww, h: rowH, item: c.item });
-          xx += ww;
-        }
-        rect = { x: rect.x, y: rect.y + rowH, w: rect.w, h: rect.h - rowH };
-      }
-    };
-    while (i < areas.length) {
-      const side = Math.min(rect.w, rect.h);
-      const c = areas[i];
-      if (!row.length || worst(row.concat([c]), side) <= worst(row, side)) {
-        row.push(c);
-        i++;
-      } else {
-        layoutRow(row);
-        row = [];
-      }
-    }
-    if (row.length) layoutRow(row);
-    return out;
-  }
-
-  AFD.packer = {
+  AFD.packer = Object.assign(AFD.packer || {}, {
     DEFAULT_IGNORES, MAX_FILE_BYTES, compileIgnore, isIgnored, globToRegex, estimateTokens, looksBinary, prepare,
-    terms, scoreFiles, autoSelect, transform, packedTokens, packedText, buildPrompt, tree, squarify, langOf, ext, BINARY_EXT,
-  };
+    terms, scoreFiles, autoSelect, langOf, ext, BINARY_EXT,
+  });
 })(globalThis.AFD = globalThis.AFD || {});

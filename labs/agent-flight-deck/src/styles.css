@@ -225,7 +225,7 @@ label.check input { accent-color: var(--accent); width: 15px; height: 15px; }
 .filters button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 2px 9px; font-size: 11.5px; cursor: pointer; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; }
 .filters button[aria-pressed="false"] { opacity: 0.45; text-decoration: line-through; }
 .feed { max-height: 560px; overflow-y: auto; overscroll-behavior: contain; }
-.ev { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 7px 14px; border-bottom: 1px solid var(--line-2); cursor: pointer; font-size: 13px; position: relative; }
+.ev { content-visibility: auto; contain-intrinsic-size: auto 44px; display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 7px 14px; border-bottom: 1px solid var(--line-2); cursor: pointer; font-size: 13px; position: relative; }
 .ev:hover { background: var(--panel-2); }
 .ev.cur { background: var(--accent-soft); }
 .ev.cur::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }

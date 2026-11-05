@@ -232,7 +232,7 @@ label.check input { accent-color: var(--accent); width: 15px; height: 15px; }
 .filters button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 2px 9px; font-size: 11.5px; cursor: pointer; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; }
 .filters button[aria-pressed="false"] { opacity: 0.45; text-decoration: line-through; }
 .feed { max-height: 560px; overflow-y: auto; overscroll-behavior: contain; }
-.ev { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 7px 14px; border-bottom: 1px solid var(--line-2); cursor: pointer; font-size: 13px; position: relative; }
+.ev { content-visibility: auto; contain-intrinsic-size: auto 44px; display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 7px 14px; border-bottom: 1px solid var(--line-2); cursor: pointer; font-size: 13px; position: relative; }
 .ev:hover { background: var(--panel-2); }
 .ev.cur { background: var(--accent-soft); }
 .ev.cur::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
@@ -381,7 +381,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 <script>
 // ── pricing.js
 /* Agent Flight Deck — model pricing and context windows.
- * Prices are USD per million tokens, Anthropic first-party API list prices (cached 2026-10).
+ * Prices are USD per million tokens, Anthropic first-party API list prices (checked against platform.claude.com/docs/en/about-claude/pricing, 2026-11).
  * Cache writes: 1.25x input (5-minute TTL), 2x input (1-hour TTL). Cache reads vary by model.
  */
 (function (AFD) {
@@ -401,7 +401,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     { id: "claude-opus-4-5", name: "Opus 4.5", input: 5, output: 25, cacheRead: 0.5, window: 200000 },
     { id: "claude-opus-4-1", name: "Opus 4.1", input: 15, output: 75, cacheRead: 1.5, window: 200000 },
     { id: "claude-opus-4", name: "Opus 4", input: 15, output: 75, cacheRead: 1.5, window: 200000 },
-    { id: "claude-sonnet-5-5", name: "Sonnet 5.5", input: 2, output: 10, cacheRead: 0.2, window: 1000000 },
+    { id: "claude-sonnet-5-5", name: "Sonnet 5.5", input: 2, output: 10, cacheRead: 0.1, window: 1000000 },
     { id: "claude-sonnet-5", name: "Sonnet 5", input: 2, output: 10, cacheRead: 0.2, window: 1000000 },
     { id: "claude-sonnet-4-6", name: "Sonnet 4.6", input: 3, output: 15, cacheRead: 0.3, window: 1000000 },
     { id: "claude-sonnet-4-5", name: "Sonnet 4.5", input: 3, output: 15, cacheRead: 0.3, window: 200000 },
@@ -502,7 +502,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     return Number.isFinite(n) && n > 0 ? n : 0;
   }
 
-  AFD.pricing = { MODELS, normalizeModel, findModel, displayName, costOf, promptCost, WEB_SEARCH_USD };
+  /** Rough tokens for a character count, for text we cannot tokenize (tool results). ~3 chars per token for code-heavy text. */
+  function charsToTokens(chars) {
+    return Math.ceil((Number(chars) || 0) / 3);
+  }
+
+  AFD.pricing = { MODELS, normalizeModel, findModel, displayName, costOf, promptCost, charsToTokens, WEB_SEARCH_USD };
 })(globalThis.AFD = globalThis.AFD || {});
 
 // ── session.js
@@ -566,37 +571,50 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     return { entries, bad };
   }
 
-  /** Group entries from many files into sessions (subagent files share the parent's sessionId). */
+  const isSubagentFile = (name) => /\/subagents\//.test(name || "") || /(^|\/)agent-[\w-]+\.jsonl$/i.test(name || "");
+
+  /**
+   * Group entries from many files into sessions (subagent files share the parent's sessionId).
+   * The main transcript keeps its own line order: Claude Code writes some lines out of timestamp order
+   * (queued prompts are written seconds later), and reordering them would move turn boundaries.
+   * Subagent lines are merged in by timestamp around it.
+   */
   function groupSessions(fileResults) {
     const groups = new Map();
     for (const fr of fileResults) {
-      let fallback = (fr.fileName || "session").replace(/^.*\//, "").replace(/\.jsonl$/i, "");
+      const fallback = (fr.fileName || "session").replace(/^.*\//, "").replace(/\.jsonl$/i, "");
       const sid = (fr.entries.find((e) => e.sessionId) || {}).sessionId || fallback;
-      if (!groups.has(sid)) groups.set(sid, { id: sid, files: [], entries: [], bad: 0 });
+      if (!groups.has(sid)) groups.set(sid, { id: sid, files: [], main: [], side: [], bad: 0 });
       const g = groups.get(sid);
       g.files.push(fr.fileName);
       g.bad += fr.bad;
-      const isSubFile = /\/subagents\//.test(fr.fileName || "") || /agent-[\w-]+\.jsonl$/i.test(fr.fileName || "");
+      const sub = isSubagentFile(fr.fileName);
       for (const e of fr.entries) {
-        if (isSubFile && e.isSidechain === undefined) e.isSidechain = true;
-        g.entries.push(e);
+        if (sub && e.isSidechain === undefined) e.isSidechain = true;
+        (sub ? g.side : g.main).push(e);
       }
     }
+    const out = [];
     for (const g of groups.values()) {
-      if (g.files.length > 1) stableSortByTime(g.entries);
+      out.push({ id: g.id, files: g.files, bad: g.bad, entries: g.side.length ? mergeByTime(g.main, g.side) : g.main });
     }
-    return [...groups.values()];
+    return out;
   }
 
-  function stableSortByTime(entries) {
-    let last = 0;
-    const keyed = entries.map((e, i) => {
-      const t = ts(e.timestamp);
-      if (t) last = t;
-      return { e, t: t || last, i };
-    });
-    keyed.sort((a, b) => a.t - b.t || a.i - b.i);
-    for (let i = 0; i < keyed.length; i++) entries[i] = keyed[i].e;
+  /** Merge `side` (sorted by time) into `main` without changing main's order. */
+  function mergeByTime(main, side) {
+    const sorted = side.map((e, i) => ({ e, t: ts(e.timestamp), i })).sort((a, b) => a.t - b.t || a.i - b.i);
+    const out = [];
+    let j = 0;
+    let lastT = 0;
+    for (const e of main) {
+      const t = ts(e.timestamp) || lastT;
+      while (j < sorted.length && sorted[j].t && sorted[j].t < t) out.push(sorted[j++].e);
+      out.push(e);
+      lastT = t;
+    }
+    while (j < sorted.length) out.push(sorted[j++].e);
+    return out;
   }
 
   function ts(v) {
@@ -642,6 +660,54 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     if (/^Caveat: The messages below were generated/.test(t)) return null;
     return { kind: "prompt", text: t };
   }
+
+  function shortPath(p) {
+    const parts = String(p).split("/").filter(Boolean);
+    return parts.length > 2 ? "…/" + parts.slice(-2).join("/") : p;
+  }
+
+  function oneLine(s) {
+    return String(s).replace(/\s+/g, " ").trim().slice(0, 200);
+  }
+
+  function fmtDur(ms) {
+    if (!ms || ms < 0) return "0s";
+    const s = Math.round(ms / 1000);
+    if (s < 60) return s + "s";
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + "m " + String(s % 60).padStart(2, "0") + "s";
+    const h = Math.floor(m / 60);
+    if (h < 48) return h + "h " + String(m % 60).padStart(2, "0") + "m";
+    return Math.floor(h / 24) + "d " + (h % 24) + "h";
+  }
+
+  function num(v) {
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+
+  /** Convenience: parse one or many {name, text} files into analyzed sessions, newest first. */
+  function analyzeFiles(files) {
+    const results = files.map((f) => Object.assign({ fileName: f.name }, parseLines(f.text, f.name)));
+    const groups = groupSessions(results.filter((r) => r.entries.length));
+    const sessions = groups.map((g) => AFD.session.buildSession(g)).filter((s) => s.calls.length || s.events.length);
+    sessions.sort((a, b) => b.startT - a.startT);
+    const bad = results.reduce((a, r) => a + r.bad, 0);
+    const empty = results.filter((r) => !r.entries.length).map((r) => r.fileName);
+    return { sessions, bad, empty };
+  }
+
+  AFD.session = Object.assign(AFD.session || {}, { parseLines, groupSessions, mergeByTime, analyzeFiles, classifyUserText, toolCategory, fmtDur, shortPath, blockText, ts, countLines, oneLine, num });
+})(globalThis.AFD = globalThis.AFD || {});
+
+
+// ── session-build.js
+/* Agent Flight Deck — build an analyzed session (calls, events, tools, turns, files, totals) from grouped log entries. */
+(function (AFD) {
+  "use strict";
+
+  const P = () => AFD.pricing;
+  const { ts, blockText, countLines, classifyUserText, toolCategory, oneLine, num } = AFD.session;
 
   // ───────────────────────── session build ─────────────────────────
 
@@ -772,9 +838,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         case "attachment": {
           const a = e.attachment || {};
           if (a.type === "queued_command" && a.prompt && a.commandMode !== "task-notification") {
-            const qt = ts(a.timestamp) || t;
+            // placed where it was delivered; the time it was typed is kept separately
             if (!title) title = a.prompt.trim();
-            pushEvent({ t: qt, kind: "prompt", text: a.prompt.trim(), queued: true, sidechain: side });
+            pushEvent({ t, kind: "prompt", text: a.prompt.trim(), queued: true, queuedAt: ts(a.timestamp) || t, sidechain: side });
           }
           break;
         }
@@ -953,7 +1019,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       sourceFiles: group.files,
     };
     session.toolStats = toolStats(tools);
-    session.insights = buildInsights(session);
+    session.reconcile = reconcile(session);
+    session.insights = AFD.insights ? AFD.insights.build(session) : [];
     return session;
   }
 
@@ -985,98 +1052,184 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     return [...m.values()].sort((a, b) => b.count - a.count);
   }
 
-  // ───────────────────────── insights ─────────────────────────
 
-  function buildInsights(s) {
+  /**
+   * Compare the estimate with the cost Claude Code logged itself (its last cost-state snapshot),
+   * over the same span of the log, per model.
+   */
+  function reconcile(s) {
+    const rc = s.reportedCost;
+    if (!rc || !(rc.usd > 0)) return null;
+    const upTo = rc.afterEvent != null ? rc.afterEvent : s.events.length;
+    const inSpan = s.calls.filter((c) => !c.events.length || c.events[0] < upTo);
+    const est = new Map();
+    for (const c of inSpan) {
+      if (!c.cost) continue;
+      const k = P().normalizeModel(c.model);
+      const e = est.get(k) || { usd: 0, tokens: 0 };
+      e.usd += c.cost.total;
+      e.tokens += c.input + c.cacheRead + c.cacheWrite + c.output;
+      est.set(k, e);
+    }
+    const models = [];
+    let hidden = 0;
+    for (const [model, u] of Object.entries(rc.models || {})) {
+      const k = P().normalizeModel(model);
+      const e = est.get(k) || { usd: 0, tokens: 0 };
+      const logged = num(u.inputTokens) + num(u.outputTokens) + num(u.cacheReadInputTokens) + num(u.cacheCreationInputTokens);
+      if (logged > e.tokens) hidden += logged - e.tokens;
+      models.push({ model, name: P().displayName(model), loggedUsd: num(u.costUSD), estimateUsd: e.usd, loggedTokens: logged, transcriptTokens: e.tokens });
+    }
+    const estimateUsd = inSpan.reduce((a, c) => a + (c.cost ? c.cost.total : 0), 0);
+    return { loggedUsd: rc.usd, estimateUsd, models, hiddenTokens: hidden, partial: upTo < s.events.length };
+  }
+
+  AFD.session.buildSession = buildSession;
+  AFD.session.reconcile = reconcile;
+})(globalThis.AFD = globalThis.AFD || {});
+
+// ── insights.js
+/* Agent Flight Deck — findings: what a session log says about cost and efficiency.
+ * Pure functions over a built session (see session-build.js). Each finding names its evidence (refs = event indexes).
+ */
+(function (AFD) {
+  "use strict";
+
+  const P = () => AFD.pricing;
+  const HOUR = 60 * 60 * 1000;
+  const FIVE_MIN = 5 * 60 * 1000;
+
+  const fmtUSD = (v) => "$" + (v >= 100 ? v.toFixed(0) : v >= 1 ? v.toFixed(2) : v.toFixed(3));
+  const tok = (n) => (n >= 1e6 ? (n / 1e6).toFixed(2) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(Math.round(n)));
+  const plural = (n, one, many) => n + " " + (n === 1 ? one : many || one + "s");
+
+  function groupCount(arr) {
+    const m = new Map();
+    for (const x of arr) m.set(x, (m.get(x) || 0) + 1);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  }
+  /** The event a finding should jump to: the call's first reply or tool use (thinking rows are often hidden). */
+  function firstEventOfCall(s, callIdx) {
+    const c = s.calls[callIdx];
+    if (!c || !c.events.length) return null;
+    const shown = c.events.find((i) => s.events[i].kind !== "thinking");
+    return shown != null ? shown : c.events[0];
+  }
+
+  /**
+   * Why a call re-wrote most of its context to the cache, and whether that could have been avoided.
+   * avoidable: a pause between the 5-minute TTL and an hour (a keep-alive or the 1-hour cache would have kept it),
+   *            or an early part of the context changed (CLAUDE.md, tools, an edited earlier turn).
+   * expected:  a pause over an hour, a model switch the user chose, a compaction, the first call.
+   */
+  function classifyRebuild(s, c, prev) {
+    const gap = c.t && prev.t ? c.t - prev.t : 0;
+    const ttl = c.write1h > 0 || prev.write1h > 0 ? HOUR : FIVE_MIN;
+    if (P().normalizeModel(c.model) !== P().normalizeModel(prev.model)) return { avoidable: false, reason: `the model switched to ${P().displayName(c.model)}` };
+    if (s.events.some((e) => e.kind === "compact" && e.t <= c.t && e.t >= prev.t)) return { avoidable: false, reason: "the context was compacted" };
+    if (gap > ttl) {
+      if (gap > HOUR) return { avoidable: false, reason: "a pause of over an hour" };
+      return { avoidable: true, reason: `a ${AFD.session.fmtDur(gap)} pause outlived the 5-minute cache` };
+    }
+    return { avoidable: true, reason: "something early in the context changed (CLAUDE.md, the tool list, or an edited earlier turn)" };
+  }
+
+  function build(s) {
     const out = [];
-    const fmtUSD = (v) => "$" + (v >= 100 ? v.toFixed(0) : v >= 1 ? v.toFixed(2) : v.toFixed(3));
     const main = s.calls.filter((c) => !c.sidechain && c.usage && !c.isError);
-    const tok = (n) => (n >= 1e6 ? (n / 1e6).toFixed(2) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(Math.round(n)));
+    const fmtDur = AFD.session.fmtDur;
+    const shortPath = AFD.session.shortPath;
 
     // 1. Cache efficiency
     if (main.length >= 3) {
       const hit = s.totals.cacheHit;
       if (hit >= 0.8) out.push({ level: "good", id: "cache-hit", title: `Prompt cache hit rate is ${(hit * 100).toFixed(0)}%`, detail: `Most of the ${tok(s.totals.input + s.totals.cacheRead + s.totals.cacheWrite)} prompt tokens were served from cache, which is billed at a fraction of the input price.` });
-      else if (hit < 0.5) out.push({ level: "warn", id: "cache-hit", title: `Prompt cache hit rate is only ${(hit * 100).toFixed(0)}%`, detail: "Most prompt tokens were billed at full or cache-write price. Long pauses, model switches and edits to early context all force the cache to rebuild." });
+      else if (hit < 0.5) out.push({ level: "warn", id: "cache-hit", title: `Prompt cache hit rate is only ${(hit * 100).toFixed(0)}%`, detail: "Most prompt tokens were billed at full or cache-write price. Pauses of 5 to 60 minutes, model switches and changes to early context all force the cache to rebuild." });
     }
 
-    // 2. Cache rebuilds: big writes after the first call, with a reason
+    // 2. Cache rebuilds: big writes after the first call, split into avoidable and expected
     const rebuilds = [];
     for (let i = 1; i < main.length; i++) {
       const c = main[i];
       const prev = main[i - 1];
       if (c.cacheWrite < 20000 || c.cacheWrite < c.ctx * 0.5) continue;
-      const gap = c.t && prev.t ? c.t - prev.t : 0;
-      const ttl = c.write1h > 0 || prev.write1h > 0 ? 60 * 60 * 1000 : 5 * 60 * 1000;
-      let reason = "the cached prefix changed";
-      if (P().normalizeModel(c.model) !== P().normalizeModel(prev.model)) reason = `the model switched to ${P().displayName(c.model)}`;
-      else if (gap > ttl) reason = `a ${fmtDur(gap)} pause outlived the ${ttl > 5 * 60 * 1000 ? "1-hour" : "5-minute"} cache`;
-      else if (s.events.some((e) => e.kind === "compact" && e.t <= c.t && e.t >= prev.t)) reason = "the context was compacted";
-      const spec = P().findModel(c.model);
-      // what this write cost beyond a cache read of the same tokens
-      const extra = spec ? (c.cost ? c.cost.cacheWrite : 0) - (c.cacheWrite * spec.cacheRead) / 1e6 : 0;
-      rebuilds.push({ call: c.idx, reason, tokens: c.cacheWrite, extra });
+      const why = classifyRebuild(s, c, prev);
+      // what this write cost beyond reading the same tokens from cache (same model, speed and price tier)
+      const asRead = P().costOf({ cache_read_input_tokens: c.cacheWrite, speed: c.usage.speed }, c.model);
+      const extra = c.cost && asRead ? Math.max(0, c.cost.cacheWrite - asRead.cacheRead) : 0;
+      rebuilds.push(Object.assign({ call: c.idx, tokens: c.cacheWrite, extra }, why));
     }
-    if (rebuilds.length) {
-      const extra = rebuilds.reduce((a, r) => a + r.extra, 0);
-      const reasons = groupCount(rebuilds.map((r) => r.reason.replace(/a [\dhms ]+ pause/, "a long pause")));
+    const avoidable = rebuilds.filter((r) => r.avoidable);
+    const expected = rebuilds.filter((r) => !r.avoidable);
+    const reasonList = (list) => groupCount(list.map((r) => r.reason.replace(/a [\dhms ]+ pause outlived/, "a pause outlived"))).map(([r, n]) => (n > 1 ? `${r} (${n}×)` : r)).join("; ");
+    if (avoidable.length) {
+      const extra = avoidable.reduce((a, r) => a + r.extra, 0);
       out.push({
-        level: extra > 0.5 || rebuilds.length >= 3 ? "warn" : "info",
+        level: extra > 0.25 || avoidable.length >= 3 ? "warn" : "info",
         id: "cache-rebuild",
-        title: `The cache was rebuilt ${rebuilds.length} time${rebuilds.length > 1 ? "s" : ""} mid-session (about ${fmtUSD(extra)} extra)`,
-        detail: "Rebuilds happened because " + reasons.map(([r, n]) => (n > 1 ? `${r} (${n}×)` : r)).join("; ") + ". Each rebuild re-sends the whole context at cache-write price instead of the cheap cache-read price.",
+        title: `${plural(avoidable.length, "avoidable cache rebuild")} (about ${fmtUSD(extra)} extra)`,
+        detail: `Caused by ${reasonList(avoidable)}. Each rebuild re-sends the whole context at cache-write price instead of the cache-read price. For pauses under an hour, the 1-hour cache keeps it warm.` + (expected.length ? ` ${plural(expected.length, "other rebuild")} had expected causes: ${reasonList(expected)}.` : ""),
         impact: extra,
-        refs: rebuilds.map((r) => firstEventOfCall(s, r.call)).filter((x) => x != null),
+        refs: avoidable.map((r) => firstEventOfCall(s, r.call)).filter((x) => x != null),
       });
+    } else if (expected.length) {
+      out.push({ level: "info", id: "cache-rebuild", title: `The cache was rebuilt ${plural(expected.length, "time")}, for expected reasons`, detail: `Caused by ${reasonList(expected)}. Nothing to change here.`, refs: expected.map((r) => firstEventOfCall(s, r.call)).filter((x) => x != null) });
     }
 
     // 3. Model switches
     let switches = 0;
     for (let i = 1; i < main.length; i++) if (P().normalizeModel(main[i].model) !== P().normalizeModel(main[i - 1].model)) switches++;
-    if (switches) out.push({ level: "info", id: "model-switch", title: `Model changed ${switches} time${switches > 1 ? "s" : ""}`, detail: "Models used: " + s.byModel.map((m) => `${m.name} (${m.calls} calls, ${fmtUSD(m.cost)})`).join(", ") + ". Caches are per model, so every switch starts a fresh cache." });
+    if (switches) out.push({ level: "info", id: "model-switch", title: `Model changed ${plural(switches, "time")}`, detail: "Models used: " + s.byModel.map((m) => `${m.name} (${m.calls} calls, ${fmtUSD(m.cost)})`).join(", ") + ". Caches are per model, so each switch starts a fresh cache." });
 
     // 4. Tool errors
     const errTools = s.tools.filter((t) => t.isError);
     if (s.tools.length >= 5) {
       const rate = errTools.length / s.tools.length;
-      if (errTools.length === 0) out.push({ level: "good", id: "tool-errors", title: `All ${s.tools.length} tool calls succeeded`, detail: "No tool returned an error." });
+      if (!errTools.length) out.push({ level: "good", id: "tool-errors", title: `All ${s.tools.length} tool calls succeeded`, detail: "No tool returned an error." });
       else {
         const top = groupCount(errTools.map((t) => t.name)).slice(0, 3).map(([n, c]) => `${n} ×${c}`).join(", ");
         out.push({ level: rate > 0.1 ? "warn" : "info", id: "tool-errors", title: `${errTools.length} of ${s.tools.length} tool calls failed (${(rate * 100).toFixed(0)}%)`, detail: `Failing tools: ${top}. Each failure costs a round trip and usually a retry.`, refs: errTools.slice(0, 20).map((t) => t.event) });
       }
     }
 
-    // 5. Edits that failed because the target text was not found / file not read
+    // 5. Rejected edits
     const editMiss = s.tools.filter((t) => t.isError && /^(Edit|MultiEdit|Write)$/.test(t.name));
     if (editMiss.length >= 2) out.push({ level: "warn", id: "edit-miss", title: `${editMiss.length} edits were rejected`, detail: "Usually the old text did not match exactly or the file changed since it was read. Re-reading the exact region before editing avoids the retry loop.", refs: editMiss.map((t) => t.event) });
 
     // 6. Repeated reads
     const reread = s.files.filter((f) => f.reads >= 3);
-    if (reread.length) out.push({ level: "info", id: "rereads", title: `${reread.length} file${reread.length > 1 ? "s were" : " was"} read 3+ times`, detail: reread.slice(0, 4).map((f) => `${shortPath(f.path)} (${f.reads}×)`).join(", ") + ". Repeated reads re-add the same text to context.", refs: reread.slice(0, 3).flatMap((f) => f.tools.map((ti) => s.tools[ti].event)).slice(0, 20) });
+    if (reread.length) out.push({ level: "info", id: "rereads", title: `${plural(reread.length, "file was", "files were")} read 3+ times`, detail: reread.slice(0, 4).map((f) => `${shortPath(f.path)} (${f.reads}×)`).join(", ") + ". Repeated reads re-add the same text to context.", refs: reread.slice(0, 3).flatMap((f) => f.tools.map((ti) => s.tools[ti].event)).slice(0, 20) });
 
-    // 7. Bash used for file operations
-    const bashFileOps = s.tools.filter((t) => t.name === "Bash" && /^\s*(cat|head|tail|grep|rg|find|ls|sed -n|awk)\b/.test(String((t.input || {}).command || "")));
-    if (bashFileOps.length >= 3) out.push({ level: "info", id: "bash-fileops", title: `Bash ran ${bashFileOps.length} file-reading commands`, detail: "Commands like cat, grep and find through Bash return unbounded output. The dedicated Read, Grep and Glob tools page and cap results.", refs: bashFileOps.slice(0, 20).map((t) => t.event) });
+    // 7. Bash used to dump files: only plain reads (no redirects, heredocs or pipes) whose output was actually large
+    const dumps = s.tools.filter((t) => {
+      if (t.name !== "Bash") return false;
+      const cmd = String((t.input || {}).command || "");
+      if (/<<|>\s*[^&\s/]|\|/.test(cmd.replace(/2>\s*\/dev\/null/g, ""))) return false;
+      return /^\s*(cat|head|tail|grep|rg|find|ls|sed -n|awk|less|more)\b/.test(cmd) && t.resultChars > 8000;
+    });
+    const dumpChars = dumps.reduce((a, t) => a + t.resultChars, 0);
+    if (dumps.length && dumpChars > 20000) out.push({ level: "info", id: "bash-fileops", title: `Bash dumped ~${tok(AFD.pricing.charsToTokens(dumpChars))} tokens of file output`, detail: `${plural(dumps.length, "cat/grep/find command")} returned large output. The Read, Grep and Glob tools page and cap results, so less of it lands in context.`, refs: dumps.slice(0, 20).map((t) => t.event) });
 
     // 8. Large tool results
     const big = s.tools.filter((t) => t.resultChars > 40000).sort((a, b) => b.resultChars - a.resultChars);
-    if (big.length) out.push({ level: "warn", id: "big-results", title: `${big.length} tool result${big.length > 1 ? "s" : ""} over ~10K tokens`, detail: big.slice(0, 3).map((t) => `${t.name}${t.filePath ? " " + shortPath(t.filePath) : ""}: ~${tok(t.resultChars / 3.5)} tokens`).join("; ") + ". Large results stay in context for every following call.", refs: big.slice(0, 10).map((t) => t.event) });
+    if (big.length) out.push({ level: "warn", id: "big-results", title: `${plural(big.length, "tool result")} over ~13K tokens`, detail: big.slice(0, 3).map((t) => `${t.name}${t.filePath ? " " + shortPath(t.filePath) : ""}: ~${tok(AFD.pricing.charsToTokens(t.resultChars))} tokens`).join("; ") + ". Large results stay in context for every following call.", refs: big.slice(0, 10).map((t) => t.event) });
 
     // 9. Context pressure
     if (s.peak.ctx > 0) {
       const ratio = s.peak.ctx / s.peak.window;
-      if (ratio > 0.6) out.push({ level: "warn", id: "context-peak", title: `Context peaked at ${(ratio * 100).toFixed(0)}% of the window`, detail: `${tok(s.peak.ctx)} of ${tok(s.peak.window)} tokens. Near the limit Claude Code compacts the conversation and older detail is summarized.`, refs: [firstEventOfCall(s, s.peak.call)].filter((x) => x != null) });
-      else if (main.length >= 5) out.push({ level: "good", id: "context-peak", title: `Context peaked at ${tok(s.peak.ctx)} tokens`, detail: `${(ratio * 100).toFixed(0)}% of the ${tok(s.peak.window)} window, plenty of headroom.`, refs: [firstEventOfCall(s, s.peak.call)].filter((x) => x != null) });
+      const ref = [firstEventOfCall(s, s.peak.call)].filter((x) => x != null);
+      if (ratio > 0.6) out.push({ level: "warn", id: "context-peak", title: `Context peaked at ${(ratio * 100).toFixed(0)}% of the window`, detail: `${tok(s.peak.ctx)} of ${tok(s.peak.window)} tokens. Near the limit Claude Code compacts the conversation and older detail is summarized.`, refs: ref });
+      else if (main.length >= 5) out.push({ level: "good", id: "context-peak", title: `Context peaked at ${tok(s.peak.ctx)} tokens`, detail: `${(ratio * 100).toFixed(0)}% of the ${tok(s.peak.window)} window, plenty of headroom.`, refs: ref });
     }
 
-    // 10. Slow tools
-    const slow = s.tools.filter((t) => t.ms > 120000).sort((a, b) => b.ms - a.ms);
-    if (slow.length) out.push({ level: "info", id: "slow-tools", title: `${slow.length} tool call${slow.length > 1 ? "s" : ""} took over 2 minutes`, detail: slow.slice(0, 3).map((t) => `${t.name} ${fmtDur(t.ms)}`).join(", ") + ". Long waits include permission prompts and slow commands.", refs: slow.slice(0, 10).map((t) => t.event) });
+    // 10. Slow tools (subagents are slow by design, so they are left out)
+    const slow = s.tools.filter((t) => t.ms > 120000 && t.category !== "agent").sort((a, b) => b.ms - a.ms);
+    if (slow.length) out.push({ level: "info", id: "slow-tools", title: `${plural(slow.length, "tool call")} took over 2 minutes`, detail: slow.slice(0, 3).map((t) => `${t.name} ${fmtDur(t.ms)}`).join(", ") + ". The time includes waiting for permission prompts as well as slow commands.", refs: slow.slice(0, 10).map((t) => t.event) });
 
     // 11. Subagents
     if (s.totals.sideCost > 0 && s.totals.cost > 0) {
       const share = s.totals.sideCost / s.totals.cost;
-      out.push({ level: "info", id: "subagents", title: `Subagents used ${(share * 100).toFixed(0)}% of the spend`, detail: `${fmtUSD(s.totals.sideCost)} of ${fmtUSD(s.totals.cost)} went to sidechain (subagent) calls, which keep their file reading out of the main context.` });
+      out.push({ level: "info", id: "subagents", title: `Subagents used ${(share * 100).toFixed(0)}% of the spend`, detail: `${fmtUSD(s.totals.sideCost)} of ${fmtUSD(s.totals.cost)} went to subagent calls, which keep their file reading out of the main context.` });
     }
 
     // 12. Output share
@@ -1089,7 +1242,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     // 13. Idle
     if (s.idleGaps.length && s.wallMs > 0) {
       const idle = s.idleGaps.reduce((a, g) => a + g.ms, 0);
-      if (idle / s.wallMs > 0.5) out.push({ level: "info", id: "idle", title: `Active ${fmtDur(s.activeMs)} out of ${fmtDur(s.wallMs)} wall time`, detail: `${s.idleGaps.length} pause${s.idleGaps.length > 1 ? "s" : ""} over 5 minutes. The timeline collapses them so the work is easier to follow.` });
+      if (idle / s.wallMs > 0.5) out.push({ level: "info", id: "idle", title: `Active ${fmtDur(s.activeMs)} out of ${fmtDur(s.wallMs)} wall time`, detail: `${plural(s.idleGaps.length, "pause")} over 5 minutes. The timeline shortens them so the work is easier to follow.` });
+    }
+
+    // 14. Reconciliation with the cost Claude Code logged
+    const rec = s.reconcile;
+    if (rec && rec.loggedUsd > 0) {
+      const diff = rec.estimateUsd - rec.loggedUsd;
+      const rel = Math.abs(diff) / rec.loggedUsd;
+      if (rel > 0.05) out.push({ level: "info", id: "reconcile", title: `Estimate differs from Claude Code's own total by ${fmtUSD(Math.abs(diff))}`, detail: `Claude Code logged ${fmtUSD(rec.loggedUsd)} up to its last cost snapshot; the calls in this log price to ${fmtUSD(rec.estimateUsd)} over the same span. ${rec.hiddenTokens > 0 ? `Claude Code also counted about ${tok(rec.hiddenTokens)} tokens from calls that are not in the transcript (titles, summaries and other background requests).` : ""}` });
     }
 
     const order = { warn: 0, info: 1, good: 2 };
@@ -1097,54 +1258,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     return out;
   }
 
-  function firstEventOfCall(s, callIdx) {
-    const c = s.calls[callIdx];
-    return c && c.events.length ? c.events[0] : null;
-  }
-
-  function groupCount(arr) {
-    const m = new Map();
-    for (const x of arr) m.set(x, (m.get(x) || 0) + 1);
-    return [...m.entries()].sort((a, b) => b[1] - a[1]);
-  }
-
-  function shortPath(p) {
-    const parts = String(p).split("/").filter(Boolean);
-    return parts.length > 2 ? "…/" + parts.slice(-2).join("/") : p;
-  }
-
-  function oneLine(s) {
-    return String(s).replace(/\s+/g, " ").trim().slice(0, 200);
-  }
-
-  function fmtDur(ms) {
-    if (!ms || ms < 0) return "0s";
-    const s = Math.round(ms / 1000);
-    if (s < 60) return s + "s";
-    const m = Math.floor(s / 60);
-    if (m < 60) return m + "m " + String(s % 60).padStart(2, "0") + "s";
-    const h = Math.floor(m / 60);
-    if (h < 48) return h + "h " + String(m % 60).padStart(2, "0") + "m";
-    return Math.floor(h / 24) + "d " + (h % 24) + "h";
-  }
-
-  function num(v) {
-    const n = Number(v);
-    return Number.isFinite(n) && n > 0 ? n : 0;
-  }
-
-  /** Convenience: parse one or many {name, text} files into analyzed sessions, newest first. */
-  function analyzeFiles(files) {
-    const results = files.map((f) => Object.assign({ fileName: f.name }, parseLines(f.text, f.name)));
-    const groups = groupSessions(results.filter((r) => r.entries.length));
-    const sessions = groups.map(buildSession).filter((s) => s.calls.length || s.events.length);
-    sessions.sort((a, b) => b.startT - a.startT);
-    const bad = results.reduce((a, r) => a + r.bad, 0);
-    const empty = results.filter((r) => !r.entries.length).map((r) => r.fileName);
-    return { sessions, bad, empty };
-  }
-
-  AFD.session = { parseLines, groupSessions, buildSession, analyzeFiles, classifyUserText, toolCategory, fmtDur, shortPath, blockText };
+  AFD.insights = { build, classifyRebuild };
 })(globalThis.AFD = globalThis.AFD || {});
 
 // ── sample.js
@@ -1364,11 +1478,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   // Always skipped, whatever .gitignore says.
   const DEFAULT_IGNORES = [
     ".git/", "node_modules/", "bower_components/", "vendor/", ".venv/", "venv/", "__pycache__/", ".mypy_cache/", ".pytest_cache/",
-    ".next/", ".nuxt/", ".svelte-kit/", ".turbo/", ".cache/", ".parcel-cache/", "dist/", "build/", "out/", "target/", "coverage/",
-    ".idea/", ".vscode/", ".gradle/", "Pods/", "DerivedData/", "bin/", "obj/",
+    ".next/", ".nuxt/", ".svelte-kit/", ".turbo/", ".cache/", ".parcel-cache/", "dist/", "build/", "coverage/",
+    ".idea/", ".vscode/", ".gradle/", "Pods/", "DerivedData/",
+    // common output folder names that are also used for source deeper down: only ignored at the root
+    "/out/", "/target/", "/bin/", "/obj/", "/vendor/",
     "*.min.js", "*.min.css", "*.map", "*.lock", "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb", "Cargo.lock", "poetry.lock", "composer.lock", "Gemfile.lock",
-    ".DS_Store", "*.log", ".env", ".env.*",
+    ".DS_Store", "*.log", ".env", ".env.*", "!.env.example", "!.env.sample", "!.env.template",
   ];
+
+  // Files that usually hold credentials: never read, never sent to a model.
+  const SECRET = /(^|\/)(id_(rsa|dsa|ecdsa|ed25519)(\.pub)?|\.npmrc|\.pypirc|\.netrc|\.htpasswd|credentials[^/]*\.json|[^/]*service[-_]?account[^/]*\.json|[^/]*\.(pem|key|p12|pfx|keystore|jks))$/i;
 
   const BINARY_EXT = new Set(("png jpg jpeg gif webp bmp ico icns tiff psd ai sketch fig pdf zip gz tgz bz2 xz 7z rar jar war " +
     "exe dll so dylib a o class pyc wasm bin dat db sqlite sqlite3 mp3 mp4 mov avi mkv webm wav flac ogg m4a " +
@@ -1503,7 +1622,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     // indentation runs: roughly one token per 4 spaces of leading whitespace
     const indent = (text.match(/^[ \t]+/gm) || []).reduce((a, s) => a + Math.ceil(s.length / 4), 0);
     // +10%: newer Claude tokenizers count more tokens than older ones; for a budget, overestimating is the safe side
-    return Math.ceil((words + longWordExtra + symbols * 0.7 + nonAscii * 0.75 + indent * 0.5) * 1.1);
+    // ×1.3: calibrated against context growth in real Claude Code logs (code reads ~2.8-3 chars per token).
+    // For a budget, overestimating is the safe side.
+    return Math.ceil((words + longWordExtra + symbols * 0.7 + nonAscii * 0.75 + indent * 0.5) * 1.3);
   }
 
   // ───────────────────────── loading ─────────────────────────
@@ -1539,6 +1660,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         gitignores.push(...compileIgnore(rawFiles[i].text, rel.includes("/") ? rel.slice(0, rel.lastIndexOf("/")) : ""));
       }
     }
+    // git applies a deeper .gitignore after a shallower one; sort so input order cannot change the result
+    gitignores.sort((a, b) => (a.base ? a.base.split("/").length : 0) - (b.base ? b.base.split("/").length : 0));
     const rules = o.useGitignore === false ? DEFAULT_RULES : DEFAULT_RULES.concat(gitignores);
 
     const files = [];
@@ -1549,6 +1672,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       if (!rel) continue;
       const size = f.size != null ? f.size : f.text ? f.text.length : 0;
       if (isIgnored(rel, rules)) { skipped.push({ path: rel, reason: "ignored", size }); continue; }
+      if (SECRET.test(rel)) { skipped.push({ path: rel, reason: "possible secret", size }); continue; }
       if (BINARY_EXT.has(ext(rel))) { skipped.push({ path: rel, reason: "binary", size }); continue; }
       if (size > MAX_FILE_BYTES) { skipped.push({ path: rel, reason: "too large", size }); continue; }
       if (typeof f.text !== "string") { skipped.push({ path: rel, reason: "unreadable", size }); continue; }
@@ -1590,18 +1714,24 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       return q;
     }
     const docFreq = new Map();
+    // term counts depend only on the file, so they are computed once and reused for every question
     const fileTerms = files.map((f) => {
-      const counts = new Map();
-      for (const t of terms(f.text)) {
-        const s = stem(t);
-        counts.set(s, (counts.get(s) || 0) + 1);
+      if (!f._terms || f._termsOf !== f.text) {
+        const counts = new Map();
+        for (const t of terms(f.text)) {
+          const st = stem(t);
+          counts.set(st, (counts.get(st) || 0) + 1);
+        }
+        f._terms = counts;
+        f._termsOf = f.text;
+        f._pathTerms = new Set(terms(f.path).map(stem));
       }
-      for (const k of counts.keys()) docFreq.set(k, (docFreq.get(k) || 0) + 1);
-      return counts;
+      for (const k of f._terms.keys()) docFreq.set(k, (docFreq.get(k) || 0) + 1);
+      return f._terms;
     });
     const N = files.length || 1;
     files.forEach((f, i) => {
-      const pathTerms = new Set(terms(f.path).map(stem));
+      const pathTerms = f._pathTerms;
       let s = 0;
       for (const t of q) {
         const idf = Math.log(1 + N / (1 + (docFreq.get(t) || 0)));
@@ -1626,7 +1756,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     let n = 0;
     const hasScores = ranked.some((f) => f.score > 0);
     for (const f of ranked) {
-      const cost = packedTokens(f, transformOpts);
+      const cost = AFD.packer.docTokens(f, transformOpts);
       if ((hasScores && f.score <= 0) || used + cost > budget) {
         f.include = false;
         continue;
@@ -1638,50 +1768,111 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     return n;
   }
 
-  // ───────────────────────── transforms ─────────────────────────
+  AFD.packer = Object.assign(AFD.packer || {}, {
+    DEFAULT_IGNORES, MAX_FILE_BYTES, compileIgnore, isIgnored, globToRegex, estimateTokens, looksBinary, prepare,
+    terms, scoreFiles, autoSelect, langOf, ext, BINARY_EXT,
+  });
+})(globalThis.AFD = globalThis.AFD || {});
 
-  const LINE_COMMENT = { ts: "//", js: "//", go: "//", rs: "//", java: "//", cs: "//", php: "//", swift: "//", c: "//", css: null, py: "#", rb: "#", sh: "#", data: null, sql: "--" };
-  const BLOCK_COMMENT = { ts: 1, js: 1, go: 1, rs: 1, java: 1, cs: 1, php: 1, swift: 1, c: 1, css: 1 };
+// ── packer-output.js
+/* Agent Flight Deck — Load Sheet output: comment stripping, prompt assembly, file tree, treemap layout. */
+(function (AFD) {
+  "use strict";
+
+  // ───────────────────────── comment stripping ─────────────────────────
 
   /**
-   * Remove whole-line comments and blank-line runs. Conservative: only lines that are entirely a comment
-   * (or inside a block comment that starts at the beginning of a line) are removed, so strings are never touched.
-   * Keeps license/doc headers? No — but keeps `#!` shebangs and type-directive comments.
+   * Comment syntax per language family. `multi` lists string delimiters that may span lines
+   * (template literals, triple quotes); `single` lists delimiters that end at the end of the line.
    */
+  const SYNTAX = {
+    c: { line: "//", block: ["/*", "*/"], single: ['"', "'"], multi: ["`"] },
+    py: { line: "#", block: null, single: ['"', "'"], multi: ['"""', "'''"] },
+    sh: { line: "#", block: null, single: ['"', "'"], multi: [] },
+    sql: { line: "--", block: ["/*", "*/"], single: [], multi: ["'"] },
+    css: { line: null, block: ["/*", "*/"], single: ['"', "'"], multi: [] },
+  };
+  const FAMILY = { ts: "c", js: "c", go: "c", rs: "c", java: "c", cs: "c", php: "c", swift: "c", c: "c", css: "css", py: "py", rb: "sh", sh: "sh", sql: "sql" };
+  // comments that change how code is checked or run: never strip them
+  const KEEP = /^(\/\/\/\s*<reference|\/\/\s*@ts-|\/\/\s*eslint-|\/\/\s*prettier-|\/\/go:|#\s*(type:|noqa|pragma|pylint|-\*-)|#!|\/\*\s*eslint|\/\*\*?\s*@(jsx|flow|vite|webpack))/;
+
+  /**
+   * Scan one line from a given state; returns the state at the end of the line.
+   * state: {block: bool, str: delimiter|null}
+   */
+  function scan(line, st, syn) {
+    let { block, str } = st;
+    let i = 0;
+    while (i < line.length) {
+      if (block) {
+        const end = line.indexOf(syn.block[1], i);
+        if (end === -1) return { block: true, str: null };
+        block = false;
+        i = end + syn.block[1].length;
+        continue;
+      }
+      if (str) {
+        if (str.length === 1 && line[i] === "\\") { i += 2; continue; }
+        if (line.startsWith(str, i)) { i += str.length; str = null; continue; }
+        i++;
+        continue;
+      }
+      if (syn.line && line.startsWith(syn.line, i)) break;
+      if (syn.block && line.startsWith(syn.block[0], i)) { block = true; i += syn.block[0].length; continue; }
+      const multi = syn.multi.find((d) => line.startsWith(d, i));
+      if (multi) { str = multi; i += multi.length; continue; }
+      const single = syn.single.find((d) => line[i] === d);
+      if (single) { str = single; i++; continue; }
+      i++;
+    }
+    // single-line strings do not continue onto the next line
+    if (str && !syn.multi.includes(str)) str = null;
+    return { block, str };
+  }
+
+  /**
+   * Remove whole-line comments, never touching anything inside a string (template literals and triple-quoted
+   * strings included). A line is removed only when it starts outside any string and is entirely comment.
+   */
+  function stripComments(text, lang) {
+    const syn = SYNTAX[FAMILY[lang]];
+    if (!syn) return text;
+    const lines = text.split("\n");
+    const out = [];
+    let st = { block: false, str: null };
+    for (let n = 0; n < lines.length; n++) {
+      const line = lines[n];
+      const t = line.trim();
+      if (st.str) { out.push(line); st = scan(line, st, syn); continue; }
+      if (st.block) {
+        const end = line.indexOf(syn.block[1]);
+        if (end === -1) continue; // still inside a block comment
+        const rest = line.slice(end + syn.block[1].length);
+        st = scan(rest, { block: false, str: null }, syn);
+        if (rest.trim()) out.push(line.slice(0, line.length - line.trimStart().length) + rest.trim());
+        continue;
+      }
+      if (KEEP.test(t)) { out.push(line); continue; }
+      if (syn.line && t.startsWith(syn.line)) continue;
+      if (syn.block && t.startsWith(syn.block[0])) {
+        const after = scan(t, { block: false, str: null }, syn);
+        const close = t.indexOf(syn.block[1], syn.block[0].length);
+        if (after.block) { st = after; continue; } // opens a block that runs onto later lines
+        if (close !== -1 && !t.slice(close + syn.block[1].length).trim()) continue; // the whole line is one block comment
+        out.push(line);
+        st = after;
+        continue;
+      }
+      out.push(line);
+      st = scan(line, st, syn);
+    }
+    return out.join("\n");
+  }
+
   function transform(text, lang, opts) {
     const o = opts || {};
-    let lines = text.split("\n");
-    if (o.stripComments) {
-      const lc = LINE_COMMENT[lang];
-      const bc = BLOCK_COMMENT[lang];
-      const out = [];
-      let inBlock = false;
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const t = line.trim();
-        if (inBlock) {
-          if (t.includes("*/")) {
-            inBlock = false;
-            const rest = t.slice(t.indexOf("*/") + 2).trim();
-            if (rest) out.push(line.slice(0, line.length - line.trimStart().length) + rest);
-          }
-          continue;
-        }
-        if (bc && t.startsWith("/*")) {
-          const end = t.indexOf("*/", 2);
-          if (end === -1) { inBlock = true; continue; }
-          const rest = t.slice(end + 2).trim();
-          if (!rest) continue;
-          out.push(line);
-          continue;
-        }
-        if (lc && t.startsWith(lc) && !(i === 0 && t.startsWith("#!")) && !/^\/\/\/\s*<reference|^\/\/\s*@ts-|^#\s*(type:|noqa|pragma)|eslint-disable/.test(t)) continue;
-        out.push(line);
-      }
-      lines = out;
-    }
-    if (o.trimTrailing) lines = lines.map((l) => l.replace(/[ \t]+$/, ""));
-    let result = lines.join("\n");
+    let result = o.stripComments ? stripComments(text, lang) : text;
+    if (o.trimTrailing) result = result.replace(/[ \t]+$/gm, "");
     if (o.collapseBlank) result = result.replace(/\n{3,}/g, "\n\n");
     return result;
   }
@@ -1694,7 +1885,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     if (f._tkey !== key) {
       f._tkey = key;
       f._ttext = transform(f.text, f.lang, o);
-      f._ttokens = estimateTokens(f._ttext);
+      f._ttokens = AFD.packer.estimateTokens(f._ttext);
     }
     return f._ttext;
   }
@@ -1703,6 +1894,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     if (!anyTransform(o)) return f.tokens;
     packedText(f, o);
     return f._ttokens;
+  }
+
+  /** Tokens a file costs inside the prompt: its body plus the wrapper around it (source path, tags or fence). */
+  function docTokens(f, o) {
+    if (f._wrapTok == null) f._wrapTok = AFD.packer.estimateTokens(`<document index="100">\n<source>${f.path}</source>\n<document_content>\n\n</document_content>\n</document>\n`);
+    return packedTokens(f, o) + f._wrapTok;
   }
 
   // ───────────────────────── output ─────────────────────────
@@ -1772,7 +1969,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       if (o.question && o.question.trim()) parts.push("===== question =====\n" + o.question.trim());
     }
     const text = parts.join("\n");
-    return { text, tokens: estimateTokens(text), files: chosen.length };
+    return { text, tokens: AFD.packer.estimateTokens(text), files: chosen.length };
   }
 
   // ───────────────────────── treemap ─────────────────────────
@@ -1836,10 +2033,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     return out;
   }
 
-  AFD.packer = {
-    DEFAULT_IGNORES, MAX_FILE_BYTES, compileIgnore, isIgnored, globToRegex, estimateTokens, looksBinary, prepare,
-    terms, scoreFiles, autoSelect, transform, packedTokens, packedText, buildPrompt, tree, squarify, langOf, ext, BINARY_EXT,
-  };
+  Object.assign(AFD.packer, { transform, stripComments, packedText, packedTokens, docTokens, buildPrompt, tree, squarify });
 })(globalThis.AFD = globalThis.AFD || {});
 
 // ── ui.js
@@ -2181,9 +2375,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 })(globalThis.AFD = globalThis.AFD || {});
 
 // ── recorder.js
-/* Agent Flight Deck — Flight Recorder view: replay and analyze Claude Code sessions. */
+/* Agent Flight Deck — Flight Recorder: loading logs, the all-sessions view, keyboard. Other parts: recorder-*.js (shared through AFD.rec). */
 (function (AFD) {
   "use strict";
+
+  const R = (AFD.rec = AFD.rec || {});
 
   const { h, clear, esc, usd, tok, pct, dur, clock, dateTime, date, plural, catColor, CAT_LABEL } = AFD.ui;
   const IDLE_MS = 5 * 60 * 1000;
@@ -2215,6 +2411,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     query: "",
     view: null, // refs into the rendered session view
   };
+
+  Object.assign(R, { S, KIND_LABEL, FILTERS, IDLE_MS, GAP_CAP_MS });
 
   // ───────────────────────── mount & loading ─────────────────────────
 
@@ -2262,16 +2460,24 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     S.sessions = res.sessions;
     S.isExample = true;
     setNotice("");
-    openSession(res.sessions[0]);
+    R.openSession(res.sessions[0]);
   }
 
   async function loadEntries(entries) {
-    const logs = entries.filter((e) => e.file && /\.jsonl$/i.test(e.path));
+    let logs = entries.filter((e) => e.file && /\.jsonl$/i.test(e.path));
+    // a whole ~/.claude/projects folder can hold gigabytes: read the newest logs first, up to a cap
+    const CAP = 400 * 1024 * 1024;
+    let skippedForCap = 0;
+    if (logs.reduce((a, e) => a + (e.file.size || 0), 0) > CAP) {
+      logs = logs.slice().sort((a, b) => (b.file.lastModified || 0) - (a.file.lastModified || 0));
+      let used = 0;
+      logs = logs.filter((e) => { used += e.file.size || 0; if (used > CAP) { skippedForCap++; return false; } return true; });
+    }
     if (!logs.length) {
       setNotice(entries.length ? "No .jsonl files found. Claude Code keeps session logs in ~/.claude/projects/<project>/<session>.jsonl." : "Nothing to load.", true);
       return;
     }
-    stop();
+    R.stop();
     const total = logs.reduce((a, e) => a + (e.file.size || 0), 0) || 1;
     let done = 0;
     const texts = [];
@@ -2306,15 +2512,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     S.isExample = false;
     const notes = [`Loaded ${plural(res.sessions.length, "session")} from ${plural(texts.length, "file")}.`];
     if (res.bad) notes.push(`${plural(res.bad, "line")} could not be parsed and were skipped.`);
+    if (skippedForCap) notes.push(`${plural(skippedForCap, "older log")} left out to stay under ${AFD.ui.bytes(CAP)}; open a project folder to see them.`);
     setNotice(notes.join(" "));
-    if (res.sessions.length === 1) openSession(res.sessions[0]);
+    if (res.sessions.length === 1) R.openSession(res.sessions[0]);
     else showFleet();
   }
 
   // ───────────────────────── fleet (many sessions) ─────────────────────────
 
   function showFleet() {
-    stop();
+    R.stop();
     S.session = null;
     S.view = null;
     clear(S.content);
@@ -2370,7 +2577,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         h("div.panel", h("div.panel-h", h("h3", "Most expensive sessions")), AFD.ui.table([
           { key: "title", label: "Session", render: (r) => h("div.ttl", { title: r.title }, r.title) },
           { key: "cost", label: "Est. cost", num: true, render: (r) => usd(r.totals.cost), sort: (r) => r.totals.cost },
-        ], ss.slice().sort((a, b) => b.totals.cost - a.totals.cost).slice(0, 8), { sortKey: "cost", onRow: openSession }))),
+        ], ss.slice().sort((a, b) => b.totals.cost - a.totals.cost).slice(0, 8), { sortKey: "cost", onRow: (r) => R.openSession(r) }))),
       h("div.panel", h("div.panel-h", h("h3", "Sessions"), h("span.hint", "Click a row to replay it")), AFD.ui.table([
         { key: "startT", label: "Started", render: (r) => h("span.tnum", dateTime(r.startT)) },
         { key: "project", label: "Project", render: (r) => h("span.mono", r.project || "—") },
@@ -2381,7 +2588,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         { key: "hit", label: "Cache hit", num: true, render: (r) => pct(r.totals.cacheHit), sort: (r) => r.totals.cacheHit },
         { key: "cost", label: "Est. cost", num: true, render: (r) => usd(r.totals.cost), sort: (r) => r.totals.cost },
         { key: "bar", label: "", sortable: false, render: (r) => h("div.minibar", h("i", { style: { width: (r.totals.cost / maxS) * 100 + "%", background: "var(--accent)" } })) },
-      ], ss, { sortKey: "startT", onRow: openSession, limit: 2000 }))));
+      ], ss, { sortKey: "startT", onRow: (r) => R.openSession(r), limit: 2000 }))));
   }
 
   function kpi(label, value) {
@@ -2423,6 +2630,278 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     return out;
   }
 
+  /** Space: play/pause · ←/→: step · /: search. Ignored while typing or when this view is hidden. */
+  function onKey(e) {
+    if (!S.session || !S.view || S.root.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+    const tag = (e.target && e.target.tagName) || "";
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || (e.target && e.target.isContentEditable)) {
+      if (e.key === "Escape" && e.target === S.view.search) e.target.blur();
+      return;
+    }
+    if (e.key === " " && tag !== "BUTTON") { e.preventDefault(); R.togglePlay(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); R.stop(); R.step(1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); R.stop(); R.step(-1); }
+    else if (e.key === "/") { e.preventDefault(); S.view.search.focus(); }
+  }
+
+  function onHide() {
+    R.stop();
+    AFD.ui.hideTip();
+  }
+
+  Object.assign(R, { mount, setNotice, setProgress, loadExample, loadEntries, showFleet, kpi, dayChart, niceTicks, onKey, onHide });
+  AFD.recorder = { mount, onHide, loadEntries: (e) => loadEntries(e), reportMarkdown: (s) => R.reportMarkdown(s), repriceAll: (s) => R.repriceAll(s), _state: S };
+})(globalThis.AFD = globalThis.AFD || {});
+
+// ── recorder-timeline.js
+/* Agent Flight Deck — Flight Recorder: the flight-path timeline (time compression, lanes, cursor). */
+(function (AFD) {
+  "use strict";
+
+  const { h, clear, esc, usd, tok, pct, dur, clock, dateTime, date, plural, catColor, CAT_LABEL } = AFD.ui;
+  const R = (AFD.rec = AFD.rec || {});
+  const { S, KIND_LABEL, FILTERS, IDLE_MS, GAP_CAP_MS } = R;
+
+  // ───────────────────────── time compression ─────────────────────────
+
+  function compressTime(times) {
+    const pts = [...new Set(times.filter((t) => t > 0))].sort((a, b) => a - b);
+    if (pts.length < 2) return null;
+    const us = [0];
+    const gaps = [];
+    for (let i = 1; i < pts.length; i++) {
+      const g = pts[i] - pts[i - 1];
+      const c = Math.min(g, GAP_CAP_MS);
+      us.push(us[i - 1] + c);
+      if (g > IDLE_MS) gaps.push({ u: us[i - 1] + c / 2, ms: g });
+    }
+    const total = us[us.length - 1] || 1;
+    const find = (t) => {
+      let lo = 0, hi = pts.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (pts[mid] <= t) lo = mid; else hi = mid - 1;
+      }
+      return lo;
+    };
+    return {
+      total,
+      gaps,
+      map(t) {
+        if (!t || t <= pts[0]) return 0;
+        if (t >= pts[pts.length - 1]) return total;
+        const i = find(t);
+        const span = pts[i + 1] - pts[i];
+        return us[i] + ((t - pts[i]) / span) * (us[i + 1] - us[i]);
+      },
+      inverse(u) {
+        let i = 0;
+        while (i < us.length - 2 && us[i + 1] < u) i++;
+        const span = us[i + 1] - us[i] || 1;
+        return pts[i] + ((u - us[i]) / span) * (pts[i + 1] - pts[i]);
+      },
+    };
+  }
+
+  // ───────────────────────── timeline ─────────────────────────
+
+  function drawTimeline() {
+    const s = S.session;
+    const v = S.view;
+    if (!s || !v) return;
+    const W = Math.max(640, v.tlWrap.clientWidth || 800);
+    const L = 74, RM = 58;
+    const lanes = { prompt: [18, 18], claude: [40, 16], tools: [62, 30], ctx: [104, 66], spend: [182, 34] };
+    const H = 236;
+    const plotW = W - L - RM;
+    const comp = compressTime(s.events.map((e) => e.t).concat(s.tools.map((t) => t.endT)));
+    const n = s.events.length || 1;
+    const xOfEvent = (ev) => (comp ? L + (comp.map(ev.t) / comp.total) * plotW : L + (ev.idx / Math.max(1, n - 1)) * plotW);
+    const xOfT = (t, fallbackIdx) => (comp && t ? L + (comp.map(t) / comp.total) * plotW : L + ((fallbackIdx || 0) / Math.max(1, n - 1)) * plotW);
+    const p = [];
+
+    // lane backgrounds & labels
+    const laneNames = [["prompt", "PROMPTS"], ["claude", "CLAUDE"], ["tools", "TOOLS"], ["ctx", "CONTEXT"], ["spend", "SPEND"]];
+    for (const [k, label] of laneNames) {
+      const [y, hh] = lanes[k];
+      p.push(`<rect x="${L}" y="${y}" width="${plotW}" height="${hh}" fill="var(--panel-2)" rx="2"/>`);
+      p.push(`<text class="lane-label" x="10" y="${y + hh / 2 + 3.5}">${label}</text>`);
+    }
+
+    // collapsed idle gaps
+    let lastLabelX = -1e9;
+    if (comp) for (const g of comp.gaps) {
+      const x = L + (g.u / comp.total) * plotW;
+      const showLabel = x - lastLabelX > 56;
+      if (showLabel) lastLabelX = x;
+      const zig = [];
+      for (let y = 16; y <= 218; y += 8) zig.push(`${x + ((y / 8) % 2 ? 3 : -3)},${y}`);
+      p.push(`<polyline points="${zig.join(" ")}" fill="none" stroke="var(--faint)" stroke-width="1" opacity="0.7"/>`);
+      if (showLabel) p.push(`<text x="${x}" y="12" text-anchor="middle" style="font-size:9.5px">+${esc(dur(g.ms))}</text>`);
+    }
+
+    // compaction markers
+    for (const ev of s.events) if (ev.kind === "compact") {
+      const x = xOfEvent(ev);
+      p.push(`<line x1="${x}" x2="${x}" y1="${lanes.ctx[0]}" y2="${lanes.ctx[0] + lanes.ctx[1]}" stroke="var(--warn)" stroke-dasharray="3 2"/>`);
+    }
+
+    // prompts & claude lane (marks on the same pixel are drawn once)
+    const seen = new Set();
+    for (const ev of s.events) {
+      const x = xOfEvent(ev);
+      const key = ev.kind + (ev.sidechain ? "s" : "") + ":" + Math.round(x * 2);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if ((ev.kind === "prompt" || ev.kind === "command" || ev.kind === "interrupt") && !ev.sidechain) {
+        const y = lanes.prompt[0] + lanes.prompt[1] / 2;
+        const fill = ev.kind === "prompt" ? "var(--accent)" : "var(--faint)";
+        p.push(`<path d="M${x} ${y - 6}L${x + 6} ${y}L${x} ${y + 6}L${x - 6} ${y}Z" fill="${fill}"/>`);
+      } else if (ev.kind === "text" || ev.kind === "thinking" || ev.kind === "error" || ev.kind === "subprompt") {
+        const y = lanes.claude[0];
+        const hh = lanes.claude[1];
+        if (ev.kind === "thinking") p.push(`<circle cx="${x}" cy="${y + hh / 2}" r="3" fill="none" stroke="var(--muted)" stroke-width="1.2"/>`);
+        else p.push(`<rect x="${x - 1}" y="${y + 2}" width="2.2" height="${hh - 4}" fill="${ev.kind === "error" ? "var(--bad)" : ev.sidechain ? "var(--c-agent)" : "var(--ink)"}" opacity="${ev.sidechain ? 0.7 : 0.85}"/>`);
+      }
+    }
+
+    // tools
+    const cats = new Set();
+    for (const t of s.tools) {
+      const ev = s.events[t.event];
+      const x1 = xOfEvent(ev);
+      const tkey = "t" + t.category + (t.isError ? "e" : "") + (t.idx % 2) + ":" + Math.round(x1 * 2);
+      if (!t.endT || t.ms < 2000) { if (seen.has(tkey)) continue; seen.add(tkey); }
+      const x2 = t.endT ? Math.max(x1 + 2.5, xOfT(t.endT, t.event)) : x1 + 2.5;
+      const row = t.idx % 2;
+      const y = lanes.tools[0] + 2 + row * 14;
+      cats.add(t.category);
+      p.push(`<rect x="${x1}" y="${y}" width="${Math.max(2.5, x2 - x1)}" height="12" rx="1.5" fill="${catColor(t.category)}" ${t.sidechain ? 'opacity="0.55"' : ""} ${t.isError ? 'stroke="var(--bad)" stroke-width="2"' : ""}/>`);
+    }
+
+    // context area
+    const main = s.calls.filter((c) => !c.sidechain && c.usage && !c.isError && c.ctx > 0);
+    const ctxMax = Math.max(1, ...main.map((c) => c.ctx)) * 1.12;
+    const [cy, ch] = lanes.ctx;
+    if (main.length) {
+      const pts = main.map((c) => {
+        const ev = c.events.length ? s.events[c.events[0]] : null;
+        const x = ev ? xOfEvent(ev) : xOfT(c.t, 0);
+        return [x, cy + ch - (c.ctx / ctxMax) * ch];
+      });
+      const line = pts.map((q, i) => (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1)).join("");
+      p.push(`<path d="${line}L${pts[pts.length - 1][0].toFixed(1)} ${cy + ch}L${pts[0][0].toFixed(1)} ${cy + ch}Z" fill="var(--c-read)" opacity="0.14"/>`);
+      p.push(`<path d="${line}" fill="none" stroke="var(--c-read)" stroke-width="1.6"/>`);
+      const peakPt = pts[main.findIndex((c) => c.idx === s.peak.call)];
+      if (peakPt) p.push(`<circle cx="${peakPt[0]}" cy="${peakPt[1]}" r="3.2" fill="var(--c-read)"/>`);
+      p.push(`<text x="${W - RM + 6}" y="${cy + 9}">${esc(tok(ctxMax / 1.12))}</text>`);
+      const win = s.peak.window;
+      if (win && win < ctxMax) {
+        const wy = cy + ch - (win / ctxMax) * ch;
+        p.push(`<line x1="${L}" x2="${W - RM}" y1="${wy}" y2="${wy}" stroke="var(--bad)" stroke-dasharray="4 3"/><text x="${W - RM + 6}" y="${wy + 3}" style="fill:var(--bad)">limit</text>`);
+      }
+    }
+
+    // spend: cumulative cost step line
+    const [sy, sh] = lanes.spend;
+    const priced = s.calls.filter((c) => c.cost);
+    if (priced.length && s.totals.cost > 0) {
+      let acc = 0;
+      let d = `M${L} ${sy + sh}`;
+      for (const c of priced) {
+        const ev = c.events.length ? s.events[c.events[0]] : null;
+        const x = ev ? xOfEvent(ev) : xOfT(c.t, 0);
+        d += `L${x.toFixed(1)} ${(sy + sh - (acc / s.totals.cost) * (sh - 4)).toFixed(1)}`;
+        acc += c.cost.total;
+        d += `L${x.toFixed(1)} ${(sy + sh - (acc / s.totals.cost) * (sh - 4)).toFixed(1)}`;
+      }
+      d += `L${W - RM} ${(sy + 4).toFixed(1)}`;
+      p.push(`<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>`);
+      p.push(`<text x="${W - RM + 6}" y="${sy + 8}" style="fill:var(--accent)">${esc(usd(s.totals.cost))}</text>`);
+    }
+
+    // time axis
+    if (comp) {
+      const ticks = Math.max(2, Math.floor(plotW / 110));
+      for (let i = 0; i <= ticks; i++) {
+        const u = (comp.total * i) / ticks;
+        const x = L + (u / comp.total) * plotW;
+        p.push(`<text x="${x}" y="${H - 6}" text-anchor="${i === 0 ? "start" : i === ticks ? "end" : "middle"}">${esc(clock(comp.inverse(u)))}</text>`);
+      }
+    } else {
+      p.push(`<text x="${L}" y="${H - 6}">event 1</text><text x="${W - RM}" y="${H - 6}" text-anchor="end">event ${n}</text>`);
+    }
+
+    // cursor
+    p.push(`<line class="tl-cursor" x1="0" x2="0" y1="14" y2="${H - 16}" stroke="var(--accent)" stroke-width="1.5" visibility="hidden"/>`);
+    p.push(`<line class="tl-hover" x1="0" x2="0" y1="14" y2="${H - 16}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 2" visibility="hidden" opacity="0.5"/>`);
+
+    v.tlWrap.innerHTML = `<svg class="tl-svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Session timeline">${p.join("")}</svg>`;
+    const svg = v.tlWrap.firstChild;
+    v.tlCursor = svg.querySelector(".tl-cursor");
+    v.tlHover = svg.querySelector(".tl-hover");
+    v.xs = s.events.map((ev) => ({ x: xOfEvent(ev), idx: ev.idx }));
+    v.tlW = W;
+    v.L = L;
+    v.RM = RM;
+
+    const nearest = (clientX) => {
+      const r = svg.getBoundingClientRect();
+      const x = ((clientX - r.left) / r.width) * W;
+      let best = null;
+      let bd = Infinity;
+      for (const q of v.xs) {
+        const d = Math.abs(q.x - x);
+        if (d < bd || (d === bd && preferKind(s.events[q.idx]))) { bd = d; best = q; }
+      }
+      return { q: best, x };
+    };
+    svg.addEventListener("pointermove", (e) => {
+      const { q } = nearest(e.clientX);
+      if (!q) return;
+      v.tlHover.setAttribute("x1", q.x);
+      v.tlHover.setAttribute("x2", q.x);
+      v.tlHover.setAttribute("visibility", "visible");
+      AFD.ui.tip(e, eventTip(s.events[q.idx]));
+    });
+    svg.addEventListener("pointerleave", () => { v.tlHover.setAttribute("visibility", "hidden"); AFD.ui.hideTip(); });
+    svg.addEventListener("click", (e) => {
+      const { q } = nearest(e.clientX);
+      if (q) { R.stop(); R.select(q.idx, true); }
+    });
+
+    v.legend.innerHTML = [...cats].sort().map((c) => `<span><i class="swatch" style="background:${catColor(c)}"></i>${esc(CAT_LABEL[c])}</span>`).join("") +
+      `<span><i class="swatch" style="background:var(--accent);transform:rotate(45deg);border-radius:1px"></i>Prompt</span><span><i class="swatch" style="background:var(--c-read);opacity:.5"></i>Context size</span><span><i class="swatch" style="background:var(--accent);height:2px"></i>Cumulative cost</span>`;
+    R.updateCursor();
+  }
+
+  function preferKind(ev) {
+    return ev && (ev.kind === "prompt" || ev.kind === "tool");
+  }
+
+  function eventTip(ev) {
+    const s = S.session;
+    const head = `<b>${esc(KIND_LABEL[ev.kind] || ev.kind)}</b> · ${esc(clock(ev.t))}${ev.sidechain ? " · subagent" : ""}`;
+    if (ev.kind === "tool") {
+      const t = s.tools[ev.tool];
+      return `${head}\n<b>${esc(t.name)}</b> ${esc(R.toolArg(t).slice(0, 120))}${t.ms ? "\n" + esc(dur(t.ms)) : ""}${t.isError ? "\nFailed" : ""}`;
+    }
+    if (ev.kind === "thinking") return head + (ev.ms ? `\nThought for ${(ev.ms / 1000).toFixed(1)}s` : "");
+    return head + "\n" + esc((ev.text || "").slice(0, 220)) + ((ev.text || "").length > 220 ? "…" : "");
+  }
+
+  Object.assign(R, { compressTime, drawTimeline, preferKind, eventTip });
+})(globalThis.AFD = globalThis.AFD || {});
+
+// ── recorder-session.js
+/* Agent Flight Deck — Flight Recorder: the session view, transcript, selection and replay. */
+(function (AFD) {
+  "use strict";
+
+  const { h, clear, esc, usd, tok, pct, dur, clock, dateTime, date, plural, catColor, CAT_LABEL } = AFD.ui;
+  const R = (AFD.rec = AFD.rec || {});
+  const { S, KIND_LABEL, FILTERS, IDLE_MS, GAP_CAP_MS } = R;
+
   // ───────────────────────── session view ─────────────────────────
 
   function openSession(s) {
@@ -2431,20 +2910,24 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     S.cursor = -1;
     S.selected = -1;
     S.query = "";
+    // thinking text is usually not written to the log; when none of it is, hide those rows to start with
+    const thinking = s.events.filter((e) => e.kind === "thinking");
+    if (thinking.length && thinking.every((e) => !e.text)) S.filters.delete("thinking");
+    else S.filters.add("thinking");
     clear(S.content);
     const v = (S.view = {});
     const t = s.totals;
     const reported = s.reportedCost;
 
-    if (S.sessions.length > 1) S.content.appendChild(h("button.btn.ghost.back", { type: "button", onclick: showFleet }, "← All sessions"));
+    if (S.sessions.length > 1) S.content.appendChild(h("button.btn.ghost.back", { type: "button", onclick: () => R.showFleet() }, "← All sessions"));
 
     // header
     const models = s.byModel.filter((m) => m.calls).map((m) => h("span.pill.model", { title: m.model }, m.name));
     S.content.appendChild(h("header.rec-head",
       h("div.rec-title", h("h1", s.title), S.isExample ? h("span.pill.example", { title: "Invented session that ships with the app, so you can try every feature" }, "Example session") : null,
         h("button.btn.sm", { type: "button", title: "Copy a Markdown summary for a PR description or a team chat", onclick: async () => {
-          const ok = await AFD.ui.copyText(reportMarkdown(s));
-          AFD.ui.toast(ok ? "Report copied as Markdown" : "Copy was blocked by the browser");
+          const ok = await AFD.ui.copyText(R.reportMarkdown(s));
+          AFD.ui.toast(ok ? "Report copied as Markdown. It quotes your prompts, so check it before sharing." : "Copy was blocked by the browser");
         } }, AFD.ui.icon("copy"), "Copy report")),
       h("div.rec-meta",
         s.project ? h("span", "Project ", h("b.mono", s.project)) : null,
@@ -2459,7 +2942,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     const peakRatio = s.peak.window ? s.peak.ctx / s.peak.window : 0;
     S.content.appendChild(h("section.gauges", { "aria-label": "Session summary" },
       gauge("Est. cost", usd(t.cost), reported ? `Claude Code logged ${usd(reported.usd)}` : t.unpricedCalls ? `${t.unpricedCalls} calls unpriced` : "at API list prices", costBar,
-        reported ? "Claude Code saves its own running total in the log, sometimes only up to an earlier point in the session. The estimate here prices every call at Anthropic's API list prices." : null),
+        "Every call priced at Anthropic's API list prices. Pro and Max plans are billed differently, so this is what the same work would cost through the API." + (reported ? " Claude Code also saves its own running total in the log, sometimes only up to an earlier point in the session; see the Inspector for the comparison." : "")),
       gauge("API calls", t.apiCalls.toLocaleString("en-US"), `${plural(s.promptCount, "prompt")} · ${plural(s.turns.filter((x) => x.calls.length).length, "turn")}`),
       gauge("Tool calls", s.tools.length.toLocaleString("en-US"), s.tools.length ? `${s.tools.filter((x) => x.isError).length} failed` : "none"),
       gauge("Active time", dur(s.activeMs), `of ${dur(s.wallMs)} wall time`),
@@ -2522,22 +3005,22 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 
     // analysis panels
     const charts = h("section.charts", { style: { marginTop: "14px" } },
-      h("div.panel", h("div.panel-h", h("h3", "Cost per API call"), h("span.hint", "Stacked by billing component; line is the running total")), h("div.panel-b", costChart(s))),
-      h("div.panel", h("div.panel-h", h("h3", "Tools")), toolsTable(s)),
-      h("div.panel", h("div.panel-h", h("h3", "Files touched"), h("span.hint", "Click to filter the transcript")), filesTable(s)),
-      h("div.panel", h("div.panel-h", h("h3", "Turns"), h("span.hint", "One turn per prompt")), turnsTable(s)));
+      h("div.panel", h("div.panel-h", h("h3", "Cost per API call"), h("span.hint", "Stacked by billing component; line is the running total")), h("div.panel-b", R.costChart(s))),
+      h("div.panel", h("div.panel-h", h("h3", "Tools")), R.toolsTable(s)),
+      h("div.panel", h("div.panel-h", h("h3", "Files touched"), h("span.hint", "Click to filter the transcript")), R.filesTable(s)),
+      h("div.panel", h("div.panel-h", h("h3", "Turns"), h("span.hint", "One turn per prompt")), R.turnsTable(s)));
     S.content.appendChild(charts);
 
-    drawTimeline();
+    R.drawTimeline();
     renderFeed();
-    renderInspector();
+    R.renderInspector();
     updatePos();
     if (v.resizeObs) v.resizeObs.disconnect();
     if (window.ResizeObserver) {
       let lastW = v.tlWrap.clientWidth;
       v.resizeObs = new ResizeObserver(() => {
         const w = v.tlWrap.clientWidth;
-        if (Math.abs(w - lastW) > 4) { lastW = w; drawTimeline(); }
+        if (Math.abs(w - lastW) > 4) { lastW = w; R.drawTimeline(); }
       });
       v.resizeObs.observe(v.tlWrap);
     }
@@ -2545,225 +3028,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 
   function gauge(label, value, sub, barKids, title) {
     return h("div.gauge", { title: title || null }, h("span.eyebrow", label), h("div.v", value), h("div.s", { title: sub }, sub), barKids ? h("div.bar", barKids) : null);
-  }
-
-  // ───────────────────────── time compression ─────────────────────────
-
-  function compressTime(times) {
-    const pts = [...new Set(times.filter((t) => t > 0))].sort((a, b) => a - b);
-    if (pts.length < 2) return null;
-    const us = [0];
-    const gaps = [];
-    for (let i = 1; i < pts.length; i++) {
-      const g = pts[i] - pts[i - 1];
-      const c = Math.min(g, GAP_CAP_MS);
-      us.push(us[i - 1] + c);
-      if (g > IDLE_MS) gaps.push({ u: us[i - 1] + c / 2, ms: g });
-    }
-    const total = us[us.length - 1] || 1;
-    const find = (t) => {
-      let lo = 0, hi = pts.length - 1;
-      while (lo < hi) {
-        const mid = (lo + hi + 1) >> 1;
-        if (pts[mid] <= t) lo = mid; else hi = mid - 1;
-      }
-      return lo;
-    };
-    return {
-      total,
-      gaps,
-      map(t) {
-        if (!t || t <= pts[0]) return 0;
-        if (t >= pts[pts.length - 1]) return total;
-        const i = find(t);
-        const span = pts[i + 1] - pts[i];
-        return us[i] + ((t - pts[i]) / span) * (us[i + 1] - us[i]);
-      },
-      inverse(u) {
-        let i = 0;
-        while (i < us.length - 2 && us[i + 1] < u) i++;
-        const span = us[i + 1] - us[i] || 1;
-        return pts[i] + ((u - us[i]) / span) * (pts[i + 1] - pts[i]);
-      },
-    };
-  }
-
-  // ───────────────────────── timeline ─────────────────────────
-
-  function drawTimeline() {
-    const s = S.session;
-    const v = S.view;
-    if (!s || !v) return;
-    const W = Math.max(640, v.tlWrap.clientWidth || 800);
-    const L = 74, R = 58;
-    const lanes = { prompt: [18, 18], claude: [40, 16], tools: [62, 30], ctx: [104, 66], spend: [182, 34] };
-    const H = 236;
-    const plotW = W - L - R;
-    const comp = compressTime(s.events.map((e) => e.t).concat(s.tools.map((t) => t.endT)));
-    const n = s.events.length || 1;
-    const xOfEvent = (ev) => (comp ? L + (comp.map(ev.t) / comp.total) * plotW : L + (ev.idx / Math.max(1, n - 1)) * plotW);
-    const xOfT = (t, fallbackIdx) => (comp && t ? L + (comp.map(t) / comp.total) * plotW : L + ((fallbackIdx || 0) / Math.max(1, n - 1)) * plotW);
-    const p = [];
-
-    // lane backgrounds & labels
-    const laneNames = [["prompt", "PROMPTS"], ["claude", "CLAUDE"], ["tools", "TOOLS"], ["ctx", "CONTEXT"], ["spend", "SPEND"]];
-    for (const [k, label] of laneNames) {
-      const [y, hh] = lanes[k];
-      p.push(`<rect x="${L}" y="${y}" width="${plotW}" height="${hh}" fill="var(--panel-2)" rx="2"/>`);
-      p.push(`<text class="lane-label" x="10" y="${y + hh / 2 + 3.5}">${label}</text>`);
-    }
-
-    // collapsed idle gaps
-    if (comp) for (const g of comp.gaps) {
-      const x = L + (g.u / comp.total) * plotW;
-      const zig = [];
-      for (let y = 16; y <= 218; y += 8) zig.push(`${x + ((y / 8) % 2 ? 3 : -3)},${y}`);
-      p.push(`<polyline points="${zig.join(" ")}" fill="none" stroke="var(--faint)" stroke-width="1" opacity="0.7"/>`);
-      p.push(`<text x="${x}" y="12" text-anchor="middle" style="font-size:9.5px">+${esc(dur(g.ms))}</text>`);
-    }
-
-    // compaction markers
-    for (const ev of s.events) if (ev.kind === "compact") {
-      const x = xOfEvent(ev);
-      p.push(`<line x1="${x}" x2="${x}" y1="${lanes.ctx[0]}" y2="${lanes.ctx[0] + lanes.ctx[1]}" stroke="var(--warn)" stroke-dasharray="3 2"/>`);
-    }
-
-    // prompts & claude lane
-    for (const ev of s.events) {
-      const x = xOfEvent(ev);
-      if ((ev.kind === "prompt" || ev.kind === "command" || ev.kind === "interrupt") && !ev.sidechain) {
-        const y = lanes.prompt[0] + lanes.prompt[1] / 2;
-        const fill = ev.kind === "prompt" ? "var(--accent)" : "var(--faint)";
-        p.push(`<path d="M${x} ${y - 6}L${x + 6} ${y}L${x} ${y + 6}L${x - 6} ${y}Z" fill="${fill}"/>`);
-      } else if (ev.kind === "text" || ev.kind === "thinking" || ev.kind === "error" || ev.kind === "subprompt") {
-        const y = lanes.claude[0];
-        const hh = lanes.claude[1];
-        if (ev.kind === "thinking") p.push(`<circle cx="${x}" cy="${y + hh / 2}" r="3" fill="none" stroke="var(--muted)" stroke-width="1.2"/>`);
-        else p.push(`<rect x="${x - 1}" y="${y + 2}" width="2.2" height="${hh - 4}" fill="${ev.kind === "error" ? "var(--bad)" : ev.sidechain ? "var(--c-agent)" : "var(--ink)"}" opacity="${ev.sidechain ? 0.7 : 0.85}"/>`);
-      }
-    }
-
-    // tools
-    const cats = new Set();
-    for (const t of s.tools) {
-      const ev = s.events[t.event];
-      const x1 = xOfEvent(ev);
-      const x2 = t.endT ? Math.max(x1 + 2.5, xOfT(t.endT, t.event)) : x1 + 2.5;
-      const row = t.idx % 2;
-      const y = lanes.tools[0] + 2 + row * 14;
-      cats.add(t.category);
-      p.push(`<rect x="${x1}" y="${y}" width="${Math.max(2.5, x2 - x1)}" height="12" rx="1.5" fill="${catColor(t.category)}" ${t.sidechain ? 'opacity="0.55"' : ""} ${t.isError ? 'stroke="var(--bad)" stroke-width="2"' : ""}/>`);
-    }
-
-    // context area
-    const main = s.calls.filter((c) => !c.sidechain && c.usage && !c.isError && c.ctx > 0);
-    const ctxMax = Math.max(1, ...main.map((c) => c.ctx)) * 1.12;
-    const [cy, ch] = lanes.ctx;
-    if (main.length) {
-      const pts = main.map((c) => {
-        const ev = c.events.length ? s.events[c.events[0]] : null;
-        const x = ev ? xOfEvent(ev) : xOfT(c.t, 0);
-        return [x, cy + ch - (c.ctx / ctxMax) * ch];
-      });
-      const line = pts.map((q, i) => (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1)).join("");
-      p.push(`<path d="${line}L${pts[pts.length - 1][0].toFixed(1)} ${cy + ch}L${pts[0][0].toFixed(1)} ${cy + ch}Z" fill="var(--c-read)" opacity="0.14"/>`);
-      p.push(`<path d="${line}" fill="none" stroke="var(--c-read)" stroke-width="1.6"/>`);
-      const peakPt = pts[main.findIndex((c) => c.idx === s.peak.call)];
-      if (peakPt) p.push(`<circle cx="${peakPt[0]}" cy="${peakPt[1]}" r="3.2" fill="var(--c-read)"/>`);
-      p.push(`<text x="${W - R + 6}" y="${cy + 9}">${esc(tok(ctxMax / 1.12))}</text>`);
-      const win = s.peak.window;
-      if (win && win < ctxMax) {
-        const wy = cy + ch - (win / ctxMax) * ch;
-        p.push(`<line x1="${L}" x2="${W - R}" y1="${wy}" y2="${wy}" stroke="var(--bad)" stroke-dasharray="4 3"/><text x="${W - R + 6}" y="${wy + 3}" style="fill:var(--bad)">limit</text>`);
-      }
-    }
-
-    // spend: cumulative cost step line
-    const [sy, sh] = lanes.spend;
-    const priced = s.calls.filter((c) => c.cost);
-    if (priced.length && s.totals.cost > 0) {
-      let acc = 0;
-      let d = `M${L} ${sy + sh}`;
-      for (const c of priced) {
-        const ev = c.events.length ? s.events[c.events[0]] : null;
-        const x = ev ? xOfEvent(ev) : xOfT(c.t, 0);
-        d += `L${x.toFixed(1)} ${(sy + sh - (acc / s.totals.cost) * (sh - 4)).toFixed(1)}`;
-        acc += c.cost.total;
-        d += `L${x.toFixed(1)} ${(sy + sh - (acc / s.totals.cost) * (sh - 4)).toFixed(1)}`;
-      }
-      d += `L${W - R} ${(sy + 4).toFixed(1)}`;
-      p.push(`<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>`);
-      p.push(`<text x="${W - R + 6}" y="${sy + 8}" style="fill:var(--accent)">${esc(usd(s.totals.cost))}</text>`);
-    }
-
-    // time axis
-    if (comp) {
-      const ticks = Math.max(2, Math.floor(plotW / 110));
-      for (let i = 0; i <= ticks; i++) {
-        const u = (comp.total * i) / ticks;
-        const x = L + (u / comp.total) * plotW;
-        p.push(`<text x="${x}" y="${H - 6}" text-anchor="${i === 0 ? "start" : i === ticks ? "end" : "middle"}">${esc(clock(comp.inverse(u)))}</text>`);
-      }
-    } else {
-      p.push(`<text x="${L}" y="${H - 6}">event 1</text><text x="${W - R}" y="${H - 6}" text-anchor="end">event ${n}</text>`);
-    }
-
-    // cursor
-    p.push(`<line class="tl-cursor" x1="0" x2="0" y1="14" y2="${H - 16}" stroke="var(--accent)" stroke-width="1.5" visibility="hidden"/>`);
-    p.push(`<line class="tl-hover" x1="0" x2="0" y1="14" y2="${H - 16}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 2" visibility="hidden" opacity="0.5"/>`);
-
-    v.tlWrap.innerHTML = `<svg class="tl-svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Session timeline">${p.join("")}</svg>`;
-    const svg = v.tlWrap.firstChild;
-    v.tlCursor = svg.querySelector(".tl-cursor");
-    v.tlHover = svg.querySelector(".tl-hover");
-    v.xs = s.events.map((ev) => ({ x: xOfEvent(ev), idx: ev.idx }));
-    v.tlW = W;
-    v.L = L;
-    v.R = R;
-
-    const nearest = (clientX) => {
-      const r = svg.getBoundingClientRect();
-      const x = ((clientX - r.left) / r.width) * W;
-      let best = null;
-      let bd = Infinity;
-      for (const q of v.xs) {
-        const d = Math.abs(q.x - x);
-        if (d < bd || (d === bd && preferKind(s.events[q.idx]))) { bd = d; best = q; }
-      }
-      return { q: best, x };
-    };
-    svg.addEventListener("pointermove", (e) => {
-      const { q } = nearest(e.clientX);
-      if (!q) return;
-      v.tlHover.setAttribute("x1", q.x);
-      v.tlHover.setAttribute("x2", q.x);
-      v.tlHover.setAttribute("visibility", "visible");
-      AFD.ui.tip(e, eventTip(s.events[q.idx]));
-    });
-    svg.addEventListener("pointerleave", () => { v.tlHover.setAttribute("visibility", "hidden"); AFD.ui.hideTip(); });
-    svg.addEventListener("click", (e) => {
-      const { q } = nearest(e.clientX);
-      if (q) { stop(); select(q.idx, true); }
-    });
-
-    v.legend.innerHTML = [...cats].sort().map((c) => `<span><i class="swatch" style="background:${catColor(c)}"></i>${esc(CAT_LABEL[c])}</span>`).join("") +
-      `<span><i class="swatch" style="background:var(--accent);transform:rotate(45deg);border-radius:1px"></i>Prompt</span><span><i class="swatch" style="background:var(--c-read);opacity:.5"></i>Context size</span><span><i class="swatch" style="background:var(--accent);height:2px"></i>Cumulative cost</span>`;
-    updateCursor();
-  }
-
-  function preferKind(ev) {
-    return ev && (ev.kind === "prompt" || ev.kind === "tool");
-  }
-
-  function eventTip(ev) {
-    const s = S.session;
-    const head = `<b>${esc(KIND_LABEL[ev.kind] || ev.kind)}</b> · ${esc(clock(ev.t))}${ev.sidechain ? " · subagent" : ""}`;
-    if (ev.kind === "tool") {
-      const t = s.tools[ev.tool];
-      return `${head}\n<b>${esc(t.name)}</b> ${esc(toolArg(t).slice(0, 120))}${t.ms ? "\n" + esc(dur(t.ms)) : ""}${t.isError ? "\nFailed" : ""}`;
-    }
-    if (ev.kind === "thinking") return head + (ev.ms ? `\nThought for ${(ev.ms / 1000).toFixed(1)}s` : "");
-    return head + "\n" + esc((ev.text || "").slice(0, 220)) + ((ev.text || "").length > 220 ? "…" : "");
   }
 
   // ───────────────────────── feed ─────────────────────────
@@ -2820,6 +3084,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     let count = 0;
     const frag = document.createDocumentFragment();
     v.rows = new Map();
+    v.drawnSel = null;
+    v.drawnCursor = null;
     for (const ev of s.events) {
       if (!kinds.has(ev.kind) || !matchesQuery(ev, q)) continue;
       const row = feedRow(ev);
@@ -2874,7 +3140,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     if (S.cursor >= 0) S.cursor = idx;
     S.view.scrub.value = idx;
     updateCursor(scrollFeed !== false);
-    renderInspector();
+    R.renderInspector();
     updatePos();
   }
 
@@ -2882,7 +3148,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     S.cursor = idx;
     S.selected = idx;
     updateCursor(scroll);
-    renderInspector();
+    R.renderInspector();
     updatePos();
   }
 
@@ -2900,11 +3166,25 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       } else v.tlCursor.setAttribute("visibility", "hidden");
     }
     if (v.rows) {
-      for (const [idx, row] of v.rows) {
-        row.classList.toggle("cur", idx === cur);
-        row.classList.toggle("future", S.cursor >= 0 && idx > S.cursor);
+      // touch only the rows whose state changed: the old and new selection, and the rows the cursor crossed
+      const mark = (idx, on) => {
+        const row = v.rows.get(idx);
+        if (!row) return;
+        row.classList.toggle("cur", on);
         const txt = row.querySelector(".txt");
-        if (txt) txt.classList.toggle("clamp", idx !== cur);
+        if (txt) txt.classList.toggle("clamp", !on);
+      };
+      if (v.drawnSel !== cur) { if (v.drawnSel != null) mark(v.drawnSel, false); mark(cur, true); v.drawnSel = cur; }
+      const from = v.drawnCursor == null ? -2 : v.drawnCursor;
+      if (from !== S.cursor) {
+        if (from < 0 || S.cursor < 0) {
+          for (const [idx, row] of v.rows) row.classList.toggle("future", S.cursor >= 0 && idx > S.cursor);
+        } else {
+          const lo = Math.min(from, S.cursor);
+          const hi = Math.max(from, S.cursor);
+          for (let i = lo + 1; i <= hi; i++) { const row = v.rows.get(i); if (row) row.classList.toggle("future", i > S.cursor); }
+        }
+        v.drawnCursor = S.cursor;
       }
       const row = v.rows.get(cur);
       if (row && scroll) {
@@ -2968,6 +3248,18 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     }
   }
 
+  Object.assign(R, { openSession, gauge, toolArg, short, matchesQuery, visibleKinds, renderFeed, feedRow, select, setCursor, updateCursor, updatePos, togglePlay, scheduleNext, step, stop });
+})(globalThis.AFD = globalThis.AFD || {});
+
+// ── recorder-panels.js
+/* Agent Flight Deck — Flight Recorder: inspector, cost chart, tools/files/turns tables, report and re-pricing. */
+(function (AFD) {
+  "use strict";
+
+  const { h, clear, esc, usd, tok, pct, dur, clock, dateTime, date, plural, catColor, CAT_LABEL } = AFD.ui;
+  const R = (AFD.rec = AFD.rec || {});
+  const { S, KIND_LABEL, FILTERS, IDLE_MS, GAP_CAP_MS } = R;
+
   // ───────────────────────── inspector ─────────────────────────
 
   function renderInspector() {
@@ -2981,6 +3273,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       const t = s.totals;
       v.inspector.appendChild(costBlock("Whole session", { input: t.input, cacheWrite: t.cacheWrite, cacheRead: t.cacheRead, output: t.output, thinking: t.thinking }, t.costParts, t.cost));
       if (s.byModel.length) v.inspector.appendChild(h("div", h("h4", "By model"), h("dl.kv", s.byModel.map((m) => [h("dt", `${m.name} · ${plural(m.calls, "call")}`), h("dd", usd(m.cost))]))));
+      const rec = s.reconcile;
+      if (rec && rec.models.length) {
+        v.inspector.appendChild(h("div", h("h4", "Compared with Claude Code's own total"),
+          h("table.tbl", h("thead", h("tr", h("th", "Model"), h("th.num", "Logged"), h("th.num", "Estimate"))), h("tbody",
+            rec.models.map((m) => h("tr", h("td", m.name), h("td.num", usd(m.loggedUsd)), h("td.num", usd(m.estimateUsd)))))),
+          h("div", { style: { fontSize: "11.5px", color: "var(--muted)", marginTop: "6px" } },
+            (rec.partial ? "Up to Claude Code's last cost snapshot. " : "") + (rec.hiddenTokens > 0 ? `Claude Code counted about ${tok(rec.hiddenTokens)} tokens from requests the transcript does not record (titles, summaries and other background calls).` : "The transcript accounts for every token Claude Code counted."))));
+      }
       const alt = repriceAll(s);
       if (alt.length) {
         const max = Math.max(...alt.map((a) => a.cost));
@@ -2998,7 +3298,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 
     if (ev.kind === "tool") {
       const t = s.tools[ev.tool];
-      const facts = [["Category", CAT_LABEL[t.category]], ["Duration", t.endT ? dur(t.ms) : "no result logged"], ["Result size", t.resultChars ? `${t.resultChars.toLocaleString("en-US")} chars ≈ ${tok(t.resultChars / 3.5)} tok` : "—"]];
+      const facts = [["Category", CAT_LABEL[t.category]], ["Duration", t.endT ? dur(t.ms) : "no result logged"], ["Result size", t.resultChars ? `${t.resultChars.toLocaleString("en-US")} chars ≈ ${tok(AFD.pricing.charsToTokens(t.resultChars))} tok` : "—"]];
       if (t.isError) facts.push(["Status", "Failed"]);
       v.inspector.appendChild(h("dl.kv", facts.map(([k, val]) => [h("dt", k), h("dd", { style: k === "Status" ? { color: "var(--bad)" } : null }, val)])));
       v.inspector.appendChild(h("div", h("h4", "Input"), h("pre", JSON.stringify(t.input, null, 2).slice(0, 6000))));
@@ -3107,7 +3407,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     }
     const W = 640, H = 200, pad = { l: 46, r: 46, t: 10, b: 24 };
     const max = Math.max(...calls.map((c) => c.cost.total));
-    const ticks = niceTicks(max, 3);
+    const ticks = R.niceTicks(max, 3);
     const top = ticks[ticks.length - 1];
     const bw = (W - pad.l - pad.r) / calls.length;
     const y = (v) => pad.t + (H - pad.t - pad.b) * (1 - v / top);
@@ -3146,7 +3446,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       const r = e.target.closest(".hit");
       if (!r) return;
       const c = calls[+r.getAttribute("data-i")];
-      if (c.events.length) { stop(); select(c.events[0], true); }
+      if (c.events.length) { R.stop(); R.select(c.events[0], true); }
     });
     el.appendChild(h("div.tl-legend", { style: { padding: "8px 0 0" } }, [["Input", "--c-input"], ["Cache write", "--c-cwrite"], ["Cache read", "--c-cread"], ["Output", "--c-output"]].map(([l, c]) => h("span", h("i.swatch", { style: { background: `var(${c})` } }), l))));
     return el;
@@ -3160,9 +3460,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       { key: "count", label: "Calls", num: true },
       { key: "errors", label: "Failed", num: true, render: (r) => (r.errors ? h("span", { style: { color: "var(--bad)" } }, String(r.errors)) : "0") },
       { key: "ms", label: "Total time", num: true, render: (r) => dur(r.ms) },
-      { key: "resultChars", label: "Output ≈tok", num: true, render: (r) => tok(r.resultChars / 3.5) },
+      { key: "resultChars", label: "Output ≈tok", num: true, render: (r) => tok(AFD.pricing.charsToTokens(r.resultChars)) },
       { key: "bar", label: "", sortable: false, render: (r) => h("div.minibar", h("i", { style: { width: (r.count / max) * 100 + "%", background: catColor(r.category) } })) },
-    ], s.toolStats, { sortKey: "count", onRow: (r) => { S.query = r.name.toLowerCase(); S.view.search.value = r.name; renderFeed(); S.view.feed.scrollIntoView({ block: "nearest", behavior: "smooth" }); } });
+    ], s.toolStats, { sortKey: "count", onRow: (r) => { S.query = r.name.toLowerCase(); S.view.search.value = r.name; R.renderFeed(); S.view.feed.scrollIntoView({ block: "nearest", behavior: "smooth" }); } });
   }
 
   function filesTable(s) {
@@ -3177,7 +3477,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       { key: "edits", label: "Edits", num: true, render: (r) => String(r.edits + r.writes), sort: (r) => r.edits + r.writes },
       { key: "lines", label: "Lines ±", num: true, render: (r) => h("span.tnum", h("span", { style: { color: "var(--good)" } }, "+" + r.added), " ", h("span", { style: { color: "var(--bad)" } }, "−" + r.removed)), sort: (r) => r.added + r.removed },
       { key: "heat", label: "", sortable: false, render: (r) => h("div.minibar", h("i", { style: { width: (r.reads / max) * 100 + "%", background: "var(--c-read)" } }), h("i", { style: { width: ((2 * (r.edits + r.writes)) / max) * 100 + "%", background: "var(--c-edit)" } })) },
-    ], s.files, { sortKey: "heat", onRow: (r) => { const q = rel(r.path); S.query = q.toLowerCase(); S.view.search.value = q; renderFeed(); S.view.feed.scrollIntoView({ block: "nearest", behavior: "smooth" }); } }));
+    ], s.files, { sortKey: "heat", onRow: (r) => { const q = rel(r.path); S.query = q.toLowerCase(); S.view.search.value = q; R.renderFeed(); S.view.feed.scrollIntoView({ block: "nearest", behavior: "smooth" }); } }));
   }
 
   function turnsTable(s) {
@@ -3192,29 +3492,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       { key: "ms", label: "Time", num: true, render: (r) => dur(r.ms) },
       { key: "cost", label: "Cost", num: true, render: (r) => usd(r.cost) },
       { key: "bar", label: "", sortable: false, render: (r) => h("div.minibar", h("i", { style: { width: (r.cost / max) * 100 + "%", background: "var(--accent)" } })) },
-    ], rows, { sortKey: "idx", asc: true, onRow: (r) => { stop(); select(r.startEvent, true); S.view.tlWrap.scrollIntoView({ block: "nearest", behavior: "smooth" }); } }));
+    ], rows, { sortKey: "idx", asc: true, onRow: (r) => { R.stop(); R.select(r.startEvent, true); S.view.tlWrap.scrollIntoView({ block: "nearest", behavior: "smooth" }); } }));
   }
 
-  /** Space: play/pause · ←/→: step · /: search. Ignored while typing or when this view is hidden. */
-  function onKey(e) {
-    if (!S.session || !S.view || S.root.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
-    const tag = (e.target && e.target.tagName) || "";
-    if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || (e.target && e.target.isContentEditable)) {
-      if (e.key === "Escape" && e.target === S.view.search) e.target.blur();
-      return;
-    }
-    if (e.key === " " && tag !== "BUTTON") { e.preventDefault(); togglePlay(); }
-    else if (e.key === "ArrowRight") { e.preventDefault(); stop(); step(1); }
-    else if (e.key === "ArrowLeft") { e.preventDefault(); stop(); step(-1); }
-    else if (e.key === "/") { e.preventDefault(); S.view.search.focus(); }
-  }
-
-  function onHide() {
-    stop();
-    AFD.ui.hideTip();
-  }
-
-  AFD.recorder = { mount, onHide, loadEntries, reportMarkdown, repriceAll, _state: S };
+  Object.assign(R, { renderInspector, repriceAll, reportMarkdown, costBlock, costChart, toolsTable, filesTable, turnsTable });
 })(globalThis.AFD = globalThis.AFD || {});
 
 // ── loadsheet.js
@@ -3243,7 +3524,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   const RESERVES = [0, 4000, 16000, 32000, 64000];
   const PRICE_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5", "claude-fable-5-1"];
   const MAX_TOTAL_READ = 60 * 1024 * 1024;
-  const TREEMAP_MAX_CELLS = 1200;
+
+  const L = (AFD.ls = AFD.ls || {});
 
   const S = {
     raw: [],
@@ -3305,14 +3587,14 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     el.question.addEventListener("input", () => {
       S.question = el.question.value;
       clearTimeout(qTimer);
-      qTimer = setTimeout(() => { rescore(); renderAll(); }, 250);
+      qTimer = setTimeout(() => { rescore(); L.renderAll(); }, 250);
     });
     const autoBtn = h("button.btn.primary", { type: "button", onclick: autoLoad, style: { justifyContent: "center" } }, AFD.ui.icon("spark"), "Auto-load the relevant files");
 
     el.budget = h("select", { id: "ls-budget", "aria-label": "Token budget" }, BUDGETS.map((b) => h("option", { value: String(b.v) }, b.label)));
-    el.budget.addEventListener("change", () => { S.budget = +el.budget.value; S.exampleBudget = false; savePrefs(); renderAll(); });
+    el.budget.addEventListener("change", () => { S.budget = +el.budget.value; S.exampleBudget = false; savePrefs(); L.renderAll(); });
     el.reserve = h("select", { id: "ls-reserve", "aria-label": "Reserve for the response" }, RESERVES.map((r) => h("option", { value: String(r) }, r ? tok(r) + " for the reply" : "No reserve")));
-    el.reserve.addEventListener("change", () => { S.reserve = +el.reserve.value; S.exampleBudget = false; savePrefs(); renderAll(); });
+    el.reserve.addEventListener("change", () => { S.reserve = +el.reserve.value; S.exampleBudget = false; savePrefs(); L.renderAll(); });
     el.wbStatus = h("div.wb-status");
     el.wbBig = h("div.wb-big");
     el.wbBar = h("div.wb-bar", { role: "img" });
@@ -3330,7 +3612,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         S.opts[k] = box.checked;
         savePrefs();
         if (k === "useGitignore") reprepare();
-        renderAll();
+        L.renderAll();
       });
       return h("label.check", { for: "ls-opt-" + k }, box, label);
     });
@@ -3339,7 +3621,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         S.format = v;
         [...el.formatSeg.children].forEach((c) => c.setAttribute("aria-pressed", String(c === b)));
         savePrefs();
-        renderAll();
+        L.renderAll();
       } }, label);
       return b;
     }));
@@ -3361,7 +3643,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     el.tmLegend = h("div.tl-legend", { style: { padding: "10px 0 0" } });
     el.tmTitle = h("span.hint");
     el.filter = h("input", { type: "search", id: "ls-filter", placeholder: "Filter files", "aria-label": "Filter files", style: { width: "200px" } });
-    el.filter.addEventListener("input", () => { S.filter = el.filter.value.trim().toLowerCase(); renderManifest(); });
+    el.filter.addEventListener("input", () => { S.filter = el.filter.value.trim().toLowerCase(); L.renderManifest(); });
     el.manifest = h("div.files-tbl");
     el.manifestCount = h("span.hint");
     el.preview = h("pre.out-pre", { tabindex: "0", "aria-label": "Prompt preview" });
@@ -3385,7 +3667,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       let lastW = 0;
       new ResizeObserver(() => {
         const w = el.treemap.clientWidth;
-        if (Math.abs(w - lastW) > 4) { lastW = w; renderTreemap(); }
+        if (Math.abs(w - lastW) > 4) { lastW = w; L.renderTreemap(); }
       }).observe(el.treemap);
     }
     loadExample();
@@ -3456,7 +3738,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     S.isExample = false;
     S.question = S.el.question.value = "";
     reprepare();
-    S.projectName = (S.prep && S.prep.root) || (S.raw[0] ? S.raw[0].path.split("/")[0] : "project");
+    // a dropped folder names the project; loose files picked one by one do not
+    S.projectName = (S.prep && S.prep.root) || (S.raw.some((r) => r.path.includes("/")) ? S.raw.find((r) => r.path.includes("/")).path.split("/")[0] : "selected files");
     // default selection: everything that fits, smallest-first is unhelpful, so load all and let the user trim
     for (const f of S.files) f.include = true;
     const totalTok = S.files.reduce((a, f) => a + f.tokens, 0);
@@ -3465,7 +3748,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     if (budgetLeft <= 0) msg.push(`Stopped reading after ${bytes(MAX_TOTAL_READ)}.`);
     if (totalTok > S.budget - S.reserve) msg.push("That is over budget: type a question and press Auto-load, or unload files.");
     setNotice(msg.join(" "));
-    renderAll();
+    L.renderAll();
   }
 
   function reprepare() {
@@ -3502,14 +3785,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     } else {
       P().autoSelect(S.files, cap * 0.95, S.opts);
     }
-    // trim the lowest-ranked files until the full prompt fits
+    // the tree and question also take room: drop the lowest-ranked files by the measured overshoot, rebuilding a few times at most
     let prompt = build();
     const byScore = S.files.filter((f) => f.include).sort((a, b) => a.score - b.score || b.tokens - a.tokens);
-    while (prompt.tokens > cap && byScore.length) {
-      byScore.shift().include = false;
+    for (let round = 0; prompt.tokens > cap && byScore.length && round < 8; round++) {
+      let over = prompt.tokens - cap;
+      while (over > 0 && byScore.length) {
+        const f = byScore.shift();
+        f.include = false;
+        over -= P().docTokens(f, S.opts) + Math.ceil(f.path.length / 6); // its document plus its line in the tree
+      }
       prompt = build();
     }
-    renderAll();
+    L.renderAll();
     if (silent !== true) AFD.ui.toast(`Loaded ${plural(S.files.filter((f) => f.include).length, "file")} · ${tok(prompt.tokens)} tokens`);
   }
 
@@ -3519,7 +3807,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 
   function setAll(on) {
     for (const f of shownFiles()) f.include = on;
-    renderAll();
+    L.renderAll();
   }
 
   function shownFiles() {
@@ -3533,6 +3821,26 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     const ok = await AFD.ui.copyText(p.text);
     AFD.ui.toast(ok ? `Copied ${tok(p.tokens)} tokens (${plural(p.files, "file")})` : "Copy was blocked by the browser. Select the preview and copy it by hand.");
   }
+
+  function onShow() {
+    L.renderTreemap();
+  }
+
+  Object.assign(L, { S, LANG_COLOR, LANG_NAME, PRICE_MODELS, autoLoad, build, capacity, copyPrompt, loadEntries, loadExample, loadPrefs, mount, onShow, reprepare, rescore, savePrefs, setAll, setNotice, setProgress, shownFiles });
+  AFD.loadsheet = { mount, onShow, loadEntries, _state: S };
+})(globalThis.AFD = globalThis.AFD || {});
+
+// ── loadsheet-render.js
+/* Agent Flight Deck — Load Sheet rendering: weight & balance, treemap, manifest table, prompt preview and costs. */
+(function (AFD) {
+  "use strict";
+
+  const { h, clear, esc, usd, tok, plural } = AFD.ui;
+  const P = () => AFD.packer;
+  const L = (AFD.ls = AFD.ls || {});
+  const S = L.S;
+  const { LANG_COLOR, LANG_NAME, PRICE_MODELS } = L;
+  const TREEMAP_MAX_CELLS = 1200;
 
   // ───────────────────────── rendering ─────────────────────────
 
@@ -3550,7 +3858,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       if (box) box.checked = S.opts[k];
     }
     [...el.formatSeg.children].forEach((c, i) => c.setAttribute("aria-pressed", String(["xml", "markdown", "plain"][i] === S.format)));
-    S.prompt = build();
+    S.prompt = L.build();
     el.projTitle.textContent = S.projectName ? S.projectName : "Cargo map";
     renderWB();
     renderTreemap();
@@ -3561,7 +3869,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   function renderWB() {
     const el = S.el;
     const used = S.prompt.tokens;
-    const cap = capacity();
+    const cap = L.capacity();
     const over = used > cap;
     const scale = Math.max(S.budget, used);
     el.wbBig.innerHTML = `${esc(tok(used))} <span style="font-size:14px;color:var(--muted);font-weight:500">/ ${esc(tok(cap))}</span>`;
@@ -3625,7 +3933,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   function renderManifest() {
     const el = S.el;
     clear(el.manifest);
-    const rows = shownFiles();
+    const rows = L.shownFiles();
     const loaded = S.files.filter((f) => f.include).length;
     el.manifestCount.textContent = `${loaded} of ${S.files.length} loaded`;
     const maxScore = Math.max(...S.files.map((f) => f.score), 0);
@@ -3683,11 +3991,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     }
   }
 
-  function onShow() {
-    renderTreemap();
-  }
-
-  AFD.loadsheet = { mount, onShow, loadEntries, _state: S };
+  Object.assign(L, { renderAll, renderManifest, renderPrompt, renderTreemap, renderWB });
 })(globalThis.AFD = globalThis.AFD || {});
 
 // ── app.js

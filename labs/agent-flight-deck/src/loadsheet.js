@@ -23,7 +23,8 @@
   const RESERVES = [0, 4000, 16000, 32000, 64000];
   const PRICE_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5", "claude-fable-5-1"];
   const MAX_TOTAL_READ = 60 * 1024 * 1024;
-  const TREEMAP_MAX_CELLS = 1200;
+
+  const L = (AFD.ls = AFD.ls || {});
 
   const S = {
     raw: [],
@@ -85,14 +86,14 @@
     el.question.addEventListener("input", () => {
       S.question = el.question.value;
       clearTimeout(qTimer);
-      qTimer = setTimeout(() => { rescore(); renderAll(); }, 250);
+      qTimer = setTimeout(() => { rescore(); L.renderAll(); }, 250);
     });
     const autoBtn = h("button.btn.primary", { type: "button", onclick: autoLoad, style: { justifyContent: "center" } }, AFD.ui.icon("spark"), "Auto-load the relevant files");
 
     el.budget = h("select", { id: "ls-budget", "aria-label": "Token budget" }, BUDGETS.map((b) => h("option", { value: String(b.v) }, b.label)));
-    el.budget.addEventListener("change", () => { S.budget = +el.budget.value; S.exampleBudget = false; savePrefs(); renderAll(); });
+    el.budget.addEventListener("change", () => { S.budget = +el.budget.value; S.exampleBudget = false; savePrefs(); L.renderAll(); });
     el.reserve = h("select", { id: "ls-reserve", "aria-label": "Reserve for the response" }, RESERVES.map((r) => h("option", { value: String(r) }, r ? tok(r) + " for the reply" : "No reserve")));
-    el.reserve.addEventListener("change", () => { S.reserve = +el.reserve.value; S.exampleBudget = false; savePrefs(); renderAll(); });
+    el.reserve.addEventListener("change", () => { S.reserve = +el.reserve.value; S.exampleBudget = false; savePrefs(); L.renderAll(); });
     el.wbStatus = h("div.wb-status");
     el.wbBig = h("div.wb-big");
     el.wbBar = h("div.wb-bar", { role: "img" });
@@ -110,7 +111,7 @@
         S.opts[k] = box.checked;
         savePrefs();
         if (k === "useGitignore") reprepare();
-        renderAll();
+        L.renderAll();
       });
       return h("label.check", { for: "ls-opt-" + k }, box, label);
     });
@@ -119,7 +120,7 @@
         S.format = v;
         [...el.formatSeg.children].forEach((c) => c.setAttribute("aria-pressed", String(c === b)));
         savePrefs();
-        renderAll();
+        L.renderAll();
       } }, label);
       return b;
     }));
@@ -141,7 +142,7 @@
     el.tmLegend = h("div.tl-legend", { style: { padding: "10px 0 0" } });
     el.tmTitle = h("span.hint");
     el.filter = h("input", { type: "search", id: "ls-filter", placeholder: "Filter files", "aria-label": "Filter files", style: { width: "200px" } });
-    el.filter.addEventListener("input", () => { S.filter = el.filter.value.trim().toLowerCase(); renderManifest(); });
+    el.filter.addEventListener("input", () => { S.filter = el.filter.value.trim().toLowerCase(); L.renderManifest(); });
     el.manifest = h("div.files-tbl");
     el.manifestCount = h("span.hint");
     el.preview = h("pre.out-pre", { tabindex: "0", "aria-label": "Prompt preview" });
@@ -165,7 +166,7 @@
       let lastW = 0;
       new ResizeObserver(() => {
         const w = el.treemap.clientWidth;
-        if (Math.abs(w - lastW) > 4) { lastW = w; renderTreemap(); }
+        if (Math.abs(w - lastW) > 4) { lastW = w; L.renderTreemap(); }
       }).observe(el.treemap);
     }
     loadExample();
@@ -236,7 +237,8 @@
     S.isExample = false;
     S.question = S.el.question.value = "";
     reprepare();
-    S.projectName = (S.prep && S.prep.root) || (S.raw[0] ? S.raw[0].path.split("/")[0] : "project");
+    // a dropped folder names the project; loose files picked one by one do not
+    S.projectName = (S.prep && S.prep.root) || (S.raw.some((r) => r.path.includes("/")) ? S.raw.find((r) => r.path.includes("/")).path.split("/")[0] : "selected files");
     // default selection: everything that fits, smallest-first is unhelpful, so load all and let the user trim
     for (const f of S.files) f.include = true;
     const totalTok = S.files.reduce((a, f) => a + f.tokens, 0);
@@ -245,7 +247,7 @@
     if (budgetLeft <= 0) msg.push(`Stopped reading after ${bytes(MAX_TOTAL_READ)}.`);
     if (totalTok > S.budget - S.reserve) msg.push("That is over budget: type a question and press Auto-load, or unload files.");
     setNotice(msg.join(" "));
-    renderAll();
+    L.renderAll();
   }
 
   function reprepare() {
@@ -282,14 +284,19 @@
     } else {
       P().autoSelect(S.files, cap * 0.95, S.opts);
     }
-    // trim the lowest-ranked files until the full prompt fits
+    // the tree and question also take room: drop the lowest-ranked files by the measured overshoot, rebuilding a few times at most
     let prompt = build();
     const byScore = S.files.filter((f) => f.include).sort((a, b) => a.score - b.score || b.tokens - a.tokens);
-    while (prompt.tokens > cap && byScore.length) {
-      byScore.shift().include = false;
+    for (let round = 0; prompt.tokens > cap && byScore.length && round < 8; round++) {
+      let over = prompt.tokens - cap;
+      while (over > 0 && byScore.length) {
+        const f = byScore.shift();
+        f.include = false;
+        over -= P().docTokens(f, S.opts) + Math.ceil(f.path.length / 6); // its document plus its line in the tree
+      }
       prompt = build();
     }
-    renderAll();
+    L.renderAll();
     if (silent !== true) AFD.ui.toast(`Loaded ${plural(S.files.filter((f) => f.include).length, "file")} · ${tok(prompt.tokens)} tokens`);
   }
 
@@ -299,7 +306,7 @@
 
   function setAll(on) {
     for (const f of shownFiles()) f.include = on;
-    renderAll();
+    L.renderAll();
   }
 
   function shownFiles() {
@@ -314,158 +321,10 @@
     AFD.ui.toast(ok ? `Copied ${tok(p.tokens)} tokens (${plural(p.files, "file")})` : "Copy was blocked by the browser. Select the preview and copy it by hand.");
   }
 
-  // ───────────────────────── rendering ─────────────────────────
-
-  function renderAll() {
-    const el = S.el;
-    if (!el.budget) return;
-    el.budget.value = String(S.budget);
-    if (!el.budget.value) {
-      el.budget.appendChild(h("option", { value: String(S.budget) }, tok(S.budget)));
-      el.budget.value = String(S.budget);
-    }
-    el.reserve.value = String(S.reserve);
-    for (const k of Object.keys(S.opts)) {
-      const box = document.getElementById("ls-opt-" + k);
-      if (box) box.checked = S.opts[k];
-    }
-    [...el.formatSeg.children].forEach((c, i) => c.setAttribute("aria-pressed", String(["xml", "markdown", "plain"][i] === S.format)));
-    S.prompt = build();
-    el.projTitle.textContent = S.projectName ? S.projectName : "Cargo map";
-    renderWB();
-    renderTreemap();
-    renderManifest();
-    renderPrompt();
-  }
-
-  function renderWB() {
-    const el = S.el;
-    const used = S.prompt.tokens;
-    const cap = capacity();
-    const over = used > cap;
-    const scale = Math.max(S.budget, used);
-    el.wbBig.innerHTML = `${esc(tok(used))} <span style="font-size:14px;color:var(--muted);font-weight:500">/ ${esc(tok(cap))}</span>`;
-    el.wbStatus.textContent = over ? `Over by ${tok(used - cap)}` : `${tok(cap - used)} free`;
-    el.wbStatus.className = "wb-status " + (over ? "over" : "ok");
-    el.wbBar.innerHTML = "";
-    el.wbBar.appendChild(h("div.payload", { style: { width: Math.min(100, (used / scale) * 100) + "%", background: over ? "var(--bad)" : "var(--ink)" } }));
-    if (S.reserve) el.wbBar.appendChild(h("div.reserve", { style: { left: (cap / scale) * 100 + "%", width: (S.reserve / scale) * 100 + "%" } }));
-    el.wbBar.setAttribute("aria-label", `Prompt uses ${tok(used)} of ${tok(cap)} tokens`);
-    const totalAll = S.files.reduce((a, f) => a + P().packedTokens(f, S.opts), 0);
-    el.wbLegend.innerHTML = `<span><i class="swatch" style="background:var(--ink)"></i> Prompt ${esc(plural(S.prompt.files, "file"))}</span>` +
-      (S.reserve ? `<span><i class="swatch" style="background:var(--warn)"></i> Reply ${esc(tok(S.reserve))}</span>` : "") +
-      `<span>Whole project ${esc(tok(totalAll))}</span>`;
-  }
-
-  function renderTreemap() {
-    const el = S.el;
-    const box = el.treemap;
-    if (!box.isConnected) return;
-    clear(box);
-    const W = box.clientWidth || 600;
-    const H = box.clientHeight || 340;
-    let items = S.files.map((f) => ({ value: Math.max(1, P().packedTokens(f, S.opts)), f }));
-    items.sort((a, b) => b.value - a.value);
-    let rest = null;
-    if (items.length > TREEMAP_MAX_CELLS) {
-      const tail = items.slice(TREEMAP_MAX_CELLS);
-      items = items.slice(0, TREEMAP_MAX_CELLS);
-      rest = { value: tail.reduce((a, x) => a + x.value, 0), rest: tail.length };
-      items.push(rest);
-    }
-    const rects = P().squarify(items, 0, 0, W, H);
-    const langs = new Map();
-    for (const r of rects) {
-      const f = r.item.f;
-      if (!f) {
-        box.appendChild(h("div.tm-cell", { style: { left: r.x + "px", top: r.y + "px", width: r.w + "px", height: r.h + "px", background: "var(--c-other)", cursor: "default" } }, h("span", `${r.item.rest} smaller files`)));
-        continue;
-      }
-      langs.set(f.lang, (langs.get(f.lang) || 0) + r.item.value);
-      const cell = h("div.tm-cell" + (f.include ? "" : ".off"), {
-        style: { left: r.x + "px", top: r.y + "px", width: r.w + "px", height: r.h + "px", background: LANG_COLOR[f.lang] || LANG_COLOR.other },
-        role: "button", tabindex: r.w > 30 && r.h > 18 ? "0" : "-1", "aria-pressed": String(f.include), "aria-label": `${f.path}, ${tok(r.item.value)} tokens`,
-      });
-      if (r.w > 46 && r.h > 16) cell.appendChild(h("span", f.path.split("/").pop()));
-      if (r.w > 46 && r.h > 30) cell.appendChild(h("small", tok(r.item.value)));
-      const toggle = () => { f.include = !f.include; renderAll(); };
-      cell.addEventListener("click", toggle);
-      cell.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
-      cell.addEventListener("pointermove", (e) => AFD.ui.tip(e, `<b>${esc(f.path)}</b>\n${esc(tok(r.item.value))} tokens · ${esc(String(f.lines))} lines${f.score > 0 ? `\nrelevance ${f.score.toFixed(2)}` : ""}\n${f.include ? "Loaded · click to unload" : "Not loaded · click to load"}`));
-      cell.addEventListener("pointerleave", AFD.ui.hideTip);
-      box.appendChild(cell);
-    }
-    if (!S.files.length) box.appendChild(h("div", { style: { padding: "20px", color: "var(--muted)" } }, "No readable text files."));
-    const totalAll = S.files.reduce((a, f) => a + P().packedTokens(f, S.opts), 0);
-    el.tmTitle.textContent = `${plural(S.files.length, "file")} · ${tok(totalAll)} tokens${S.isExample ? " · example project" : ""}`;
-    el.tmLegend.innerHTML = [...langs.entries()].sort((a, b) => b[1] - a[1]).map(([l, v]) => `<span><i class="swatch" style="background:${LANG_COLOR[l] || LANG_COLOR.other}"></i>${esc(LANG_NAME[l] || l)} ${esc(tok(v))}</span>`).join("") +
-      `<span><i class="swatch" style="background:var(--line);background-image:repeating-linear-gradient(-45deg,transparent,transparent 2px,var(--faint) 2px,var(--faint) 3px)"></i>Not loaded</span>`;
-  }
-
-  function renderManifest() {
-    const el = S.el;
-    clear(el.manifest);
-    const rows = shownFiles();
-    const loaded = S.files.filter((f) => f.include).length;
-    el.manifestCount.textContent = `${loaded} of ${S.files.length} loaded`;
-    const maxScore = Math.max(...S.files.map((f) => f.score), 0);
-    const hasScore = maxScore > 0;
-    const cols = [
-      { key: "include", label: "", sortable: false, render: (r) => {
-        const box = h("input", { type: "checkbox", checked: r.include, "aria-label": "Load " + r.path });
-        box.addEventListener("click", (e) => e.stopPropagation());
-        box.addEventListener("change", () => { r.include = box.checked; renderAll(); });
-        return box;
-      } },
-      { key: "path", label: "File", render: (r) => h("div.path", { title: r.path }, h("bdi", r.path)), ascFirst: true },
-      { key: "lang", label: "Type", render: (r) => h("span", { style: { display: "inline-flex", alignItems: "center", gap: "5px", whiteSpace: "nowrap" } }, h("i.swatch", { style: { background: LANG_COLOR[r.lang] || LANG_COLOR.other } }), LANG_NAME[r.lang] || r.lang) },
-      { key: "tokens", label: "≈Tokens", num: true, render: (r) => tok(P().packedTokens(r, S.opts)), sort: (r) => P().packedTokens(r, S.opts) },
-    ];
-    if (hasScore) cols.push({ key: "score", label: "Relevance", render: (r) => h("span", { title: r.score.toFixed(2) }, h("i.score", { style: { width: Math.max(2, (r.score / maxScore) * 70) + "px", opacity: r.score > 0 ? 1 : 0.2 } })) });
-    el.manifest.appendChild(AFD.ui.table(cols, rows, { sortKey: hasScore ? "score" : "tokens", onRow: (r) => { r.include = !r.include; renderAll(); }, limit: 3000 }));
-  }
-
-  function renderPrompt() {
-    const el = S.el;
-    const p = S.prompt;
-    const text = p.text;
-    el.promptStats.textContent = `${plural(p.files, "file")} · ≈${tok(p.tokens)} tokens · ${text.length.toLocaleString("en-US")} chars`;
-    const HEAD = 6000;
-    const TAIL = 1500;
-    el.preview.textContent = p.files
-      ? text.length > HEAD + TAIL + 200
-        ? text.slice(0, HEAD) + `\n\n  ⋯ ${(text.length - HEAD - TAIL).toLocaleString("en-US")} characters not shown here; Copy prompt copies everything ⋯\n\n` + text.slice(-TAIL)
-        : text
-      : "Load some files to build the prompt.";
-    el.copyBtn.disabled = !p.files;
-
-    clear(el.costs);
-    el.costs.appendChild(h("span.h", "Input cost of this prompt"));
-    el.costs.appendChild(h("span.h.num", "First send"));
-    el.costs.appendChild(h("span.h.num", { title: "Each later request that reuses the same prompt prefix from the prompt cache" }, "Cached re-send"));
-    for (const m of PRICE_MODELS) {
-      const c = AFD.pricing.promptCost(p.tokens, m);
-      if (!c) continue;
-      el.costs.appendChild(h("span", AFD.pricing.displayName(m)));
-      el.costs.appendChild(h("span.num", usd(c.first)));
-      el.costs.appendChild(h("span.num", usd(c.reread)));
-    }
-
-    clear(el.skipped);
-    if (S.skipped.length) {
-      const groups = new Map();
-      for (const s of S.skipped) {
-        if (!groups.has(s.reason)) groups.set(s.reason, []);
-        groups.get(s.reason).push(s);
-      }
-      el.skipped.appendChild(h("summary", `${plural(S.skipped.length, "file")} left out: ` + [...groups.entries()].map(([r, list]) => `${list.length} ${r}`).join(", ")));
-      el.skipped.appendChild(h("ul", S.skipped.slice(0, 400).map((s) => h("li", `${s.path}  (${s.reason})`))));
-    }
-  }
-
   function onShow() {
-    renderTreemap();
+    L.renderTreemap();
   }
 
+  Object.assign(L, { S, LANG_COLOR, LANG_NAME, PRICE_MODELS, autoLoad, build, capacity, copyPrompt, loadEntries, loadExample, loadPrefs, mount, onShow, reprepare, rescore, savePrefs, setAll, setNotice, setProgress, shownFiles });
   AFD.loadsheet = { mount, onShow, loadEntries, _state: S };
 })(globalThis.AFD = globalThis.AFD || {});
