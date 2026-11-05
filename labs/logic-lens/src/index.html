@@ -1,0 +1,129 @@
+<title>Logic Lens</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Dán code, nhận sơ đồ từng bước của logic để hiểu nhanh.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/*@STYLES@*/
+</style>
+<header class="topbar">
+  <div class="topbar-in wrap">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+        <rect x="8" y="2.5" width="12" height="6" rx="1.6" fill="var(--panel)" stroke="var(--ink)" stroke-width="1.5"/>
+        <rect x="2" y="17" width="10" height="6" rx="1.6" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5"/>
+        <rect x="16" y="17" width="10" height="6" rx="1.6" fill="var(--panel)" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="2.5 1.8"/>
+        <path d="M14 8.5v4.2M7 12.7h14M7 12.7v4.3M21 12.7v4.3" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+      </svg>
+      <b>Logic Lens</b><span>hiểu code qua sơ đồ từng bước</span>
+    </div>
+    <div class="top-right">
+      <button class="icon-btn" id="theme" type="button" aria-label="Đổi giao diện sáng / tối"></button>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <div class="grid">
+    <section class="col col-left" aria-label="Code">
+      <div class="panel">
+        <div class="panel-h">
+          <h2>Code</h2>
+          <span class="spacer"></span>
+          <label class="lbl" for="example">Ví dụ</label>
+          <select id="example" aria-label="Chọn code ví dụ"></select>
+        </div>
+        <div class="panel-b stack">
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span id="code-info">Dán code vào đây</span>
+              <span class="spacer"></span>
+              <button class="btn sm ghost" id="code-toggle" type="button">Sửa code</button>
+            </div>
+            <textarea class="code-edit" id="code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Code cần vẽ sơ đồ" placeholder="Dán một hàm, stored procedure, API handler… (SQL, TypeScript, C#, Python, Java, Go…)"></textarea>
+            <div class="code-view" id="code-view" hidden tabindex="0" aria-label="Code, dòng đang chọn được tô sáng"></div>
+          </div>
+          <div class="opt-grid">
+            <span class="lbl">Ngôn ngữ</span>
+            <div class="seg" id="lang-seg" role="group" aria-label="Ngôn ngữ của sơ đồ">
+              <button type="button" data-v="vi" aria-pressed="true">Tiếng Việt</button>
+              <button type="button" data-v="en" aria-pressed="false">English</button>
+            </div>
+            <span class="lbl">Mức chi tiết</span>
+            <div class="seg" id="detail-seg" role="group" aria-label="Mức chi tiết">
+              <button type="button" data-v="simple" aria-pressed="false">Gọn</button>
+              <button type="button" data-v="normal" aria-pressed="true">Vừa</button>
+              <button type="button" data-v="detailed" aria-pressed="false">Chi tiết</button>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn primary big" id="draw" type="button" style="flex:1">Vẽ sơ đồ bằng Claude</button>
+            <button class="btn" id="stop" type="button" hidden>Dừng</button>
+          </div>
+          <div class="status" id="status" role="status" aria-live="polite"></div>
+          <details class="alt" id="alt">
+            <summary>Không gọi được Claude ở đây? Dùng Claude ở nơi khác</summary>
+            <div class="stack">
+              <div class="cheat">1. Bấm “Copy prompt”, dán vào Claude (claude.ai, Claude Code…).<br>2. Copy câu trả lời của Claude, dán vào ô dưới rồi bấm “Vẽ từ câu trả lời”.</div>
+              <div class="row"><button class="btn" id="copy-prompt" type="button">Copy prompt</button></div>
+              <textarea id="reply" aria-label="Dán câu trả lời của Claude" placeholder="Dán câu trả lời (JSON) vào đây"></textarea>
+              <div class="row"><button class="btn" id="use-reply" type="button">Vẽ từ câu trả lời</button></div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="col" aria-label="Sơ đồ">
+      <div class="panel" id="diagram-panel">
+        <div class="d-head">
+          <h1 id="d-title">Sơ đồ</h1>
+          <p id="d-summary"></p>
+        </div>
+        <div class="d-tools">
+          <button class="btn" id="tour" type="button" aria-pressed="false">▶ Đi từng bước</button>
+          <button class="icon-btn" id="prev" type="button" aria-label="Bước trước">‹</button>
+          <span class="counter" id="counter"></span>
+          <button class="icon-btn" id="next" type="button" aria-label="Bước sau">›</button>
+          <span class="spacer"></span>
+          <button class="icon-btn" id="zoom-out" type="button" aria-label="Thu nhỏ">−</button>
+          <button class="btn sm ghost" id="zoom-fit" type="button">Vừa khung</button>
+          <button class="icon-btn" id="zoom-in" type="button" aria-label="Phóng to">+</button>
+          <button class="btn sm" id="copy-mermaid" type="button" title="Dán vào GitHub, Notion, Obsidian… để hiện sơ đồ">Copy Mermaid</button>
+          <button class="btn sm" id="dl-svg" type="button" hidden>Tải SVG</button>
+          <button class="btn sm" id="dl-png" type="button" hidden>Tải PNG</button>
+        </div>
+        <div class="canvas fit" id="canvas"></div>
+        <div class="legend" aria-label="Chú thích">
+          <span><i class="lg"></i>Một bước</span>
+          <span><i class="lg stage"></i>Giai đoạn chính</span>
+          <span><i class="lg attn"></i>Đáng chú ý</span>
+          <span>Các ô nằm cạnh nhau: chỉ một nhánh được chạy</span>
+          <span>Bấm vào ô để xem giải thích và dòng code</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h2>Giải thích</h2><span class="hint" id="explain-hint"></span></div>
+        <div class="panel-b explain" id="explain"></div>
+      </div>
+
+      <details class="panel" id="dsl-panel">
+        <summary class="panel-h" style="cursor:pointer;list-style:none"><h2>Sửa sơ đồ bằng chữ</h2><span class="hint">mỗi dòng là một ô, sơ đồ cập nhật ngay</span></summary>
+        <div class="panel-b stack">
+          <textarea class="dsl" id="dsl" spellcheck="false" aria-label="Sơ đồ dạng chữ"></textarea>
+          <ul class="dsl-errors" id="dsl-errors"></ul>
+          <div class="cheat">
+            <div><code>step Tiêu đề | dòng phụ</code> một bước &nbsp; <code>stage …</code> giai đoạn chính (xanh) &nbsp; <code>warn …</code> đáng chú ý (viền đỏ)</div>
+            <div><code>group …</code> rồi thụt vào <code>item …</code> và <code>note …</code> &nbsp; <code>branch</code> rồi thụt vào <code>lane …</code>, các bước của nhánh thụt sâu hơn</div>
+            <div><code>@12-40</code> cuối dòng: dòng code tương ứng &nbsp; <code>!</code> cuối dòng: đánh dấu đáng chú ý &nbsp; <code>&gt; …</code> dòng giải thích</div>
+          </div>
+          <div class="row"><button class="btn sm" id="copy-dsl" type="button">Copy dạng chữ</button></div>
+        </div>
+      </details>
+    </section>
+  </div>
+</main>
+<script>
+/*@SCRIPTS@*/
+</script>

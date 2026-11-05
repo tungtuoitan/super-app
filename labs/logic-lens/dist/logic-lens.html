@@ -1,0 +1,1914 @@
+<title>Logic Lens</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Dán code, nhận sơ đồ từng bước của logic để hiểu nhanh.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: header; two columns (code on the left, diagram + explanation on the right); one column on phones.
+   Look: calm documentation page; the diagram palette mirrors the hand-drawn reference (pale blue phases, red dashed attention). */
+:root {
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --panel-2: #f7f9fa;
+  --ink: #16212b;
+  --muted: #5f6c78;
+  --faint: #8a96a1;
+  --line: #d8dfe5;
+  --line-2: #e8edf1;
+  --accent: #d4561b;
+  --accent-ink: #ffffff;
+  --accent-soft: #fbe9df;
+  --blue: #3c7fa8;
+  --blue-soft: #e4eff6;
+  --red: #c8462f;
+  --good: #23855c;
+  --hl-line: #fff1c9;
+  --hl-gutter: #f4d27a;
+  --shadow: 0 1px 2px rgba(22, 33, 43, 0.05), 0 4px 18px rgba(22, 33, 43, 0.05);
+  /* diagram tokens (read by the SVG) */
+  --ll-step-bg: #ffffff; --ll-step-line: #1d2a36; --ll-stage-bg: #e4eff6; --ll-stage-line: #3c7fa8; --ll-item-line: #b8c4ce;
+  --ll-attn: #c8462f; --ll-ink: #16212b; --ll-muted: #6b7884; --ll-edge: #2a3540; --ll-accent: #d4561b; --ll-glow: rgba(212, 86, 27, 0.45);
+  --f-body: "Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1419; --panel: #161d24; --panel-2: #1b232b; --ink: #e5ebf0; --muted: #98a5b1; --faint: #6c7a87; --line: #2a3540; --line-2: #212b34;
+    --accent: #ff8a4c; --accent-ink: #1b0e06; --accent-soft: #3a2316; --blue: #6fb0d8; --blue-soft: #1c2f3c; --red: #ff7a66; --good: #47c98f;
+    --hl-line: #3a3218; --hl-gutter: #8a7330; --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+    --ll-step-bg: #161d24; --ll-step-line: #c9d4dd; --ll-stage-bg: #1c2f3c; --ll-stage-line: #6fb0d8; --ll-item-line: #3a4753;
+    --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #aab6c1; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1419; --panel: #161d24; --panel-2: #1b232b; --ink: #e5ebf0; --muted: #98a5b1; --faint: #6c7a87; --line: #2a3540; --line-2: #212b34;
+  --accent: #ff8a4c; --accent-ink: #1b0e06; --accent-soft: #3a2316; --blue: #6fb0d8; --blue-soft: #1c2f3c; --red: #ff7a66; --good: #47c98f;
+  --hl-line: #3a3218; --hl-gutter: #8a7330; --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+  --ll-step-bg: #161d24; --ll-step-line: #c9d4dd; --ll-stage-bg: #1c2f3c; --ll-stage-line: #6fb0d8; --ll-item-line: #3a4753;
+  --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #aab6c1; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.55 var(--f-body); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--panel); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, pre, kbd, .mono { font-family: var(--f-mono); }
+[hidden] { display: none !important; }
+
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--panel); border-bottom: 1px solid var(--line); }
+.topbar-in { max-width: 1520px; margin: 0 auto; display: flex; align-items: center; gap: 14px; min-height: 56px; padding-block: 6px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand b { font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+.brand span { color: var(--muted); font-size: 13px; }
+.top-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.icon-btn { border: 1px solid var(--line); background: var(--panel); border-radius: 7px; width: 34px; height: 34px; display: grid; place-items: center; cursor: pointer; color: var(--muted); flex: none; }
+.icon-btn:hover { color: var(--ink); border-color: var(--faint); }
+.icon-btn:disabled { opacity: 0.4; cursor: default; }
+
+main { max-width: 1520px; margin: 0 auto; padding-block: 16px 48px; }
+.grid { display: grid; grid-template-columns: minmax(330px, 440px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.col { display: grid; gap: 16px; min-width: 0; }
+.col-left { position: sticky; top: calc(72px + env(safe-area-inset-top, 0px)); }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.panel-h { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--line-2); flex-wrap: wrap; }
+.panel-h h2 { margin: 0; font-size: 14px; font-weight: 700; }
+.panel-h .hint { color: var(--muted); font-size: 12.5px; }
+.spacer { flex: 1; }
+.panel-b { padding: 14px; min-width: 0; }
+.stack { display: grid; gap: 10px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 7px 13px; border-radius: 7px; cursor: pointer; font-size: 13.5px; font-weight: 500; white-space: nowrap; line-height: 1.3; }
+.btn:hover { border-color: var(--faint); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.big { padding: 10px 16px; font-size: 15px; }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.btn.ghost:hover { background: var(--panel-2); color: var(--ink); }
+.btn.sm { padding: 4px 10px; font-size: 12.5px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { border: 0; background: var(--panel); padding: 5px 11px; font-size: 12.5px; cursor: pointer; color: var(--muted); border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+select, textarea, input[type="text"] { border: 1px solid var(--line); background: var(--panel); border-radius: 7px; padding: 6px 9px; min-width: 0; }
+select:focus, textarea:focus, input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+label.lbl { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+label.check { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; cursor: pointer; }
+label.check input { accent-color: var(--accent); width: 15px; height: 15px; }
+.opt-grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; }
+.opt-grid .seg { justify-self: start; }
+
+/* code */
+.code-wrap { position: relative; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel-2); }
+.code-edit { display: block; width: 100%; min-height: 360px; height: 52vh; max-height: 640px; resize: vertical; border: 0; border-radius: 0; background: var(--panel-2); font: 12.5px/1.6 var(--f-mono); padding: 10px 12px; white-space: pre; overflow: auto; tab-size: 4; }
+.code-edit:focus { box-shadow: none; }
+.code-view { position: relative; height: 52vh; min-height: 360px; max-height: 640px; overflow: auto; font: 12.5px/1.6 var(--f-mono); padding: 8px 0; }
+.code-line { display: grid; grid-template-columns: 3.4em 1fr; white-space: pre; min-width: max-content; }
+.code-line .n { text-align: right; padding-right: 12px; color: var(--faint); user-select: none; border-right: 2px solid transparent; }
+.code-line .c { padding: 0 12px; }
+.code-line.hl { background: var(--hl-line); }
+.code-line.hl .n { border-right-color: var(--hl-gutter); color: var(--ink); }
+.code-bar { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-bottom: 1px solid var(--line-2); background: var(--panel); font-size: 12px; color: var(--muted); }
+.status { font-size: 13px; color: var(--muted); min-height: 1.4em; }
+.status.err { color: var(--red); }
+.status.busy::before { content: ""; display: inline-block; width: 10px; height: 10px; border: 2px solid var(--accent); border-right-color: transparent; border-radius: 50%; margin-right: 8px; vertical-align: -1px; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+details.alt { border-top: 1px solid var(--line-2); padding-top: 10px; }
+details.alt summary { cursor: pointer; font-size: 13px; color: var(--muted); }
+details.alt[open] summary { margin-bottom: 8px; }
+.alt textarea { width: 100%; min-height: 90px; font: 12px/1.5 var(--f-mono); }
+
+/* diagram */
+.d-head { padding: 14px 16px 4px; }
+.d-head h1 { margin: 0; font-size: clamp(18px, 2vw, 22px); font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+.d-head p { margin: 4px 0 0; color: var(--muted); max-width: 75ch; }
+.d-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid var(--line-2); }
+.d-tools .counter { font-size: 12.5px; color: var(--muted); min-width: 70px; text-align: center; font-variant-numeric: tabular-nums; }
+.canvas { overflow: auto; padding: 8px 8px 16px; max-height: 80vh; overscroll-behavior: contain; }
+.canvas.fit { max-height: none; }
+.canvas svg { display: block; margin: 0 auto; height: auto; }
+.canvas.fit svg { width: 100%; min-width: 640px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--muted); padding: 10px 16px 12px; border-top: 1px solid var(--line-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.lg { width: 22px; height: 13px; border-radius: 3px; display: inline-block; border: 1.4px solid var(--ll-step-line); background: var(--ll-step-bg); }
+.lg.stage { background: var(--ll-stage-bg); border-color: var(--ll-stage-line); }
+.lg.attn { border: 1.6px dashed var(--ll-attn); }
+.empty { padding: 40px 20px; text-align: center; color: var(--muted); }
+
+/* explanation */
+.explain { display: grid; gap: 8px; }
+.explain .pos { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.explain h3 { margin: 0; font-size: 17px; font-weight: 700; }
+.explain .sub { color: var(--muted); }
+.explain p { margin: 0; line-height: 1.6; max-width: 72ch; }
+.explain .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.tag.attn { border-color: var(--red); color: var(--red); border-style: dashed; }
+.tag.stage { border-color: var(--blue); color: var(--blue); }
+.tag.lines { cursor: pointer; font-family: var(--f-mono); }
+.tag.lines:hover { border-color: var(--accent); color: var(--accent); }
+.explain-empty { color: var(--muted); }
+
+/* text editor */
+.dsl { width: 100%; min-height: 300px; font: 12.5px/1.6 var(--f-mono); white-space: pre; resize: vertical; }
+.dsl-errors { margin: 0; padding-left: 18px; color: var(--red); font-size: 12.5px; }
+.cheat { font-size: 12.5px; color: var(--muted); display: grid; gap: 3px; }
+.cheat code { color: var(--ink); background: var(--panel-2); border: 1px solid var(--line-2); padding: 0 5px; border-radius: 4px; font-size: 12px; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 7px; font-size: 13px; box-shadow: var(--shadow); max-width: calc(100vw - 32px); }
+
+@media (max-width: 1060px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .col-left { position: static; }
+  .code-edit, .code-view { height: 40vh; min-height: 260px; }
+}
+@media (max-width: 560px) {
+  .brand span { display: none; }
+  .d-tools { gap: 6px; }
+  .canvas { max-height: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+</style>
+<header class="topbar">
+  <div class="topbar-in wrap">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+        <rect x="8" y="2.5" width="12" height="6" rx="1.6" fill="var(--panel)" stroke="var(--ink)" stroke-width="1.5"/>
+        <rect x="2" y="17" width="10" height="6" rx="1.6" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5"/>
+        <rect x="16" y="17" width="10" height="6" rx="1.6" fill="var(--panel)" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="2.5 1.8"/>
+        <path d="M14 8.5v4.2M7 12.7h14M7 12.7v4.3M21 12.7v4.3" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+      </svg>
+      <b>Logic Lens</b><span>hiểu code qua sơ đồ từng bước</span>
+    </div>
+    <div class="top-right">
+      <button class="icon-btn" id="theme" type="button" aria-label="Đổi giao diện sáng / tối"></button>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <div class="grid">
+    <section class="col col-left" aria-label="Code">
+      <div class="panel">
+        <div class="panel-h">
+          <h2>Code</h2>
+          <span class="spacer"></span>
+          <label class="lbl" for="example">Ví dụ</label>
+          <select id="example" aria-label="Chọn code ví dụ"></select>
+        </div>
+        <div class="panel-b stack">
+          <div class="code-wrap">
+            <div class="code-bar">
+              <span id="code-info">Dán code vào đây</span>
+              <span class="spacer"></span>
+              <button class="btn sm ghost" id="code-toggle" type="button">Sửa code</button>
+            </div>
+            <textarea class="code-edit" id="code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Code cần vẽ sơ đồ" placeholder="Dán một hàm, stored procedure, API handler… (SQL, TypeScript, C#, Python, Java, Go…)"></textarea>
+            <div class="code-view" id="code-view" hidden tabindex="0" aria-label="Code, dòng đang chọn được tô sáng"></div>
+          </div>
+          <div class="opt-grid">
+            <span class="lbl">Ngôn ngữ</span>
+            <div class="seg" id="lang-seg" role="group" aria-label="Ngôn ngữ của sơ đồ">
+              <button type="button" data-v="vi" aria-pressed="true">Tiếng Việt</button>
+              <button type="button" data-v="en" aria-pressed="false">English</button>
+            </div>
+            <span class="lbl">Mức chi tiết</span>
+            <div class="seg" id="detail-seg" role="group" aria-label="Mức chi tiết">
+              <button type="button" data-v="simple" aria-pressed="false">Gọn</button>
+              <button type="button" data-v="normal" aria-pressed="true">Vừa</button>
+              <button type="button" data-v="detailed" aria-pressed="false">Chi tiết</button>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn primary big" id="draw" type="button" style="flex:1">Vẽ sơ đồ bằng Claude</button>
+            <button class="btn" id="stop" type="button" hidden>Dừng</button>
+          </div>
+          <div class="status" id="status" role="status" aria-live="polite"></div>
+          <details class="alt" id="alt">
+            <summary>Không gọi được Claude ở đây? Dùng Claude ở nơi khác</summary>
+            <div class="stack">
+              <div class="cheat">1. Bấm “Copy prompt”, dán vào Claude (claude.ai, Claude Code…).<br>2. Copy câu trả lời của Claude, dán vào ô dưới rồi bấm “Vẽ từ câu trả lời”.</div>
+              <div class="row"><button class="btn" id="copy-prompt" type="button">Copy prompt</button></div>
+              <textarea id="reply" aria-label="Dán câu trả lời của Claude" placeholder="Dán câu trả lời (JSON) vào đây"></textarea>
+              <div class="row"><button class="btn" id="use-reply" type="button">Vẽ từ câu trả lời</button></div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="col" aria-label="Sơ đồ">
+      <div class="panel" id="diagram-panel">
+        <div class="d-head">
+          <h1 id="d-title">Sơ đồ</h1>
+          <p id="d-summary"></p>
+        </div>
+        <div class="d-tools">
+          <button class="btn" id="tour" type="button" aria-pressed="false">▶ Đi từng bước</button>
+          <button class="icon-btn" id="prev" type="button" aria-label="Bước trước">‹</button>
+          <span class="counter" id="counter"></span>
+          <button class="icon-btn" id="next" type="button" aria-label="Bước sau">›</button>
+          <span class="spacer"></span>
+          <button class="icon-btn" id="zoom-out" type="button" aria-label="Thu nhỏ">−</button>
+          <button class="btn sm ghost" id="zoom-fit" type="button">Vừa khung</button>
+          <button class="icon-btn" id="zoom-in" type="button" aria-label="Phóng to">+</button>
+          <button class="btn sm" id="copy-mermaid" type="button" title="Dán vào GitHub, Notion, Obsidian… để hiện sơ đồ">Copy Mermaid</button>
+          <button class="btn sm" id="dl-svg" type="button" hidden>Tải SVG</button>
+          <button class="btn sm" id="dl-png" type="button" hidden>Tải PNG</button>
+        </div>
+        <div class="canvas fit" id="canvas"></div>
+        <div class="legend" aria-label="Chú thích">
+          <span><i class="lg"></i>Một bước</span>
+          <span><i class="lg stage"></i>Giai đoạn chính</span>
+          <span><i class="lg attn"></i>Đáng chú ý</span>
+          <span>Các ô nằm cạnh nhau: chỉ một nhánh được chạy</span>
+          <span>Bấm vào ô để xem giải thích và dòng code</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h2>Giải thích</h2><span class="hint" id="explain-hint"></span></div>
+        <div class="panel-b explain" id="explain"></div>
+      </div>
+
+      <details class="panel" id="dsl-panel">
+        <summary class="panel-h" style="cursor:pointer;list-style:none"><h2>Sửa sơ đồ bằng chữ</h2><span class="hint">mỗi dòng là một ô, sơ đồ cập nhật ngay</span></summary>
+        <div class="panel-b stack">
+          <textarea class="dsl" id="dsl" spellcheck="false" aria-label="Sơ đồ dạng chữ"></textarea>
+          <ul class="dsl-errors" id="dsl-errors"></ul>
+          <div class="cheat">
+            <div><code>step Tiêu đề | dòng phụ</code> một bước &nbsp; <code>stage …</code> giai đoạn chính (xanh) &nbsp; <code>warn …</code> đáng chú ý (viền đỏ)</div>
+            <div><code>group …</code> rồi thụt vào <code>item …</code> và <code>note …</code> &nbsp; <code>branch</code> rồi thụt vào <code>lane …</code>, các bước của nhánh thụt sâu hơn</div>
+            <div><code>@12-40</code> cuối dòng: dòng code tương ứng &nbsp; <code>!</code> cuối dòng: đánh dấu đáng chú ý &nbsp; <code>&gt; …</code> dòng giải thích</div>
+          </div>
+          <div class="row"><button class="btn sm" id="copy-dsl" type="button">Copy dạng chữ</button></div>
+        </div>
+      </details>
+    </section>
+  </div>
+</main>
+<script>
+// ── flow.js
+/* Logic Lens — flow model, text format, normalization, Mermaid export, prompt for Claude.
+ * Pure functions: no DOM. Works in the browser and in Node (tests).
+ *
+ * Model
+ *   Flow  = { title, summary, steps: Node[] }
+ *   Node  = { kind: "step" | "stage" | "group" | "branch", title, sub, detail, lines: [from, to] | null, attention,
+ *             items?: {title, sub}[], note?: string,        // group
+ *             lanes?: Lane[] }                               // branch
+ *   Lane  = { title, sub, detail, lines, attention, steps: Node[] }
+ *
+ * Text format (2-space indentation)
+ *   title: Search RFD
+ *   summary: One sentence.
+ *   step  Receive parameters | filters, page, view mode   @1-12
+ *     > Longer explanation shown when the box is clicked.
+ *   stage 1. Build the filter | one "AND ..." per non-NULL parameter   @14-40
+ *   warn  Attach files | dashed red box = worth a closer look
+ *   group 2. Build FROM
+ *     item plm.RFD
+ *     item Style | Product + Collection
+ *     note Show latest: keep the highest Id per style
+ *   branch
+ *     lane Rows
+ *       step Count | rows after filtering
+ *     lane Timeline !
+ *       step Group | by GroupBy
+ *   stage Return result
+ *   ("!" at the end of any line marks the box for attention.)
+ */
+(function (LL) {
+  "use strict";
+
+  const KINDS = ["step", "stage", "group", "branch"];
+  const LIMITS = { depth: 4, lanes: 6, items: 8, steps: 40, title: 80, sub: 140, detail: 1200 };
+
+  // ───────────────────────── normalize ─────────────────────────
+
+  const str = (v, max) => (v == null ? "" : String(v).replace(/\s+/g, " ").trim().slice(0, max || 400));
+  const longStr = (v, max) => (v == null ? "" : String(v).replace(/\r\n/g, "\n").trim().slice(0, max || 2000));
+
+  function lines(v) {
+    if (!v) return null;
+    let a, b;
+    if (Array.isArray(v)) [a, b] = v;
+    else if (typeof v === "object") { a = v.from != null ? v.from : v.start; b = v.to != null ? v.to : v.end; }
+    else if (typeof v === "string") { const m = v.match(/(\d+)\s*(?:[-–:]\s*(\d+))?/); if (m) { a = m[1]; b = m[2]; } }
+    else if (typeof v === "number") a = v;
+    a = Math.round(Number(a));
+    b = b == null ? a : Math.round(Number(b));
+    if (!Number.isFinite(a) || a < 1) return null;
+    if (!Number.isFinite(b) || b < a) b = a;
+    return [a, b];
+  }
+
+  /** Make any loosely shaped object (from Claude or hand-written JSON) a valid Flow. */
+  function normalize(raw) {
+    const r = raw && typeof raw === "object" ? raw : {};
+    const steps = Array.isArray(r) ? r : r.steps || r.flow || r.nodes || [];
+    let count = 0;
+    const node = (n, depth) => {
+      if (!n || typeof n !== "object" || count >= LIMITS.steps * 3) return null;
+      count++;
+      let kind = String(n.kind || n.type || "step").toLowerCase();
+      let attention = !!(n.attention || n.warn || n.highlight === "warn");
+      if (kind === "warn" || kind === "attention" || kind === "note") { kind = "step"; attention = true; }
+      if (kind === "phase" || kind === "section") kind = "stage";
+      if (kind === "if" || kind === "switch" || kind === "fork") kind = "branch";
+      if (!KINDS.includes(kind)) kind = "step";
+      const out = { kind, title: str(n.title || n.label || n.name, LIMITS.title), sub: str(n.sub || n.subtitle || n.description, LIMITS.sub), detail: longStr(n.detail || n.explanation, LIMITS.detail), lines: lines(n.lines || n.lineRange || n.range), attention };
+      if (kind === "group") {
+        out.items = (Array.isArray(n.items) ? n.items : Array.isArray(n.children) ? n.children : []).slice(0, LIMITS.items)
+          .map((it) => (typeof it === "string" ? { title: str(it, LIMITS.title), sub: "" } : { title: str(it && (it.title || it.label), LIMITS.title), sub: str(it && (it.sub || it.subtitle), LIMITS.sub) }))
+          .filter((it) => it.title);
+        out.note = str(n.note, LIMITS.sub);
+      }
+      if (kind === "branch") {
+        const lanes = (Array.isArray(n.lanes) ? n.lanes : Array.isArray(n.branches) ? n.branches : Array.isArray(n.cases) ? n.cases : []).slice(0, LIMITS.lanes);
+        out.lanes = lanes.map((l) => ({
+          title: str(l && (l.title || l.label || l.when || l.condition), LIMITS.title) || "…",
+          sub: str(l && (l.sub || l.subtitle), LIMITS.sub),
+          detail: longStr(l && (l.detail || l.explanation), LIMITS.detail),
+          lines: lines(l && (l.lines || l.range)),
+          attention: !!(l && (l.attention || l.warn)),
+          steps: depth < LIMITS.depth ? ((l && (l.steps || l.flow || l.nodes)) || []).map((c) => node(c, depth + 1)).filter(Boolean) : [],
+        }));
+        if (!out.lanes.length) { out.kind = "step"; delete out.lanes; }
+      }
+      if (!out.title && kind !== "branch") out.title = "…";
+      return out;
+    };
+    return {
+      title: str(r.title, 120),
+      summary: longStr(r.summary, 600),
+      steps: (Array.isArray(steps) ? steps : []).slice(0, LIMITS.steps).map((n) => node(n, 1)).filter(Boolean),
+    };
+  }
+
+  // ───────────────────────── text format ─────────────────────────
+
+  const KEYWORDS = { step: "step", stage: "stage", warn: "warn", group: "group", branch: "branch", lane: "lane", item: "item", note: "note",
+    // Vietnamese aliases
+    buoc: "step", "bước": "step", "giai-doan": "stage", "nhom": "group", "nhóm": "group", "nhanh": "branch", "nhánh": "branch" };
+
+  /** Parse the text format. Returns {flow, errors: [{line, message}]}. Never throws. */
+  function parseText(text) {
+    const errors = [];
+    const flow = { title: "", summary: "", steps: [] };
+    // stack of {indent, container: array to push nodes into, kind: "root"|"lane"|"group"|"branch", owner}
+    const stack = [{ indent: -1, list: flow.steps, kind: "root" }];
+    let lastNode = null; // the node that a following "> detail" line belongs to
+    const src = String(text || "").replace(/\t/g, "  ").split(/\r?\n/);
+
+    for (let i = 0; i < src.length; i++) {
+      const raw = src[i];
+      if (!raw.trim() || /^\s*(#|\/\/)/.test(raw)) continue;
+      const indent = raw.match(/^ */)[0].length;
+      let line = raw.trim();
+
+      const meta = line.match(/^(title|summary|tiêu đề|tom tat|tóm tắt)\s*:\s*(.*)$/i);
+      if (meta && indent === 0) {
+        if (/^(title|tiêu đề)$/i.test(meta[1])) flow.title = str(meta[2], 120);
+        else flow.summary = longStr(meta[2], 600);
+        continue;
+      }
+      if (line.startsWith(">")) {
+        if (lastNode) lastNode.detail = (lastNode.detail ? lastNode.detail + "\n" : "") + line.slice(1).trim();
+        else errors.push({ line: i + 1, message: "Dòng giải thích “>” phải nằm ngay dưới một ô." });
+        continue;
+      }
+
+      const m = line.match(/^([^\s]+)\s*(.*)$/);
+      const kw = KEYWORDS[m[1].toLowerCase()];
+      if (!kw) {
+        errors.push({ line: i + 1, message: `Không hiểu từ “${m[1]}”. Mỗi dòng bắt đầu bằng step, stage, warn, group, item, note, branch hoặc lane.` });
+        continue;
+      }
+      let rest = m[2];
+      let attention = false;
+      if (/\s!$|^!$/.test(rest)) { attention = true; rest = rest.replace(/\s*!$/, ""); }
+      let range = null;
+      const at = rest.match(/\s*@\s*(\d+)\s*(?:[-–]\s*(\d+))?\s*$/);
+      if (at) { range = lines([at[1], at[2] || at[1]]); rest = rest.slice(0, at.index); }
+      const [title, ...subParts] = rest.split("|");
+      const t = str(title, LIMITS.title);
+      const sub = str(subParts.join("|"), LIMITS.sub);
+
+      // pop to the container this indentation belongs to
+      while (stack.length > 1 && indent <= stack[stack.length - 1].indent) stack.pop();
+      const top = stack[stack.length - 1];
+
+      if (kw === "item" || kw === "note") {
+        if (top.kind !== "group") { errors.push({ line: i + 1, message: `“${m[1]}” phải thụt vào bên dưới một group.` }); continue; }
+        if (kw === "item") { if (top.owner.items.length < LIMITS.items) top.owner.items.push({ title: t || "…", sub }); }
+        else top.owner.note = str(rest, LIMITS.sub);
+        lastNode = null;
+        continue;
+      }
+      if (kw === "lane") {
+        if (top.kind !== "branch") { errors.push({ line: i + 1, message: "“lane” phải thụt vào bên dưới một branch." }); continue; }
+        const lane = { title: t || "…", sub, detail: "", lines: range, attention, steps: [] };
+        top.owner.lanes.push(lane);
+        stack.push({ indent, list: lane.steps, kind: "lane", owner: lane });
+        lastNode = lane;
+        continue;
+      }
+      if (top.kind === "branch") { errors.push({ line: i + 1, message: "Bên dưới branch, mỗi dòng phải là một lane." }); continue; }
+      if (top.kind === "group") { errors.push({ line: i + 1, message: "Bên dưới group chỉ dùng item hoặc note." }); continue; }
+
+      const node = { kind: kw === "warn" ? "step" : kw, title: t, sub, detail: "", lines: range, attention: attention || kw === "warn" };
+      if (kw === "group") { node.items = []; node.note = ""; }
+      if (kw === "branch") node.lanes = [];
+      if (kw !== "branch" && !t) errors.push({ line: i + 1, message: "Ô này cần có tiêu đề." });
+      top.list.push(node);
+      if (kw === "group") stack.push({ indent, list: null, kind: "group", owner: node });
+      if (kw === "branch") stack.push({ indent, list: null, kind: "branch", owner: node });
+      lastNode = kw === "branch" ? null : node;
+    }
+    // empty branches are errors that would render nothing
+    const check = (list) => {
+      for (const n of list) {
+        if (n.kind === "branch") {
+          if (!n.lanes.length) errors.push({ line: 0, message: "Có một branch chưa có lane nào." });
+          n.lanes.forEach((l) => check(l.steps));
+        }
+      }
+    };
+    check(flow.steps);
+    return { flow, errors };
+  }
+
+  /** Serialize a Flow back to the text format. */
+  function toText(flow) {
+    const out = [];
+    if (flow.title) out.push("title: " + flow.title);
+    if (flow.summary) out.push("summary: " + flow.summary.replace(/\n+/g, " "));
+    if (out.length) out.push("");
+    const head = (kw, n, pad) => {
+      let s = pad + kw.padEnd(6) + (n.title || "");
+      if (n.sub) s += " | " + n.sub;
+      if (n.lines) s += "   @" + n.lines[0] + (n.lines[1] !== n.lines[0] ? "-" + n.lines[1] : "");
+      if (n.attention && kw !== "warn") s += " !";
+      out.push(s.replace(/\s+$/, ""));
+      if (n.detail) for (const d of n.detail.split("\n")) if (d.trim()) out.push(pad + "  > " + d.trim());
+    };
+    const walk = (list, pad) => {
+      for (const n of list) {
+        if (n.kind === "branch") {
+          out.push(pad + "branch" + (n.title ? " " + n.title : ""));
+          for (const l of n.lanes) {
+            head("lane", l, pad + "  ");
+            walk(l.steps, pad + "    ");
+          }
+          continue;
+        }
+        head(n.kind === "step" && n.attention ? "warn" : n.kind, n, pad);
+        if (n.kind === "group") {
+          for (const it of n.items || []) out.push(pad + "  item  " + it.title + (it.sub ? " | " + it.sub : ""));
+          if (n.note) out.push(pad + "  note  " + n.note);
+        }
+      }
+    };
+    walk(flow.steps, "");
+    return out.join("\n") + "\n";
+  }
+
+  // ───────────────────────── traversal ─────────────────────────
+
+  /** Depth-first list of every clickable box, in reading order, each with a stable id. */
+  function walkNodes(flow) {
+    const out = [];
+    const visit = (list, path) => {
+      list.forEach((n, i) => {
+        const id = path + i;
+        if (n.kind === "branch") {
+          n.lanes.forEach((l, j) => {
+            const lid = id + ".l" + j;
+            out.push({ id: lid, node: l, lane: true, depth: path.split(".").length });
+            visit(l.steps, lid + ".");
+          });
+        } else {
+          out.push({ id, node: n, depth: path.split(".").length });
+        }
+      });
+    };
+    visit(flow.steps, "");
+    return out;
+  }
+
+  function countBoxes(flow) {
+    return walkNodes(flow).length;
+  }
+
+  // ───────────────────────── Mermaid ─────────────────────────
+
+  function toMermaid(flow) {
+    const out = ["flowchart TD"];
+    let n = 0;
+    const id = () => "n" + ++n;
+    const label = (x) => {
+      const t = (x.title || "").replace(/"/g, "'");
+      const s = (x.sub || "").replace(/"/g, "'");
+      return `"${s ? `<b>${t}</b><br/><small>${s}</small>` : t}"`;
+    };
+    const styles = { stage: [], attention: [] };
+    // returns {first: [ids], last: [ids]} of a sequence
+    const seq = (list) => {
+      let first = null;
+      let prevLast = null;
+      for (const node of list) {
+        let ends;
+        if (node.kind === "branch") {
+          const heads = [];
+          const tails = [];
+          for (const l of node.lanes) {
+            const lid = id();
+            out.push(`  ${lid}[${label(l)}]`);
+            styles.stage.push(lid);
+            if (l.attention) styles.attention.push(lid);
+            heads.push(lid);
+            const inner = seq(l.steps);
+            if (inner.first) { for (const f of inner.first) out.push(`  ${lid} --> ${f}`); tails.push(...inner.last); }
+            else tails.push(lid);
+          }
+          ends = { first: heads, last: tails };
+        } else if (node.kind === "group") {
+          const gid = id();
+          const parts = (node.items || []).map((it) => it.title + (it.sub ? " (" + it.sub + ")" : "")).join(" · ");
+          const sub = [node.sub, parts, node.note].filter(Boolean).join("<br/>");
+          out.push(`  ${gid}[${label({ title: node.title, sub })}]`);
+          styles.stage.push(gid);
+          if (node.attention) styles.attention.push(gid);
+          ends = { first: [gid], last: [gid] };
+        } else {
+          const nid = id();
+          out.push(`  ${nid}[${label(node)}]`);
+          if (node.kind === "stage") styles.stage.push(nid);
+          if (node.attention) styles.attention.push(nid);
+          ends = { first: [nid], last: [nid] };
+        }
+        if (prevLast) for (const a of prevLast) for (const b of ends.first) out.push(`  ${a} --> ${b}`);
+        if (!first) first = ends.first;
+        prevLast = ends.last;
+      }
+      return { first, last: prevLast || [] };
+    };
+    seq(flow.steps);
+    out.push("  classDef stage fill:#e3eef5,stroke:#3d7ea6,color:#16232e");
+    out.push("  classDef attention stroke:#c8462f,stroke-dasharray:5 4");
+    if (styles.stage.length) out.push("  class " + styles.stage.join(",") + " stage");
+    if (styles.attention.length) out.push("  class " + styles.attention.join(",") + " attention");
+    return out.join("\n") + "\n";
+  }
+
+  // ───────────────────────── code helpers ─────────────────────────
+
+  const LANG_HINTS = [
+    ["sql", /\b(create\s+(or\s+alter\s+)?proc(edure)?|select\s+.+\s+from|declare\s+@\w+|begin\s+tran|exec\s+sp_|insert\s+into)\b/i],
+    ["python", /^\s*(def |class |import |from \w+ import )|:\s*\n\s{4}\S/m],
+    ["go", /^\s*(package \w+|func \(?\w)/m],
+    ["rust", /\bfn \w+\(|\blet mut\b|impl\b.*\{/],
+    ["csharp", /\b(namespace|public\s+(async\s+)?(class|Task|void|static))\b|\busing System\b/],
+    ["java", /\bpublic\s+(static\s+)?(class|void|final)\b|@Override/],
+    ["php", /<\?php|\$\w+\s*=|function\s+\w+\(\$/],
+    ["typescript", /\b(interface|type)\s+\w+\s*[={<]|:\s*(string|number|boolean)\b|\bimport .* from ['"]/],
+    ["javascript", /\b(const|let|function|=>|async|await|module\.exports|require\()/],
+  ];
+
+  function guessLanguage(code) {
+    for (const [name, re] of LANG_HINTS) if (re.test(code)) return name;
+    return "code";
+  }
+
+  function numberLines(code) {
+    const ls = String(code).replace(/\r\n/g, "\n").split("\n");
+    const w = String(ls.length).length;
+    return ls.map((l, i) => String(i + 1).padStart(w) + "| " + l).join("\n");
+  }
+
+  /** Resolve {from: "text", to: "text"} anchors against code into [line, line] (used by the examples). */
+  function resolveAnchors(flow, code) {
+    const ls = String(code).split("\n");
+    const find = (needle, start) => {
+      for (let i = Math.max(0, start || 0); i < ls.length; i++) if (ls[i].includes(needle)) return i + 1;
+      return null;
+    };
+    const fix = (n) => {
+      if (n.anchor) {
+        const a = find(n.anchor[0]);
+        const b = n.anchor[1] ? find(n.anchor[1], a ? a - 1 : 0) : a;
+        n.lines = a ? [a, b || a] : null;
+        delete n.anchor;
+      }
+      (n.lanes || []).forEach(fix);
+      (n.steps || []).forEach(fix);
+    };
+    flow.steps.forEach(fix);
+    return flow;
+  }
+
+  // ───────────────────────── prompt ─────────────────────────
+
+  const DETAIL_GUIDE = {
+    simple: "Keep it short: 4 to 7 top-level boxes, branches only for the main split.",
+    normal: "Aim for 5 to 10 top-level boxes; use branches and groups where the code really has them.",
+    detailed: "Be thorough: up to 14 top-level boxes, include nested branches and every meaningful check.",
+  };
+
+  /** The instruction Claude receives, with the numbered code. */
+  function buildPrompt(code, opts) {
+    const o = opts || {};
+    const lang = o.language === "en" ? "English" : "Vietnamese";
+    const codeLang = o.codeLanguage || guessLanguage(code);
+    return [
+      "You turn source code into a simple, visual flow diagram that helps a developer understand the logic step by step.",
+      "",
+      "Read the code below and describe its control flow as a JSON object with this exact shape:",
+      "{",
+      '  "title": "short name of what the code does",',
+      '  "summary": "one or two plain sentences: what goes in, what comes out",',
+      '  "steps": [ Node, ... ]',
+      "}",
+      "Node is one of:",
+      '  {"kind": "step",   "title": "...", "sub": "...", "detail": "...", "lines": [from, to], "attention": false}',
+      '  {"kind": "stage",  ...same fields}   // a main phase of the code; shown highlighted',
+      '  {"kind": "group",  ...same fields, "items": [{"title": "...", "sub": "..."}], "note": "..."}   // several things combined in one phase (tables joined, sources merged, parallel calls)',
+      '  {"kind": "branch", "lanes": [ {"title": "...", "sub": "...", "detail": "...", "lines": [from, to], "attention": false, "steps": [Node, ...]} ]}   // mutually exclusive paths (if/else, switch, modes); lanes rejoin afterwards',
+      "",
+      "Rules:",
+      `- Write every title, sub, detail and note in ${lang}. Keep code identifiers (table names, variables, functions) as they are.`,
+      "- title: at most 5 words, starting with a verb or a noun phrase, e.g. \"Build the filter\". Number the main stages (\"1. ...\", \"2. ...\") when the code has clear phases.",
+      "- sub: at most 10 words saying what concretely happens, e.g. \"one AND clause per non-NULL parameter\".",
+      "- detail: 1 to 3 plain sentences a newcomer needs: why this step exists, what to watch for. No code.",
+      "- lines: the first and last line numbers (from the numbered listing) that this box describes. Every box should have them.",
+      "- attention: true for the few boxes a reader should look at twice: surprising behavior, side effects, performance traps, a branch that differs from the others, values that are NOT set. Use it sparingly.",
+      "- Describe the logic, not the syntax. Merge trivial lines into one box. Never invent behavior the code does not have.",
+      "- Use a branch only when paths really diverge; put each path's own steps inside its lane, and the shared steps after the branch.",
+      "- " + (DETAIL_GUIDE[o.detail] || DETAIL_GUIDE.normal),
+      "- The first box is the input (parameters, request, arguments). The last box is the output or the final effect.",
+      "",
+      "Reply with only the JSON object.",
+      "",
+      `Code (${codeLang}, ${String(code).split("\n").length} lines, numbered):`,
+      "```",
+      numberLines(code),
+      "```",
+    ].join("\n");
+  }
+
+  /** Extract a Flow from a pasted reply (JSON, fenced JSON, or the text format). */
+  function parseReply(text) {
+    const t = String(text || "").trim();
+    if (!t) return { flow: null, error: "Câu trả lời đang trống." };
+    const fenced = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const candidates = [t, fenced && fenced[1]];
+    const first = t.indexOf("{");
+    const last = t.lastIndexOf("}");
+    if (first !== -1 && last > first) candidates.push(t.slice(first, last + 1));
+    for (const c of candidates) {
+      if (!c) continue;
+      try {
+        const flow = normalize(JSON.parse(c));
+        if (flow.steps.length) return { flow, error: null };
+      } catch (e) { /* try the next form */ }
+    }
+    const asText = parseText(t);
+    if (asText.flow.steps.length) return { flow: asText.flow, error: null, errors: asText.errors };
+    return { flow: null, error: "Không tìm thấy sơ đồ trong nội dung này. Hãy dán nguyên đoạn JSON mà Claude trả về." };
+  }
+
+  LL.flow = { normalize, parseText, toText, walkNodes, countBoxes, toMermaid, guessLanguage, numberLines, resolveAnchors, buildPrompt, parseReply, LIMITS };
+})(globalThis.LL = globalThis.LL || {});
+
+// ── layout.js
+/* Logic Lens — lay a Flow out top-to-bottom and draw it as SVG.
+ * Pure apart from text measurement, which is injected (canvas in the browser, an estimate in Node).
+ */
+(function (LL) {
+  "use strict";
+
+  const W = 880; // drawing width in SVG units; the SVG scales to its container
+  const FONT = {
+    title: { size: 15, weight: 600, lh: 19 },
+    sub: { size: 12.5, weight: 400, lh: 16 },
+    item: { size: 13, weight: 500, lh: 17 },
+    note: { size: 12, weight: 400, lh: 16 },
+  };
+  const PAD_X = 16;
+  const PAD_Y = 10;
+  const GAP = 30; // vertical space between boxes (arrow length)
+  const BUS = 18; // fork / merge bus offset
+  const LANE_GAP = 16;
+  const FAMILY = '"Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif';
+
+  // ───────────────────────── measurement ─────────────────────────
+
+  let measureFn = null;
+  /** Use a canvas to measure text in the browser; falls back to an estimate. */
+  function setMeasure(fn) {
+    measureFn = fn;
+  }
+  function browserMeasure() {
+    if (typeof document === "undefined") return null;
+    const ctx = document.createElement("canvas").getContext("2d");
+    const cache = new Map();
+    return (text, f) => {
+      const key = f.weight + "|" + f.size + "|" + text;
+      let v = cache.get(key);
+      if (v == null) {
+        ctx.font = `${f.weight} ${f.size}px ${FAMILY}`;
+        v = ctx.measureText(text).width;
+        if (cache.size > 5000) cache.clear();
+        cache.set(key, v);
+      }
+      return v;
+    };
+  }
+  function estimate(text, f) {
+    let w = 0;
+    for (const ch of text) w += /[ilI.,:;'|!]/.test(ch) ? 0.3 : /[mwMW@]/.test(ch) ? 0.85 : /[A-Z0-9]/.test(ch) ? 0.66 : 0.55;
+    return w * f.size * (f.weight >= 600 ? 1.05 : 1);
+  }
+  const measure = (text, f) => (measureFn || estimate)(text, f);
+
+  /** Greedy word wrap; very long words are split. Returns lines (at most maxLines, last one ellipsized). */
+  function wrap(text, f, maxW, maxLines) {
+    const words = String(text || "").split(/\s+/).filter(Boolean);
+    const out = [];
+    let cur = "";
+    const push = (s) => out.push(s);
+    for (let word of words) {
+      while (measure(word, f) > maxW && word.length > 1) {
+        // split an over-long word
+        let cut = word.length - 1;
+        while (cut > 1 && measure(word.slice(0, cut), f) > maxW) cut--;
+        if (cur) { push(cur); cur = ""; }
+        push(word.slice(0, cut));
+        word = word.slice(cut);
+      }
+      const next = cur ? cur + " " + word : word;
+      if (measure(next, f) <= maxW) cur = next;
+      else { if (cur) push(cur); cur = word; }
+    }
+    if (cur) push(cur);
+    if (maxLines && out.length > maxLines) {
+      const kept = out.slice(0, maxLines);
+      let last = kept[maxLines - 1];
+      while (last.length > 1 && measure(last + "…", f) > maxW) last = last.slice(0, -1);
+      kept[maxLines - 1] = last + "…";
+      return kept;
+    }
+    return out;
+  }
+
+  // ───────────────────────── layout ─────────────────────────
+
+  /**
+   * Lay out a flow. Returns {width, height, boxes, edges, groups} in SVG units.
+   * boxes: {id, x, y, w, h, kind, attention, titleLines, subLines, lane?, item?, groupId?}
+   * edges: {d, arrow}
+   */
+  function layout(flow) {
+    const boxes = [];
+    const edges = [];
+    const containers = [];
+    const top = 16;
+
+    // a simple box (step/stage/lane head/group item); returns its height for a given width
+    const textBlock = (node, w, f1, f2) => {
+      const inner = w - PAD_X * 2;
+      const titleLines = wrap(node.title || "", f1 || FONT.title, inner, 3);
+      const subLines = node.sub ? wrap(node.sub, f2 || FONT.sub, inner, 3) : [];
+      const h = PAD_Y * 2 + titleLines.length * (f1 || FONT.title).lh + (subLines.length ? 3 + subLines.length * (f2 || FONT.sub).lh : 0);
+      return { titleLines, subLines, h: Math.max(h, subLines.length ? 52 : 40) };
+    };
+
+    /** Lay out a sequence starting at (x..x+w, y). Returns {bottom, firstTop: {x,y}|null, lastBottoms: [{x,y}], isEmpty}. */
+    function seq(list, x, w, y, path, depth, from) {
+      let cursor = y;
+      let prev = from || null; // [{x, y}] bottoms to connect from
+      let firstTop = null;
+      list.forEach((node, i) => {
+        const id = path + i;
+        if (node.kind === "branch") {
+          const n = node.lanes.length;
+          const laneW = (w - LANE_GAP * (n - 1)) / n;
+          const centers = node.lanes.map((_, j) => x + j * (laneW + LANE_GAP) + laneW / 2);
+          let laneTop = cursor;
+          if (prev) {
+            const busY = cursor - GAP + BUS;
+            // from the previous box(es) down to the fork bus
+            const from = prev.length === 1 ? prev[0] : null;
+            if (from) edges.push({ d: `M${from.x} ${from.y}V${busY}`, arrow: false });
+            else for (const p of prev) edges.push({ d: `M${p.x} ${p.y}V${busY}`, arrow: false });
+            const xs = centers.concat(prev.map((p) => p.x));
+            if (n > 1 || prev.some((p) => Math.abs(p.x - centers[0]) > 0.5)) edges.push({ d: `M${Math.min(...xs)} ${busY}H${Math.max(...xs)}`, arrow: false });
+            for (const c of centers) edges.push({ d: `M${c} ${busY}V${laneTop}`, arrow: true });
+          }
+          const bottoms = [];
+          let maxBottom = laneTop;
+          node.lanes.forEach((lane, j) => {
+            const lid = id + ".l" + j;
+            const lx = x + j * (laneW + LANE_GAP);
+            const bw = Math.min(laneW, Math.max(140, laneW));
+            const tb = textBlock(lane, bw);
+            boxes.push({ id: lid, x: lx + (laneW - bw) / 2, y: laneTop, w: bw, h: tb.h, kind: "stage", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane });
+            let lb = [{ x: centers[j], y: laneTop + tb.h }];
+            let bottom = laneTop + tb.h;
+            if (lane.steps.length) {
+              const r = seq(lane.steps, lx, laneW, bottom + GAP, lid + ".", depth + 1, [{ x: centers[j], y: bottom }]);
+              lb = r.lastBottoms;
+              bottom = r.bottom;
+            }
+            bottoms.push(lb);
+            maxBottom = Math.max(maxBottom, bottom);
+          });
+          if (!firstTop) firstTop = { x: centers[0], y: laneTop };
+          // merge: drop each lane's tail to a shared bus; the next box connects from the bus center
+          const mergeY = maxBottom + BUS;
+          const isLast = i === list.length - 1;
+          if (!isLast || depth > 1) {
+            for (const lb of bottoms) for (const p of lb) edges.push({ d: `M${p.x} ${p.y}V${mergeY}`, arrow: false });
+            const xs = bottoms.flat().map((p) => p.x);
+            if (xs.length > 1) edges.push({ d: `M${Math.min(...xs)} ${mergeY}H${Math.max(...xs)}`, arrow: false });
+            prev = [{ x: x + w / 2, y: mergeY }];
+            cursor = mergeY + GAP - BUS + 6;
+            // connector from the merge bus center to the next box is drawn by the next box; mark it
+            prev.merge = true;
+          } else {
+            prev = bottoms.flat();
+            cursor = maxBottom;
+          }
+          return;
+        }
+
+        if (node.kind === "group") {
+          const gw = depth === 1 ? w : w;
+          const gx = x + (w - gw) / 2;
+          const head = textBlock(node, gw);
+          // item boxes laid out in rows
+          const inner = gw - PAD_X * 2;
+          const items = (node.items || []).map((it) => {
+            const tw = Math.max(measure(it.title, FONT.item), it.sub ? measure(it.sub, FONT.sub) : 0);
+            const iw = Math.min(inner, Math.max(110, tw + 28));
+            const tl = wrap(it.title, FONT.item, iw - 24, 2);
+            const sl = it.sub ? wrap(it.sub, FONT.sub, iw - 24, 2) : [];
+            const ih = 16 + tl.length * FONT.item.lh + (sl.length ? 2 + sl.length * FONT.sub.lh : 0);
+            return { it, w: iw, h: Math.max(ih, 40), tl, sl };
+          });
+          const rows = [];
+          let row = [];
+          let rw = 0;
+          for (const it of items) {
+            if (row.length && rw + 12 + it.w > inner) { rows.push(row); row = []; rw = 0; }
+            rw += (row.length ? 12 : 0) + it.w;
+            row.push(it);
+          }
+          if (row.length) rows.push(row);
+          // equalize heights within a row
+          let gy = cursor;
+          let yy = gy + PAD_Y + head.titleLines.length * FONT.title.lh + (head.subLines.length ? 3 + head.subLines.length * FONT.sub.lh : 0) + 12;
+          const itemBoxes = [];
+          for (const r of rows) {
+            const rh = Math.max(...r.map((q) => q.h));
+            const total = r.reduce((a, q) => a + q.w, 0) + 12 * (r.length - 1);
+            let xx = gx + (gw - total) / 2;
+            for (const q of r) {
+              itemBoxes.push({ id: id + ".i" + itemBoxes.length, x: xx, y: yy, w: q.w, h: rh, kind: "item", titleLines: q.tl, subLines: q.sl, item: true, groupId: id });
+              xx += q.w + 12;
+            }
+            yy += rh + 10;
+          }
+          const noteLines = node.note ? wrap(node.note, FONT.note, inner, 3) : [];
+          if (noteLines.length) yy += 2 + noteLines.length * FONT.note.lh;
+          const gh = yy - gy + (rows.length || noteLines.length ? 6 : 0) + PAD_Y - 4;
+          boxes.push({ id, x: gx, y: gy, w: gw, h: Math.max(gh, head.h), kind: "group", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, noteLines, node, noteY: yy - noteLines.length * FONT.note.lh });
+          for (const b of itemBoxes) boxes.push(b);
+          connect({ x: x + w / 2, y: gy });
+          prev = [{ x: x + w / 2, y: gy + Math.max(gh, head.h) }];
+          cursor = gy + Math.max(gh, head.h) + GAP;
+          return;
+        }
+
+        // step / stage
+        const maxW = depth === 1 ? Math.min(w, Math.max(340, w * 0.56)) : w - 8;
+        const tb = textBlock(node, maxW);
+        const bx = x + (w - maxW) / 2;
+        boxes.push({ id, x: bx, y: cursor, w: maxW, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node });
+        connect({ x: x + w / 2, y: cursor });
+        prev = [{ x: x + w / 2, y: cursor + tb.h }];
+        cursor += tb.h + GAP;
+      });
+
+      function connect(to) {
+        if (!firstTop) firstTop = to;
+        if (!prev) return;
+        if (prev.merge) {
+          edges.push({ d: `M${prev[0].x} ${prev[0].y}V${to.y}`, arrow: true });
+        } else if (prev.length === 1) {
+          edges.push({ d: `M${prev[0].x} ${prev[0].y}V${to.y}`, arrow: true });
+        } else {
+          const busY = to.y - BUS;
+          for (const p of prev) edges.push({ d: `M${p.x} ${p.y}V${busY}`, arrow: false });
+          const xs = prev.map((p) => p.x).concat([to.x]);
+          edges.push({ d: `M${Math.min(...xs)} ${busY}H${Math.max(...xs)}`, arrow: false });
+          edges.push({ d: `M${to.x} ${busY}V${to.y}`, arrow: true });
+        }
+      }
+
+      const lastBottoms = prev || [];
+      const bottom = list.length ? Math.max(...lastBottoms.map((p) => p.y), y) : y;
+      return { bottom, firstTop: firstTop || { x: x + w / 2, y }, lastBottoms };
+    }
+
+    const margin = 20;
+    const r = seq(flow.steps, margin, W - margin * 2, top, "", 1);
+    const height = Math.ceil(r.bottom + 20);
+    return { width: W, height, boxes, edges, containers };
+  }
+
+  // ───────────────────────── SVG ─────────────────────────
+
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  // Colors are CSS variables with light fallbacks, so the on-page SVG follows the theme and an exported SVG still looks right.
+  const SVG_STYLE = `
+  .ll-box{fill:var(--ll-step-bg,#ffffff);stroke:var(--ll-step-line,#1d2a36);stroke-width:1.4}
+  .ll-stage{fill:var(--ll-stage-bg,#e4eff6);stroke:var(--ll-stage-line,#3c7fa8);stroke-width:1.4}
+  .ll-group{fill:var(--ll-stage-bg,#e4eff6);stroke:var(--ll-stage-line,#3c7fa8);stroke-width:1.4}
+  .ll-item{fill:var(--ll-step-bg,#ffffff);stroke:var(--ll-item-line,#b8c4ce);stroke-width:1.2}
+  .ll-attn{stroke:var(--ll-attn,#c8462f);stroke-dasharray:6 4;stroke-width:1.6}
+  .ll-title{font-weight:600;font-size:15px;fill:var(--ll-ink,#16212b)}
+  .ll-sub{font-size:12.5px;fill:var(--ll-muted,#6b7884)}
+  .ll-itemt{font-weight:500;font-size:13px;fill:var(--ll-ink,#16212b)}
+  .ll-note{font-size:12px;fill:var(--ll-attn,#c8462f)}
+  .ll-edge{fill:none;stroke:var(--ll-edge,#2a3540);stroke-width:1.5}
+  .ll-head{fill:var(--ll-edge,#2a3540)}
+  text{font-family:${FAMILY}}
+  .ll-node{cursor:pointer}
+  .ll-node:focus{outline:none}
+  .ll-node:focus-visible .ll-shape,.ll-node.sel .ll-shape{stroke:var(--ll-accent,#d4561b);stroke-width:2.6;stroke-dasharray:none}
+  .ll-node.dim{opacity:.32}
+  .ll-node.hl .ll-shape{filter:drop-shadow(0 0 6px var(--ll-glow,rgba(212,86,27,.45)))}
+  `;
+
+  /** Render to an SVG string. opts: {interactive, background} */
+  function toSvg(flow, lay, opts) {
+    const o = opts || {};
+    const L = lay || layout(flow);
+    const p = [];
+    p.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${L.width} ${L.height}" width="${L.width}" height="${L.height}" class="ll-svg" role="img" aria-label="${esc(flow.title || "Sơ đồ logic")}">`);
+    p.push(`<defs><marker id="ll-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ll-head"/></marker><style>${SVG_STYLE}</style></defs>`);
+    if (o.background) p.push(`<rect width="100%" height="100%" fill="${esc(o.background)}"/>`);
+    for (const e of L.edges) p.push(`<path class="ll-edge" d="${e.d}"${e.arrow ? ' marker-end="url(#ll-arrow)"' : ""}/>`);
+    // groups first so items draw on top
+    const order = L.boxes.slice().sort((a, b) => (a.kind === "group" ? -1 : 0) - (b.kind === "group" ? -1 : 0));
+    for (const b of order) {
+      const cls = b.kind === "item" ? "ll-item" : b.kind === "group" ? "ll-group" : b.kind === "stage" ? "ll-stage" : "ll-box";
+      const shape = `<rect class="ll-shape ${cls}${b.attention ? " ll-attn" : ""}" x="${r(b.x)}" y="${r(b.y)}" width="${r(b.w)}" height="${r(b.h)}" rx="6"/>`;
+      const cx = r(b.x + b.w / 2);
+      const t = [];
+      if (b.kind === "item") {
+        let yy = b.y + (b.h - (b.titleLines.length * FONT.item.lh + (b.subLines.length ? 2 + b.subLines.length * FONT.sub.lh : 0))) / 2 + FONT.item.size;
+        for (const l of b.titleLines) { t.push(`<text class="ll-itemt" x="${cx}" y="${r(yy)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.item.lh; }
+        yy += 2;
+        for (const l of b.subLines) { t.push(`<text class="ll-sub" x="${cx}" y="${r(yy - 2)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.sub.lh; }
+        p.push(`<g class="ll-itemg" data-group="${esc(b.groupId)}">${shape}${t.join("")}</g>`);
+        continue;
+      }
+      const textH = b.titleLines.length * FONT.title.lh + (b.subLines.length ? 3 + b.subLines.length * FONT.sub.lh : 0);
+      let yy = b.kind === "group" ? b.y + PAD_Y + FONT.title.size : b.y + (b.h - textH) / 2 + FONT.title.size - 1;
+      for (const l of b.titleLines) { t.push(`<text class="ll-title" x="${cx}" y="${r(yy)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.title.lh; }
+      yy += 2;
+      for (const l of b.subLines) { t.push(`<text class="ll-sub" x="${cx}" y="${r(yy)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.sub.lh; }
+      if (b.noteLines && b.noteLines.length) {
+        let ny = b.noteY + FONT.note.size;
+        for (const l of b.noteLines) { t.push(`<text class="ll-note" x="${cx}" y="${r(ny)}" text-anchor="middle">${esc(l)}</text>`); ny += FONT.note.lh; }
+      }
+      const label = [b.node && b.node.title, b.node && b.node.sub].filter(Boolean).join(": ");
+      p.push(o.interactive
+        ? `<g class="ll-node" data-id="${esc(b.id)}" tabindex="0" role="button" aria-label="${esc(label)}">${shape}${t.join("")}</g>`
+        : `<g>${shape}${t.join("")}</g>`);
+    }
+    p.push("</svg>");
+    return p.join("");
+  }
+
+  const r = (v) => Math.round(v * 10) / 10;
+
+  LL.layout = { layout, toSvg, wrap, setMeasure, browserMeasure, W, FAMILY, FONT };
+})(globalThis.LL = globalThis.LL || {});
+
+// ── sample.js
+/* Logic Lens — built-in examples: invented code with a hand-made diagram each.
+ * Box line ranges are given as text anchors and resolved against the code at load.
+ */
+(function (LL) {
+  "use strict";
+
+  const SQL = `CREATE OR ALTER PROCEDURE plm.usp_RFD_Search
+    @StyleNo        NVARCHAR(50)  = NULL,
+    @CollectionId   INT           = NULL,
+    @StatusCode     INT           = NULL,
+    @DueFrom        DATE          = NULL,
+    @DueTo          DATE          = NULL,
+    @ShowLatest     BIT           = 0,
+    @ViewMode       VARCHAR(10)   = 'list',   -- list | kanban | timeline | download
+    @GroupBy        VARCHAR(20)   = 'status',
+    @PageIndex      INT           = 1,
+    @PageSize       INT           = 50,
+    @WithMilestone  BIT           = 0,
+    @ov_TotalRows   INT OUTPUT,
+    @ov_TotalRowsMax INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 1. Build the WHERE clause: one AND per parameter that is not NULL
+    DECLARE @where NVARCHAR(MAX) = N' WHERE r.IsDeleted = 0';
+    IF @StyleNo IS NOT NULL      SET @where += N' AND s.StyleNo LIKE @StyleNo + ''%''';
+    IF @CollectionId IS NOT NULL SET @where += N' AND s.CollectionId = @CollectionId';
+    IF @StatusCode IS NOT NULL   SET @where += N' AND r.StatusCode = @StatusCode';
+    IF @DueFrom IS NOT NULL      SET @where += N' AND r.DueDate >= @DueFrom';
+    IF @DueTo IS NOT NULL        SET @where += N' AND r.DueDate <= @DueTo';
+
+    -- 2. Build the FROM clause
+    DECLARE @from NVARCHAR(MAX) = N'
+        FROM plm.RFD r
+        JOIN plm.Style s        ON s.Id = r.StyleId
+        JOIN plm.Product p      ON p.Id = s.ProductId
+        JOIN plm.Collection c   ON c.Id = s.CollectionId
+        LEFT JOIN dbo.StandardRegistry st  ON st.Code = r.StatusCode   AND st.Type = ''RFD_STATUS''
+        LEFT JOIN dbo.StandardRegistry pr  ON pr.Code = r.PriorityCode AND pr.Type = ''PRIORITY''
+        LEFT JOIN dbo.StandardRegistry se  ON se.Code = s.SeasonCode   AND se.Type = ''SEASON''
+        LEFT JOIN dbo.StandardRegistry ge  ON ge.Code = p.GenderCode   AND ge.Type = ''GENDER''
+        LEFT JOIN dbo.StandardRegistry ca  ON ca.Code = p.CategoryCode AND ca.Type = ''CATEGORY''
+        LEFT JOIN dbo.StandardRegistry de  ON de.Code = r.DeptCode     AND de.Type = ''DEPT''
+        OUTER APPLY (
+            SELECT STRING_AGG(f.FileName, '';'') AS Drawings
+            FROM plm.RFDFile f WHERE f.RFDId = r.Id AND f.Kind = ''DRAWING''
+        ) dw';
+
+    -- Show latest: keep only the newest RFD of each style (applied after the filter)
+    IF @ShowLatest = 1
+        SET @where += N' AND r.Id = (SELECT MAX(r2.Id) FROM plm.RFD r2
+                                     WHERE r2.StyleId = r.StyleId AND r2.IsDeleted = 0)';
+
+    DECLARE @sql NVARCHAR(MAX);
+    DECLARE @params NVARCHAR(MAX) = N'@StyleNo NVARCHAR(50), @CollectionId INT, @StatusCode INT,
+        @DueFrom DATE, @DueTo DATE, @PageIndex INT, @PageSize INT, @ov_TotalRows INT OUTPUT, @ov_TotalRowsMax INT OUTPUT';
+
+    -- 3. Pick the view mode: only one branch runs
+    IF @ViewMode = 'list'
+    BEGIN
+        SET @sql = N'SELECT @ov_TotalRows = COUNT(*) ' + @from + @where + N';
+            SELECT r.Id, s.StyleNo, st.Name AS Status, r.DueDate,
+                   DATEDIFF(HOUR, r.CreatedAt, SYSUTCDATETIME()) AS AgeHours,
+                   (SELECT COUNT(*) FROM plm.RFDFile f WHERE f.RFDId = r.Id) AS FileCount,
+                   dw.Drawings
+            ' + @from + @where + N'
+            ORDER BY r.Id DESC
+            OFFSET (@PageIndex - 1) * @PageSize ROWS FETCH NEXT @PageSize ROWS ONLY;';
+    END
+    ELSE IF @ViewMode = 'kanban'
+    BEGIN
+        SET @sql = N';WITH cards AS (
+                SELECT r.Id, r.StatusCode, s.StyleNo, r.DueDate,
+                       ROW_NUMBER() OVER (PARTITION BY r.StatusCode ORDER BY r.DueDate, r.Id) AS rn
+                ' + @from + @where + N')
+            SELECT @ov_TotalRows = COUNT(*),
+                   @ov_TotalRowsMax = MAX(cnt)
+            FROM (SELECT StatusCode, COUNT(*) AS cnt FROM cards GROUP BY StatusCode) t;
+            SELECT * FROM cards
+            WHERE rn BETWEEN (@PageIndex - 1) * @PageSize + 1 AND @PageIndex * @PageSize;';
+    END
+    ELSE IF @ViewMode = 'timeline'
+    BEGIN
+        SET @sql = N'SELECT CASE @GroupBy WHEN ''status'' THEN st.Name
+                                         WHEN ''season'' THEN se.Name
+                                         ELSE c.Name END AS GroupName,
+                   COUNT(*) AS RFDCount, MIN(r.CreatedAt) AS FirstCreated, MAX(r.DueDate) AS LastDue
+            ' + @from + @where + N'
+            GROUP BY CASE @GroupBy WHEN ''status'' THEN st.Name
+                                   WHEN ''season'' THEN se.Name
+                                   ELSE c.Name END;
+            SET @ov_TotalRows = 0;';
+    END
+    ELSE IF @ViewMode = 'download'
+    BEGIN
+        SET @sql = N'SELECT r.Id, f.FileName, f.BlobUrl ' + @from + N'
+            JOIN plm.RFDFile f ON f.RFDId = r.Id ' + @where + N';';
+        IF @WithMilestone = 1
+            SET @sql += N' SELECT m.RFDId, m.Name, m.DoneAt FROM plm.RFDMilestone m
+                           WHERE m.RFDId IN (SELECT r.Id ' + @from + @where + N');';
+        -- note: @ov_TotalRows is not assigned here, so callers get NULL
+    END
+
+    EXEC sp_executesql @sql, @params,
+        @StyleNo, @CollectionId, @StatusCode, @DueFrom, @DueTo, @PageIndex, @PageSize,
+        @ov_TotalRows OUTPUT, @ov_TotalRowsMax OUTPUT;
+END`;
+
+  const SQL_FLOW = {
+    title: "Tìm kiếm RFD (plm.usp_RFD_Search)",
+    summary: "Nhận bộ lọc và kiểu xem, ghép câu SQL động rồi chạy đúng một nhánh: lưới, Kanban, timeline hoặc tải file. Trả về danh sách RFD kèm hai số tổng qua tham số OUTPUT.",
+    steps: [
+      { kind: "step", title: "Nhận tham số", sub: "bộ lọc, trang, kiểu xem (list / Kanban / download)", anchor: ["CREATE OR ALTER PROCEDURE", "@ov_TotalRowsMax INT OUTPUT"], detail: "Mọi bộ lọc đều mặc định NULL, nghĩa là “không lọc theo trường này”. @ViewMode quyết định nhánh nào sẽ chạy ở bước 3." },
+      { kind: "stage", title: "1. Ghép điều kiện lọc", sub: "mỗi tham số khác NULL thêm một đoạn \"AND ...\"", anchor: ["-- 1. Build the WHERE", "IF @DueTo IS NOT NULL"], detail: "Câu WHERE được ghép bằng chuỗi nhưng giá trị vẫn truyền qua tham số của sp_executesql, nên không bị SQL injection. Luôn có sẵn điều kiện IsDeleted = 0." },
+      { kind: "group", title: "2. Ghép phần FROM (nối bảng)", anchor: ["-- 2. Build the FROM", "WHERE r2.StyleId = r.StyleId"], detail: "Cùng một phần FROM được dùng lại cho mọi chế độ xem. Sáu lần nối StandardRegistry chỉ để đổi mã thành tên hiển thị.",
+        items: [{ title: "plm.RFD" }, { title: "Style", sub: "(Product + Collection)" }, { title: "6 bảng tra mã", sub: "(StandardRegistry)" }, { title: "File bản vẽ", sub: "gộp thành 1 chuỗi" }],
+        note: "Show latest: chỉ giữ RFD có Id lớn nhất mỗi style, tính sau khi lọc" },
+      { kind: "step", title: "3. Chọn chế độ", sub: "chỉ một nhánh được chạy", anchor: ["-- 3. Pick the view mode", "IF @ViewMode = 'list'"] },
+      { kind: "branch", lanes: [
+        { title: "Lưới Rows", anchor: ["IF @ViewMode = 'list'", "OFFSET (@PageIndex - 1)"], steps: [
+          { kind: "step", title: "Đếm tổng", sub: "số RFD sau lọc", anchor: ["SELECT @ov_TotalRows = COUNT(*) ' + @from"] },
+          { kind: "step", title: "Lấy một trang", sub: "Id giảm dần", anchor: ["ORDER BY r.Id DESC", "OFFSET (@PageIndex - 1)"] },
+          { kind: "step", title: "Kèm giờ, số file,", sub: "danh sách file", attention: true, anchor: ["DATEDIFF(HOUR", "dw.Drawings"], detail: "Mỗi dòng chạy thêm một truy vấn con COUNT(*) trên RFDFile. Với trang lớn đây là chỗ dễ chậm nhất của nhánh này." },
+        ] },
+        { title: "Kanban", anchor: ["ELSE IF @ViewMode = 'kanban'", "WHERE rn BETWEEN"], steps: [
+          { kind: "step", title: "Đánh số thẻ", sub: "từ 1 trong mỗi cột", anchor: ["ROW_NUMBER() OVER (PARTITION BY r.StatusCode"] },
+          { kind: "step", title: "Đếm tổng và", sub: "cột dài nhất", anchor: ["SELECT @ov_TotalRows = COUNT(*),", "FROM (SELECT StatusCode, COUNT(*)"], detail: "@ov_TotalRowsMax là số thẻ của cột dài nhất, dùng để biết còn trang sau hay không." },
+          { kind: "step", title: "Lấy thẻ của trang", sub: "cho từng cột", anchor: ["SELECT * FROM cards", "WHERE rn BETWEEN"], detail: "Phân trang theo từng cột: trang 2 lấy thẻ 51 đến 100 của MỖI cột, không phải của cả bảng." },
+        ] },
+        { title: "Timeline", attention: true, anchor: ["ELSE IF @ViewMode = 'timeline'", "SET @ov_TotalRows = 0;"], detail: "Nhánh này khác hẳn ba nhánh còn lại: trả về số liệu theo nhóm chứ không phải từng RFD.", steps: [
+          { kind: "step", title: "Gom nhóm", sub: "theo GroupBy", attention: true, anchor: ["SET @sql = N'SELECT CASE @GroupBy", "ELSE c.Name END AS GroupName"] },
+          { kind: "step", title: "1 dòng mỗi nhóm", sub: "số RFD, ngày tạo, due", attention: true, anchor: ["COUNT(*) AS RFDCount", "ELSE c.Name END;"] },
+          { kind: "step", title: "Không phân trang", sub: "tổng số dòng = 0", attention: true, anchor: ["SET @ov_TotalRows = 0;"], detail: "@PageIndex và @PageSize bị bỏ qua, và tổng luôn bằng 0 nên giao diện không được dựa vào nó để phân trang." },
+        ] },
+        { title: "Download", anchor: ["ELSE IF @ViewMode = 'download'", "-- note: @ov_TotalRows is not assigned"], steps: [
+          { kind: "step", title: "File đính kèm", sub: "của RFD đã lọc", anchor: ["SET @sql = N'SELECT r.Id, f.FileName"] },
+          { kind: "step", title: "Milestone", sub: "nếu được bật", anchor: ["IF @WithMilestone = 1", "WHERE m.RFDId IN"] },
+          { kind: "step", title: "Không gán tổng", sub: "giá trị OUTPUT là NULL", anchor: ["-- note: @ov_TotalRows is not assigned"], detail: "Không nhánh nào trong Download gán @ov_TotalRows, nên phía gọi nhận NULL thay vì 0." },
+        ] },
+      ] },
+      { kind: "stage", title: "Trả kết quả", sub: "danh sách RFD + @ov_TotalRows + @ov_TotalRowsMax", anchor: ["EXEC sp_executesql @sql", "@ov_TotalRows OUTPUT, @ov_TotalRowsMax OUTPUT;"] },
+    ],
+  };
+
+  const JS = `// POST /api/checkout — turn the cart into an order and charge the card
+router.post("/checkout", requireAuth, async (req, res) => {
+  const userId = req.user.id;
+  const { couponCode, paymentMethodId } = req.body;
+
+  const cart = await carts.get(userId);
+  if (!cart || cart.items.length === 0) {
+    return res.status(400).json({ error: "cart_empty" });
+  }
+
+  // Re-price every item from the catalog: never trust prices stored in the cart
+  const priced = await Promise.all(
+    cart.items.map(async (it) => {
+      const product = await catalog.find(it.sku);
+      if (!product || product.stock < it.qty) throw new OutOfStock(it.sku);
+      return { ...it, price: product.price };
+    })
+  ).catch((err) => err);
+  if (priced instanceof OutOfStock) {
+    return res.status(409).json({ error: "out_of_stock", sku: priced.sku });
+  }
+
+  let total = priced.reduce((sum, it) => sum + it.price * it.qty, 0);
+  if (couponCode) {
+    const coupon = await coupons.validate(couponCode, userId);
+    if (coupon) total = Math.max(0, total - coupon.amountOff);
+  }
+
+  const order = await orders.create({ userId, items: priced, total, status: "pending" });
+
+  try {
+    const charge = await payments.charge(paymentMethodId, total, { orderId: order.id });
+    await orders.update(order.id, { status: "paid", chargeId: charge.id });
+    await carts.clear(userId);
+    mailer.send(userId, "order-confirmation", { orderId: order.id }); // not awaited
+    return res.status(201).json({ orderId: order.id, total });
+  } catch (err) {
+    await orders.update(order.id, { status: "payment_failed" });
+    return res.status(402).json({ error: "payment_failed" });
+  }
+});`;
+
+  const JS_FLOW = {
+    title: "Thanh toán giỏ hàng (POST /checkout)",
+    summary: "Kiểm tra giỏ, tính lại giá từ catalog, áp mã giảm giá, tạo đơn rồi trừ tiền thẻ. Thành công thì xoá giỏ và gửi mail, thất bại thì đánh dấu đơn lỗi.",
+    steps: [
+      { kind: "step", title: "Nhận yêu cầu", sub: "user đã đăng nhập, mã giảm giá, thẻ", anchor: ["router.post(\"/checkout\"", "const { couponCode, paymentMethodId }"] },
+      { kind: "step", title: "Kiểm tra giỏ hàng", sub: "giỏ trống thì trả lỗi 400", anchor: ["const cart = await carts.get", "return res.status(400)"] },
+      { kind: "stage", title: "1. Tính lại giá", sub: "lấy giá và tồn kho từ catalog", anchor: ["// Re-price every item", "return res.status(409)"], detail: "Giá trong giỏ có thể đã cũ, nên mọi món đều được tra lại. Hết hàng ở bất kỳ món nào thì dừng cả đơn với lỗi 409." },
+      { kind: "stage", title: "2. Tính tổng tiền", sub: "trừ mã giảm giá nếu hợp lệ", anchor: ["let total = priced.reduce", "if (coupon) total"], detail: "Mã không hợp lệ bị bỏ qua lặng lẽ: đơn vẫn đi tiếp với giá gốc, người dùng không được báo." },
+      { kind: "step", title: "Tạo đơn hàng", sub: "trạng thái pending", anchor: ["const order = await orders.create"], detail: "Đơn được tạo TRƯỚC khi trừ tiền, nên nếu tiến trình chết giữa chừng sẽ còn đơn pending cần dọn." },
+      { kind: "branch", lanes: [
+        { title: "Trừ tiền thành công", anchor: ["const charge = await payments.charge", "return res.status(201)"], steps: [
+          { kind: "step", title: "Đánh dấu đã trả", sub: "lưu chargeId", anchor: ["await orders.update(order.id, { status: \"paid\""] },
+          { kind: "step", title: "Xoá giỏ hàng", anchor: ["await carts.clear(userId);"] },
+          { kind: "step", title: "Gửi mail xác nhận", sub: "không chờ kết quả", attention: true, anchor: ["mailer.send(userId"], detail: "Không có await: nếu gửi mail lỗi, request vẫn báo thành công và lỗi chỉ hiện trong log." },
+        ] },
+        { title: "Trừ tiền thất bại", attention: true, anchor: ["} catch (err) {", "return res.status(402)"], steps: [
+          { kind: "step", title: "Đánh dấu lỗi", sub: "payment_failed, giữ nguyên giỏ", anchor: ["status: \"payment_failed\""] },
+        ] },
+      ] },
+      { kind: "stage", title: "Trả kết quả", sub: "201 kèm mã đơn, hoặc 402", anchor: ["return res.status(201)", "return res.status(402)"] },
+    ],
+  };
+
+  const PY = `def import_products(path, dry_run=False, batch_size=500):
+    """Import a supplier CSV into the products table."""
+    rows, errors = [], []
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        for i, rec in enumerate(csv.DictReader(f), start=2):
+            try:
+                rows.append(Product(
+                    sku=rec["SKU"].strip().upper(),
+                    name=rec["Name"].strip(),
+                    price=Decimal(rec["Price"].replace(",", ".")),
+                    stock=int(rec.get("Stock") or 0),
+                ))
+            except (KeyError, InvalidOperation, ValueError) as e:
+                errors.append((i, str(e)))
+
+    if errors and len(errors) > len(rows) * 0.1:
+        raise ImportAborted(f"{len(errors)} bad rows, first: {errors[0]}")
+
+    existing = {p.sku: p for p in Product.objects.filter(sku__in=[r.sku for r in rows])}
+    to_create = [r for r in rows if r.sku not in existing]
+    to_update = []
+    for r in rows:
+        old = existing.get(r.sku)
+        if old and (old.price != r.price or old.stock != r.stock):
+            old.price, old.stock = r.price, r.stock
+            to_update.append(old)
+
+    if dry_run:
+        return {"create": len(to_create), "update": len(to_update), "errors": errors}
+
+    with transaction.atomic():
+        Product.objects.bulk_create(to_create, batch_size=batch_size)
+        Product.objects.bulk_update(to_update, ["price", "stock"], batch_size=batch_size)
+    cache.delete_many([f"product:{p.sku}" for p in to_update])
+    return {"created": len(to_create), "updated": len(to_update), "errors": errors}`;
+
+  const PY_FLOW = {
+    title: "Nhập sản phẩm từ CSV",
+    summary: "Đọc file CSV của nhà cung cấp, bỏ qua dòng lỗi (nhưng dừng nếu quá 10% lỗi), so với dữ liệu hiện có rồi tạo mới hoặc cập nhật. Chế độ dry run chỉ báo con số.",
+    steps: [
+      { kind: "step", title: "Nhận đường dẫn file", sub: "dry_run, kích thước lô", anchor: ["def import_products"] },
+      { kind: "stage", title: "1. Đọc và kiểm tra CSV", sub: "dòng lỗi được ghi lại, không dừng ngay", anchor: ["rows, errors = [], []", "errors.append((i, str(e)))"], detail: "Số dòng bắt đầu từ 2 vì dòng 1 là tiêu đề, nên lỗi báo ra khớp với số dòng khi mở file bằng Excel." },
+      { kind: "step", title: "Dừng nếu lỗi > 10%", sub: "ném ImportAborted", attention: true, anchor: ["if errors and len(errors) >", "raise ImportAborted"], detail: "Dưới ngưỡng 10% thì các dòng lỗi bị bỏ qua và chỉ được trả về trong danh sách errors, không chặn việc nhập." },
+      { kind: "group", title: "2. So với dữ liệu hiện có", anchor: ["existing = {p.sku: p", "to_update.append(old)"], items: [{ title: "Tra theo SKU", sub: "một truy vấn" }, { title: "Mới", sub: "chưa có SKU" }, { title: "Cần cập nhật", sub: "đổi giá hoặc tồn" }], note: "SKU đã có mà không đổi gì thì bỏ qua" },
+      { kind: "branch", lanes: [
+        { title: "Dry run", anchor: ["if dry_run:", "return {\"create\""], steps: [
+          { kind: "step", title: "Chỉ trả con số", sub: "không ghi gì vào DB", anchor: ["return {\"create\""] },
+        ] },
+        { title: "Chạy thật", anchor: ["with transaction.atomic():", "cache.delete_many"], steps: [
+          { kind: "step", title: "Ghi trong transaction", sub: "tạo mới và cập nhật theo lô", anchor: ["with transaction.atomic():", "Product.objects.bulk_update"] },
+          { kind: "step", title: "Xoá cache sản phẩm", sub: "chỉ các SKU vừa cập nhật", attention: true, anchor: ["cache.delete_many"], detail: "Chạy SAU khi transaction commit. Sản phẩm mới tạo không cần xoá cache vì chưa từng được cache." },
+        ] },
+      ] },
+      { kind: "stage", title: "Trả kết quả", sub: "số tạo mới, cập nhật, danh sách lỗi", anchor: ["return {\"created\""] },
+    ],
+  };
+
+  const EXAMPLES = [
+    { id: "sql", name: "SQL: tìm kiếm RFD", lang: "sql", code: SQL, flow: SQL_FLOW },
+    { id: "js", name: "JavaScript: thanh toán", lang: "javascript", code: JS, flow: JS_FLOW },
+    { id: "py", name: "Python: nhập CSV", lang: "python", code: PY, flow: PY_FLOW },
+  ];
+
+  function getExample(id) {
+    const ex = EXAMPLES.find((e) => e.id === id) || EXAMPLES[0];
+    const flow = LL.flow.resolveAnchors(JSON.parse(JSON.stringify(ex.flow)), ex.code);
+    return { id: ex.id, name: ex.name, lang: ex.lang, code: ex.code, flow: LL.flow.normalize(flow) };
+  }
+
+  LL.sample = { EXAMPLES, getExample };
+})(globalThis.LL = globalThis.LL || {});
+
+// ── app.js
+/* Logic Lens — page logic. */
+(function (LL) {
+  "use strict";
+
+  const $ = (id) => document.getElementById(id);
+  const F = LL.flow;
+  const LAY = LL.layout;
+
+  const S = {
+    code: "",
+    flow: null,
+    nodes: [],
+    byId: new Map(),
+    selected: null,
+    tour: false,
+    zoom: "fit",
+    lang: "vi",
+    detail: "normal",
+    codeAtDraw: null,
+    ctl: null,
+    sample: undefined, // undefined = still checking, null = unavailable
+    downloads: null,
+    lineEls: [],
+    hlRange: null,
+  };
+
+  // ───────────────────────── storage (best effort) ─────────────────────────
+  const KEY = "logic-lens:v1";
+  function loadDraft() {
+    try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { return null; }
+  }
+  let saveTimer = 0;
+  function writeDraft() {
+    clearTimeout(saveTimer);
+    saveTimer = 0;
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ code: S.code, flow: S.flow, lang: S.lang, detail: S.detail, example: $("example").value }));
+    } catch (e) { /* storage unavailable: drafts just won't persist */ }
+  }
+  /** Debounced while typing; `now` for changes that must survive an immediate reload (a new diagram). */
+  function saveDraft(now) {
+    if (now) { writeDraft(); return; }
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(writeDraft, 400);
+  }
+
+  // ───────────────────────── small helpers ─────────────────────────
+  let toastTimer = 0;
+  function toast(msg) {
+    let el = document.querySelector(".toast");
+    if (!el) { el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => (el.hidden = true), 2600);
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; } catch (e) {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.left = "-9999px";
+        document.body.appendChild(ta); ta.select();
+        const ok = document.execCommand && document.execCommand("copy");
+        ta.remove();
+        return !!ok;
+      } catch (e2) { return false; }
+    }
+  }
+  function setStatus(text, kind) {
+    const el = $("status");
+    el.textContent = text || "";
+    el.className = "status" + (kind ? " " + kind : "");
+  }
+  function linesLabel(r) {
+    return r[0] === r[1] ? "Dòng " + r[0] : "Dòng " + r[0] + "–" + r[1];
+  }
+  async function capability(name) {
+    try { return window.claude && typeof window.claude.use === "function" ? await window.claude.use(name) : null; } catch (e) { return null; }
+  }
+
+  // ───────────────────────── code panel ─────────────────────────
+  function setCode(code, mode) {
+    S.code = String(code || "").replace(/\r\n/g, "\n");
+    $("code").value = S.code;
+    buildCodeView();
+    setCodeMode(mode || (S.code ? "view" : "edit"));
+    updateCodeInfo();
+  }
+  function updateCodeInfo() {
+    const n = S.code ? S.code.split("\n").length : 0;
+    $("code-info").textContent = n ? `${n} dòng · ${F.guessLanguage(S.code)}` : "Dán code vào đây";
+  }
+  function buildCodeView() {
+    const view = $("code-view");
+    view.textContent = "";
+    S.lineEls = [];
+    S.hlRange = null;
+    const frag = document.createDocumentFragment();
+    S.code.split("\n").forEach((line, i) => {
+      const row = document.createElement("div");
+      row.className = "code-line";
+      const n = document.createElement("span");
+      n.className = "n";
+      n.textContent = i + 1;
+      const c = document.createElement("span");
+      c.className = "c";
+      c.textContent = line || " ";
+      row.append(n, c);
+      frag.appendChild(row);
+      S.lineEls.push(row);
+    });
+    view.appendChild(frag);
+  }
+  function setCodeMode(mode) {
+    const editing = mode === "edit";
+    $("code").hidden = !editing;
+    $("code-view").hidden = editing;
+    $("code-toggle").textContent = editing ? "Xem theo dòng" : "Sửa code";
+    $("code-toggle").hidden = editing && !S.code;
+  }
+  function highlightLines(range, scroll) {
+    if (S.hlRange) for (let i = S.hlRange[0]; i <= S.hlRange[1]; i++) S.lineEls[i - 1] && S.lineEls[i - 1].classList.remove("hl");
+    S.hlRange = null;
+    if (!range || !S.lineEls.length) return;
+    const a = Math.max(1, range[0]);
+    const b = Math.min(S.lineEls.length, range[1]);
+    if (a > b) return;
+    for (let i = a; i <= b; i++) S.lineEls[i - 1].classList.add("hl");
+    S.hlRange = [a, b];
+    if (scroll) {
+      if (!$("code").hidden) setCodeMode("view");
+      const view = $("code-view");
+      const el = S.lineEls[a - 1];
+      const span = S.lineEls[b - 1].offsetTop + S.lineEls[b - 1].offsetHeight - el.offsetTop;
+      const top = span < view.clientHeight * 0.8 ? el.offsetTop - (view.clientHeight - span) / 3 : el.offsetTop - 24;
+      view.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }
+  }
+
+  // ───────────────────────── diagram ─────────────────────────
+  function setFlow(flow, opts) {
+    const o = opts || {};
+    S.flow = flow;
+    S.nodes = flow ? F.walkNodes(flow) : [];
+    S.byId = new Map(S.nodes.map((x, i) => [x.id, Object.assign({ index: i }, x)]));
+    if (!S.byId.has(S.selected)) S.selected = null;
+    $("d-title").textContent = flow && flow.title ? flow.title : flow && flow.steps.length ? "Sơ đồ" : "Chưa có sơ đồ";
+    $("d-summary").textContent = flow && flow.summary ? flow.summary : "";
+    if (!o.fromText) {
+      $("dsl").value = flow ? F.toText(flow) : "";
+      $("dsl-errors").textContent = "";
+    }
+    renderDiagram();
+    renderExplain();
+    updateTourUi();
+    saveDraft(!o.fromText);
+  }
+
+  function renderDiagram() {
+    const canvas = $("canvas");
+    if (!S.flow || !S.flow.steps.length) {
+      canvas.innerHTML = '<div class="empty">Dán code bên trái rồi bấm “Vẽ sơ đồ bằng Claude”, hoặc chọn một ví dụ.</div>';
+      return;
+    }
+    const lay = LAY.layout(S.flow);
+    S.lay = lay;
+    canvas.innerHTML = LAY.toSvg(S.flow, lay, { interactive: true });
+    const svg = canvas.firstElementChild;
+    applyZoom();
+    svg.querySelectorAll(".ll-node").forEach((g) => {
+      g.addEventListener("click", () => select(g.getAttribute("data-id"), { fromDiagram: true }));
+      g.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(g.getAttribute("data-id"), { fromDiagram: true }); }
+      });
+    });
+    svg.querySelectorAll(".ll-itemg").forEach((g) => g.addEventListener("click", () => select(g.getAttribute("data-group"), { fromDiagram: true })));
+    applySelection(false);
+  }
+
+  function applyZoom() {
+    const canvas = $("canvas");
+    const svg = canvas.querySelector("svg");
+    if (!svg || !S.lay) return;
+    canvas.classList.toggle("fit", S.zoom === "fit");
+    if (S.zoom === "fit") { svg.style.width = ""; }
+    else svg.style.width = Math.round(S.lay.width * S.zoom) + "px";
+    $("zoom-fit").textContent = S.zoom === "fit" ? "Vừa khung" : Math.round(S.zoom * 100) + "%";
+  }
+  function zoomBy(f) {
+    const canvas = $("canvas");
+    const svg = canvas.querySelector("svg");
+    if (!svg || !S.lay) return;
+    const current = S.zoom === "fit" ? svg.getBoundingClientRect().width / S.lay.width : S.zoom;
+    S.zoom = Math.min(2.5, Math.max(0.4, Math.round(current * f * 10) / 10));
+    applyZoom();
+  }
+
+  function applySelection(scrollIntoView) {
+    const svg = $("canvas").querySelector("svg");
+    if (!svg) return;
+    svg.querySelectorAll(".ll-node").forEach((g) => {
+      const id = g.getAttribute("data-id");
+      const on = id === S.selected;
+      g.classList.toggle("sel", on);
+      g.classList.toggle("hl", on && S.tour);
+      g.classList.toggle("dim", S.tour && !on && S.selected != null);
+      g.setAttribute("aria-pressed", String(on));
+    });
+    if (scrollIntoView && S.selected && S.lay) {
+      const box = S.lay.boxes.find((b) => b.id === S.selected);
+      const canvas = $("canvas");
+      if (box) {
+        const scale = svg.getBoundingClientRect().width / S.lay.width;
+        const svgTop = svg.getBoundingClientRect().top - canvas.getBoundingClientRect().top + canvas.scrollTop;
+        const svgLeft = svg.getBoundingClientRect().left - canvas.getBoundingClientRect().left + canvas.scrollLeft;
+        const y = svgTop + (box.y + box.h / 2) * scale;
+        const x = svgLeft + (box.x + box.w / 2) * scale;
+        canvas.scrollTo({ top: Math.max(0, y - canvas.clientHeight / 2), left: Math.max(0, x - canvas.clientWidth / 2), behavior: "smooth" });
+        // on phones the canvas is not a scroll box: bring the diagram row into view
+        const r = svg.getBoundingClientRect();
+        const by = r.top + (box.y + box.h / 2) * scale;
+        if (canvas.scrollHeight <= canvas.clientHeight + 2 && (by < 80 || by > window.innerHeight - 40)) window.scrollBy({ top: by - window.innerHeight / 2, behavior: "smooth" });
+      }
+    }
+  }
+
+  function select(id, opts) {
+    const o = opts || {};
+    if (!S.byId.has(id)) id = null;
+    S.selected = id;
+    applySelection(!o.fromDiagram);
+    renderExplain();
+    updateTourUi();
+    const entry = id ? S.byId.get(id) : null;
+    highlightLines(entry && entry.node.lines, true);
+  }
+
+  // ───────────────────────── explanation ─────────────────────────
+  function renderExplain() {
+    const el = $("explain");
+    el.textContent = "";
+    const entry = S.selected ? S.byId.get(S.selected) : null;
+    $("explain-hint").textContent = entry ? "" : "bấm một ô trên sơ đồ";
+    if (!entry) {
+      const p = document.createElement("p");
+      p.className = "explain-empty";
+      p.textContent = S.flow && S.flow.steps.length
+        ? `Sơ đồ có ${S.nodes.length} ô. Bấm vào một ô để xem nó làm gì và tô sáng đúng dòng code, hoặc bấm “Đi từng bước” để đọc lần lượt từ trên xuống.`
+        : "Chưa có sơ đồ.";
+      el.appendChild(p);
+      return;
+    }
+    const n = entry.node;
+    const pos = document.createElement("div");
+    pos.className = "pos";
+    pos.textContent = `Ô ${entry.index + 1} / ${S.nodes.length}` + (entry.lane ? " · một nhánh" : "");
+    const h = document.createElement("h3");
+    h.textContent = n.title || "…";
+    el.append(pos, h);
+    if (n.sub) { const s = document.createElement("div"); s.className = "sub"; s.textContent = n.sub; el.appendChild(s); }
+    if (n.detail) for (const para of n.detail.split("\n")) { const p = document.createElement("p"); p.textContent = para; el.appendChild(p); }
+    if (n.items && n.items.length) {
+      const p = document.createElement("p");
+      p.textContent = "Gồm: " + n.items.map((it) => it.title + (it.sub ? " " + it.sub : "")).join(" · ");
+      el.appendChild(p);
+    }
+    if (n.note) { const p = document.createElement("p"); p.style.color = "var(--red)"; p.textContent = n.note; el.appendChild(p); }
+    const tags = document.createElement("div");
+    tags.className = "tags";
+    const tag = (cls, text) => { const t = document.createElement("span"); t.className = "tag " + cls; t.textContent = text; tags.appendChild(t); return t; };
+    if (entry.lane) tag("stage", "Nhánh: chỉ chạy khi rơi vào trường hợp này");
+    else if (n.kind === "stage" || n.kind === "group") tag("stage", "Giai đoạn chính");
+    if (n.attention) tag("attn", "Đáng chú ý");
+    if (n.lines) {
+      const t = tag("lines", linesLabel(n.lines));
+      t.setAttribute("role", "button");
+      t.tabIndex = 0;
+      t.title = "Hiện các dòng này trong khung code";
+      const go = () => highlightLines(n.lines, true);
+      t.addEventListener("click", go);
+      t.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+      if (S.codeAtDraw != null && S.codeAtDraw !== S.code) tag("", "code đã sửa sau khi vẽ, số dòng có thể lệch");
+    }
+    if (tags.childNodes.length) el.appendChild(tags);
+  }
+
+  // ───────────────────────── tour ─────────────────────────
+  function updateTourUi() {
+    const has = S.nodes.length > 0;
+    const entry = S.selected ? S.byId.get(S.selected) : null;
+    $("counter").textContent = has ? (entry ? `${entry.index + 1} / ${S.nodes.length}` : `${S.nodes.length} ô`) : "";
+    $("prev").disabled = !has || (entry && entry.index === 0);
+    $("next").disabled = !has || (entry && entry.index === S.nodes.length - 1);
+    $("tour").disabled = !has;
+    $("tour").setAttribute("aria-pressed", String(S.tour));
+    $("tour").textContent = S.tour ? "■ Thoát chế độ từng bước" : "▶ Đi từng bước";
+  }
+  function step(dir) {
+    if (!S.nodes.length) return;
+    const entry = S.selected ? S.byId.get(S.selected) : null;
+    let i = entry ? entry.index + dir : dir > 0 ? 0 : S.nodes.length - 1;
+    i = Math.max(0, Math.min(S.nodes.length - 1, i));
+    select(S.nodes[i].id);
+  }
+  function toggleTour() {
+    S.tour = !S.tour;
+    if (S.tour && !S.selected && S.nodes.length) select(S.nodes[0].id);
+    else { applySelection(false); updateTourUi(); }
+  }
+
+  // ───────────────────────── Claude ─────────────────────────
+  const ERR = {
+    not_granted: "Bạn chưa cho phép trang này dùng Claude. Có thể dùng Claude ở nơi khác (mục bên dưới).",
+    sampling_disabled: "Tài khoản này không dùng được Claude trong trang. Có thể dùng Claude ở nơi khác (mục bên dưới).",
+    rate_limited: "Đang gọi Claude quá nhiều hoặc đã chạm giới hạn sử dụng. Chờ một lúc rồi thử lại.",
+    prompt_too_large: "Code quá dài cho một lần vẽ. Hãy dán một hàm hoặc một đoạn nhỏ hơn.",
+    session_expired: "Phiên đăng nhập đã hết hạn. Đăng nhập lại rồi thử lần nữa.",
+    refused: "Claude từ chối đoạn code này. Thử bỏ bớt phần nhạy cảm rồi vẽ lại.",
+    invalid_json: "Claude trả lời không đúng định dạng. Bấm vẽ lại, hoặc chọn mức “Gọn”.",
+    empty_completion: "Claude không trả lời gì. Thử lại với đoạn code ngắn hơn.",
+    upstream_error: "Kết nối tới Claude bị gián đoạn. Thử lại.",
+  };
+
+  async function draw() {
+    const code = $("code").hidden ? S.code : $("code").value;
+    S.code = code.replace(/\r\n/g, "\n");
+    if (!S.code.trim()) { setStatus("Chưa có code. Dán code vào khung bên trên trước.", "err"); return; }
+    if (S.sample === undefined) { setStatus("Đang kết nối Claude…", "busy"); S.sample = await capability("sample"); }
+    if (!S.sample) {
+      setStatus("Trang này không gọi trực tiếp được Claude. Dùng cách bên dưới: copy prompt sang Claude rồi dán câu trả lời về.", "err");
+      $("alt").open = true;
+      return;
+    }
+    const prompt = F.buildPrompt(S.code, { language: S.lang, detail: S.detail });
+    if (new Blob([prompt]).size > 250000) { setStatus(ERR.prompt_too_large, "err"); return; }
+    S.ctl = new AbortController();
+    $("draw").disabled = true;
+    $("stop").hidden = false;
+    setStatus("Claude đang đọc code… (thường mất 20–60 giây)", "busy");
+    const started = Date.now();
+    try {
+      const result = await S.sample.json(prompt, {
+        signal: S.ctl.signal,
+        modelTier: "default",
+        onText: ({ text }) => setStatus(`Claude đang viết sơ đồ… ${text.length.toLocaleString("vi-VN")} ký tự`, "busy"),
+      });
+      const flow = F.normalize(result);
+      if (!flow.steps.length) throw { code: "invalid_json" };
+      buildCodeView();
+      S.codeAtDraw = S.code;
+      S.selected = null;
+      S.tour = false;
+      $("example").value = "";
+      setFlow(flow);
+      setCodeMode("view");
+      setStatus(`Xong sau ${Math.round((Date.now() - started) / 1000)} giây: ${S.nodes.length} ô. Bấm vào ô để xem giải thích.`);
+    } catch (e) {
+      const code = e && e.code;
+      if (code === "cancelled") setStatus("Đã dừng.");
+      else {
+        setStatus(ERR[code] || ERR.upstream_error, "err");
+        if (code === "not_granted" || code === "sampling_disabled" || code === "capability_disabled" || code === "not_declared") { S.sample = null; $("alt").open = true; }
+      }
+    } finally {
+      $("draw").disabled = false;
+      $("stop").hidden = true;
+      S.ctl = null;
+    }
+  }
+
+  // ───────────────────────── exports ─────────────────────────
+  function svgForExport() {
+    if (!S.flow || !S.flow.steps.length) return null;
+    // exported files always use the light palette (the fallbacks inside the SVG's own style block)
+    return LAY.toSvg(S.flow, S.lay || LAY.layout(S.flow), { interactive: false, background: "#ffffff" });
+  }
+  function fileBase() {
+    const t = (S.flow && S.flow.title) || "so-do";
+    return t.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").replace(/[^\w]+/g, "-").replace(/^-|-$/g, "").toLowerCase().slice(0, 60) || "so-do";
+  }
+  async function saveFile(filename, data) {
+    if (!S.downloads) return;
+    try {
+      await S.downloads.save({ filename, data });
+    } catch (e) {
+      if (e && e.code !== "declined") toast("Không tải được file ở đây.");
+    }
+  }
+  async function downloadPng() {
+    const svg = svgForExport();
+    if (!svg) return;
+    const blob = new Blob([svg], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+    try {
+      const img = new Image();
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+      const scale = 2;
+      const c = document.createElement("canvas");
+      c.width = S.lay.width * scale;
+      c.height = S.lay.height * scale;
+      const ctx = c.getContext("2d");
+      ctx.scale(scale, scale);
+      ctx.drawImage(img, 0, 0, S.lay.width, S.lay.height);
+      const png = await new Promise((res) => c.toBlob(res, "image/png"));
+      if (png) await saveFile(fileBase() + ".png", png);
+    } catch (e) {
+      toast("Không tạo được ảnh PNG.");
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  // ───────────────────────── wiring ─────────────────────────
+  function segment(id, key) {
+    const seg = $(id);
+    const sync = () => seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === S[key])));
+    seg.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      S[key] = b.dataset.v;
+      sync();
+      saveDraft();
+    });
+    return sync;
+  }
+
+  function loadExample(id) {
+    const ex = LL.sample.getExample(id);
+    setCode(ex.code, "view");
+    S.codeAtDraw = ex.code;
+    S.selected = null;
+    S.tour = false;
+    setFlow(ex.flow);
+    setStatus(`Ví dụ có sẵn sơ đồ. Thử sửa code rồi bấm “Vẽ sơ đồ bằng Claude” để Claude vẽ lại.`);
+  }
+
+  function boot() {
+    LAY.setMeasure(LAY.browserMeasure());
+
+    const exSel = $("example");
+    exSel.appendChild(new Option("Code của bạn", ""));
+    for (const ex of LL.sample.EXAMPLES) exSel.appendChild(new Option(ex.name, ex.id));
+    exSel.addEventListener("change", () => { if (exSel.value) loadExample(exSel.value); });
+
+    const syncLang = segment("lang-seg", "lang");
+    const syncDetail = segment("detail-seg", "detail");
+
+    const code = $("code");
+    let codeTimer = 0;
+    code.addEventListener("input", () => {
+      S.code = code.value.replace(/\r\n/g, "\n");
+      $("example").value = "";
+      updateCodeInfo();
+      clearTimeout(codeTimer);
+      codeTimer = setTimeout(() => { buildCodeView(); saveDraft(); }, 300);
+    });
+    $("code-toggle").addEventListener("click", () => {
+      if ($("code").hidden) { setCodeMode("edit"); $("code").focus(); }
+      else { S.code = code.value.replace(/\r\n/g, "\n"); buildCodeView(); setCodeMode("view"); if (S.selected) highlightLines(S.byId.get(S.selected).node.lines, true); }
+    });
+
+    $("draw").addEventListener("click", draw);
+    $("stop").addEventListener("click", () => S.ctl && S.ctl.abort());
+    $("copy-prompt").addEventListener("click", async () => {
+      const c = $("code").hidden ? S.code : $("code").value;
+      if (!c.trim()) { toast("Chưa có code để tạo prompt."); return; }
+      const ok = await copyText(F.buildPrompt(c, { language: S.lang, detail: S.detail }));
+      toast(ok ? "Đã copy prompt. Dán vào Claude, rồi dán câu trả lời vào ô bên dưới." : "Trình duyệt chặn copy.");
+    });
+    $("use-reply").addEventListener("click", () => {
+      const r = F.parseReply($("reply").value);
+      if (!r.flow) { setStatus(r.error, "err"); return; }
+      S.code = $("code").hidden ? S.code : $("code").value;
+      buildCodeView();
+      S.codeAtDraw = S.code;
+      S.selected = null;
+      $("example").value = "";
+      setFlow(r.flow);
+      setCodeMode("view");
+      setStatus(`Đã vẽ từ câu trả lời: ${S.nodes.length} ô.`);
+    });
+
+    $("tour").addEventListener("click", toggleTour);
+    $("prev").addEventListener("click", () => step(-1));
+    $("next").addEventListener("click", () => step(1));
+    $("zoom-in").addEventListener("click", () => zoomBy(1.2));
+    $("zoom-out").addEventListener("click", () => zoomBy(1 / 1.2));
+    $("zoom-fit").addEventListener("click", () => { S.zoom = "fit"; applyZoom(); });
+    $("copy-mermaid").addEventListener("click", async () => {
+      if (!S.flow) return;
+      const ok = await copyText(F.toMermaid(S.flow));
+      toast(ok ? "Đã copy Mermaid. Dán vào GitHub, Notion hoặc Obsidian trong khối ```mermaid." : "Trình duyệt chặn copy.");
+    });
+    $("copy-dsl").addEventListener("click", async () => {
+      const ok = await copyText($("dsl").value);
+      toast(ok ? "Đã copy sơ đồ dạng chữ." : "Trình duyệt chặn copy.");
+    });
+    $("dl-svg").addEventListener("click", () => { const s = svgForExport(); if (s) saveFile(fileBase() + ".svg", s); });
+    $("dl-png").addEventListener("click", downloadPng);
+
+    let dslTimer = 0;
+    $("dsl").addEventListener("input", () => {
+      clearTimeout(dslTimer);
+      dslTimer = setTimeout(() => {
+        const { flow, errors } = F.parseText($("dsl").value);
+        const ul = $("dsl-errors");
+        ul.textContent = "";
+        for (const e of errors.slice(0, 8)) { const li = document.createElement("li"); li.textContent = (e.line ? "Dòng " + e.line + ": " : "") + e.message; ul.appendChild(li); }
+        setFlow(flow, { fromText: true });
+      }, 300);
+    });
+
+    // keyboard: ← → move between boxes, Esc leaves the step-by-step mode
+    document.addEventListener("keydown", (e) => {
+      const tag = (e.target && e.target.tagName) || "";
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "ArrowRight" || e.key === "ArrowDown" && S.tour) { if (S.nodes.length) { e.preventDefault(); step(1); } }
+      else if (e.key === "ArrowLeft" || e.key === "ArrowUp" && S.tour) { if (S.nodes.length) { e.preventDefault(); step(-1); } }
+      else if (e.key === "Escape" && (S.tour || S.selected)) { S.tour = false; select(null); }
+    });
+
+    window.addEventListener("pagehide", () => { if (saveTimer) writeDraft(); });
+
+    // theme
+    const themeBtn = $("theme");
+    const isDark = () => { const t = document.documentElement.getAttribute("data-theme"); return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
+    const paintTheme = () => { themeBtn.textContent = isDark() ? "☀" : "☾"; };
+    try { const t = localStorage.getItem("logic-lens:theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) { /* ignore */ }
+    paintTheme();
+    themeBtn.addEventListener("click", () => {
+      const next = isDark() ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem("logic-lens:theme", next); } catch (e) { /* ignore */ }
+      paintTheme();
+    });
+
+    // start: the viewer's draft, else the first example
+    const draft = loadDraft();
+    if (draft && (draft.code || (draft.flow && draft.flow.steps && draft.flow.steps.length))) {
+      if (draft.lang === "en" || draft.lang === "vi") S.lang = draft.lang;
+      if (["simple", "normal", "detailed"].includes(draft.detail)) S.detail = draft.detail;
+      syncLang(); syncDetail();
+      if (draft.example) { exSel.value = draft.example; loadExample(draft.example); }
+      else {
+        setCode(draft.code || "", draft.code ? "view" : "edit");
+        S.codeAtDraw = S.code;
+        setFlow(draft.flow ? F.normalize(draft.flow) : null);
+        exSel.value = "";
+      }
+    } else {
+      exSel.value = LL.sample.EXAMPLES[0].id;
+      loadExample(exSel.value);
+    }
+
+    // re-measure once web fonts arrive
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { LAY.setMeasure(LAY.browserMeasure()); renderDiagram(); });
+
+    // capabilities light up later; the page works without them
+    capability("sample").then((s) => {
+      S.sample = s;
+      if (!s) {
+        $("draw").title = "Trang này không gọi trực tiếp được Claude";
+        $("alt").open = true;
+      }
+    });
+    capability("downloads").then((d) => {
+      S.downloads = d;
+      $("dl-svg").hidden = !d;
+      $("dl-png").hidden = !d;
+    });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+  LL.app = { _state: S, select, setFlow };
+})(globalThis.LL = globalThis.LL || {});
+
+</script>
