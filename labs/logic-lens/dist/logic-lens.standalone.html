@@ -863,7 +863,7 @@ label.check input { accent-color: var(--accent); }
       if (at) { range = lines([at[1], at[2] || at[1]]); rest = rest.slice(0, at.index); }
       let tag = "";
       const tg = rest.match(/\s*\[([A-Za-z][\w /-]{0,9})\]\s*(?=\||$)/);
-      if (tg) { tag = tagOf(tg[1]); rest = rest.slice(0, tg.index) + rest.slice(tg.index + tg[0].length); }
+      if (tg) { tag = tagOf(tg[1]); rest = (rest.slice(0, tg.index) + " " + rest.slice(tg.index + tg[0].length)).trim(); }
       // " | " (with spaces) separates title and sub-line, so code like `a || b` stays in the title
       const bar = rest.search(/\s\|\s|\s\|$/);
       const t = str(bar === -1 ? rest : rest.slice(0, bar), LIMITS.title);

@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
@@ -254,4 +255,15 @@ test("change prompt shows the merged listing and the change rules", () => {
   assert.ok(p.includes("2+| B") && p.includes(" -| b") && p.includes("4+| d"));
   assert.ok(p.includes('"changeSummary"'));
   assert.ok(!F.buildPrompt("x", {}).includes("CODE CHANGE"));
+});
+
+test("text format round-trips every corpus diagram (tags before ' | ', changes, sections)", () => {
+  const dir = new URL("./corpus/out/", import.meta.url);
+  for (const f of fs.readdirSync(dir)) {
+    const flow = F.normalize(JSON.parse(fs.readFileSync(new URL(f, dir), "utf8")));
+    const text = F.toText(flow);
+    const back = F.parseText(text);
+    assert.deepEqual(back.errors, [], f);
+    assert.equal(F.toText(back.flow), text, f);
+  }
 });
