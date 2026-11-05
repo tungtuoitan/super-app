@@ -195,7 +195,7 @@ ok((await page.locator(".ll-node.run-trail").count()) >= 3, "boxes passed keep a
 await page.screenshot({ path: path.join(shots, "4b-run.png") });
 await page.selectOption("#run-scn", "0");
 await page.waitForFunction(() => /Kịch bản xong/.test(document.getElementById("run-box").textContent), null, { timeout: 20000 });
-ok((await page.locator("#run-count").textContent()) === "11 bước", "a scenario plays by itself and ends back on the screen");
+ok((await page.locator("#run-count").textContent()) === "10 bước", "a scenario plays by itself and ends back on the screen (the hidden normal path is not a step)");
 ok((await page.locator("#run-box .run-w").textContent()).includes("products (sửa)"), "the end lists the tables this run wrote");
 ok((await page.locator("#run-play").getAttribute("aria-pressed")) === "false", "play is off once the scenario is over");
 await page.keyboard.press("Escape");
