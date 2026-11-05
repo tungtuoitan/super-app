@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const src = (f) => fs.readFileSync(path.join(here, "src", f), "utf8");
 const corpusFile = (f) => fs.readFileSync(path.join(here, "test", "corpus", f), "utf8");
-const ORDER = ["flow.js", "flow-text.js", "prompt.js", "diff.js", "layout.js", "layout-lanes.js", "svg.js", "highlight.js", "editor.js", "sample.js", "app-core.js", "app-diagram.js", "app.js"];
+const ORDER = ["flow.js", "flow-text.js", "flow-run.js", "prompt.js", "diff.js", "layout.js", "layout-lanes.js", "svg.js", "highlight.js", "editor.js", "sample.js", "app-core.js", "app-diagram.js", "app-data.js", "app-run.js", "app.js"];
 
 // id → [file, name]; the diagram lives in test/corpus/out/<id>.json
 const CODE = [

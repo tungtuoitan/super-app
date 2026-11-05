@@ -1,1 +1,261 @@
-{"title":"Webhook thanh toán","summary":"Nhận sự kiện từ nhà cung cấp thanh toán, kiểm tra chữ ký, chống xử lý trùng, rồi cập nhật đơn hàng và gửi biên lai khi thu tiền thành công.","changeSummary":"Thay đổi thêm bước chống xử lý trùng theo event.id và kiểm tra đơn đã paid, đồng thời gộp cập nhật đơn và giữ kho vào một transaction để không bị lệch nửa chừng. Rủi ro: event.id được ghi nhận trước khi xử lý, nên nếu các bước sau lỗi thì lần gửi lại sẽ bị coi là trùng và đơn không bao giờ được xử lý.","steps":[{"kind":"start","title":"POST /webhooks/payments","sub":"nhà cung cấp gọi khi charge thành công/lỗi","tag":"API","lines":[1,2]},{"kind":"step","title":"Kiểm tra chữ ký","sub":"sai chữ ký: trả 400 và dừng","tag":"AUTH","lines":[3,6],"detail":"Chữ ký được kiểm tra trên rawBody để chắc chắn request đến từ nhà cung cấp."},{"kind":"step","title":"Ghi nhận event.id","sub":"insertIfAbsent vào processedEvents","tag":"DB","attention":true,"change":"added","changeNote":"Ghi lại id sự kiện để mỗi sự kiện chỉ được xử lý một lần khi nhà cung cấp gửi lại.","lines":[9,10],"detail":"Id được ghi ngay lúc này, trước khi đơn được cập nhật. Nếu các bước sau lỗi thì lần gửi lại sẽ bị bỏ qua."},{"kind":"branch","title":"Sự kiện đã xử lý chưa?","change":"added","changeNote":"Sự kiện trùng được trả 200 ngay để nhà cung cấp ngừng gửi lại.","lines":[11,11],"lanes":[{"title":"Trùng","sub":"trả 200 'duplicate'","lines":[11,11],"steps":[{"kind":"end","exit":"respond","title":"200 duplicate","sub":"không xử lý lại","lines":[11,11]}]},{"title":"Lần đầu","sub":"đi tiếp","lines":[13,13],"steps":[]}]},{"kind":"step","title":"Tìm đơn theo paymentId","sub":"không thấy: trả 404 và dừng","tag":"DB","lines":[13,14]},{"kind":"branch","title":"Loại sự kiện","lines":[16,25],"lanes":[{"title":"charge.succeeded","sub":"thu tiền xong, cập nhật đơn","lines":[16,22],"steps":[{"kind":"branch","title":"Đơn đã paid chưa?","change":"added","changeNote":"Nếu đơn đã paid thì dừng, tránh giữ kho và gửi biên lai lần nữa.","lines":[17,17],"lanes":[{"title":"Đã paid","sub":"trả 200 'already paid'","lines":[17,17],"steps":[{"kind":"end","exit":"respond","title":"200 already paid","sub":"không làm gì thêm","lines":[17,17]}]},{"title":"Chưa paid","sub":"đi tiếp","lines":[18,18],"steps":[]}]},{"kind":"call","title":"db.tx: paid và giữ kho","sub":"cập nhật đơn + inventory.reserve","tag":"DB","attention":true,"change":"modified","changeNote":"Trước đây hai lệnh chạy rời nhau, giờ nằm trong một transaction nên hoặc cùng thành công hoặc cùng huỷ.","lines":[18,21]},{"kind":"call","title":"mailer.send(receipt)","sub":"gửi biên lai cho khách","tag":"EMAIL","lines":[22,22]}]},{"title":"charge.failed","sub":"status = payment_failed","lines":[23,24],"steps":[]}]},{"kind":"end","exit":"respond","title":"200 ok","sub":"kể cả loại sự kiện không xử lý","lines":[27,27]}]}
+{
+ "title": "Webhook thanh toán",
+ "summary": "Nhận sự kiện từ nhà cung cấp thanh toán, kiểm tra chữ ký, chống xử lý trùng, rồi cập nhật đơn hàng và gửi biên lai khi thu tiền thành công.",
+ "changeSummary": "Thay đổi thêm bước chống xử lý trùng theo event.id và kiểm tra đơn đã paid, đồng thời gộp cập nhật đơn và giữ kho vào một transaction để không bị lệch nửa chừng. Rủi ro: event.id được ghi nhận trước khi xử lý, nên nếu các bước sau lỗi thì lần gửi lại sẽ bị coi là trùng và đơn không bao giờ được xử lý.",
+ "steps": [
+  {
+   "kind": "start",
+   "title": "POST /webhooks/payments",
+   "sub": "nhà cung cấp gọi khi charge thành công/lỗi",
+   "tag": "API",
+   "lines": [
+    1,
+    2
+   ]
+  },
+  {
+   "kind": "step",
+   "title": "Kiểm tra chữ ký",
+   "sub": "sai chữ ký: trả 400 và dừng",
+   "tag": "AUTH",
+   "lines": [
+    3,
+    6
+   ],
+   "detail": "Chữ ký được kiểm tra trên rawBody để chắc chắn request đến từ nhà cung cấp."
+  },
+  {
+   "kind": "step",
+   "title": "Ghi nhận event.id",
+   "sub": "insertIfAbsent vào processedEvents",
+   "tag": "DB",
+   "attention": true,
+   "change": "added",
+   "changeNote": "Ghi lại id sự kiện để mỗi sự kiện chỉ được xử lý một lần khi nhà cung cấp gửi lại.",
+   "lines": [
+    9,
+    10
+   ],
+   "detail": "Id được ghi ngay lúc này, trước khi đơn được cập nhật. Nếu các bước sau lỗi thì lần gửi lại sẽ bị bỏ qua.",
+   "data": [
+    {
+     "table": "processedEvents",
+     "op": "insert"
+    }
+   ]
+  },
+  {
+   "kind": "branch",
+   "title": "Sự kiện đã xử lý chưa?",
+   "change": "added",
+   "changeNote": "Sự kiện trùng được trả 200 ngay để nhà cung cấp ngừng gửi lại.",
+   "lines": [
+    11,
+    11
+   ],
+   "lanes": [
+    {
+     "title": "Trùng",
+     "sub": "trả 200 'duplicate'",
+     "lines": [
+      11,
+      11
+     ],
+     "steps": [
+      {
+       "kind": "end",
+       "exit": "respond",
+       "title": "200 duplicate",
+       "sub": "không xử lý lại",
+       "lines": [
+        11,
+        11
+       ]
+      }
+     ]
+    },
+    {
+     "title": "Lần đầu",
+     "sub": "đi tiếp",
+     "lines": [
+      13,
+      13
+     ],
+     "steps": []
+    }
+   ]
+  },
+  {
+   "kind": "step",
+   "title": "Tìm đơn theo paymentId",
+   "sub": "không thấy: trả 404 và dừng",
+   "tag": "DB",
+   "lines": [
+    13,
+    14
+   ],
+   "data": [
+    {
+     "table": "orders",
+     "op": "read"
+    }
+   ]
+  },
+  {
+   "kind": "branch",
+   "title": "Loại sự kiện",
+   "lines": [
+    16,
+    25
+   ],
+   "lanes": [
+    {
+     "title": "charge.succeeded",
+     "sub": "thu tiền xong, cập nhật đơn",
+     "lines": [
+      16,
+      22
+     ],
+     "steps": [
+      {
+       "kind": "branch",
+       "title": "Đơn đã paid chưa?",
+       "change": "added",
+       "changeNote": "Nếu đơn đã paid thì dừng, tránh giữ kho và gửi biên lai lần nữa.",
+       "lines": [
+        17,
+        17
+       ],
+       "lanes": [
+        {
+         "title": "Đã paid",
+         "sub": "trả 200 'already paid'",
+         "lines": [
+          17,
+          17
+         ],
+         "steps": [
+          {
+           "kind": "end",
+           "exit": "respond",
+           "title": "200 already paid",
+           "sub": "không làm gì thêm",
+           "lines": [
+            17,
+            17
+           ]
+          }
+         ]
+        },
+        {
+         "title": "Chưa paid",
+         "sub": "đi tiếp",
+         "lines": [
+          18,
+          18
+         ],
+         "steps": []
+        }
+       ]
+      },
+      {
+       "kind": "call",
+       "title": "db.tx: paid và giữ kho",
+       "sub": "cập nhật đơn + inventory.reserve",
+       "tag": "DB",
+       "attention": true,
+       "change": "modified",
+       "changeNote": "Trước đây hai lệnh chạy rời nhau, giờ nằm trong một transaction nên hoặc cùng thành công hoặc cùng huỷ.",
+       "lines": [
+        18,
+        21
+       ],
+       "data": [
+        {
+         "table": "orders",
+         "op": "update"
+        },
+        {
+         "table": "inventory",
+         "op": "update"
+        }
+       ]
+      },
+      {
+       "kind": "call",
+       "title": "mailer.send(receipt)",
+       "sub": "gửi biên lai cho khách",
+       "tag": "EMAIL",
+       "lines": [
+        22,
+        22
+       ]
+      }
+     ]
+    },
+    {
+     "title": "charge.failed",
+     "sub": "status = payment_failed",
+     "lines": [
+      23,
+      24
+     ],
+     "steps": [],
+     "data": [
+      {
+       "table": "orders",
+       "op": "update"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "end",
+   "exit": "respond",
+   "title": "200 ok",
+   "sub": "kể cả loại sự kiện không xử lý",
+   "lines": [
+    27,
+    27
+   ]
+  }
+ ],
+ "entities": [
+  {
+   "name": "processedEvents",
+   "note": "id của các sự kiện đã nhận"
+  },
+  {
+   "name": "orders",
+   "note": "một đơn hàng"
+  },
+  {
+   "name": "inventory",
+   "note": "tồn kho theo sản phẩm"
+  }
+ ],
+ "scenarios": [
+  {
+   "title": "Thu tiền lần đầu",
+   "picks": [
+    "Lần đầu",
+    "charge.succeeded",
+    "Chưa paid"
+   ]
+  },
+  {
+   "title": "Nhà cung cấp gửi lại",
+   "picks": [
+    "Trùng"
+   ]
+  },
+  {
+   "title": "Thanh toán thất bại",
+   "picks": [
+    "Lần đầu",
+    "charge.failed"
+   ]
+  }
+ ]
+}

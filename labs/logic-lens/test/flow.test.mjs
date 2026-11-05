@@ -268,3 +268,27 @@ test("text format round-trips every corpus diagram (tags before ' | ', changes, 
     assert.equal(F.toText(back.flow), text, f);
   }
 });
+
+test("tables and scenarios: normalized, written to text and read back", () => {
+  const f = F.normalize({
+    entities: [{ name: "orders", note: "one order" }, "users"],
+    scenarios: [{ title: "Happy path", picks: ["ok", "paid"] }],
+    steps: [
+      { kind: "start", title: "go", data: ["users:select"] },
+      { kind: "branch", lanes: [{ title: "ok", data: [{ table: "orders", op: "upsert" }], steps: [{ kind: "step", title: "save", data: [{ table: "orders", op: "insert" }, { table: "orders", op: "read" }] }] }, { title: "no" }] },
+      { kind: "end", exit: "back", title: "Back to the list" },
+    ],
+  });
+  assert.deepEqual(f.steps[0].data, [{ table: "users", op: "read" }]);
+  assert.deepEqual(f.steps[1].lanes[0].data, [{ table: "orders", op: "write" }]);
+  assert.equal(f.steps[1].lanes[0].steps[0].data.length, 1, "one entry per table");
+  assert.equal(f.steps[2].exit, "back");
+  assert.deepEqual(f.entities, [{ name: "orders", note: "one order" }, { name: "users", note: "" }]);
+  assert.deepEqual(f.scenarios, [{ title: "Happy path", picks: ["ok", "paid"] }]);
+  const text = F.toText(f);
+  assert.ok(text.includes("  $ users read"), text);
+  assert.ok(text.includes("scenario: Happy path > ok > paid"));
+  const back = F.parseText(text);
+  assert.deepEqual(back.errors, []);
+  assert.equal(F.toText(back.flow), text);
+});

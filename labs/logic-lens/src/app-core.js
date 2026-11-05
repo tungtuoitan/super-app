@@ -29,7 +29,12 @@
     lay: null,
     narrow: false,
     ed: {},
+    run: null, // the "run" mode: {runner, trail: [ids], current, timer}
+    dataFocus: null, // the table whose boxes are highlighted
   };
+  // other modules listen here: "flow" (a new diagram), "render" (the SVG was redrawn), "paint" (selection repainted)
+  const hooks = { flow: [], render: [], paint: [] };
+  const emit = (name) => { for (const f of hooks[name]) f(); };
 
   // ───────────────────────── drafts (best effort) ─────────────────────────
   const KEY = "logic-lens:v2";
@@ -153,5 +158,5 @@
     showTab(change ? (S.tab === "before" ? "before" : "after") : S.tab === "text" ? "text" : "code");
   }
 
-  LL.app = Object.assign(LL.app || {}, { S, $, F, LAY, toast, copyText, setStatus, linesLabel, capability, loadDraft, writeDraft, saveDraft, flushDraft, createEditors, diagramCode, diagramEditor, refreshChange, updateCodeInfo, showTab, setMode });
+  LL.app = Object.assign(LL.app || {}, { hooks, emit, S, $, F, LAY, toast, copyText, setStatus, linesLabel, capability, loadDraft, writeDraft, saveDraft, flushDraft, createEditors, diagramCode, diagramEditor, refreshChange, updateCodeInfo, showTab, setMode });
 })(globalThis.LL = globalThis.LL || {});

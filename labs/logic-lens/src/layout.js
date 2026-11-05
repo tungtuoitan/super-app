@@ -16,7 +16,9 @@
     item: { size: 13, weight: 500, lh: 17 },
     note: { size: 12, weight: 400, lh: 16 },
     label: { size: 11.5, weight: 500, lh: 14 },
+    data: { size: 11.5, weight: 500, lh: 15 },
   };
+  const OP_WORD = { read: "đọc", insert: "thêm", update: "sửa", delete: "xoá", write: "ghi" };
   const PAD_X = 14;
   const PAD_Y = 10;
   const GAP = 30; // vertical space between boxes (arrow length)
@@ -140,6 +142,31 @@
     const whyLines = (node, w) => {
       const why = (node.change === "modified" || node.change === "removed") && node.changeNote ? node.changeNote.split(/(?<=[.!?])\s/)[0] : "";
       return why ? wrap(why, FONT.note, w - 28, 2) : [];
+    };
+    /** The stored data a box touches, packed into at most 2 centered rows of "▤ table op" items. */
+    const dataRows = (node, w) => {
+      const rows = [];
+      let row = [];
+      let used = 0;
+      for (const d of node.data || []) {
+        const text = "▤ " + d.table + " " + OP_WORD[d.op];
+        const tw = measure(text, FONT.data) + 14;
+        if (row.length && used + tw > w - 24) { rows.push(row); row = []; used = 0; }
+        row.push({ table: d.table, op: d.op, word: OP_WORD[d.op] });
+        used += tw;
+      }
+      if (row.length) rows.push(row);
+      return rows.slice(0, 2);
+    };
+    /** Below the text of a box: its data row(s), then why it changed. Grows tb.h; returns what to draw. */
+    const extras = (node, w, top, tb) => {
+      const data = dataRows(node, w);
+      const dataY = top + tb.h - PAD_Y + 3;
+      if (data.length) tb.h += 5 + data.length * FONT.data.lh;
+      const noteLines = whyLines(node, w);
+      const noteY = top + tb.h - PAD_Y + 4;
+      if (noteLines.length) tb.h += 6 + noteLines.length * FONT.note.lh;
+      return { dataRows: data, dataY, noteLines, noteY, noteKind: noteLines.length ? node.change : "" };
     };
     const arrowTo = (from, to) => edges.push({ d: `M${from.x} ${from.y}V${to.y}`, arrow: true });
 
@@ -283,13 +310,11 @@
         // room for the effect tag and the change chip so they never cover the title
         const tb = textBlock(node, bw - (node.tag || node.change ? 20 : 0) - (node.kind === "call" ? 12 : 0), 2, depth > 1 ? 3 : 2);
         tb.h += node.tag || node.change ? 8 : 0;
-        // an edited or removed box says why, right on the diagram (first sentence of the change note)
-        const noteLines = whyLines(node, bw);
-        const noteY = cursor + tb.h - PAD_Y + 4;
-        if (noteLines.length) tb.h += 6 + noteLines.length * FONT.note.lh;
+        // tables it reads / writes, and why an edited or removed box changed (first sentence of the change note)
+        const ex = extras(node, bw, cursor, tb);
         const bx = x + (w - bw) / 2;
         const removed = node.change === "removed";
-        boxes.push({ id, x: bx, y: cursor, w: bw, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node, clipped: tb.clipped, change: node.change, noteLines, noteY, noteKind: noteLines.length ? node.change : "" });
+        boxes.push({ id, x: bx, y: cursor, w: bw, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node, clipped: tb.clipped, change: node.change, ...ex });
         connect({ x: cx, y: cursor }, removed);
         merged = false;
         if (node.kind === "end" && !removed) { prev = null; ended = true; }
@@ -314,16 +339,14 @@
 
     function laneHead(lane, lid, x, y, w, parallel) {
       const tb = textBlock(lane, w, 2, 3); // lanes are narrow: one more line before cutting the text
-      const noteLines = whyLines(lane, w);
-      const noteY = y + tb.h - PAD_Y + 4;
-      if (noteLines.length) tb.h += 6 + noteLines.length * FONT.note.lh;
-      boxes.push({ id: lid, x, y, w, h: tb.h, noteLines, noteY, noteKind: noteLines.length ? lane.change : "", kind: parallel ? "plane" : "lane", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane, clipped: tb.clipped, change: lane.change });
+      const ex = extras(lane, w, y, tb);
+      boxes.push({ id: lid, x, y, w, h: tb.h, ...ex, kind: parallel ? "plane" : "lane", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane, clipped: tb.clipped, change: lane.change });
       return tb.h;
     }
 
     function questionLabel(text, x, y, anchor, parallel, change) {
       if (!text) return;
-      if (change) text = { added: "+ ", modified: "~ ", removed: "− " }[change] + text;
+      if (change) text = { added: "+ ", modified: "✎ ", removed: "− " }[change] + text;
       const f = FONT.label;
       const t = wrap(text, f, 260, 1)[0];
       const tw = measure(t, f) + 14;

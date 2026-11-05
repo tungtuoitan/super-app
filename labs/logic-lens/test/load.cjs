@@ -1,2 +1,2 @@
-for (const m of ["flow", "flow-text", "prompt", "diff", "layout", "layout-lanes", "svg", "sample"]) require(`../src/${m}.js`);
+for (const m of ["flow", "flow-text", "flow-run", "prompt", "diff", "layout", "layout-lanes", "svg", "sample"]) require(`../src/${m}.js`);
 module.exports = globalThis.LL;

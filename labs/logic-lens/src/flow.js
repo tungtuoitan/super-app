@@ -46,7 +46,7 @@
   "use strict";
 
   const KINDS = ["start", "step", "call", "stage", "end", "group", "loop", "branch", "parallel", "section"];
-  const EXITS = ["return", "throw", "break", "continue", "exit", "respond", "navigate"];
+  const EXITS = ["return", "throw", "break", "continue", "exit", "respond", "navigate", "back"];
   /** Kinds that hold lanes / child steps. */
   const LANED = { branch: 1, parallel: 1 };
   const NESTED = { loop: 1, section: 1 };
@@ -95,7 +95,7 @@
     entrypoint: "section", method: "section", endpoint: "section", effect: "section",
   };
   // kind words that also say how a path stops
-  const EXIT_KINDS = { exit: "exit", return: "return", throw: "throw", raise: "throw", break: "break", continue: "continue", respond: "respond", reject: "throw", navigate: "navigate", redirect: "navigate" };
+  const EXIT_KINDS = { exit: "exit", return: "return", throw: "throw", raise: "throw", break: "break", continue: "continue", respond: "respond", reject: "throw", navigate: "navigate", redirect: "navigate", back: "back" };
 
   const CHANGES = { added: "added", add: "added", new: "added", modified: "modified", changed: "modified", modify: "modified", updated: "modified", fixed: "modified", removed: "removed", deleted: "removed", remove: "removed", delete: "removed" };
   /** Copy change marks from a loose object onto a normalized one. */
@@ -114,6 +114,22 @@
     return t;
   }
 
+  // what a box does to stored data: read, insert, update, delete or write (any change)
+  const OPS = { read: "read", select: "read", get: "read", find: "read", query: "read", load: "read", insert: "insert", create: "insert", add: "insert", update: "update", set: "update", modify: "update", delete: "delete", remove: "delete", write: "write", upsert: "write", save: "write", merge: "write" };
+  /** [{table, op}] from loose input: [{table, op}], ["orders:read"], "orders". */
+  function dataOf(v) {
+    const list = Array.isArray(v) ? v : v ? [v] : [];
+    const out = [];
+    for (const d of list) {
+      const o = d && typeof d === "object" ? d : { table: String(d).split(":")[0], op: String(d).split(":")[1] };
+      const table = str(o.table || o.name || o.entity || o.collection, 40);
+      if (!table || out.some((x) => x.table === table)) continue;
+      out.push({ table, op: OPS[String(o.op || o.access || o.mode || "read").toLowerCase().trim()] || "read" });
+      if (out.length >= 6) break;
+    }
+    return out;
+  }
+
   /** Make any loosely shaped object (from Claude or hand-written JSON) a valid Flow. */
   function normalize(raw) {
     const r = raw && typeof raw === "object" ? raw : {};
@@ -128,14 +144,15 @@
 
     const lane = (l, depth, fallbackTitle) => {
       const o = l && typeof l === "object" ? l : { title: l };
-      return changeOf(o, {
+      const data = dataOf(o.data || o.tables);
+      return changeOf(o, Object.assign(data.length ? { data } : {}, {
         title: str(o.title || o.label || o.when || o.condition || o.case || o.name, LIMITS.title) || fallbackTitle || "…",
         sub: str(o.sub || o.subtitle, LIMITS.sub),
         detail: longStr(o.detail || o.explanation, LIMITS.detail),
         lines: rng(o.lines || o.range || o.lineRange),
         attention: !!(o.attention || o.warn),
         steps: depth < LIMITS.depth ? arr(o.steps || o.flow || o.nodes || o.body || o.then).map((c) => node(c, depth + 1)).filter(Boolean) : [],
-      });
+      }));
     };
 
     const node = (n, depth) => {
@@ -160,6 +177,8 @@
       };
       const tag = tagOf(n.tag || n.effect || n.io);
       if (tag) out.tag = tag;
+      const data = dataOf(n.data || n.tables);
+      if (data.length) out.data = data;
       changeOf(n, out);
       if (kind === "end") {
         const e = String(n.exit && n.exit !== true ? n.exit : n.how || exit || "return").toLowerCase();
@@ -186,6 +205,8 @@
         out.lanes = arr(lanes).slice(0, LIMITS.lanes).map((l) => lane(l, depth));
         if (!out.title) out.title = str(n.condition || n.question, LIMITS.title);
         if (!out.lanes.length) { out.kind = "step"; delete out.lanes; }
+        // a branch is not a box of its own: its change note travels to the first lane so it can be read
+        else if (out.change && out.changeNote && !out.lanes.some((l) => l.change)) Object.assign(out.lanes[0], { change: out.change, changeNote: out.changeNote });
       }
       if (!out.title && !LANED[out.kind]) out.title = "…";
       return out;
@@ -200,6 +221,14 @@
     };
     const cs = longStr(r.changeSummary || r.change_summary || r.changeSummaryText, 800);
     if (cs) flow.changeSummary = cs;
+    const entities = arr(r.entities || r.tables).slice(0, 20)
+      .map((e) => (e && typeof e === "object" ? { name: str(e.name || e.table, 40), note: str(e.note || e.description, LIMITS.sub) } : { name: str(e, 40), note: "" }))
+      .filter((e) => e.name);
+    if (entities.length) flow.entities = entities;
+    const scenarios = arr(r.scenarios || r.runs).slice(0, 4)
+      .map((x) => ({ title: str(x && x.title, LIMITS.title), picks: arr(x && (x.picks || x.choices || x.path)).slice(0, 30).map((p) => str(p, LIMITS.title)).filter(Boolean) }))
+      .filter((x) => x.title);
+    if (scenarios.length) flow.scenarios = scenarios;
     // a section may only sit at the top level: a section nested in a section becomes a stage
     for (const n of flow.steps) if (n.kind === "section") for (const c of n.steps) if (c.kind === "section") c.kind = "stage";
     // a model that numbers lines from 0: shift every range by one
@@ -350,5 +379,5 @@
 
   LL.flow = Object.assign(LL.flow || {}, { normalize, walkNodes, eachNode, endsPath, countBoxes, guessLanguage, numberLines, resolveAnchors, markUnreachable, LIMITS, KINDS, EXITS, LANED, NESTED });
   // helpers shared with flow-text.js and prompt.js
-  LL.flow._ = { str, longStr, lines, tagOf, CHANGES };
+  LL.flow._ = { str, longStr, lines, tagOf, CHANGES, dataOf };
 })(globalThis.LL = globalThis.LL || {});

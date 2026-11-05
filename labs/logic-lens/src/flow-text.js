@@ -57,11 +57,25 @@
       const indent = raw.match(/^ */)[0].length;
       const line = raw.trim();
 
-      const meta = line.match(/^(title|summary|change|tiêu đề|tóm tắt|thay đổi)\s*:\s*(.*)$/i);
+      const meta = line.match(/^(title|summary|change|table|scenario|tiêu đề|tóm tắt|thay đổi|bảng|kịch bản)\s*:\s*(.*)$/i);
       if (meta && indent === 0) {
         if (/^(title|tiêu đề)$/i.test(meta[1])) flow.title = str(meta[2], 120);
+        else if (/^(table|bảng)$/i.test(meta[1])) {
+          const [name, note] = meta[2].split(/\s\|\s/);
+          if (name.trim()) (flow.entities = flow.entities || []).push({ name: str(name, 40), note: str(note || "", 140) });
+        } else if (/^(scenario|kịch bản)$/i.test(meta[1])) {
+          const [t, ...picks] = meta[2].split(/\s*>\s*/);
+          if (t.trim()) (flow.scenarios = flow.scenarios || []).push({ title: str(t, 80), picks: picks.map((x) => str(x, 80)).filter(Boolean) });
+        }
         else if (/^(change|thay đổi)$/i.test(meta[1])) flow.changeSummary = longStr(meta[2], 800);
         else flow.summary = longStr(meta[2], 600);
+        continue;
+      }
+      if (line.startsWith("$")) {
+        // "$ orders read, order_lines insert": the stored data the box above reads or writes
+        if (!lastNode) { errors.push({ line: i + 1, message: "Dòng dữ liệu “$” phải nằm ngay dưới một ô." }); continue; }
+        const data = LL.flow._.dataOf(line.slice(1).split(",").map((x) => x.trim().replace(/\s+/, ":")).filter(Boolean));
+        if (data.length) lastNode.data = (lastNode.data || []).concat(data).slice(0, 6);
         continue;
       }
       if (line.startsWith(">")) {
@@ -145,6 +159,8 @@
     if (flow.title) out.push("title: " + flow.title);
     if (flow.summary) out.push("summary: " + flow.summary.replace(/\n+/g, " "));
     if (flow.changeSummary) out.push("change: " + flow.changeSummary.replace(/\n+/g, " "));
+    for (const e of flow.entities || []) out.push("table: " + e.name + (e.note ? " | " + e.note : ""));
+    for (const x of flow.scenarios || []) out.push("scenario: " + [x.title].concat(x.picks).join(" > "));
     if (out.length) out.push("");
     const head = (kw, n, pad) => {
       // the "never reached" mark is derived from the order of boxes, so it is not written out
@@ -158,6 +174,7 @@
       s += range(n.lines);
       if (attention && kw !== "warn") s += " !";
       out.push(s.replace(/\s+$/, ""));
+      if (n.data && n.data.length) out.push(pad + "  $ " + n.data.map((d) => d.table + " " + d.op).join(", "));
       if (n.changeNote) for (const d of n.changeNote.split("\n")) if (d.trim()) out.push(pad + "  >> " + d.trim());
       if (n.detail) for (const d of n.detail.split("\n")) if (d.trim()) out.push(pad + "  > " + d.trim());
     };

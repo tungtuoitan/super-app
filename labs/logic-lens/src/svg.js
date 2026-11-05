@@ -42,6 +42,10 @@
   .ll-on-dark-sub{font-size:12px;fill:var(--ll-start-sub,#b8c4cf)}
   .ll-itemt{font-weight:500;font-size:13px;fill:var(--ll-ink,#16212b)}
   .ll-note{font-size:12px;fill:var(--ll-attn,#c8462f)}
+  .ll-data{font-size:11.5px;font-weight:500;font-family:${FAMILY}}
+  .ll-d-read{fill:var(--ll-d-read,#2f6f95)} .ll-d-insert,.ll-d-update,.ll-d-write{fill:var(--ll-d-write,#a35a00)} .ll-d-delete{fill:var(--ll-del,#c8462f)}
+  .ll-dop{fill:var(--ll-muted,#66727e);font-weight:400} .ll-dsep{fill:var(--ll-muted,#66727e)}
+  .ll-node.dt-on .ll-shape{stroke:var(--ll-d-read,#2f6f95);stroke-width:2.4;stroke-dasharray:none}
   .ll-cn-modified{fill:var(--ll-mod,#a06d00);font-style:italic} .ll-cn-removed{fill:var(--ll-del,#c8462f);font-style:italic}
   .ll-edge{fill:none;stroke:var(--ll-edge,#7d8996);stroke-width:1.4}
   .ll-edge.ll-del{stroke:var(--ll-del,#c8462f);stroke-dasharray:4 4;opacity:.7}
@@ -67,7 +71,9 @@
   .ll-node:focus{outline:none}
   .ll-node:hover .ll-shape{filter:brightness(.985)}
   .ll-node:focus-visible .ll-shape,.ll-node.sel .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:2.6;stroke-dasharray:none}
-  .ll-node.dim,.ll-itemg.dim{opacity:.28}
+  .ll-node.dim,.ll-itemg.dim,.ll-node.run-dim,.ll-node.dt-dim{opacity:.28}
+  .ll-node.run-now .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:3;stroke-dasharray:none;filter:drop-shadow(0 0 9px var(--ll-glow,rgba(37,99,235,.35)))}
+  .ll-node.run-trail .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:1.8;stroke-opacity:.55;stroke-dasharray:none}
   .ll-node.hl .ll-shape{filter:drop-shadow(0 0 7px var(--ll-glow,rgba(37,99,235,.35)))}
   .ll-shadow{filter:drop-shadow(0 1px 1.5px rgba(16,24,40,.07))}
   `;
@@ -105,8 +111,8 @@
     return out + `L${r1(lp[0])} ${r1(lp[1])}`;
   }
 
-  const CHANGE_LABEL = { added: "+ MỚI", modified: "~ SỬA", removed: "− XOÁ" };
-  const EXIT_LABEL = { return: "RETURN", throw: "THROW", break: "BREAK", continue: "CONTINUE", exit: "EXIT", respond: "RESPOND", navigate: "CHUYỂN TRANG" };
+  const CHANGE_LABEL = { added: "+ MỚI", modified: "✎ SỬA", removed: "− XOÁ" };
+  const EXIT_LABEL = { return: "TRẢ VỀ", throw: "NÉM LỖI", break: "THOÁT VÒNG", continue: "BỎ QUA LƯỢT", exit: "THOÁT", respond: "PHẢN HỒI", navigate: "CHUYỂN TRANG", back: "VỀ MÀN HÌNH" };
   // tags shown in words: a user action and what the screen shows read better than code-ish labels
   const TAG_LABEL = { USER: "NGƯỜI DÙNG", UI: "MÀN HÌNH" };
   /** A start box the user triggers (click, type, open a page) looks different from a system trigger. */
@@ -133,12 +139,21 @@
     const tx = left ? r1(b.x + 18) : r1(b.x + b.w / 2);
     const anchor = left ? "start" : "middle";
     const extra = b.node && (b.node.tag || b.node.change) && !b.container ? 4 : 0;
-    const noteH = b.noteKind ? 6 + b.noteLines.length * FONT.note.lh : 0;
+    const noteH = (b.noteKind ? 6 + b.noteLines.length * FONT.note.lh : 0) + (b.dataRows && b.dataRows.length ? 5 + b.dataRows.length * FONT.data.lh : 0);
     const textH = b.titleLines.length * FONT.title.lh + (b.subLines.length ? 3 + b.subLines.length * FONT.sub.lh : 0);
     let yy = b.container ? b.y + PAD_Y + FONT.title.size : b.y + extra + (b.h - noteH - extra - textH) / 2 + FONT.title.size - 1 + (b.kind === "lane" || b.kind === "plane" ? 2 : 0);
     for (const l of b.titleLines) { t.push(`<text class="ll-title${dark ? " ll-on-dark" : ""}" x="${tx}" y="${r1(yy)}" text-anchor="${anchor}">${esc(l)}</text>`); yy += FONT.title.lh; }
     yy += 2;
     for (const l of b.subLines) { t.push(`<text class="${dark ? "ll-on-dark-sub" : "ll-sub"}" x="${tx}" y="${r1(yy)}" text-anchor="${anchor}">${esc(l)}</text>`); yy += FONT.sub.lh; }
+    if (b.dataRows && b.dataRows.length) {
+      // "▤ orders đọc · ▤ order_lines thêm": the table in the op's color, the op in words
+      let dy = b.dataY + FONT.data.size;
+      for (const row of b.dataRows) {
+        const parts = row.map((d, i) => `${i ? '<tspan class="ll-dsep"> · </tspan>' : ""}<tspan class="ll-d-${d.op}" data-table="${esc(d.table)}">▤ ${esc(d.table)}</tspan><tspan class="ll-dop"> ${esc(d.word)}</tspan>`).join("");
+        t.push(`<text class="ll-data" x="${r1(b.x + b.w / 2)}" y="${r1(dy)}" text-anchor="middle">${parts}</text>`);
+        dy += FONT.data.lh;
+      }
+    }
     if (b.noteLines && b.noteLines.length) {
       let ny = b.noteY + FONT.note.size;
       for (const l of b.noteLines) { t.push(`<text class="ll-note${b.noteKind ? " ll-cn-" + b.noteKind : ""}" x="${r1(b.x + b.w / 2)}" y="${r1(ny)}" text-anchor="middle">${esc(l)}</text>`); ny += FONT.note.lh; }
@@ -161,14 +176,19 @@
     if (b.kind === "call") s += `<text class="ll-callic" x="${r1(b.x + b.w - 12)}" y="${r1(b.y + b.h - 9)}" text-anchor="end">↗</text>`; // calls another function
     // chips sit on the top edge: the change (left), the exit kind (left on end boxes), the effect tag (right)
     const n = b.node || {};
-    if (b.change) s += chip(b.x + 10, b.y - 7.5, CHANGE_LABEL[b.change], "ll-cbg-" + b.change, "ll-ct");
-    else if (b.kind === "end" && n.exit && n.exit !== "return") s += chip(b.x + 14, b.y - 7.5, EXIT_LABEL[n.exit] || n.exit.toUpperCase(), "ll-tagbg", n.exit === "throw" ? "ll-exit-throw" : "ll-exit");
+    let leftEnd = b.x; // where the left chip ends: a right chip that would touch it is left out
+    if (b.change) { s += chip(b.x + 10, b.y - 7.5, CHANGE_LABEL[b.change], "ll-cbg-" + b.change, "ll-ct"); leftEnd = b.x + 10 + chipW(CHANGE_LABEL[b.change]); }
+    else if (b.kind === "end" && n.exit && n.exit !== "return") {
+      const label = EXIT_LABEL[n.exit] || n.exit.toUpperCase();
+      s += chip(b.x + 14, b.y - 7.5, label, "ll-tagbg", n.exit === "throw" ? "ll-exit-throw" : "ll-exit");
+      leftEnd = b.x + 14 + chipW(label);
+    }
     let right = b.x + b.w - 10;
     if (b.attention && b.kind !== "item") { // "!" badge: worth a look (kept apart from the red of removed code)
       s += `<g class="ll-chipg"><title>Đáng chú ý</title><circle class="ll-attnbg" cx="${r1(right - 7.5)}" cy="${r1(b.y)}" r="7.5"/><text class="ll-chip ll-ct" x="${r1(right - 7.5)}" y="${r1(b.y + 3.6)}" text-anchor="middle">!</text></g>`;
       right -= 19;
     }
-    if (n.tag) {
+    if (n.tag && right - chipW(TAG_LABEL[n.tag] || n.tag) > leftEnd + 6) {
       const label = TAG_LABEL[n.tag] || n.tag;
       const w = chipW(label);
       s += n.tag === "USER" ? chip(right - w, b.y - 7.5, label, "ll-userbg", "ll-usert") : chip(right - w, b.y - 7.5, label, "ll-tagbg", "ll-tagt");

@@ -99,6 +99,7 @@
         <h1 id="d-title">Sơ đồ</h1>
         <p id="d-summary"></p>
         <div class="change-bar" id="change-bar" hidden></div>
+        <div class="data-bar" id="data-bar" hidden></div>
       </div>
       <div class="toolbar" role="toolbar" aria-label="Công cụ sơ đồ">
         <button class="icon-btn" id="zoom-out" type="button" aria-label="Thu nhỏ">−</button>
@@ -126,7 +127,18 @@
       <button class="tour-btn" id="tour" type="button" aria-pressed="false">Đi từng bước</button>
       <span class="counter" id="counter"></span>
       <button class="icon-btn" id="next" type="button" aria-label="Ô sau">›</button>
-      <label class="check sm" id="only-changes-wrap" hidden><input type="checkbox" id="only-changes"> chỉ chỗ thay đổi</label>
+      <label class="check sm" id="only-changes-wrap" hidden><input type="checkbox" id="only-changes"> chỉ<span class="wide"> chỗ</span> thay đổi</label>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="tour-btn run-btn" id="run" type="button" title="Đi theo đúng đường code chạy, chọn nhánh ở mỗi chỗ rẽ">▶ Chạy<span class="wide"> thử</span></button>
+    </div>
+    <div class="tour run-bar" id="run-bar" role="group" aria-label="Chạy thử" hidden>
+      <label class="sr-only" for="run-scn">Kịch bản</label>
+      <select id="run-scn" class="select-quiet sm" aria-label="Kịch bản chạy thử"></select>
+      <button class="icon-btn" id="run-restart" type="button" aria-label="Chạy lại từ đầu" title="Chạy lại từ đầu">↺</button>
+      <button class="tour-btn" id="run-play" type="button" aria-pressed="false">▶ Tự chạy</button>
+      <button class="btn sm" id="run-step" type="button">Bước tiếp ›</button>
+      <span class="counter" id="run-count"></span>
+      <button class="icon-btn" id="run-stop" type="button" aria-label="Dừng chạy thử">✕</button>
     </div>
     <aside class="card" id="explain-card" aria-label="Giải thích ô đang chọn" hidden>
       <div class="card-h">
@@ -136,6 +148,7 @@
         <button class="icon-btn sm" id="card-next" type="button" aria-label="Ô sau">›</button>
         <button class="icon-btn sm" id="card-close" type="button" aria-label="Đóng giải thích">✕</button>
       </div>
+      <div class="run-box" id="run-box" hidden></div>
       <div class="card-b" id="explain"></div>
     </aside>
   </section>

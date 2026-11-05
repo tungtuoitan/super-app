@@ -1,1 +1,253 @@
-{"title":"Đóng sổ kế toán theo tháng","summary":"Thủ tục chặn đóng lại kỳ đã đóng, rồi trong một transaction duyệt từng tài khoản đang hoạt động để chốt số dư tháng, tạo cảnh báo khi âm, và đánh dấu kỳ đã đóng. Có lỗi thì rollback và ném lỗi lên trên.","steps":[{"kind":"start","title":"usp_CloseMonth(năm, tháng)","sub":"gọi khi kế toán đóng sổ một tháng","lines":[1,7],"tag":"DB"},{"kind":"step","title":"Kiểm tra kỳ đã đóng chưa","sub":"acc.Period có IsClosed = 1 không?","lines":[8,8],"tag":"DB"},{"kind":"branch","lanes":[{"title":"Đã đóng","sub":"báo lỗi và thoát","lines":[8,12],"steps":[{"kind":"end","exit":"return","title":"Period already closed","sub":"RAISERROR rồi RETURN","lines":[10,11],"detail":"Thủ tục báo lỗi mức 16 và dừng, không ghi gì vào sổ."}]},{"title":"Chưa đóng","sub":"đi tiếp","lines":[14,14],"steps":[]}]},{"kind":"step","title":"Khai báo cursor tài khoản","sub":"lấy các tài khoản IsActive = 1","lines":[14,16],"tag":"DB"},{"kind":"branch","lanes":[{"title":"Thành công","sub":"trong một transaction","lines":[19,40],"steps":[{"kind":"loop","title":"Với mỗi tài khoản hoạt động","sub":"duyệt từng dòng bằng cursor","tag":"DB","lines":[20,36],"attention":true,"detail":"Mỗi tài khoản chạy một truy vấn tính tổng và một lần INSERT riêng, nên chậm khi có nhiều tài khoản.","steps":[{"kind":"step","title":"Tính số dư trong tháng","sub":"SUM(Amount) của acc.Entry","lines":[24,26],"tag":"DB","attention":true,"detail":"YEAR() và MONTH() bọc quanh PostedAt khiến index trên cột này khó được dùng."},{"kind":"step","title":"Ghi acc.MonthlyBalance","sub":"một dòng cho mỗi tài khoản","lines":[28,29],"tag":"DB"},{"kind":"step","title":"Số dư âm thì tạo cảnh báo","sub":"ghi vào acc.Alert","lines":[31,32],"tag":"DB"}]},{"kind":"step","title":"Đóng kỳ và commit","sub":"IsClosed = 1, ghi người đóng và giờ","lines":[38,40],"tag":"DB"}]},{"title":"Có lỗi","sub":"rollback rồi ném lại lỗi","lines":[42,46],"steps":[{"kind":"end","exit":"throw","title":"Rollback rồi THROW","sub":"đóng cursor nếu còn mở","lines":[43,45],"detail":"Nếu còn transaction thì hoàn tác toàn bộ, đóng cursor, rồi ném lại đúng lỗi gốc cho nơi gọi."}]}]},{"kind":"end","exit":"return","title":"Kỳ đã được đóng","sub":"thủ tục kết thúc bình thường","lines":[46,47]}]}
+{
+ "title": "Đóng sổ kế toán theo tháng",
+ "summary": "Thủ tục chặn đóng lại kỳ đã đóng, rồi trong một transaction duyệt từng tài khoản đang hoạt động để chốt số dư tháng, tạo cảnh báo khi âm, và đánh dấu kỳ đã đóng. Có lỗi thì rollback và ném lỗi lên trên.",
+ "steps": [
+  {
+   "kind": "start",
+   "title": "usp_CloseMonth(năm, tháng)",
+   "sub": "gọi khi kế toán đóng sổ một tháng",
+   "lines": [
+    1,
+    7
+   ],
+   "tag": "DB"
+  },
+  {
+   "kind": "step",
+   "title": "Kiểm tra kỳ đã đóng chưa",
+   "sub": "acc.Period có IsClosed = 1 không?",
+   "lines": [
+    8,
+    8
+   ],
+   "tag": "DB",
+   "data": [
+    {
+     "table": "acc.Period",
+     "op": "read"
+    }
+   ]
+  },
+  {
+   "kind": "branch",
+   "lanes": [
+    {
+     "title": "Đã đóng",
+     "sub": "báo lỗi và thoát",
+     "lines": [
+      8,
+      12
+     ],
+     "steps": [
+      {
+       "kind": "end",
+       "exit": "return",
+       "title": "Period already closed",
+       "sub": "RAISERROR rồi RETURN",
+       "lines": [
+        10,
+        11
+       ],
+       "detail": "Thủ tục báo lỗi mức 16 và dừng, không ghi gì vào sổ."
+      }
+     ]
+    },
+    {
+     "title": "Chưa đóng",
+     "sub": "đi tiếp",
+     "lines": [
+      14,
+      14
+     ],
+     "steps": []
+    }
+   ]
+  },
+  {
+   "kind": "step",
+   "title": "Khai báo cursor tài khoản",
+   "sub": "lấy các tài khoản IsActive = 1",
+   "lines": [
+    14,
+    16
+   ],
+   "tag": "DB",
+   "data": [
+    {
+     "table": "acc.Account",
+     "op": "read"
+    }
+   ]
+  },
+  {
+   "kind": "branch",
+   "lanes": [
+    {
+     "title": "Thành công",
+     "sub": "trong một transaction",
+     "lines": [
+      19,
+      40
+     ],
+     "steps": [
+      {
+       "kind": "loop",
+       "title": "Với mỗi tài khoản hoạt động",
+       "sub": "duyệt từng dòng bằng cursor",
+       "tag": "DB",
+       "lines": [
+        20,
+        36
+       ],
+       "attention": true,
+       "detail": "Mỗi tài khoản chạy một truy vấn tính tổng và một lần INSERT riêng, nên chậm khi có nhiều tài khoản.",
+       "steps": [
+        {
+         "kind": "step",
+         "title": "Tính số dư trong tháng",
+         "sub": "SUM(Amount) của acc.Entry",
+         "lines": [
+          24,
+          26
+         ],
+         "tag": "DB",
+         "attention": true,
+         "detail": "YEAR() và MONTH() bọc quanh PostedAt khiến index trên cột này khó được dùng.",
+         "data": [
+          {
+           "table": "acc.Entry",
+           "op": "read"
+          }
+         ]
+        },
+        {
+         "kind": "step",
+         "title": "Ghi acc.MonthlyBalance",
+         "sub": "một dòng cho mỗi tài khoản",
+         "lines": [
+          28,
+          29
+         ],
+         "tag": "DB",
+         "data": [
+          {
+           "table": "acc.MonthlyBalance",
+           "op": "insert"
+          }
+         ]
+        },
+        {
+         "kind": "step",
+         "title": "Số dư âm thì tạo cảnh báo",
+         "sub": "ghi vào acc.Alert",
+         "lines": [
+          31,
+          32
+         ],
+         "tag": "DB",
+         "data": [
+          {
+           "table": "acc.Alert",
+           "op": "insert"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "step",
+       "title": "Đóng kỳ và commit",
+       "sub": "IsClosed = 1, ghi người đóng và giờ",
+       "lines": [
+        38,
+        40
+       ],
+       "tag": "DB",
+       "data": [
+        {
+         "table": "acc.Period",
+         "op": "update"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "title": "Có lỗi",
+     "sub": "rollback rồi ném lại lỗi",
+     "lines": [
+      42,
+      46
+     ],
+     "steps": [
+      {
+       "kind": "end",
+       "exit": "throw",
+       "title": "Rollback rồi THROW",
+       "sub": "đóng cursor nếu còn mở",
+       "lines": [
+        43,
+        45
+       ],
+       "detail": "Nếu còn transaction thì hoàn tác toàn bộ, đóng cursor, rồi ném lại đúng lỗi gốc cho nơi gọi."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "end",
+   "exit": "return",
+   "title": "Kỳ đã được đóng",
+   "sub": "thủ tục kết thúc bình thường",
+   "lines": [
+    46,
+    47
+   ]
+  }
+ ],
+ "entities": [
+  {
+   "name": "acc.Period",
+   "note": "một kỳ kế toán (năm, tháng), đã đóng hay chưa"
+  },
+  {
+   "name": "acc.Account",
+   "note": "một tài khoản kế toán"
+  },
+  {
+   "name": "acc.Entry",
+   "note": "một bút toán phát sinh"
+  },
+  {
+   "name": "acc.MonthlyBalance",
+   "note": "số dư cuối tháng của một tài khoản"
+  },
+  {
+   "name": "acc.Alert",
+   "note": "một cảnh báo cho kế toán"
+  }
+ ],
+ "scenarios": [
+  {
+   "title": "Đóng kỳ thành công",
+   "picks": [
+    "Chưa đóng",
+    "Thành công"
+   ]
+  },
+  {
+   "title": "Kỳ đã đóng rồi",
+   "picks": [
+    "Đã đóng"
+   ]
+  },
+  {
+   "title": "Lỗi giữa chừng",
+   "picks": [
+    "Chưa đóng",
+    "Có lỗi"
+   ]
+  }
+ ]
+}

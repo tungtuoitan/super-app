@@ -14,6 +14,7 @@
     S.nodes = flow ? F.walkNodes(flow) : [];
     S.byId = new Map(S.nodes.map((x, i) => [x.id, Object.assign({ index: i }, x)]));
     if (!S.byId.has(S.selected)) S.selected = null;
+    if (!S.selected) { $("explain-card").hidden = true; $("pane-canvas").classList.remove("card-on"); }
     $("d-title").textContent = flow && flow.title ? flow.title : flow && flow.steps.length ? "Sơ đồ" : "Chưa có sơ đồ";
     $("d-summary").textContent = flow && flow.summary ? flow.summary : "";
     renderChangeBar();
@@ -22,6 +23,7 @@
     renderExplain();
     updateTourUi();
     saveDraft(!o.fromText);
+    LL.app.emit("flow");
   }
 
   function changedNodes() {
@@ -40,7 +42,7 @@
       if (!n) continue;
       const pill = document.createElement("span");
       pill.className = "pill " + k;
-      pill.textContent = `${k === "added" ? "+" : k === "modified" ? "~" : "−"} ${n} ${CHANGE_TEXT[k].toLowerCase()}`;
+      pill.textContent = `${k === "added" ? "+" : k === "modified" ? "✎" : "−"} ${n} ${CHANGE_TEXT[k].toLowerCase()}`;
       bar.appendChild(pill);
     }
   }
@@ -68,6 +70,7 @@
     }));
     applyZoom();
     applySelection(false);
+    LL.app.emit("render");
   }
 
   function applyZoom() {
@@ -131,6 +134,7 @@
       g.setAttribute("aria-pressed", String(on));
     });
     svg.querySelectorAll(".ll-itemg").forEach((g) => g.classList.toggle("dim", S.tour && S.selected != null && g.getAttribute("data-group") !== S.selected));
+    LL.app.emit("paint");
     if (scrollIntoView && S.selected && S.lay) {
       const box = S.lay.boxes.find((b) => b.id === S.selected);
       const canvas = $("canvas");
@@ -213,10 +217,10 @@
   }
 
   /** Code lines of a box; with a change, the removed lines are shown struck through where they used to be. */
-  function snippet(range) {
+  function snippet(range, removedBox) {
     const box = el("div", "snippet");
     const ls = LL.app.diagramCode().split("\n");
-    const rows = S.cmp ? LL.diff.listingFor(S.cmp, range) : [];
+    const rows = S.cmp ? LL.diff.listingFor(S.cmp, range, removedBox) : [];
     const list = rows.length ? rows : Array.from({ length: Math.max(0, Math.min(ls.length, range[1]) - range[0] + 1) }, (_, i) => ({ type: "eq", newLine: range[0] + i, text: ls[range[0] + i - 1] }));
     const MAX = 18;
     list.slice(0, MAX).forEach((r) => {
@@ -243,7 +247,7 @@
     if (n.sub) box.appendChild(el("div", "sub", n.sub));
     if (n.change) {
       const cb = el("div", "changebox " + n.change);
-      cb.appendChild(el("b", "", (n.change === "added" ? "+ " : n.change === "modified" ? "~ " : "− ") + CHANGE_TEXT[n.change].toUpperCase()));
+      cb.appendChild(el("b", "", (n.change === "added" ? "+ " : n.change === "modified" ? "✎ " : "− ") + CHANGE_TEXT[n.change].toUpperCase()));
       cb.appendChild(el("div", "", n.changeNote || (n.changeAuto ? "Các dòng code của ô này đã thay đổi (phát hiện từ diff)." : "")));
       box.appendChild(cb);
     }
@@ -275,7 +279,7 @@
       tags.appendChild(t);
     }
     if (tags.childNodes.length) box.appendChild(tags);
-    if (live) box.appendChild(snippet(live));
+    if (live) box.appendChild(snippet(live, n.change === "removed"));
     else if (n.lines) box.appendChild(el("p", "hint-empty", "Các dòng code của ô này đã bị sửa hoặc xoá sau khi vẽ. Bấm vẽ lại để cập nhật."));
     if (live && S.codeAtDraw != null && S.codeAtDraw !== LL.app.diagramCode()) box.appendChild(el("p", "hint-empty", "Code đã sửa sau khi vẽ; số dòng đã được dời theo. Bấm vẽ lại nếu logic thay đổi."));
   }

@@ -24,6 +24,10 @@ Code giao diện (React, Vue, Angular, mobile…) được vẽ theo **hành tr�
 
 Menu **Ví dụ…** có 17 ví dụ có sẵn sơ đồ: 14 loại code (trang quản lý sản phẩm theo thao tác người dùng, React, Express, Redux, state machine, Go worker pool, Python async, C# controller, Java đệ quy, Kotlin coroutine, Rust, PHP job, SQL, Bash) và 3 thay đổi sửa bug (JS, Python, SQL).
 
+**Bảng dữ liệu**: mỗi ô ghi bảng / entity nó đọc hay ghi (`▤ orders sửa`). Dải **Dữ liệu** phía trên liệt kê mọi bảng; bấm một bảng để sáng lên các bước đụng tới nó và xem bước nào đọc, bước nào ghi.
+
+**Chạy thử**: bấm **▶ Chạy thử** để đi theo đúng đường code chạy, từng ô một. Ở chỗ rẽ nhánh bạn chọn đi nhánh nào (hoặc bấm phím 1–9), cuối vòng lặp chọn lặp tiếp hay thoát; các ô đã đi qua giữ vết. Chọn một **kịch bản** (ví dụ “Sửa giá thành công”) để tự chạy. Với trang giao diện, nhánh kết thúc “về màn hình” quay lại câu hỏi “Người dùng làm gì?” để bấm tiếp như khi dùng thật.
+
 ## Đọc sơ đồ
 
 | Hình | Nghĩa |
@@ -75,6 +79,7 @@ section onFailure() | handler khác
 - Loại ô: `start`, `step`, `call`, `stage`, `warn`, `end` (`end:throw`, `end:respond`, `end:break`, `end:continue`, `end:exit`), `branch`/`parallel` + `lane`, `loop`, `group` + `item`/`note`, `section`.
 - ` | ` ngăn tiêu đề và dòng phụ; `[DB]` gắn nhãn; `@12-40` dòng code; `!` cuối dòng đánh dấu đáng chú ý.
 - `>` dòng giải thích; `+` `~` `-` đầu dòng: thêm / sửa / xoá; `>>` lý do thay đổi; `change:` tóm tắt thay đổi.
+- `$ orders read, order_lines insert` dưới một ô: bảng nó đọc / ghi (`read`, `insert`, `update`, `delete`, `write`); `table: orders | một đơn hàng` mô tả bảng; `scenario: Lưu thành công > tải được > Lưu` một kịch bản chạy thử (tên nhánh chọn ở mỗi chỗ rẽ).
 
 Xuất: Copy Mermaid, copy dạng chữ, tải SVG / PNG.
 
@@ -84,6 +89,7 @@ Xuất: Copy Mermaid, copy dạng chữ, tải SVG / PNG.
 src/
   flow.js           mô hình sơ đồ, chuẩn hoá câu trả lời của Claude, đoán ngôn ngữ
   flow-text.js      định dạng chữ (đọc / ghi) và xuất Mermaid
+  flow-run.js       chạy thử: đi theo đường code, hỏi ở chỗ rẽ nhánh, theo kịch bản
   prompt.js         lời nhắc gửi Claude (code hoặc thay đổi code) và đọc câu trả lời dán vào
   diff.js           diff dòng (Myers), đối chiếu đánh dấu thay đổi, đọc / áp git diff
   layout.js         xếp ô; layout-lanes.js: nhánh và song song (cạnh nhau hoặc xếp dọc)
@@ -92,6 +98,7 @@ src/
   sample.js         ba ví dụ gốc (SQL, JavaScript, Python)
   app-core.js       trạng thái, bản nháp, khung code, chế độ code / thay đổi
   app-diagram.js    sơ đồ trên trang: zoom, chọn ô, giải thích, đi từng bước
+  app-data.js       dải bảng dữ liệu; app-run.js: thanh chạy thử
   app.js            gọi Claude, ví dụ, xuất file, nối mọi thứ lại
 build.mjs           gộp thành dist/logic-lens.html (+ .standalone.html), kèm các ví dụ trong test/corpus
 test/               unit test (node --test), e2e Chromium (Playwright, giả lập window.claude), corpus ví dụ

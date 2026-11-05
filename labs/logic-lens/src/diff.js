@@ -159,8 +159,8 @@
         if (!similar) owner = at;
       }
       owner = Math.max(1, Math.min(owner, B.length));
-      for (const e of entries) e.owner = owner;
-      return { owner, sig: real.length, similar };
+      for (const e of entries) { e.owner = owner; e.similar = similar; }
+      return { at, owner, sig: real.length, similar };
     });
     const removed = listing.filter((l) => l.type === "del").length;
     const trivialText = new Map();
@@ -180,7 +180,7 @@
     let own = 0;
     let addedCount = 0;
     for (let l = a; l <= b; l++) if (mine(l) && !cmp.trivial.has(l)) { own++; if (cmp.sigAdded.has(l)) addedCount++; }
-    const owned = cmp.blocks.filter((bl) => bl.sig && mine(bl.owner));
+    const owned = cmp.blocks.filter((bl) => bl.sig && !bl.claimed && mine(bl.owner));
     if (addedCount && addedCount === own && !owned.some((bl) => bl.similar)) return "added";
     if (addedCount || owned.length) return "modified";
     return "";
@@ -194,11 +194,17 @@
    */
   function reconcileChanges(flow, cmp) {
     const counts = { added: 0, modified: 0, removed: 0, corrected: 0 };
+    // removed lines that a "removed" box stands for are explained by it: they do not make neighbours "modified"
+    for (const bl of cmp.blocks) bl.claimed = false;
+    LL.flow.eachNode(flow, (n) => {
+      if (n.change === "removed" && n.lines) for (const bl of cmp.blocks) if (bl.at >= n.lines[0] && bl.at <= n.lines[1] + 1) bl.claimed = true;
+    });
     const visit = (n) => {
       if (n.change === "removed") { counts.removed++; return; }
       const kids = (n.steps || []).concat(n.lanes || []).filter((k) => k.lines);
       const skip = kids.length ? (l) => kids.some((k) => l >= k.lines[0] && l <= k.lines[1]) : null;
-      const real = changeIn(cmp, n.lines, skip);
+      // an empty lane is only "the normal path goes on": it is never changed on its own
+      const real = n.steps && !n.steps.length && !n.kind ? "" : changeIn(cmp, n.lines, skip);
       if (real && !n.change) { n.change = real; n.changeAuto = true; counts.corrected++; }
       else if (!real && n.change && !n.changeNote && !kids.some((k) => k.change)) { delete n.change; counts.corrected++; }
       if (n.change) counts[n.change]++;
@@ -211,16 +217,25 @@
   /** The merged listing in the shape sent to Claude: new line numbers, "+" for added, "-" for removed (no number). */
   function listingForPrompt(cmp) {
     const w = String(cmp.listing.reduce((m, l) => Math.max(m, l.newLine || 0), 0)).length;
-    return cmp.listing.map((l) => {
-      if (l.type === "del") return " ".repeat(w) + "-| " + l.text;
-      return String(l.newLine).padStart(w) + (l.type === "add" ? "+| " : " | ") + l.text;
-    }).join("\n");
+    // removed lines that were edited into a new line sit right before that line, so the edit reads as one
+    const moved = new Map();
+    for (const l of cmp.listing) if (l.type === "del" && l.similar && l.owner !== l.newLine) moved.set(l.owner, (moved.get(l.owner) || []).concat([l]));
+    const del = (l) => " ".repeat(w) + "-| " + l.text;
+    const out = [];
+    for (const l of cmp.listing) {
+      if (l.type === "del") { if (!(l.similar && l.owner !== l.newLine)) out.push(del(l)); continue; }
+      for (const d of moved.get(l.newLine) || []) out.push(del(d));
+      out.push(String(l.newLine).padStart(w) + (l.type === "add" ? "+| " : " | ") + l.text);
+    }
+    return out.join("\n");
   }
 
   /** The listing entries that belong to a box: its new lines plus the removed lines it owns (see compare). */
-  function listingFor(cmp, range) {
+  function listingFor(cmp, range, removedBox) {
     if (!cmp || !range) return [];
     const [a, b] = range;
+    // a removed box points at where its lines used to be: show those removed lines, not the code around them
+    if (removedBox) return cmp.listing.filter((l) => l.type === "del" && l.newLine >= a && l.newLine <= b + 1);
     return cmp.listing.filter((l) => (l.type === "del" ? l.owner >= a && l.owner <= b : l.newLine >= a && l.newLine <= b));
   }
 

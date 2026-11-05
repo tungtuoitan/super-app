@@ -35,7 +35,7 @@ test("reconcileChanges corrects the model: changed lines are marked, unchanged m
   ] });
   const counts = D.reconcileChanges(flow, c);
   assert.equal(flow.steps[0].change, undefined, "no real change and no note");
-  assert.equal(flow.steps[1].change, "modified");
+  assert.equal(flow.steps[1].change, "added", "the old check is shown by its own removed box");
   assert.equal(flow.steps[2].change, "added");
   assert.equal(flow.steps[3].change, "removed");
   assert.equal(counts.corrected, 2);

@@ -110,18 +110,20 @@ END`;
   const SQL_FLOW = {
     title: "Tìm kiếm RFD (plm.usp_RFD_Search)",
     summary: "Nhận bộ lọc và kiểu xem, ghép câu SQL động rồi chạy đúng một nhánh: lưới, Kanban, timeline hoặc tải file. Trả về danh sách RFD kèm hai số tổng qua tham số OUTPUT.",
+    entities: [{ name: "plm.RFD", note: "một yêu cầu phát triển (RFD) của một style" }, { name: "plm.Style", note: "một mẫu thiết kế" }, { name: "plm.RFDFile", note: "một file bản vẽ đính kèm RFD" }, { name: "plm.RFDMilestone", note: "một mốc tiến độ của RFD" }],
+    scenarios: [{ title: "Xem dạng lưới", picks: ["Lưới Rows"] }, { title: "Xem Kanban", picks: ["Kanban"] }, { title: "Tải file", picks: ["Download"] }],
     steps: [
       { kind: "step", title: "Nhận tham số", sub: "bộ lọc, trang, kiểu xem (list / Kanban / download)", anchor: ["CREATE OR ALTER PROCEDURE", "@ov_TotalRowsMax INT OUTPUT"], detail: "Mọi bộ lọc đều mặc định NULL, nghĩa là “không lọc theo trường này”. @ViewMode quyết định nhánh nào sẽ chạy ở bước 3." },
       { kind: "stage", title: "1. Ghép điều kiện lọc", sub: "mỗi tham số khác NULL thêm một đoạn \"AND ...\"", anchor: ["-- 1. Build the WHERE", "IF @DueTo IS NOT NULL"], detail: "Câu WHERE được ghép bằng chuỗi nhưng giá trị vẫn truyền qua tham số của sp_executesql, nên không bị SQL injection. Luôn có sẵn điều kiện IsDeleted = 0." },
-      { kind: "group", title: "2. Ghép phần FROM (nối bảng)", anchor: ["-- 2. Build the FROM", "WHERE r2.StyleId = r.StyleId"], detail: "Cùng một phần FROM được dùng lại cho mọi chế độ xem. Sáu lần nối StandardRegistry chỉ để đổi mã thành tên hiển thị.",
+      { kind: "group", title: "2. Ghép phần FROM (nối bảng)", data: ["plm.RFD:read", "plm.Style:read", "plm.Product:read", "plm.Collection:read"], anchor: ["-- 2. Build the FROM", "WHERE r2.StyleId = r.StyleId"], detail: "Cùng một phần FROM được dùng lại cho mọi chế độ xem. Sáu lần nối StandardRegistry chỉ để đổi mã thành tên hiển thị.",
         items: [{ title: "plm.RFD" }, { title: "Style", sub: "(Product + Collection)" }, { title: "6 bảng tra mã", sub: "(StandardRegistry)" }, { title: "File bản vẽ", sub: "gộp thành 1 chuỗi" }],
         note: "Show latest: chỉ giữ RFD có Id lớn nhất mỗi style, tính sau khi lọc" },
       { kind: "step", title: "3. Chọn chế độ", sub: "theo @ViewMode, chỉ một nhánh chạy", anchor: ["-- 3. Pick the view mode", "IF @ViewMode = 'list'"] },
       { kind: "branch", lanes: [
         { title: "Lưới Rows", sub: "= 'list'", anchor: ["IF @ViewMode = 'list'", "OFFSET (@PageIndex - 1)"], steps: [
           { kind: "step", title: "Đếm tổng", sub: "số RFD sau lọc", anchor: ["SELECT @ov_TotalRows = COUNT(*) ' + @from"] },
-          { kind: "step", title: "Lấy một trang", sub: "Id giảm dần", anchor: ["ORDER BY r.Id DESC", "OFFSET (@PageIndex - 1)"] },
-          { kind: "step", title: "Kèm giờ và số file", sub: "cùng danh sách bản vẽ", attention: true, anchor: ["DATEDIFF(HOUR", "dw.Drawings"], detail: "Mỗi dòng chạy thêm một truy vấn con COUNT(*) trên RFDFile. Với trang lớn đây là chỗ dễ chậm nhất của nhánh này." },
+          { kind: "step", title: "Lấy một trang", sub: "Id giảm dần", data: ["plm.RFD:read"], anchor: ["ORDER BY r.Id DESC", "OFFSET (@PageIndex - 1)"] },
+          { kind: "step", title: "Kèm giờ và số file", sub: "cùng danh sách bản vẽ", data: ["plm.RFDFile:read"], attention: true, anchor: ["DATEDIFF(HOUR", "dw.Drawings"], detail: "Mỗi dòng chạy thêm một truy vấn con COUNT(*) trên RFDFile. Với trang lớn đây là chỗ dễ chậm nhất của nhánh này." },
         ] },
         { title: "Kanban", sub: "= 'kanban'", anchor: ["ELSE IF @ViewMode = 'kanban'", "WHERE rn BETWEEN"], steps: [
           { kind: "step", title: "Đánh số thẻ", sub: "từ 1 trong mỗi cột", anchor: ["ROW_NUMBER() OVER (PARTITION BY r.StatusCode"] },
@@ -134,8 +136,8 @@ END`;
           { kind: "step", title: "Không phân trang", sub: "tổng số dòng = 0", attention: true, anchor: ["SET @ov_TotalRows = 0;"], detail: "@PageIndex và @PageSize bị bỏ qua, và tổng luôn bằng 0 nên giao diện không được dựa vào nó để phân trang." },
         ] },
         { title: "Download", sub: "= 'download'", anchor: ["ELSE IF @ViewMode = 'download'", "-- note: @ov_TotalRows is not assigned"], steps: [
-          { kind: "step", title: "File đính kèm", sub: "của RFD đã lọc", anchor: ["SET @sql = N'SELECT r.Id, f.FileName"] },
-          { kind: "step", title: "Milestone", sub: "nếu được bật", anchor: ["IF @WithMilestone = 1", "WHERE m.RFDId IN"] },
+          { kind: "step", title: "File đính kèm", sub: "của RFD đã lọc", data: ["plm.RFDFile:read"], anchor: ["SET @sql = N'SELECT r.Id, f.FileName"] },
+          { kind: "step", title: "Milestone", sub: "nếu được bật", data: ["plm.RFDMilestone:read"], anchor: ["IF @WithMilestone = 1", "WHERE m.RFDId IN"] },
           { kind: "step", title: "Không gán tổng", sub: "giá trị OUTPUT là NULL", anchor: ["-- note: @ov_TotalRows is not assigned"], detail: "Không nhánh nào trong Download gán @ov_TotalRows, nên phía gọi nhận NULL thay vì 0." },
         ] },
       ] },
