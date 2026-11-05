@@ -1,0 +1,11 @@
+{
+  "name": "agent-flight-deck",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Replay and audit Claude Code sessions, and pack a codebase into a prompt under a token budget. Runs entirely in the browser.",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --check src/pricing.js && node --check src/session.js && node --check src/sample.js && node --check src/packer.js && node --check src/ui.js && node --check src/recorder.js && node --check src/loadsheet.js && node --check src/app.js && node --test test/*.test.mjs",
+    "e2e": "node build.mjs && node test/e2e.mjs"
+  }
+}
