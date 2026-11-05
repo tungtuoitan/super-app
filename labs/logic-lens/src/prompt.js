@@ -59,7 +59,7 @@
   };
 
   // A second, tiny example for code with several entry points (a UI component, a controller, a class).
-  const SECTIONS_EXAMPLE = '{"kind": "section", "title": "On save click", "steps": [{"kind": "start", "title": "onSave()", "tag": "UI"}, {"kind": "call", "title": "api.save(form)", "tag": "API"}]}';
+  const SECTIONS_EXAMPLE = '{"kind": "section", "title": "3. Click \u201cSave\u201d in the edit dialog", "sub": "onSave()", "steps": [{"kind": "start", "title": "Click \u201cSave\u201d", "sub": "onSave(), button disabled while saving", "tag": "USER"}, {"kind": "call", "title": "PUT /products/:id", "tag": "API"}, {"kind": "branch", "lanes": [{"title": "saved", "steps": [{"kind": "step", "title": "Close dialog, show toast", "sub": "list shows the new price", "tag": "UI"}]}, {"title": "error", "steps": [{"kind": "step", "title": "Show error under the form", "sub": "dialog stays open to retry", "tag": "UI"}]}]}]}';
 
   const CHANGE_RULES = [
     "This is a CODE CHANGE. The listing below is the NEW code with the change marked: \"N+|\" lines were added, \"-|\" lines were removed (they have no number in the new code), \"N |\" lines are unchanged.",
@@ -90,13 +90,13 @@
       '- "step": one action.',
       '- "call": a call into another function, method or service whose inside is not shown here.',
       '- "stage": a main phase (shown highlighted). Number main phases "1. ...", "2. ..." when the code has clear phases.',
-      '- "end": the path STOPS here. Add "exit": "return" | "throw" | "respond" (HTTP response, render) | "break" | "continue" | "exit". A lane that ends does not rejoin; inside a loop, "continue" and "break" end only that pass.',
+      '- "end": the path STOPS here. Add "exit": "return" | "throw" | "respond" (HTTP response, render) | "navigate" (go to another page / screen) | "break" | "continue" | "exit". A lane that ends does not rejoin; inside a loop, "continue" and "break" end only that pass.',
       '- "group": several things combined in one phase (tables joined, sources merged). + "items": [{"title", "sub", "lines"}], "note". 2 to 6 items.',
       '- "loop": repeated work (for, while, map, retry, cursor, polling). title like "For each …" / "Retry up to 3×"; + "steps": the body.',
       '- "branch": mutually exclusive paths (if/else, switch, match, pattern, try/catch). + "lanes": [{"title": answer / condition value, "sub", "detail", "lines", "attention", "steps"}]. Lanes that do not end rejoin after the branch.',
       '- "parallel": paths that ALL run at the same time and are awaited together (Promise.all, goroutines + WaitGroup, Task.WhenAll, async gather). Same "lanes" shape.',
       '- "section": only at the top level, for code with several independent entry points (a UI component with effects and event handlers, a controller with several endpoints, a class with several public methods, a reducer with actions). + "steps". Each section starts with its own "start". Example: ' + SECTIONS_EXAMPLE,
-      '"tag" marks an external effect with one short word: DB, API, FILE, QUEUE, CACHE, UI, EMAIL, AI, LOG, AUTH, TIMER, STATE.',
+      '"tag" marks an external effect with one short word: DB, API, FILE, QUEUE, CACHE, UI (what the screen shows changes), USER (something the user does), EMAIL, AI, LOG, AUTH, TIMER, STATE.',
       "",
       "Example of the shape (an invented import function; copy the structure and the style of the wording, not the content):",
       JSON.stringify(EXAMPLE[o.language === "en" ? "en" : "vi"]),
@@ -121,6 +121,14 @@
       "- detail: 1 to 3 plain sentences: why this step exists and what to watch for. No code.",
       "- lines: 1-based line numbers from the numbered listing below, first and last line the box describes. Every box gets lines.",
       "- attention: true on at most 3 boxes a reader must look at twice: surprising behavior, side effects, performance traps, values left unset, a path that behaves differently.",
+      "",
+      "Frontend / UI code (components, pages, screens, forms, event handlers; React, Vue, Angular, Svelte, mobile, plain DOM):",
+      "- Tell it as the USER'S JOURNEY, not as code internals. One section per thing the user does or sees happen, in the order a user meets them: open the page first, then the actions in the order they appear on screen (filter, open a dialog, the buttons inside it, submit, delete…). Number the section titles \"1. …\", \"2. …\".",
+      "- Each section starts with a \"start\" box tagged USER whose title is the action in the user's words: \"Open the page\", \"Click “Save”\", \"Type in the search box\", \"Choose a category\"; the handler or effect name (onSave(), useEffect) goes in the sub. Effects that run by themselves (timers, websockets, a prop changing) start with an untagged \"start\".",
+      "- Say what the user SEES: loading spinners, disabled buttons, dialogs opening and closing, toasts, errors under fields, lists refreshing. Tag those steps UI and put the visible result in the title (\"Show the edit dialog\", \"Disable “Pay”\"), the state variable in the sub.",
+      "- Confirm dialogs (\"Delete this item?\") are a branch: the user's answer is the lane (\"OK\" / \"Cancel\"). Validation is a branch whose failing lane shows the error and ends.",
+      "- Moving to another page ends the path: an \"end\" with \"exit\": \"navigate\" titled with where it goes. If a section opens something the next section works in (a dialog, a step of a wizard), say so in the last box's sub (\"→ user can Save or Cancel\").",
+      "- Rendering is not its own section: fold what the page shows (loading / empty / error / data) into \"Open the page\" as a branch when it matters.",
     ];
     if (change) out.push("", ...CHANGE_RULES);
     out.push("", "Reply with only the JSON object.", "");

@@ -29,7 +29,7 @@
   /* diagram (read by the SVG; light values are also the SVG's own fallbacks) */
   --ll-step-bg: #ffffff; --ll-step-line: #c3ccd5; --ll-stage-bg: #eaf2f8; --ll-stage-line: #8db3cd; --ll-stage-strong: #3c7fa8;
   --ll-item-line: #cdd5dc; --ll-attn: #c8462f; --ll-ink: #16212b; --ll-muted: #66727e; --ll-edge: #7d8996; --ll-accent: #2563eb;
-  --ll-glow: rgba(37, 99, 235, 0.35); --ll-start-bg: #1e2935; --ll-start-ink: #ffffff; --ll-start-sub: #b8c4cf;
+  --ll-glow: rgba(37, 99, 235, 0.35); --ll-start-bg: #1e2935; --ll-user: #0f8f83; --ll-user-bg: #e5f5f2; --ll-start-ink: #ffffff; --ll-start-sub: #b8c4cf;
   --ll-end-bg: #f1f3f5; --ll-end-line: #97a2ad; --ll-loop-bg: rgba(60, 127, 168, 0.04); --ll-section-bg: #f3f5f7; --ll-section-line: #d6dce2;
   --ll-par: #6d5bd0; --ll-par-line: #a99be6; --ll-par-bg: #f1eefc; --ll-q-bg: #fff6e3; --ll-q-line: #e7c27a; --ll-q-ink: #7a5310;
   --ll-tag-bg: #eef1f4; --ll-tag-line: #d3d9df; --ll-tag-ink: #4b5763;
@@ -45,7 +45,7 @@
   --t-c: #6c7a87; --t-s: #6fd3a8; --t-n: #f0a36b; --t-k: #c6a6ff; --t-f: #7fb8ff;
   --ll-step-bg: #161d24; --ll-step-line: #3a4753; --ll-stage-bg: #18293a; --ll-stage-line: #3f6e8f; --ll-stage-strong: #6fb0d8; --ll-item-line: #34404b;
   --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #8796a5; --ll-accent: #6ea8ff; --ll-glow: rgba(110, 168, 255, 0.45);
-  --ll-start-bg: #e5ebf0; --ll-start-ink: #10161c; --ll-start-sub: #4b5967; --ll-end-bg: #1d252d; --ll-end-line: #6d7b88; --ll-loop-bg: rgba(111, 176, 216, 0.05);
+  --ll-start-bg: #e5ebf0; --ll-user: #3cc1b2; --ll-user-bg: #0f2e2b; --ll-start-ink: #10161c; --ll-start-sub: #4b5967; --ll-end-bg: #1d252d; --ll-end-line: #6d7b88; --ll-loop-bg: rgba(111, 176, 216, 0.05);
   --ll-section-bg: #1a2129; --ll-section-line: #2b3640; --ll-par: #a99bff; --ll-par-line: #5b4fa3; --ll-par-bg: #221d3d; --ll-q-bg: #33280f; --ll-q-line: #8a6a2a; --ll-q-ink: #f0c873;
   --ll-tag-bg: #222b33; --ll-tag-line: #34404b; --ll-tag-ink: #b4c0cb;
   --ll-add: #45c784; --ll-add-bg: #10291c; --ll-mod: #f0b13d; --ll-mod-bg: #2e2512; --ll-del: #ff7a66; --ll-del-bg: #351816;
@@ -58,7 +58,7 @@
   --t-c: #6c7a87; --t-s: #6fd3a8; --t-n: #f0a36b; --t-k: #c6a6ff; --t-f: #7fb8ff;
   --ll-step-bg: #161d24; --ll-step-line: #3a4753; --ll-stage-bg: #18293a; --ll-stage-line: #3f6e8f; --ll-stage-strong: #6fb0d8; --ll-item-line: #34404b;
   --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #8796a5; --ll-accent: #6ea8ff; --ll-glow: rgba(110, 168, 255, 0.45);
-  --ll-start-bg: #e5ebf0; --ll-start-ink: #10161c; --ll-start-sub: #4b5967; --ll-end-bg: #1d252d; --ll-end-line: #6d7b88; --ll-loop-bg: rgba(111, 176, 216, 0.05);
+  --ll-start-bg: #e5ebf0; --ll-user: #3cc1b2; --ll-user-bg: #0f2e2b; --ll-start-ink: #10161c; --ll-start-sub: #4b5967; --ll-end-bg: #1d252d; --ll-end-line: #6d7b88; --ll-loop-bg: rgba(111, 176, 216, 0.05);
   --ll-section-bg: #1a2129; --ll-section-line: #2b3640; --ll-par: #a99bff; --ll-par-line: #5b4fa3; --ll-par-bg: #221d3d; --ll-q-bg: #33280f; --ll-q-line: #8a6a2a; --ll-q-ink: #f0c873;
   --ll-tag-bg: #222b33; --ll-tag-line: #34404b; --ll-tag-ink: #b4c0cb;
   --ll-add: #45c784; --ll-add-bg: #10291c; --ll-mod: #f0b13d; --ll-mod-bg: #2e2512; --ll-del: #ff7a66; --ll-del-bg: #351816;
@@ -196,6 +196,7 @@ label.check input { accent-color: var(--accent); }
 .legend div { display: flex; align-items: center; gap: 9px; }
 .lg { width: 26px; height: 14px; border-radius: 4px; flex: none; border: 1.3px solid var(--ll-step-line); background: var(--ll-step-bg); }
 .lg.stage { background: var(--ll-stage-bg); border-color: var(--ll-stage-line); }
+.lg.ustart { background: var(--ll-user-bg); border: 1.5px solid var(--ll-user); border-radius: 7px; }
 .lg.start { background: var(--ll-start-bg); border-color: var(--ll-start-bg); border-radius: 7px; }
 .lg.end { background: var(--ll-end-bg); border-color: var(--ll-end-line); border-radius: 7px; }
 .lg.call { position: relative; } .lg.call::after { content: "↗"; position: absolute; right: 1px; bottom: -3px; font-size: 9px; color: var(--ll-muted); }

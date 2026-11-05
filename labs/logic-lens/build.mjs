@@ -12,6 +12,7 @@ const ORDER = ["flow.js", "flow-text.js", "prompt.js", "diff.js", "layout.js", "
 
 // id → [file, name]; the diagram lives in test/corpus/out/<id>.json
 const CODE = [
+  ["react-product-admin", "react-product-admin.tsx", "Front end · người dùng bấm nút (React)"],
   ["react-checkout", "react-checkout.tsx", "React · trang thanh toán (TSX)"],
   ["express-auth-middleware", "express-auth-middleware.js", "Express · middleware xác thực (JS)"],
   ["order-state-machine", "order-state-machine.ts", "State machine đơn hàng (TS)"],

@@ -251,12 +251,12 @@
     if (n.items && n.items.length) box.appendChild(el("p", "", "Gồm: " + n.items.map((it) => it.title + (it.sub ? " " + it.sub : "")).join(" · ")));
     if (n.note) { const p = el("p", "", n.note); p.style.color = "var(--del)"; box.appendChild(p); }
     const KIND_NOTE = {
-      start: "Điểm bắt đầu: thứ kích hoạt luồng này.",
+      start: n.tag === "USER" ? "Người dùng thao tác: luồng này bắt đầu từ đây." : "Điểm bắt đầu: thứ kích hoạt luồng này.",
       call: "Gọi sang một hàm hoặc dịch vụ khác; bên trong nó không vẽ ở đây.",
       loop: `Các bước trong khung được lặp lại (${(n.steps || []).length} bước).`,
       section: "Một điểm vào độc lập của cùng đoạn code.",
     };
-    if (n.kind === "end") box.appendChild(el("p", "", { throw: "Ném lỗi: đường đi dừng ở đây.", break: "Thoát khỏi vòng lặp.", continue: "Bỏ qua phần còn lại, sang vòng lặp kế tiếp.", respond: "Trả phản hồi và dừng xử lý.", exit: "Thoát chương trình." }[n.exit] || "Trả về: đường đi dừng ở đây."));
+    if (n.kind === "end") box.appendChild(el("p", "", { throw: "Ném lỗi: đường đi dừng ở đây.", break: "Thoát khỏi vòng lặp.", continue: "Bỏ qua phần còn lại, sang vòng lặp kế tiếp.", respond: "Trả phản hồi và dừng xử lý.", exit: "Thoát chương trình.", navigate: "Chuyển sang trang khác: luồng trên trang này dừng ở đây." }[n.exit] || "Trả về: đường đi dừng ở đây."));
     else if (KIND_NOTE[n.kind]) box.appendChild(el("p", "hint-empty", KIND_NOTE[n.kind]));
     const tags = el("div", "tags");
     if (n.tag) tags.appendChild(el("span", "tag", n.tag));

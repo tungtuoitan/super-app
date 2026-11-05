@@ -167,7 +167,7 @@
     } catch (e) { toast("Không tạo được ảnh PNG."); } finally { URL.revokeObjectURL(url); }
   }
   const LEGEND = [
-    ["start", "Điểm bắt đầu (request, sự kiện, lời gọi)"], ["", "Một bước"], ["call", "Gọi hàm / dịch vụ khác"], ["stage", "Giai đoạn chính"],
+    ["ustart", "Người dùng thao tác (bấm, gõ, mở trang)"], ["start", "Điểm bắt đầu khác (request, sự kiện, lịch chạy)"], ["", "Một bước"], ["call", "Gọi hàm / dịch vụ khác"], ["stage", "Giai đoạn chính"],
     ["lane", "Rẽ nhánh: chỉ một nhánh chạy"], ["plane", "Song song: các nhánh chạy cùng lúc"], ["loop", "Lặp lại"], ["end", "Dừng tại đây (return / throw…)"],
     ["attn", "Đáng chú ý"], ["added", "Thay đổi: thêm mới"], ["modified", "Thay đổi: đã sửa"], ["removed", "Thay đổi: đã xoá"],
   ];

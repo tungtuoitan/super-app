@@ -1,1 +1,302 @@
-{"title":"Form thanh toán giỏ hàng","summary":"CheckoutForm tải giỏ hàng khi mở, cho áp mã giảm giá và gửi đơn khi bấm Đặt hàng; chưa có giỏ thì hiện Spinner.","steps":[{"kind":"section","title":"Khi mở form / đổi cartId","sub":"useEffect tải giỏ hàng","lines":[12,18],"steps":[{"kind":"start","title":"useEffect([cartId])","sub":"chạy khi mount hoặc cartId đổi","tag":"STATE","lines":[12,13]},{"kind":"call","title":"api.get(/carts/cartId)","sub":"tải giỏ, bỏ kết quả nếu đã huỷ","tag":"API","lines":[14,17],"detail":"Nếu component bị huỷ hoặc cartId đổi trước khi xong, cờ cancelled chặn setCart. Lỗi tải chỉ hiện toast, form vẫn ở trạng thái Spinner."}]},{"kind":"section","title":"Khi bấm Áp mã","sub":"applyCoupon","lines":[20,25],"steps":[{"kind":"start","title":"applyCoupon()","sub":"mã trống thì thoát luôn","tag":"UI","lines":[20,21]},{"kind":"call","title":"api.post(/coupon)","sub":"ok thì setCart, sai thì cảnh báo","tag":"API","lines":[22,24],"detail":"Khi server trả ok, giỏ hàng được thay bằng giỏ đã giảm giá. Nếu không, chỉ hiện toast 'Mã không hợp lệ'."}]},{"kind":"section","title":"Khi bấm Đặt hàng","sub":"submit form","lines":[27,42],"steps":[{"kind":"start","title":"submit(e)","sub":"chặn submit mặc định của form","tag":"UI","lines":[27,28]},{"kind":"branch","title":"Giỏ hàng có sản phẩm?","lines":[29,32],"lanes":[{"title":"Giỏ trống","sub":"cảnh báo rồi dừng","lines":[29,32],"steps":[{"kind":"end","exit":"return","title":"Toast 'Giỏ hàng trống'","sub":"không gọi API","lines":[30,31]}]},{"title":"Có sản phẩm","sub":"đi tiếp","lines":[33,33],"steps":[]}]},{"kind":"call","title":"api.post(/orders)","sub":"status = saving, gửi cartId và coupon","tag":"API","attention":true,"lines":[33,35],"detail":"Gửi chuỗi coupon đang gõ trong ô nhập, kể cả khi chưa bấm Áp mã hoặc mã chưa hợp lệ. Trong lúc chờ, nút Đặt hàng bị khoá."},{"kind":"branch","title":"Kết quả đặt đơn","lines":[34,41],"lanes":[{"title":"Thành công","sub":"toast rồi chuyển sang /orders/id","attention":true,"lines":[36,37],"detail":"Chuyển trang bằng window.location.assign nên tải lại cả trang. Status vẫn là saving cho đến lúc đó, nên nút luôn bị khoá.","steps":[]},{"title":"Lỗi","sub":"status = error, toast theo loại lỗi","lines":[38,40],"detail":"PaymentError hiện 'Thẻ bị từ chối', lỗi khác hiện thông báo chung. Status về error nên nút Đặt hàng được mở lại.","steps":[]}]}]},{"kind":"section","title":"Hiển thị form","sub":"render","lines":[44,52],"steps":[{"kind":"start","title":"Render CheckoutForm","sub":"chưa có cart: Spinner, có cart: form","tag":"UI","lines":[44,52],"detail":"Form gồm danh sách sản phẩm, ô nhập mã, nút Áp mã và nút Đặt hàng."}]}]}
+{
+ "title": "Thanh toán giỏ hàng",
+ "summary": "Người dùng mở trang thanh toán, có thể nhập và áp mã giảm giá, rồi bấm Đặt hàng để tạo đơn và chuyển sang trang đơn hàng.",
+ "steps": [
+  {
+   "kind": "section",
+   "title": "1. Mở trang thanh toán",
+   "sub": "useEffect theo cartId",
+   "lines": [
+    11,
+    18
+   ],
+   "steps": [
+    {
+     "kind": "start",
+     "title": "Mở trang thanh toán",
+     "sub": "trong lúc chờ: vòng xoay (Spinner)",
+     "tag": "USER",
+     "lines": [
+      11,
+      12
+     ]
+    },
+    {
+     "kind": "call",
+     "title": "Tải giỏ hàng",
+     "sub": "GET /carts/:cartId",
+     "tag": "API",
+     "lines": [
+      14,
+      14
+     ]
+    },
+    {
+     "kind": "branch",
+     "lines": [
+      15,
+      16
+     ],
+     "lanes": [
+      {
+       "title": "tải được",
+       "lines": [
+        15,
+        15
+       ],
+       "steps": [
+        {
+         "kind": "step",
+         "title": "Hiện form thanh toán",
+         "sub": "món hàng, ô mã giảm giá, nút Áp mã, nút Đặt hàng",
+         "tag": "UI",
+         "lines": [
+          45,
+          52
+         ]
+        }
+       ]
+      },
+      {
+       "title": "lỗi",
+       "lines": [
+        16,
+        16
+       ],
+       "attention": true,
+       "steps": [
+        {
+         "kind": "end",
+         "exit": "return",
+         "title": "Toast “Không tải được giỏ hàng”",
+         "sub": "vòng xoay vẫn quay, không có nút thử lại",
+         "tag": "UI",
+         "lines": [
+          16,
+          16
+         ],
+         "detail": "Khi tải lỗi, cart vẫn là null nên trang kẹt ở Spinner; người dùng chỉ còn cách tải lại trang."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "section",
+   "title": "2. Nhập mã rồi bấm “Áp mã”",
+   "sub": "applyCoupon()",
+   "lines": [
+    20,
+    25
+   ],
+   "steps": [
+    {
+     "kind": "start",
+     "title": "Bấm “Áp mã”",
+     "sub": "applyCoupon(); ô mã trống thì không làm gì",
+     "tag": "USER",
+     "lines": [
+      20,
+      20
+     ]
+    },
+    {
+     "kind": "call",
+     "title": "Gửi mã lên server",
+     "sub": "POST /carts/:cartId/coupon",
+     "tag": "API",
+     "lines": [
+      22,
+      22
+     ]
+    },
+    {
+     "kind": "branch",
+     "lines": [
+      23,
+      24
+     ],
+     "lanes": [
+      {
+       "title": "mã hợp lệ",
+       "lines": [
+        23,
+        23
+       ],
+       "steps": [
+        {
+         "kind": "step",
+         "title": "Giá trong giỏ được giảm",
+         "sub": "setCart(res.cart)",
+         "tag": "UI",
+         "lines": [
+          23,
+          23
+         ]
+        }
+       ]
+      },
+      {
+       "title": "mã sai",
+       "lines": [
+        24,
+        24
+       ],
+       "steps": [
+        {
+         "kind": "step",
+         "title": "Toast “Mã không hợp lệ”",
+         "sub": "giỏ giữ nguyên",
+         "tag": "UI",
+         "lines": [
+          24,
+          24
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "section",
+   "title": "3. Bấm “Đặt hàng”",
+   "sub": "submit(e)",
+   "lines": [
+    27,
+    42
+   ],
+   "steps": [
+    {
+     "kind": "start",
+     "title": "Bấm “Đặt hàng”",
+     "sub": "submit(e), chặn submit mặc định của form",
+     "tag": "USER",
+     "lines": [
+      27,
+      28
+     ]
+    },
+    {
+     "kind": "branch",
+     "lines": [
+      29,
+      32
+     ],
+     "lanes": [
+      {
+       "title": "giỏ trống",
+       "lines": [
+        29,
+        32
+       ],
+       "steps": [
+        {
+         "kind": "end",
+         "exit": "return",
+         "title": "Toast “Giỏ hàng trống”",
+         "sub": "không gọi API",
+         "tag": "UI",
+         "lines": [
+          30,
+          31
+         ]
+        }
+       ]
+      },
+      {
+       "title": "có hàng",
+       "lines": [
+        33,
+        33
+       ],
+       "steps": []
+      }
+     ]
+    },
+    {
+     "kind": "step",
+     "title": "Khoá nút Đặt hàng",
+     "sub": "status = saving",
+     "tag": "UI",
+     "lines": [
+      33,
+      33
+     ]
+    },
+    {
+     "kind": "call",
+     "title": "Tạo đơn hàng",
+     "sub": "POST /orders với cartId và mã đang gõ",
+     "tag": "API",
+     "lines": [
+      35,
+      35
+     ],
+     "attention": true,
+     "detail": "Gửi chuỗi mã đang nằm trong ô nhập, kể cả khi người dùng chưa bấm Áp mã hoặc mã đã bị báo sai."
+    },
+    {
+     "kind": "branch",
+     "lines": [
+      34,
+      41
+     ],
+     "lanes": [
+      {
+       "title": "thành công",
+       "lines": [
+        36,
+        37
+       ],
+       "steps": [
+        {
+         "kind": "step",
+         "title": "Toast “Đã đặt đơn #id”",
+         "tag": "UI",
+         "lines": [
+          36,
+          36
+         ]
+        },
+        {
+         "kind": "end",
+         "exit": "navigate",
+         "title": "Sang trang /orders/:id",
+         "sub": "tải lại cả trang",
+         "lines": [
+          37,
+          37
+         ]
+        }
+       ]
+      },
+      {
+       "title": "lỗi",
+       "lines": [
+        38,
+        40
+       ],
+       "steps": [
+        {
+         "kind": "step",
+         "title": "Mở lại nút, báo lỗi",
+         "sub": "thẻ bị từ chối hoặc lỗi chung",
+         "tag": "UI",
+         "lines": [
+          39,
+          40
+         ],
+         "detail": "status về error nên nút Đặt hàng bấm lại được. PaymentError hiện “Thẻ bị từ chối”, lỗi khác hiện “Có lỗi, thử lại”."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

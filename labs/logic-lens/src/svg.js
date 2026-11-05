@@ -15,6 +15,8 @@
   .ll-box{fill:var(--ll-step-bg,#fff);stroke:var(--ll-step-line,#c3ccd5);stroke-width:1.2}
   .ll-stage,.ll-group{fill:var(--ll-stage-bg,#eaf2f8);stroke:var(--ll-stage-line,#8db3cd);stroke-width:1.2}
   .ll-start{fill:var(--ll-start-bg,#1e2935);stroke:var(--ll-start-bg,#1e2935)}
+  .ll-start.ll-user{fill:var(--ll-user-bg,#e5f5f2);stroke:var(--ll-user,#0f8f83);stroke-width:1.6}
+  .ll-userbg{fill:var(--ll-user,#0f8f83)} .ll-usert{fill:#fff}
   .ll-end{fill:var(--ll-end-bg,#f1f3f5);stroke:var(--ll-end-line,#97a2ad);stroke-width:1.2}
   .ll-lane{fill:var(--ll-step-bg,#fff);stroke:var(--ll-stage-line,#8db3cd);stroke-width:1.2}
   .ll-plane{fill:var(--ll-step-bg,#fff);stroke:var(--ll-par-line,#a99be6);stroke-width:1.2}
@@ -104,7 +106,11 @@
   }
 
   const CHANGE_LABEL = { added: "+ MỚI", modified: "~ SỬA", removed: "− XOÁ" };
-  const EXIT_LABEL = { return: "RETURN", throw: "THROW", break: "BREAK", continue: "CONTINUE", exit: "EXIT", respond: "RESPOND" };
+  const EXIT_LABEL = { return: "RETURN", throw: "THROW", break: "BREAK", continue: "CONTINUE", exit: "EXIT", respond: "RESPOND", navigate: "CHUYỂN TRANG" };
+  // tags shown in words: a user action and what the screen shows read better than code-ish labels
+  const TAG_LABEL = { USER: "NGƯỜI DÙNG", UI: "MÀN HÌNH" };
+  /** A start box the user triggers (click, type, open a page) looks different from a system trigger. */
+  const userStart = (b) => b.kind === "start" && b.node && b.node.tag === "USER";
 
   function chip(x, y, text, bgClass, textClass) {
     const w = chipW(text);
@@ -113,7 +119,7 @@
 
   function textLines(b) {
     const t = [];
-    const dark = b.kind === "start";
+    const dark = b.kind === "start" && !userStart(b);
     if (b.kind === "item") {
       const cx = r1(b.x + b.w / 2);
       let yy = b.y + (b.h - (b.titleLines.length * FONT.item.lh + (b.subLines.length ? 2 + b.subLines.length * FONT.sub.lh : 0))) / 2 + FONT.item.size;
@@ -148,7 +154,8 @@
     const pill = b.kind === "end" || b.kind === "start";
     const rx = pill ? Math.min(b.h / 2, 22) : b.kind === "loop" ? 12 : b.kind === "section" ? 8 : 10;
     const shadow = !b.container && b.kind !== "section" ? " ll-shadow" : "";
-    let s = `<rect class="ll-shape ${base}${cont}${change}${attn}${shadow}" x="${r1(b.x)}" y="${r1(b.y)}" width="${r1(b.w)}" height="${r1(b.h)}" rx="${rx}"/>`;
+    const user = userStart(b) ? " ll-user" : "";
+    let s = `<rect class="ll-shape ${base}${user}${cont}${change}${attn}${shadow}" x="${r1(b.x)}" y="${r1(b.y)}" width="${r1(b.w)}" height="${r1(b.h)}" rx="${rx}"/>`;
     if (b.kind === "lane" || b.kind === "plane") s += `<path class="${b.kind === "plane" ? "ll-pband" : "ll-band"}" d="M${r1(b.x + 8)} ${r1(b.y + 0.6)}H${r1(b.x + b.w - 8)}a6 6 0 0 1 6 3.4v.6H${r1(b.x + 2)}v-.6a6 6 0 0 1 6-3.4z"/>`;
     if (b.kind === "section") s += `<rect class="ll-sbar" x="${r1(b.x)}" y="${r1(b.y + 8)}" width="4" height="${r1(b.h - 16)}" rx="2"/>`;
     if (b.kind === "call") s += `<text class="ll-callic" x="${r1(b.x + b.w - 12)}" y="${r1(b.y + b.h - 9)}" text-anchor="end">↗</text>`; // calls another function
@@ -161,7 +168,11 @@
       s += `<g class="ll-chipg"><title>Đáng chú ý</title><circle class="ll-attnbg" cx="${r1(right - 7.5)}" cy="${r1(b.y)}" r="7.5"/><text class="ll-chip ll-ct" x="${r1(right - 7.5)}" y="${r1(b.y + 3.6)}" text-anchor="middle">!</text></g>`;
       right -= 19;
     }
-    if (n.tag) { const w = chipW(n.tag); s += chip(right - w, b.y - 7.5, n.tag, "ll-tagbg", "ll-tagt"); }
+    if (n.tag) {
+      const label = TAG_LABEL[n.tag] || n.tag;
+      const w = chipW(label);
+      s += n.tag === "USER" ? chip(right - w, b.y - 7.5, label, "ll-userbg", "ll-usert") : chip(right - w, b.y - 7.5, label, "ll-tagbg", "ll-tagt");
+    }
     return s;
   }
 

@@ -20,13 +20,16 @@ Dán code (hoặc một thay đổi code), nhận sơ đồ từng bước của
 
 Đánh dấu của Claude được đối chiếu với diff thật: ô có dòng code bị đổi mà Claude quên đánh dấu sẽ tự được đánh dấu “đã sửa”.
 
-Menu **Ví dụ…** có 16 ví dụ có sẵn sơ đồ: 13 loại code (React, Express, Redux, state machine, Go worker pool, Python async, C# controller, Java đệ quy, Kotlin coroutine, Rust, PHP job, SQL, Bash) và 3 thay đổi sửa bug (JS, Python, SQL).
+Code giao diện (React, Vue, Angular, mobile…) được vẽ theo **hành trình người dùng**: mỗi phần là một thao tác, đánh số theo thứ tự người dùng gặp (1. Mở trang → 2. Bấm “Sửa” → 3. Trong hộp thoại bấm “Lưu”…), kèm những gì màn hình hiện ra (nhãn MÀN HÌNH) và chỗ chuyển trang.
+
+Menu **Ví dụ…** có 17 ví dụ có sẵn sơ đồ: 14 loại code (trang quản lý sản phẩm theo thao tác người dùng, React, Express, Redux, state machine, Go worker pool, Python async, C# controller, Java đệ quy, Kotlin coroutine, Rust, PHP job, SQL, Bash) và 3 thay đổi sửa bug (JS, Python, SQL).
 
 ## Đọc sơ đồ
 
 | Hình | Nghĩa |
 |---|---|
-| Ô đen bo tròn | điểm bắt đầu (request, sự kiện, lời gọi hàm) |
+| Ô xanh ngọc có nhãn NGƯỜI DÙNG | người dùng thao tác: mở trang, bấm nút, gõ, chọn |
+| Ô đen bo tròn | điểm bắt đầu khác (request, sự kiện, lời gọi hàm, lịch chạy) |
 | Ô trắng | một bước |
 | Ô có vạch hai bên | gọi sang hàm / dịch vụ khác |
 | Ô xanh | giai đoạn chính |

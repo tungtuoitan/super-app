@@ -8,7 +8,7 @@
  *     kind "step"     one action
  *     kind "call"     a call into another function / service (drawn as a subroutine box)
  *     kind "stage"    a main phase (drawn highlighted)
- *     kind "end"      the path stops here: + exit: return | throw | break | continue | exit | respond
+ *     kind "end"      the path stops here: + exit: return | throw | break | continue | exit | respond | navigate
  *                     (drawn as a pill; its lane does not rejoin)
  *     kind "group"    several things combined in one phase: + items: {title, sub, attention, lines}[], note
  *     kind "loop"     repeated work: + steps: Node[] (the body)
@@ -46,7 +46,7 @@
   "use strict";
 
   const KINDS = ["start", "step", "call", "stage", "end", "group", "loop", "branch", "parallel", "section"];
-  const EXITS = ["return", "throw", "break", "continue", "exit", "respond"];
+  const EXITS = ["return", "throw", "break", "continue", "exit", "respond", "navigate"];
   /** Kinds that hold lanes / child steps. */
   const LANED = { branch: 1, parallel: 1 };
   const NESTED = { loop: 1, section: 1 };
@@ -95,7 +95,7 @@
     entrypoint: "section", method: "section", endpoint: "section", effect: "section",
   };
   // kind words that also say how a path stops
-  const EXIT_KINDS = { exit: "exit", return: "return", throw: "throw", raise: "throw", break: "break", continue: "continue", respond: "respond", reject: "throw" };
+  const EXIT_KINDS = { exit: "exit", return: "return", throw: "throw", raise: "throw", break: "break", continue: "continue", respond: "respond", reject: "throw", navigate: "navigate", redirect: "navigate" };
 
   const CHANGES = { added: "added", add: "added", new: "added", modified: "modified", changed: "modified", modify: "modified", updated: "modified", fixed: "modified", removed: "removed", deleted: "removed", remove: "removed", delete: "removed" };
   /** Copy change marks from a loose object onto a normalized one. */

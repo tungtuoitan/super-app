@@ -1,0 +1,46 @@
+{
+  "title": "Trang quản lý sản phẩm",
+  "summary": "Người dùng mở trang để xem danh sách sản phẩm, gõ tìm kiếm, sửa giá trong hộp thoại, xoá sau khi xác nhận, hoặc bấm Thêm để sang trang tạo mới.",
+  "steps": [
+    { "kind": "section", "title": "1. Mở trang / gõ tìm kiếm", "sub": "useEffect theo query", "lines": [14, 18], "steps": [
+      { "kind": "start", "title": "Mở trang hoặc gõ tìm kiếm", "sub": "useEffect chạy lại mỗi khi query đổi; lúc đầu hiện Spinner", "tag": "USER", "lines": [14, 14] },
+      { "kind": "call", "title": "Tải danh sách", "sub": "GET /products?q=…", "tag": "API", "lines": [15, 15], "attention": true, "detail": "Mỗi lần gõ một ký tự là một request, không có debounce. Request cũ về sau có thể ghi đè kết quả của request mới." },
+      { "kind": "branch", "lines": [16, 17], "lanes": [
+        { "title": "tải được", "lines": [16, 16], "steps": [ { "kind": "step", "title": "Hiện bảng sản phẩm", "sub": "mỗi dòng có nút Sửa và Xoá", "tag": "UI", "lines": [53, 55] } ] },
+        { "title": "lỗi", "lines": [17, 17], "steps": [ { "kind": "end", "exit": "return", "title": "Toast “Không tải được danh sách”", "sub": "lần đầu thì trang kẹt ở Spinner", "tag": "UI", "lines": [17, 17] } ] } ] }
+    ] },
+    { "kind": "section", "title": "2. Bấm “Sửa” ở một dòng", "sub": "openEdit(p)", "lines": [20, 23], "steps": [
+      { "kind": "start", "title": "Bấm “Sửa”", "sub": "openEdit(p)", "tag": "USER", "lines": [20, 20] },
+      { "kind": "step", "title": "Mở hộp thoại Sửa sản phẩm", "sub": "bản sao sản phẩm, xoá lỗi cũ → người dùng sửa giá, rồi Lưu hoặc Huỷ", "tag": "UI", "lines": [21, 22] }
+    ] },
+    { "kind": "section", "title": "3. Trong hộp thoại: bấm “Lưu”", "sub": "save()", "lines": [25, 42], "steps": [
+      { "kind": "start", "title": "Bấm “Lưu”", "sub": "save()", "tag": "USER", "lines": [25, 26] },
+      { "kind": "branch", "lines": [27, 30], "lanes": [
+        { "title": "giá ≤ 0", "lines": [27, 30], "steps": [ { "kind": "end", "exit": "return", "title": "Báo lỗi dưới ô giá", "sub": "“Giá phải lớn hơn 0”, hộp thoại vẫn mở", "tag": "UI", "lines": [28, 29] } ] },
+        { "title": "giá hợp lệ", "lines": [31, 31], "steps": [] } ] },
+      { "kind": "step", "title": "Khoá nút Lưu", "sub": "saving = true", "tag": "UI", "lines": [31, 31] },
+      { "kind": "call", "title": "Lưu sản phẩm", "sub": "PUT /products/:id", "tag": "API", "lines": [33, 33] },
+      { "kind": "branch", "lines": [32, 39], "lanes": [
+        { "title": "lưu được", "lines": [34, 36], "steps": [ { "kind": "step", "title": "Đóng hộp thoại, toast “Đã lưu”", "sub": "dòng trong bảng cập nhật giá mới", "tag": "UI", "lines": [34, 36] } ] },
+        { "title": "lỗi", "lines": [37, 38], "steps": [ { "kind": "step", "title": "Báo lỗi trong hộp thoại", "sub": "giữ nguyên để thử lại", "tag": "UI", "lines": [38, 38] } ] } ] },
+      { "kind": "step", "title": "Mở lại nút Lưu", "sub": "finally: saving = false", "tag": "UI", "lines": [39, 41] }
+    ] },
+    { "kind": "section", "title": "4. Trong hộp thoại: bấm “Huỷ”", "sub": "setEditing(null)", "lines": [59, 59], "steps": [
+      { "kind": "start", "title": "Bấm “Huỷ” hoặc đóng", "sub": "setEditing(null)", "tag": "USER", "lines": [56, 59] },
+      { "kind": "end", "exit": "return", "title": "Đóng hộp thoại", "sub": "bỏ mọi thay đổi chưa lưu", "tag": "UI", "lines": [59, 59] }
+    ] },
+    { "kind": "section", "title": "5. Bấm “Xoá” ở một dòng", "sub": "remove(p)", "lines": [44, 49], "steps": [
+      { "kind": "start", "title": "Bấm “Xoá”", "sub": "remove(p)", "tag": "USER", "lines": [44, 44] },
+      { "kind": "step", "title": "Hỏi “Xoá tên sản phẩm?”", "sub": "window.confirm", "tag": "UI", "lines": [45, 45] },
+      { "kind": "branch", "lines": [45, 48], "lanes": [
+        { "title": "Huỷ", "lines": [45, 45], "steps": [ { "kind": "end", "exit": "return", "title": "Không xoá gì", "lines": [45, 45] } ] },
+        { "title": "OK", "lines": [46, 48], "steps": [
+          { "kind": "call", "title": "Xoá trên server", "sub": "DELETE /products/:id", "tag": "API", "lines": [46, 46], "attention": true, "detail": "Không có try/catch: nếu xoá lỗi thì người dùng không thấy thông báo nào và dòng vẫn nằm trong bảng." },
+          { "kind": "step", "title": "Bỏ dòng khỏi bảng, toast “Đã xoá”", "tag": "UI", "lines": [47, 48] } ] } ] }
+    ] },
+    { "kind": "section", "title": "6. Bấm “Thêm”", "sub": "navigate", "lines": [53, 53], "steps": [
+      { "kind": "start", "title": "Bấm “Thêm”", "sub": "nút ở góc trang", "tag": "USER", "lines": [53, 53] },
+      { "kind": "end", "exit": "navigate", "title": "Sang trang /products/new", "lines": [53, 53] }
+    ] }
+  ]
+}
