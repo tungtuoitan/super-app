@@ -116,8 +116,8 @@ END`;
       { kind: "group", title: "2. Ghép phần FROM (nối bảng)", anchor: ["-- 2. Build the FROM", "WHERE r2.StyleId = r.StyleId"], detail: "Cùng một phần FROM được dùng lại cho mọi chế độ xem. Sáu lần nối StandardRegistry chỉ để đổi mã thành tên hiển thị.",
         items: [{ title: "plm.RFD" }, { title: "Style", sub: "(Product + Collection)" }, { title: "6 bảng tra mã", sub: "(StandardRegistry)" }, { title: "File bản vẽ", sub: "gộp thành 1 chuỗi" }],
         note: "Show latest: chỉ giữ RFD có Id lớn nhất mỗi style, tính sau khi lọc" },
-      { kind: "step", title: "3. Chọn chế độ", sub: "chỉ một nhánh được chạy", anchor: ["-- 3. Pick the view mode", "IF @ViewMode = 'list'"] },
-      { kind: "branch", title: "@ViewMode", lanes: [
+      { kind: "step", title: "3. Chọn chế độ", sub: "theo @ViewMode, chỉ một nhánh chạy", anchor: ["-- 3. Pick the view mode", "IF @ViewMode = 'list'"] },
+      { kind: "branch", lanes: [
         { title: "Lưới Rows", sub: "= 'list'", anchor: ["IF @ViewMode = 'list'", "OFFSET (@PageIndex - 1)"], steps: [
           { kind: "step", title: "Đếm tổng", sub: "số RFD sau lọc", anchor: ["SELECT @ov_TotalRows = COUNT(*) ' + @from"] },
           { kind: "step", title: "Lấy một trang", sub: "Id giảm dần", anchor: ["ORDER BY r.Id DESC", "OFFSET (@PageIndex - 1)"] },

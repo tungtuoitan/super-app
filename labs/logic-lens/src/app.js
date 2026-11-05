@@ -1,367 +1,9 @@
-/* Logic Lens — page logic. */
+/* Logic Lens — asking Claude, exports, and wiring the page together (boot). */
 (function (LL) {
   "use strict";
 
-  const $ = (id) => document.getElementById(id);
-  const F = LL.flow;
-  const LAY = LL.layout;
-
-  const S = {
-    code: "",
-    flow: null,
-    nodes: [],
-    byId: new Map(),
-    selected: null,
-    tour: false,
-    zoom: "fit",
-    lang: "vi",
-    detail: "normal",
-    codeAtDraw: null,
-    ctl: null,
-    sample: undefined, // undefined = still checking, null = unavailable
-    downloads: null,
-    lineEls: [],
-    hlRange: null,
-  };
-
-  // ───────────────────────── storage (best effort) ─────────────────────────
-  const KEY = "logic-lens:v1";
-  function loadDraft() {
-    try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { return null; }
-  }
-  let saveTimer = 0;
-  function writeDraft() {
-    clearTimeout(saveTimer);
-    saveTimer = 0;
-    try {
-      localStorage.setItem(KEY, JSON.stringify({ code: S.code, flow: S.flow, lang: S.lang, detail: S.detail, example: $("example").value }));
-    } catch (e) { /* storage unavailable: drafts just won't persist */ }
-  }
-  /** Debounced while typing; `now` for changes that must survive an immediate reload (a new diagram). */
-  function saveDraft(now) {
-    if (now) { writeDraft(); return; }
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(writeDraft, 400);
-  }
-
-  // ───────────────────────── small helpers ─────────────────────────
-  let toastTimer = 0;
-  function toast(msg) {
-    let el = document.querySelector(".toast");
-    if (!el) { el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
-    el.textContent = msg;
-    el.hidden = false;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => (el.hidden = true), 2600);
-  }
-  async function copyText(text) {
-    try { await navigator.clipboard.writeText(text); return true; } catch (e) {
-      try {
-        const ta = document.createElement("textarea");
-        ta.value = text; ta.style.position = "fixed"; ta.style.left = "-9999px";
-        document.body.appendChild(ta); ta.select();
-        const ok = document.execCommand && document.execCommand("copy");
-        ta.remove();
-        return !!ok;
-      } catch (e2) { return false; }
-    }
-  }
-  function setStatus(text, kind) {
-    const el = $("status");
-    el.textContent = text || "";
-    el.className = "status" + (kind ? " " + kind : "");
-  }
-  function linesLabel(r) {
-    return r[0] === r[1] ? "Dòng " + r[0] : "Dòng " + r[0] + "–" + r[1];
-  }
-  async function capability(name) {
-    try { return window.claude && typeof window.claude.use === "function" ? await window.claude.use(name) : null; } catch (e) { return null; }
-  }
-
-  // ───────────────────────── code panel ─────────────────────────
-  function setCode(code, mode) {
-    S.code = String(code || "").replace(/\r\n/g, "\n");
-    $("code").value = S.code;
-    buildCodeView();
-    setCodeMode(mode || (S.code ? "view" : "edit"));
-    updateCodeInfo();
-  }
-  function updateCodeInfo() {
-    const n = S.code ? S.code.split("\n").length : 0;
-    $("code-info").textContent = n ? `${n} dòng · ${F.guessLanguage(S.code)}` : "Dán code vào đây";
-  }
-  function buildCodeView() {
-    const view = $("code-view");
-    view.textContent = "";
-    S.lineEls = [];
-    S.hlRange = null;
-    const frag = document.createDocumentFragment();
-    S.code.split("\n").forEach((line, i) => {
-      const row = document.createElement("div");
-      row.className = "code-line";
-      const n = document.createElement("span");
-      n.className = "n";
-      n.textContent = i + 1;
-      const c = document.createElement("span");
-      c.className = "c";
-      c.textContent = line || " ";
-      row.append(n, c);
-      frag.appendChild(row);
-      S.lineEls.push(row);
-    });
-    view.appendChild(frag);
-  }
-  function setCodeMode(mode) {
-    const editing = mode === "edit";
-    $("code").hidden = !editing;
-    $("code-view").hidden = editing;
-    $("code-toggle").textContent = editing ? "Xem theo dòng" : "Sửa code";
-    $("code-toggle").hidden = editing && !S.code;
-  }
-  function highlightLines(range, scroll) {
-    if (S.hlRange) for (let i = S.hlRange[0]; i <= S.hlRange[1]; i++) S.lineEls[i - 1] && S.lineEls[i - 1].classList.remove("hl");
-    S.hlRange = null;
-    if (!range || !S.lineEls.length) return;
-    const a = Math.max(1, range[0]);
-    const b = Math.min(S.lineEls.length, range[1]);
-    if (a > b) return;
-    for (let i = a; i <= b; i++) S.lineEls[i - 1].classList.add("hl");
-    S.hlRange = [a, b];
-    if (scroll) {
-      if (!$("code").hidden) setCodeMode("view");
-      const view = $("code-view");
-      const el = S.lineEls[a - 1];
-      const span = S.lineEls[b - 1].offsetTop + S.lineEls[b - 1].offsetHeight - el.offsetTop;
-      const top = span < view.clientHeight * 0.8 ? el.offsetTop - (view.clientHeight - span) / 3 : el.offsetTop - 24;
-      view.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-    }
-  }
-
-  // ───────────────────────── diagram ─────────────────────────
-  function setFlow(flow, opts) {
-    const o = opts || {};
-    S.flow = flow;
-    S.nodes = flow ? F.walkNodes(flow) : [];
-    S.byId = new Map(S.nodes.map((x, i) => [x.id, Object.assign({ index: i }, x)]));
-    if (!S.byId.has(S.selected)) S.selected = null;
-    $("d-title").textContent = flow && flow.title ? flow.title : flow && flow.steps.length ? "Sơ đồ" : "Chưa có sơ đồ";
-    $("d-summary").textContent = flow && flow.summary ? flow.summary : "";
-    if (!o.fromText) {
-      $("dsl").value = flow ? F.toText(flow) : "";
-      $("dsl-errors").textContent = "";
-    }
-    renderDiagram();
-    renderExplain();
-    updateTourUi();
-    saveDraft(!o.fromText);
-  }
-
-  function renderDiagram() {
-    const canvas = $("canvas");
-    if (!S.flow || !S.flow.steps.length) {
-      canvas.innerHTML = '<div class="empty">Dán code bên trái rồi bấm “Vẽ sơ đồ bằng Claude”, hoặc chọn một ví dụ.</div>';
-      return;
-    }
-    S.narrow = canvas.clientWidth > 0 && canvas.clientWidth < 600;
-    // on narrow screens draw at the real width so text stays at its true size
-    const lay = LAY.layout(S.flow, S.narrow ? { narrow: true, width: Math.max(320, canvas.clientWidth - 16) } : {});
-    canvas.classList.toggle("narrow", S.narrow);
-    S.lay = lay;
-    canvas.innerHTML = LAY.toSvg(S.flow, lay, { interactive: true });
-    const svg = canvas.firstElementChild;
-    applyZoom();
-    svg.querySelectorAll(".ll-node").forEach((g) => {
-      g.addEventListener("click", () => select(g.getAttribute("data-id"), { fromDiagram: true }));
-      g.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(g.getAttribute("data-id"), { fromDiagram: true }); }
-      });
-    });
-    svg.querySelectorAll(".ll-itemg").forEach((g) => g.addEventListener("click", () => select(g.getAttribute("data-group"), { fromDiagram: true })));
-    applySelection(false);
-  }
-
-  function applyZoom() {
-    const canvas = $("canvas");
-    const svg = canvas.querySelector("svg");
-    if (!svg || !S.lay) return;
-    canvas.classList.toggle("fit", S.zoom === "fit");
-    if (S.zoom === "fit") { svg.style.width = ""; }
-    else svg.style.width = Math.round(S.lay.width * S.zoom) + "px";
-    $("zoom-fit").textContent = S.zoom === "fit" ? "Vừa khung" : Math.round(S.zoom * 100) + "%";
-  }
-  function zoomBy(f) {
-    const canvas = $("canvas");
-    const svg = canvas.querySelector("svg");
-    if (!svg || !S.lay) return;
-    const current = S.zoom === "fit" ? svg.getBoundingClientRect().width / S.lay.width : S.zoom;
-    S.zoom = Math.min(2.5, Math.max(0.4, Math.round(current * f * 10) / 10));
-    applyZoom();
-  }
-
-  function applySelection(scrollIntoView) {
-    const svg = $("canvas").querySelector("svg");
-    if (!svg) return;
-    svg.querySelectorAll(".ll-node").forEach((g) => {
-      const id = g.getAttribute("data-id");
-      const on = id === S.selected;
-      g.classList.toggle("sel", on);
-      g.classList.toggle("hl", on && S.tour);
-      g.classList.toggle("dim", S.tour && !on && S.selected != null);
-      g.setAttribute("aria-pressed", String(on));
-    });
-    svg.querySelectorAll(".ll-itemg").forEach((g) => g.classList.toggle("dim", S.tour && S.selected != null && g.getAttribute("data-group") !== S.selected));
-    if (scrollIntoView && S.selected && S.lay) {
-      const box = S.lay.boxes.find((b) => b.id === S.selected);
-      const canvas = $("canvas");
-      if (box) {
-        const scale = svg.getBoundingClientRect().width / S.lay.width;
-        const svgTop = svg.getBoundingClientRect().top - canvas.getBoundingClientRect().top + canvas.scrollTop;
-        const svgLeft = svg.getBoundingClientRect().left - canvas.getBoundingClientRect().left + canvas.scrollLeft;
-        const y = svgTop + (box.y + box.h / 2) * scale;
-        const x = svgLeft + (box.x + box.w / 2) * scale;
-        canvas.scrollTo({ top: Math.max(0, y - canvas.clientHeight / 2), left: Math.max(0, x - canvas.clientWidth / 2), behavior: "smooth" });
-        // on phones the canvas is not a scroll box: bring the diagram row into view
-        const r = svg.getBoundingClientRect();
-        const by = r.top + (box.y + box.h / 2) * scale;
-        if (canvas.scrollHeight <= canvas.clientHeight + 2 && (by < 80 || by > window.innerHeight - 40)) window.scrollBy({ top: by - window.innerHeight / 2, behavior: "smooth" });
-      }
-    }
-  }
-
-  function select(id, opts) {
-    const o = opts || {};
-    if (!S.byId.has(id)) id = null;
-    S.selected = id;
-    applySelection(!o.fromDiagram);
-    renderExplain();
-    updateTourUi();
-    const entry = id ? S.byId.get(id) : null;
-    highlightLines(entry && entry.node.lines, !o.fromCode);
-    $("explain-panel").classList.toggle("open", !!entry);
-    document.body.classList.toggle("sheet-open", !!entry);
-  }
-
-  /** Smallest box whose line range contains this code line. */
-  function boxForLine(line) {
-    let best = null;
-    for (const e of S.nodes) {
-      const r = e.node.lines;
-      if (!r || line < r[0] || line > r[1]) continue;
-      if (!best || r[1] - r[0] < best.node.lines[1] - best.node.lines[0] || (r[1] - r[0] === best.node.lines[1] - best.node.lines[0] && e.path.length > best.path.length)) best = e;
-    }
-    return best;
-  }
-
-  // ───────────────────────── explanation ─────────────────────────
-  function renderExplain() {
-    const el = $("explain");
-    el.textContent = "";
-    const entry = S.selected ? S.byId.get(S.selected) : null;
-    $("explain-hint").textContent = entry ? "" : "bấm một ô trên sơ đồ";
-    if (!entry) {
-      const p = document.createElement("p");
-      p.className = "explain-empty";
-      p.textContent = S.flow && S.flow.steps.length
-        ? `Sơ đồ có ${S.nodes.length} ô. Bấm vào một ô để xem nó làm gì và tô sáng đúng dòng code, hoặc bấm “Đi từng bước” để đọc lần lượt từ trên xuống.`
-        : "Chưa có sơ đồ.";
-      el.appendChild(p);
-      return;
-    }
-    const n = entry.node;
-    const pos = document.createElement("div");
-    pos.className = "pos";
-    pos.textContent = `Ô ${entry.index + 1} / ${S.nodes.length}`;
-    el.appendChild(pos);
-    const crumb = whereText(entry);
-    if (crumb) { const c = document.createElement("div"); c.className = "crumb"; c.textContent = crumb; el.appendChild(c); }
-    const h = document.createElement("h3");
-    h.textContent = n.title || "…";
-    el.appendChild(h);
-    if (n.sub) { const s = document.createElement("div"); s.className = "sub"; s.textContent = n.sub; el.appendChild(s); }
-    if (n.detail) for (const para of n.detail.split("\n")) { const p = document.createElement("p"); p.textContent = para; el.appendChild(p); }
-    if (n.items && n.items.length) {
-      const p = document.createElement("p");
-      p.textContent = "Gồm: " + n.items.map((it) => it.title + (it.sub ? " " + it.sub : "")).join(" · ");
-      el.appendChild(p);
-    }
-    if (n.note) { const p = document.createElement("p"); p.style.color = "var(--red)"; p.textContent = n.note; el.appendChild(p); }
-    if (n.kind === "end") { const p = document.createElement("p"); p.textContent = "Đường đi này dừng ở đây (return / throw / thoát), không đi tiếp xuống các bước bên dưới."; el.appendChild(p); }
-    if (n.kind === "loop") { const p = document.createElement("p"); p.textContent = `Các bước bên trong khung được lặp lại (${(n.steps || []).length} bước).`; el.appendChild(p); }
-    const tags = document.createElement("div");
-    tags.className = "tags";
-    const tag = (cls, text) => { const t = document.createElement("span"); t.className = "tag " + cls; t.textContent = text; tags.appendChild(t); return t; };
-    if (entry.lane) tag("stage", "Nhánh: chỉ chạy khi rơi vào trường hợp này");
-    else if (n.kind === "stage" || n.kind === "group") tag("stage", "Giai đoạn chính");
-    if (n.attention) tag("attn", "Đáng chú ý");
-    if (n.lines) {
-      const t = tag("lines", linesLabel(n.lines));
-      t.setAttribute("role", "button");
-      t.tabIndex = 0;
-      t.title = "Hiện các dòng này trong khung code";
-      const go = () => highlightLines(n.lines, true);
-      t.addEventListener("click", go);
-      t.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
-      if (S.codeAtDraw != null && S.codeAtDraw !== S.code) tag("", "code đã sửa sau khi vẽ, số dòng có thể lệch");
-    }
-    if (tags.childNodes.length) el.appendChild(tags);
-    if (n.lines && S.code) el.appendChild(snippet(n.lines));
-  }
-
-  /** "Nhánh 2/4 · Kanban → bước 1/3" style location of a box inside branches and loops. */
-  function whereText(entry) {
-    const parts = [];
-    for (const p of entry.path || []) {
-      if (p.loop != null) parts.push("Trong vòng lặp “" + p.loop + "”");
-      else parts.push(`${p.branchTitle ? p.branchTitle + ": " : ""}nhánh ${p.laneIndex + 1}/${p.laneCount} “${p.lane}”`);
-    }
-    if (entry.lane) return parts.length ? parts.join(" › ") + " · chỉ chạy khi rơi vào trường hợp này" : "Chỉ chạy khi rơi vào trường hợp này";
-    return parts.join(" › ");
-  }
-
-  function snippet(range) {
-    const ls = S.code.split("\n");
-    const a = Math.max(1, range[0]);
-    const b = Math.min(ls.length, range[1]);
-    const box = document.createElement("div");
-    box.className = "snippet";
-    box.setAttribute("aria-label", linesLabel(range));
-    const MAX = 14;
-    for (let i = a; i <= Math.min(b, a + MAX - 1); i++) {
-      const row = document.createElement("div");
-      const num = document.createElement("span");
-      num.textContent = i;
-      const txt = document.createElement("span");
-      txt.textContent = ls[i - 1] || " ";
-      row.append(num, txt);
-      box.appendChild(row);
-    }
-    if (b - a + 1 > MAX) { const more = document.createElement("span"); more.className = "more"; more.textContent = `… thêm ${b - a + 1 - MAX} dòng (xem trong khung code)`; box.appendChild(more); }
-    return box;
-  }
-
-  // ───────────────────────── tour ─────────────────────────
-  function updateTourUi() {
-    const has = S.nodes.length > 0;
-    const entry = S.selected ? S.byId.get(S.selected) : null;
-    $("counter").textContent = has ? (entry ? `${entry.index + 1} / ${S.nodes.length}` : `${S.nodes.length} ô`) : "";
-    $("prev").disabled = !has || (entry && entry.index === 0);
-    $("next").disabled = !has || (entry && entry.index === S.nodes.length - 1);
-    $("tour").disabled = !has;
-    $("tour").setAttribute("aria-pressed", String(S.tour));
-    $("tour").textContent = S.tour ? "■ Thoát chế độ từng bước" : "▶ Đi từng bước";
-  }
-  function step(dir) {
-    if (!S.nodes.length) return;
-    const entry = S.selected ? S.byId.get(S.selected) : null;
-    let i = entry ? entry.index + dir : dir > 0 ? 0 : S.nodes.length - 1;
-    i = Math.max(0, Math.min(S.nodes.length - 1, i));
-    select(S.nodes[i].id);
-  }
-  function toggleTour() {
-    S.tour = !S.tour;
-    if (S.tour && !S.selected && S.nodes.length) select(S.nodes[0].id);
-    else { applySelection(false); updateTourUi(); }
-  }
+  const { S, $, F, LAY, toast, copyText, setStatus, linesLabel, capability, setCode, updateCodeInfo, buildCodeView, setCodeMode, highlightLines, loadDraft, writeDraft, saveDraft, flushDraft } = LL.app;
+  const { setFlow, renderDiagram, MIN_FIT, applyZoom, zoomBy, applySelection, select, sheetMode, boxForLine, renderExplain, whereText, snippet, updateTourUi, step, toggleTour } = LL.app;
 
   // ───────────────────────── Claude ─────────────────────────
   const ERR = {
@@ -403,7 +45,10 @@
       const result = await S.sample.json(prompt, {
         signal: S.ctl.signal,
         modelTier: "default",
-        onText: ({ text }) => setStatus(`Claude đang viết sơ đồ… ${text.length.toLocaleString("vi-VN")} ký tự`, "busy"),
+        onText: ({ text }) => {
+          const titles = [...text.matchAll(/"title"\s*:\s*"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1]).slice(1);
+          setStatus(titles.length ? `Claude đã thấy ${titles.length} bước: ${titles.slice(-6).join(" · ")}…` : "Claude đang viết sơ đồ…", "busy");
+        },
       });
       let flow;
       try { flow = F.normalize(result); } catch (err) { throw { code: "bad_shape" }; }
@@ -415,7 +60,9 @@
       $("example").value = "";
       setFlow(flow);
       setCodeMode("view");
-      setStatus(`Xong sau ${Math.round((Date.now() - started) / 1000)} giây: ${S.nodes.length} ô. Bấm vào ô để xem giải thích.`);
+      const limit = { simple: 10, normal: 16, detailed: 26 }[S.detail] || 16;
+      const dense = S.nodes.length > limit * 1.5;
+      setStatus(`Xong sau ${Math.round((Date.now() - started) / 1000)} giây: ${S.nodes.length} ô. Bấm vào ô để xem giải thích.` + (dense ? " Sơ đồ khá dày: thử mức “Gọn” hoặc dán từng hàm để dễ đọc hơn." : ""));
     } catch (e) {
       const code = e && e.code;
       if (code === "cancelled") setStatus("Đã dừng.");
@@ -529,6 +176,7 @@
       const line = S.lineEls.indexOf(row) + 1;
       const hit = line ? boxForLine(line) : null;
       if (hit) select(hit.id, { fromCode: true });
+      else if (line && S.nodes.length) { select(null); toast("Dòng " + line + " không thuộc ô nào trên sơ đồ."); }
     });
     $("sheet-prev").addEventListener("click", () => step(-1));
     $("sheet-next").addEventListener("click", () => step(1));
@@ -538,6 +186,7 @@
       new ResizeObserver(() => {
         const w = $("canvas").clientWidth;
         if (S.flow && w > 0 && (w < 600) !== !!S.narrow) renderDiagram();
+        else applyZoom();
       }).observe($("canvas"));
     }
     $("stop").addEventListener("click", () => S.ctl && S.ctl.abort());
@@ -561,11 +210,23 @@
     });
 
     $("tour").addEventListener("click", toggleTour);
+    $("paste-own").addEventListener("click", () => {
+      setCodeMode("edit");
+      $("code").scrollIntoView({ block: "center", behavior: "smooth" });
+      $("code").focus({ preventScroll: true });
+      $("code").select();
+      setStatus("Dán code của bạn vào khung (thay cho ví dụ), rồi bấm “Vẽ sơ đồ bằng Claude”.");
+    });
     $("prev").addEventListener("click", () => step(-1));
     $("next").addEventListener("click", () => step(1));
     $("zoom-in").addEventListener("click", () => zoomBy(1.2));
     $("zoom-out").addEventListener("click", () => zoomBy(1 / 1.2));
-    $("zoom-fit").addEventListener("click", () => { S.zoom = "fit"; applyZoom(); });
+    $("zoom-fit").addEventListener("click", () => {
+      const svg = $("canvas").querySelector("svg");
+      const shrunk = svg && S.lay && $("canvas").classList.contains("fit") && svg.getBoundingClientRect().width / S.lay.width < MIN_FIT;
+      S.zoom = typeof S.zoom === "number" ? "auto" : S.zoom === "all" || shrunk ? "auto" : "all";
+      applyZoom();
+    });
     $("copy-mermaid").addEventListener("click", async () => {
       if (!S.flow) return;
       const ok = await copyText(F.toMermaid(S.flow));
@@ -595,12 +256,13 @@
     document.addEventListener("keydown", (e) => {
       const tag = (e.target && e.target.tagName) || "";
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target && e.target.closest && e.target.closest("#code-view") && /^Arrow/.test(e.key)) return;
       if (e.key === "ArrowRight" || e.key === "ArrowDown" && S.tour) { if (S.nodes.length) { e.preventDefault(); step(1); } }
       else if (e.key === "ArrowLeft" || e.key === "ArrowUp" && S.tour) { if (S.nodes.length) { e.preventDefault(); step(-1); } }
       else if (e.key === "Escape" && (S.tour || S.selected)) { S.tour = false; select(null); }
     });
 
-    window.addEventListener("pagehide", () => { if (saveTimer) writeDraft(); });
+    window.addEventListener("pagehide", flushDraft);
 
     // theme
     const themeBtn = $("theme");
@@ -650,5 +312,5 @@
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
-  LL.app = { _state: S, select, setFlow };
+  LL.app._state = S;
 })(globalThis.LL = globalThis.LL || {});

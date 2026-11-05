@@ -165,6 +165,7 @@ details.alt[open] summary { margin-bottom: 8px; }
 
 /* explanation: top of the left column on desktop, a bottom sheet on narrow screens */
 .explain-panel .sheet-only { display: none; }
+@media (min-width: 1061px) { .explain-panel.idle .explain { display: none; } .explain-panel.idle .panel-h { border-bottom: 0; } }
 .snippet { margin: 2px 0 0; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 6px; padding: 6px 0; font: 12px/1.55 var(--f-mono); overflow-x: auto; max-height: 220px; overflow-y: auto; }
 .snippet div { display: grid; grid-template-columns: 3em 1fr; white-space: pre; min-width: max-content; }
 .snippet span:first-child { text-align: right; padding-right: 10px; color: var(--faint); user-select: none; }
@@ -193,11 +194,11 @@ details.alt[open] summary { margin-bottom: 8px; }
   .grid > .col:not(.col-left) { order: 1; }
   .code-edit, .code-view { height: 40vh; min-height: 260px; }
   /* explanation becomes a sheet over the bottom of the screen while a box is selected */
-  .explain-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; border-radius: 14px 14px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18); max-height: 52vh; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom, 0px); transform: translateY(105%); visibility: hidden; transition: transform 0.2s ease, visibility 0s linear 0.2s; }
+  .explain-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; border-radius: 14px 14px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18); max-height: 46vh; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom, 0px); transform: translateY(105%); visibility: hidden; transition: transform 0.2s ease, visibility 0s linear 0.2s; }
   .explain-panel.open { transform: none; visibility: visible; transition: transform 0.2s ease; }
   .explain-panel .explain { overflow: auto; }
   .explain-panel .sheet-only { display: grid; }
-  body.sheet-open main { padding-bottom: 52vh; }
+  body.sheet-open main { padding-bottom: 46vh; }
 }
 @media (max-width: 560px) {
   .brand span { display: none; }
@@ -296,6 +297,7 @@ details.alt[open] summary { margin-bottom: 8px; }
           <span class="counter" id="counter"></span>
           <button class="icon-btn" id="next" type="button" aria-label="Bước sau">›</button>
           <span class="spacer"></span>
+          <button class="btn sm" id="paste-own" type="button">Dán code của bạn</button>
           <button class="icon-btn" id="zoom-out" type="button" aria-label="Thu nhỏ">−</button>
           <button class="btn sm ghost" id="zoom-fit" type="button">Vừa khung</button>
           <button class="icon-btn" id="zoom-in" type="button" aria-label="Phóng to">+</button>
@@ -459,8 +461,8 @@ details.alt[open] summary { margin-bottom: 8px; }
       if (kind === "group") {
         out.items = arr(n.items || n.children || n.parts).slice(0, LIMITS.items)
           .map((it) => (it && typeof it === "object"
-            ? { title: str(it.title || it.label || it.name, LIMITS.title), sub: str(it.sub || it.subtitle, LIMITS.sub), attention: !!(it.attention || it.warn) }
-            : { title: str(it, LIMITS.title), sub: "", attention: false }))
+            ? { title: str(it.title || it.label || it.name, LIMITS.title), sub: str(it.sub || it.subtitle, LIMITS.sub), attention: !!(it.attention || it.warn), lines: rng(it.lines || it.range) }
+            : { title: str(it, LIMITS.title), sub: "", attention: false, lines: null }))
           .filter((it) => it.title);
         out.note = str(n.note, LIMITS.sub);
       } else if (kind === "loop") {
@@ -488,9 +490,33 @@ details.alt[open] summary { margin-bottom: 8px; }
       steps: top.slice(0, LIMITS.steps).map((n) => node(n, 1)).filter(Boolean),
     };
     // a model that numbers lines from 0: shift every range by one
-    if (sawZero) eachNode(flow, (n) => { if (n.lines) n.lines = [n.lines[0] + 1, n.lines[1] + 1]; });
-    else eachNode(flow, (n) => { if (n.lines && n.lines[0] < 1) n.lines = null; });
+    const fixRange = (r) => (!r ? null : sawZero ? [r[0] + 1, r[1] + 1] : r[0] < 1 ? null : r);
+    eachNode(flow, (n) => {
+      n.lines = fixRange(n.lines);
+      if (n.items) for (const it of n.items) it.lines = fixRange(it.lines);
+    });
+    markUnreachable(flow);
     return flow;
+  }
+
+  const UNREACHABLE = "không bao giờ chạy tới";
+
+  /** Boxes listed after an end box in the same sequence can never run: flag them instead of drawing them as normal steps. */
+  function markUnreachable(flow) {
+    const visit = (list) => {
+      let ended = false;
+      for (const n of list) {
+        if (ended && !n.unreachable) {
+          n.unreachable = true;
+          n.attention = true;
+          if (!n.sub.startsWith(UNREACHABLE)) n.sub = n.sub ? UNREACHABLE + " · " + n.sub : UNREACHABLE;
+        }
+        if (n.kind === "end") ended = true;
+        if (n.kind === "branch") for (const l of n.lanes) visit(l.steps);
+        if (n.kind === "loop") visit(n.steps);
+      }
+    };
+    visit(flow.steps);
   }
 
   /** Visit every node and lane (not group items). */
@@ -503,129 +529,6 @@ details.alt[open] summary { margin-bottom: 8px; }
       }
     };
     visit(flow.steps);
-  }
-
-  // ───────────────────────── text format ─────────────────────────
-
-  const KEYWORDS = { step: "step", stage: "stage", warn: "warn", end: "end", group: "group", loop: "loop", branch: "branch", lane: "lane", item: "item", note: "note",
-    // Vietnamese aliases
-    buoc: "step", "bước": "step", "giai-doan": "stage", "nhom": "group", "nhóm": "group", "nhanh": "branch", "nhánh": "branch", lap: "loop", "lặp": "loop", "ket-thuc": "end" };
-
-  /** Parse the text format. Returns {flow, errors: [{line, message}]}. Never throws. */
-  function parseText(text) {
-    const errors = [];
-    const flow = { title: "", summary: "", steps: [] };
-    // containers: root / lane / loop take nodes; group takes item/note; branch takes lanes
-    const stack = [{ indent: -1, list: flow.steps, kind: "root" }];
-    let lastNode = null; // where a following "> detail" line goes
-    let lastItem = null;
-    const src = String(text || "").replace(/\t/g, "  ").split(/\r?\n/);
-
-    for (let i = 0; i < src.length; i++) {
-      const raw = src[i];
-      if (!raw.trim() || /^\s*(#|\/\/)/.test(raw)) continue;
-      const indent = raw.match(/^ */)[0].length;
-      const line = raw.trim();
-
-      const meta = line.match(/^(title|summary|tiêu đề|tóm tắt)\s*:\s*(.*)$/i);
-      if (meta && indent === 0) {
-        if (/^(title|tiêu đề)$/i.test(meta[1])) flow.title = str(meta[2], 120);
-        else flow.summary = longStr(meta[2], 600);
-        continue;
-      }
-      if (line.startsWith(">")) {
-        if (lastNode) lastNode.detail = (lastNode.detail ? lastNode.detail + "\n" : "") + line.slice(1).trim();
-        else errors.push({ line: i + 1, message: "Dòng giải thích “>” phải nằm ngay dưới một ô." });
-        continue;
-      }
-
-      const m = line.match(/^([^\s]+)\s*(.*)$/);
-      const kw = KEYWORDS[m[1].toLowerCase()];
-      if (!kw) {
-        errors.push({ line: i + 1, message: `Không hiểu từ “${m[1]}”. Mỗi dòng bắt đầu bằng step, stage, warn, end, group, item, note, loop, branch hoặc lane.` });
-        continue;
-      }
-      let rest = m[2];
-      let attention = false;
-      if (/\s!$|^!$/.test(rest)) { attention = true; rest = rest.replace(/\s*!$/, ""); }
-      let range = null;
-      const at = rest.match(/\s*@\s*(\d+)\s*(?:[-–]\s*(\d+))?\s*$/);
-      if (at) { range = lines([at[1], at[2] || at[1]]); rest = rest.slice(0, at.index); }
-      const [title, ...subParts] = rest.split("|");
-      const t = str(title, LIMITS.title);
-      const sub = str(subParts.join("|"), LIMITS.sub);
-
-      while (stack.length > 1 && indent <= stack[stack.length - 1].indent) stack.pop();
-      const top = stack[stack.length - 1];
-
-      if (kw === "item" || kw === "note") {
-        if (top.kind !== "group") { errors.push({ line: i + 1, message: `“${m[1]}” phải thụt vào bên dưới một group.` }); continue; }
-        if (kw === "item") { if (top.owner.items.length < LIMITS.items) top.owner.items.push({ title: t || "…", sub, attention }); }
-        else top.owner.note = str(rest, LIMITS.sub);
-        lastNode = null;
-        continue;
-      }
-      if (kw === "lane") {
-        if (top.kind !== "branch") { errors.push({ line: i + 1, message: "“lane” phải thụt vào bên dưới một branch." }); continue; }
-        const ln = { title: t || "…", sub, detail: "", lines: range, attention, steps: [] };
-        top.owner.lanes.push(ln);
-        stack.push({ indent, list: ln.steps, kind: "lane", owner: ln });
-        lastNode = ln;
-        continue;
-      }
-      if (top.kind === "branch") { errors.push({ line: i + 1, message: "Bên dưới branch, mỗi dòng phải là một lane." }); continue; }
-      if (top.kind === "group") { errors.push({ line: i + 1, message: "Bên dưới group chỉ dùng item hoặc note." }); continue; }
-
-      const node = { kind: kw === "warn" ? "step" : kw, title: t, sub, detail: "", lines: range, attention: attention || kw === "warn" };
-      if (kw === "group") { node.items = []; node.note = ""; }
-      if (kw === "loop") node.steps = [];
-      if (kw === "branch") node.lanes = [];
-      if (kw !== "branch" && !t) errors.push({ line: i + 1, message: "Ô này cần có tiêu đề." });
-      top.list.push(node);
-      if (kw === "group") stack.push({ indent, kind: "group", owner: node });
-      if (kw === "branch") stack.push({ indent, kind: "branch", owner: node });
-      if (kw === "loop") stack.push({ indent, list: node.steps, kind: "loop", owner: node });
-      lastNode = kw === "branch" ? null : node;
-      lastItem = null;
-    }
-    eachNode(flow, (n) => { if (n.kind === "branch" && !n.lanes.length) errors.push({ line: 0, message: "Có một branch chưa có lane nào." }); });
-    return { flow, errors };
-  }
-
-  /** Serialize a Flow back to the text format. */
-  function toText(flow) {
-    const out = [];
-    if (flow.title) out.push("title: " + flow.title);
-    if (flow.summary) out.push("summary: " + flow.summary.replace(/\n+/g, " "));
-    if (out.length) out.push("");
-    const head = (kw, n, pad) => {
-      let s = pad + (kw + " ").padEnd(6) + (n.title || "");
-      if (n.sub) s += " | " + n.sub;
-      if (n.lines) s += "   @" + n.lines[0] + (n.lines[1] !== n.lines[0] ? "-" + n.lines[1] : "");
-      if (n.attention && kw !== "warn") s += " !";
-      out.push(s.replace(/\s+$/, ""));
-      if (n.detail) for (const d of n.detail.split("\n")) if (d.trim()) out.push(pad + "  > " + d.trim());
-    };
-    const walk = (list, pad) => {
-      for (const n of list) {
-        if (n.kind === "branch") {
-          head("branch", n, pad);
-          for (const l of n.lanes) {
-            head("lane", l, pad + "  ");
-            walk(l.steps, pad + "    ");
-          }
-          continue;
-        }
-        head(n.kind === "step" && n.attention ? "warn" : n.kind, n, pad);
-        if (n.kind === "group") {
-          for (const it of n.items || []) out.push(pad + "  item  " + it.title + (it.sub ? " | " + it.sub : "") + (it.attention ? " !" : ""));
-          if (n.note) out.push(pad + "  note  " + n.note);
-        }
-        if (n.kind === "loop") walk(n.steps, pad + "  ");
-      }
-    };
-    walk(flow.steps, "");
-    return out.join("\n") + "\n";
   }
 
   // ───────────────────────── traversal ─────────────────────────
@@ -667,77 +570,6 @@ details.alt[open] summary { margin-bottom: 8px; }
     if (last.kind === "end") return true;
     if (last.kind === "branch") return last.lanes.every((l) => endsPath(l.steps));
     return false;
-  }
-
-  // ───────────────────────── Mermaid ─────────────────────────
-
-  function toMermaid(flow) {
-    const out = ["flowchart TD"];
-    let n = 0;
-    const id = () => "n" + ++n;
-    const label = (x) => {
-      const t = (x.title || "").replace(/"/g, "'");
-      const s = (x.sub || "").replace(/"/g, "'");
-      return `"${s ? `<b>${t}</b><br/><small>${s}</small>` : t}"`;
-    };
-    const cls = { stage: [], attention: [], end: [] };
-    // returns {first: [ids], last: [ids that continue]}
-    const seq = (list, indent) => {
-      let first = null;
-      let prevLast = null;
-      for (const node of list) {
-        let ends;
-        if (node.kind === "branch") {
-          const heads = [];
-          const tails = [];
-          for (const l of node.lanes) {
-            const lid = id();
-            out.push(`${indent}${lid}[${label(l)}]`);
-            if (l.attention) cls.attention.push(lid);
-            heads.push(lid);
-            const inner = seq(l.steps, indent);
-            if (inner.first) { for (const f of inner.first) out.push(`${indent}${lid} --> ${f}`); tails.push(...inner.last); }
-            else tails.push(lid);
-          }
-          ends = { first: heads, last: tails, label: node.title };
-        } else if (node.kind === "group") {
-          const gid = id();
-          const parts = (node.items || []).map((it) => it.title + (it.sub ? " (" + it.sub + ")" : "")).join(" · ");
-          const sub = [node.sub, parts, node.note].filter(Boolean).join("<br/>");
-          out.push(`${indent}${gid}[${label({ title: node.title, sub })}]`);
-          cls.stage.push(gid);
-          if (node.attention) cls.attention.push(gid);
-          ends = { first: [gid], last: [gid] };
-        } else if (node.kind === "loop") {
-          const sid = "s" + ++n;
-          out.push(`${indent}subgraph ${sid}["↻ ${(node.title || "").replace(/"/g, "'")}"]`);
-          const inner = seq(node.steps, indent + "  ");
-          out.push(`${indent}end`);
-          if (node.attention) cls.attention.push(sid);
-          ends = inner.first ? { first: inner.first, last: inner.last } : { first: [sid], last: [sid] };
-        } else {
-          const nid = id();
-          out.push(node.kind === "end" ? `${indent}${nid}([${label(node)}])` : `${indent}${nid}[${label(node)}]`);
-          if (node.kind === "stage") cls.stage.push(nid);
-          if (node.kind === "end") cls.end.push(nid);
-          if (node.attention) cls.attention.push(nid);
-          ends = { first: [nid], last: node.kind === "end" ? [] : [nid] };
-        }
-        const arrow = ends.label ? ` -- "${ends.label.replace(/"/g, "'")}" --> ` : " --> ";
-        if (prevLast) for (const a of prevLast) for (const b of ends.first) out.push(`${indent}${a}${arrow}${b}`);
-        if (!first) first = ends.first;
-        prevLast = ends.last;
-      }
-      return { first, last: prevLast || [] };
-    };
-    seq(flow.steps, "  ");
-    out.push("  classDef stage fill:#e4eff6,stroke:#3c7fa8,color:#16212b");
-    out.push("  classDef endnode fill:#eef1f4,stroke:#5f6c78,color:#16212b");
-    out.push("  classDef attention stroke:#c8462f,stroke-dasharray:5 4");
-    if (cls.stage.length) out.push("  class " + cls.stage.join(",") + " stage");
-    if (cls.end.length) out.push("  class " + cls.end.join(",") + " endnode");
-    if (cls.attention.length) out.push("  class " + cls.attention.join(",") + " attention");
-    return out.join("\n") + "\n";
   }
 
   // ───────────────────────── code helpers ─────────────────────────
@@ -786,6 +618,226 @@ details.alt[open] summary { margin-bottom: 8px; }
     return flow;
   }
 
+  LL.flow = Object.assign(LL.flow || {}, { normalize, walkNodes, eachNode, endsPath, countBoxes, guessLanguage, numberLines, resolveAnchors, markUnreachable, LIMITS, KINDS });
+  // helpers shared with flow-text.js and prompt.js
+  LL.flow._ = { str, longStr, lines };
+})(globalThis.LL = globalThis.LL || {});
+
+// ── flow-text.js
+/* Logic Lens — the plain-text diagram format (parse / serialize) and Mermaid export. Format reference: flow.js header. */
+(function (LL) {
+  "use strict";
+
+  const { str, longStr, lines } = LL.flow._;
+  const { LIMITS, eachNode, markUnreachable } = LL.flow;
+
+  // ───────────────────────── text format ─────────────────────────
+
+  const KEYWORDS = { step: "step", stage: "stage", warn: "warn", end: "end", group: "group", loop: "loop", branch: "branch", lane: "lane", item: "item", note: "note",
+    // Vietnamese aliases
+    buoc: "step", "bước": "step", "giai-doan": "stage", "nhom": "group", "nhóm": "group", "nhanh": "branch", "nhánh": "branch", lap: "loop", "lặp": "loop", "ket-thuc": "end" };
+
+  /** Parse the text format. Returns {flow, errors: [{line, message}]}. Never throws. */
+  function parseText(text) {
+    const errors = [];
+    const flow = { title: "", summary: "", steps: [] };
+    // containers: root / lane / loop take nodes; group takes item/note; branch takes lanes
+    const stack = [{ indent: -1, list: flow.steps, kind: "root" }];
+    let lastNode = null; // where a following "> detail" line goes
+    const src = String(text || "").replace(/\t/g, "  ").split(/\r?\n/);
+
+    for (let i = 0; i < src.length; i++) {
+      const raw = src[i];
+      if (!raw.trim() || /^\s*(#|\/\/)/.test(raw)) continue;
+      const indent = raw.match(/^ */)[0].length;
+      const line = raw.trim();
+
+      const meta = line.match(/^(title|summary|tiêu đề|tóm tắt)\s*:\s*(.*)$/i);
+      if (meta && indent === 0) {
+        if (/^(title|tiêu đề)$/i.test(meta[1])) flow.title = str(meta[2], 120);
+        else flow.summary = longStr(meta[2], 600);
+        continue;
+      }
+      if (line.startsWith(">")) {
+        if (lastNode) lastNode.detail = (lastNode.detail ? lastNode.detail + "\n" : "") + line.slice(1).trim();
+        else errors.push({ line: i + 1, message: "Dòng giải thích “>” phải nằm ngay dưới một ô." });
+        continue;
+      }
+
+      const m = line.match(/^([^\s]+)\s*(.*)$/);
+      const kw = KEYWORDS[m[1].toLowerCase()];
+      if (!kw) {
+        errors.push({ line: i + 1, message: `Không hiểu từ “${m[1]}”. Mỗi dòng bắt đầu bằng step, stage, warn, end, group, item, note, loop, branch hoặc lane.` });
+        continue;
+      }
+      let rest = m[2];
+      let attention = false;
+      if (/\s!$|^!$/.test(rest)) { attention = true; rest = rest.replace(/\s*!$/, ""); }
+      let range = null;
+      const at = rest.match(/\s*@\s*(\d+)\s*(?:[-–]\s*(\d+))?\s*$/);
+      if (at) { range = lines([at[1], at[2] || at[1]]); rest = rest.slice(0, at.index); }
+      // " | " (with spaces) separates title and sub-line, so code like `a || b` stays in the title
+      const bar = rest.search(/\s\|\s|\s\|$/);
+      const t = str(bar === -1 ? rest : rest.slice(0, bar), LIMITS.title);
+      const sub = str(bar === -1 ? "" : rest.slice(bar + 2), LIMITS.sub);
+
+      while (stack.length > 1 && indent <= stack[stack.length - 1].indent) stack.pop();
+      const top = stack[stack.length - 1];
+
+      if (kw === "item" || kw === "note") {
+        if (top.kind !== "group") { errors.push({ line: i + 1, message: `“${m[1]}” phải thụt vào bên dưới một group.` }); continue; }
+        if (kw === "item") { if (top.owner.items.length < LIMITS.items) top.owner.items.push({ title: t || "…", sub, attention, lines: range }); }
+        else top.owner.note = str(rest, LIMITS.sub);
+        lastNode = null;
+        continue;
+      }
+      if (kw === "lane") {
+        if (top.kind !== "branch") { errors.push({ line: i + 1, message: "“lane” phải thụt vào bên dưới một branch." }); continue; }
+        const ln = { title: t || "…", sub, detail: "", lines: range, attention, steps: [] };
+        top.owner.lanes.push(ln);
+        stack.push({ indent, list: ln.steps, kind: "lane", owner: ln });
+        lastNode = ln;
+        continue;
+      }
+      if (top.kind === "branch") { errors.push({ line: i + 1, message: "Bên dưới branch, mỗi dòng phải là một lane." }); continue; }
+      if (top.kind === "group") { errors.push({ line: i + 1, message: "Bên dưới group chỉ dùng item hoặc note." }); continue; }
+
+      const node = { kind: kw === "warn" ? "step" : kw, title: t, sub, detail: "", lines: range, attention: attention || kw === "warn" };
+      if (kw === "group") { node.items = []; node.note = ""; }
+      if (kw === "loop") node.steps = [];
+      if (kw === "branch") node.lanes = [];
+      if (kw !== "branch" && !t) errors.push({ line: i + 1, message: "Ô này cần có tiêu đề." });
+      top.list.push(node);
+      if (kw === "group") stack.push({ indent, kind: "group", owner: node });
+      if (kw === "branch") stack.push({ indent, kind: "branch", owner: node });
+      if (kw === "loop") stack.push({ indent, list: node.steps, kind: "loop", owner: node });
+      lastNode = node;
+    }
+    eachNode(flow, (n) => { if (n.kind === "branch" && !n.lanes.length) errors.push({ line: 0, message: "Có một branch chưa có lane nào." }); });
+    const before = JSON.stringify(flow);
+    markUnreachable(flow);
+    if (JSON.stringify(flow) !== before) errors.push({ line: 0, message: "Có ô đứng sau một “end” trong cùng nhánh: ô đó sẽ không bao giờ chạy tới." });
+    return { flow, errors };
+  }
+
+  /** Serialize a Flow back to the text format. */
+  function toText(flow) {
+    const out = [];
+    if (flow.title) out.push("title: " + flow.title);
+    if (flow.summary) out.push("summary: " + flow.summary.replace(/\n+/g, " "));
+    if (out.length) out.push("");
+    const head = (kw, n, pad) => {
+      let s = pad + (kw + " ").padEnd(6) + (n.title || "");
+      if (n.sub) s += " | " + n.sub;
+      if (n.lines) s += "   @" + n.lines[0] + (n.lines[1] !== n.lines[0] ? "-" + n.lines[1] : "");
+      if (n.attention && kw !== "warn") s += " !";
+      out.push(s.replace(/\s+$/, ""));
+      if (n.detail) for (const d of n.detail.split("\n")) if (d.trim()) out.push(pad + "  > " + d.trim());
+    };
+    const walk = (list, pad) => {
+      for (const n of list) {
+        if (n.kind === "branch") {
+          head("branch", n, pad);
+          for (const l of n.lanes) {
+            head("lane", l, pad + "  ");
+            walk(l.steps, pad + "    ");
+          }
+          continue;
+        }
+        head(n.kind === "step" && n.attention ? "warn" : n.kind, n, pad);
+        if (n.kind === "group") {
+          for (const it of n.items || []) out.push(pad + "  item  " + it.title + (it.sub ? " | " + it.sub : "") + (it.lines ? "   @" + it.lines[0] + (it.lines[1] !== it.lines[0] ? "-" + it.lines[1] : "") : "") + (it.attention ? " !" : ""));
+          if (n.note) out.push(pad + "  note  " + n.note);
+        }
+        if (n.kind === "loop") walk(n.steps, pad + "  ");
+      }
+    };
+    walk(flow.steps, "");
+    return out.join("\n") + "\n";
+  }
+
+  // ───────────────────────── Mermaid ─────────────────────────
+
+  function toMermaid(flow) {
+    const out = ["flowchart TD"];
+    let n = 0;
+    const id = () => "n" + ++n;
+    const mm = (v) => String(v || "").replace(/"/g, "#quot;").replace(/</g, "#lt;").replace(/>/g, "#gt;");
+    const label = (x) => {
+      const t = mm(x.title);
+      const s = mm(x.sub);
+      return `"${s ? `<b>${t}</b><br/><small>${s}</small>` : t}"`;
+    };
+    const cls = { stage: [], attention: [], end: [] };
+    // returns {first: [ids], last: [ids that continue]}
+    const seq = (list, indent) => {
+      let first = null;
+      let prevLast = null;
+      for (const node of list) {
+        let ends;
+        if (node.kind === "branch") {
+          const heads = [];
+          const tails = [];
+          for (const l of node.lanes) {
+            const lid = id();
+            out.push(`${indent}${lid}[${label(l)}]`);
+            if (l.attention) cls.attention.push(lid);
+            heads.push(lid);
+            const inner = seq(l.steps, indent);
+            if (inner.first) { for (const f of inner.first) out.push(`${indent}${lid} --> ${f}`); tails.push(...inner.last); }
+            else tails.push(lid);
+          }
+          ends = { first: heads, last: tails, label: node.title };
+        } else if (node.kind === "group") {
+          const gid = id();
+          const parts = (node.items || []).map((it) => it.title + (it.sub ? " (" + it.sub + ")" : "")).join(" · ");
+          const sub = [node.sub, parts, node.note].filter(Boolean).join("<br/>");
+          out.push(`${indent}${gid}[${label({ title: node.title, sub })}]`);
+          cls.stage.push(gid);
+          if (node.attention) cls.attention.push(gid);
+          ends = { first: [gid], last: [gid] };
+        } else if (node.kind === "loop") {
+          const sid = "s" + ++n;
+          out.push(`${indent}subgraph ${sid}["↻ ${(node.title || "").replace(/"/g, "'")}"]`);
+          const inner = seq(node.steps, indent + "  ");
+          out.push(`${indent}end`);
+          if (node.attention) cls.attention.push(sid);
+          ends = inner.first ? { first: inner.first, last: inner.last } : { first: [sid], last: [sid] };
+        } else {
+          const nid = id();
+          out.push(node.kind === "end" ? `${indent}${nid}([${label(node)}])` : `${indent}${nid}[${label(node)}]`);
+          if (node.kind === "stage") cls.stage.push(nid);
+          if (node.kind === "end") cls.end.push(nid);
+          if (node.attention) cls.attention.push(nid);
+          ends = { first: [nid], last: node.kind === "end" ? [] : [nid] };
+        }
+        const arrow = ends.label ? ` -- "${mm(ends.label)}" --> ` : " --> ";
+        if (prevLast) for (const a of prevLast) for (const b of ends.first) out.push(`${indent}${a}${arrow}${b}`);
+        if (!first) first = ends.first;
+        prevLast = ends.last;
+      }
+      return { first, last: prevLast || [] };
+    };
+    seq(flow.steps, "  ");
+    out.push("  classDef stage fill:#e4eff6,stroke:#3c7fa8,color:#16212b");
+    out.push("  classDef endnode fill:#eef1f4,stroke:#5f6c78,color:#16212b");
+    out.push("  classDef attention stroke:#c8462f,stroke-dasharray:5 4");
+    if (cls.stage.length) out.push("  class " + cls.stage.join(",") + " stage");
+    if (cls.end.length) out.push("  class " + cls.end.join(",") + " endnode");
+    if (cls.attention.length) out.push("  class " + cls.attention.join(",") + " attention");
+    return out.join("\n") + "\n";
+  }
+
+  Object.assign(LL.flow, { parseText, toText, toMermaid });
+})(globalThis.LL = globalThis.LL || {});
+
+// ── prompt.js
+/* Logic Lens — the instruction sent to Claude, and reading a pasted reply back into a flow. */
+(function (LL) {
+  "use strict";
+
+  const { normalize, parseText, guessLanguage, numberLines } = LL.flow;
+
   // ───────────────────────── prompt ─────────────────────────
 
   const SIZE = {
@@ -794,24 +846,47 @@ details.alt[open] summary { margin-bottom: 8px; }
     detailed: { total: 26, top: "6 to 12", depth: 2, extra: "Include every meaningful check and branch, still within the limits." },
   };
 
-  const EXAMPLE_JSON = `{
-  "title": "Search RFD",
-  "summary": "Builds a dynamic SQL query from optional filters, then runs exactly one view mode and returns rows plus totals.",
-  "steps": [
-    {"kind": "step", "title": "Receive parameters", "sub": "filters, page, view mode", "lines": [1, 14], "detail": "Every filter defaults to NULL, meaning: do not filter on it."},
-    {"kind": "stage", "title": "1. Build the filter", "sub": "one AND clause per non-NULL parameter", "lines": [19, 25]},
-    {"kind": "group", "title": "2. Build FROM", "lines": [27, 46], "items": [{"title": "plm.RFD"}, {"title": "Style", "sub": "Product + Collection"}], "note": "Show latest keeps the newest RFD per style"},
-    {"kind": "step", "title": "3. Pick the view mode", "sub": "@ViewMode", "lines": [53, 53]},
-    {"kind": "branch", "title": "@ViewMode", "lanes": [
-      {"title": "= 'list'", "lines": [54, 64], "steps": [
-        {"kind": "step", "title": "Count all rows", "lines": [56, 56]},
-        {"kind": "loop", "title": "For each row on the page", "sub": "add file count", "lines": [57, 62], "steps": [{"kind": "step", "title": "Count files", "sub": "one sub-query per row", "attention": true, "lines": [59, 59]}]}
-      ]},
-      {"title": "unknown mode", "attention": true, "lines": [90, 92], "steps": [{"kind": "end", "title": "Throw error", "sub": "RAISERROR 50001", "lines": [91, 91]}]}
-    ]},
-    {"kind": "stage", "title": "Return result", "sub": "rows + @ov_TotalRows", "lines": [94, 97]}
-  ]
-}`;
+  // One worked example per output language (Claude mirrors the example's wording). Content is invented.
+  const EXAMPLE = {
+    en: {
+      title: "Import orders from CSV",
+      summary: "Reads a supplier CSV, collects bad rows instead of stopping, gives up above 10% bad rows, then saves new and changed orders in one transaction.",
+      steps: [
+        { kind: "step", title: "Receive the file", sub: "path, dry_run flag", lines: [1, 2] },
+        { kind: "loop", title: "For each CSV row", sub: "numbered from line 2", lines: [4, 14], steps: [
+          { kind: "step", title: "Parse the row", sub: "price as Decimal, SKU upper-cased", lines: [5, 9] },
+          { kind: "step", title: "Bad row: note it", sub: "the import goes on", attention: true, lines: [10, 13], detail: "Missing columns or a malformed price only add the row to the error list." },
+        ] },
+        { kind: "step", title: "Check the error rate", sub: "more than 10% bad rows?", lines: [16, 16] },
+        { kind: "branch", lanes: [
+          { title: "Over 10%", lines: [16, 17], steps: [{ kind: "end", title: "Raise ImportAborted", sub: "nothing is written", lines: [17, 17] }] },
+          { title: "Within the limit", sub: "bad rows are skipped", lines: [19, 19], steps: [] },
+        ] },
+        { kind: "group", title: "1. Compare with the database", lines: [19, 26], items: [{ title: "Look up by SKU", sub: "one query", lines: [19, 19] }, { title: "New", sub: "SKU not found" }, { title: "Changed", sub: "price or stock differs" }], note: "Unchanged rows are ignored" },
+        { kind: "stage", title: "2. Save in one transaction", sub: "bulk create + bulk update", lines: [28, 30] },
+        { kind: "stage", title: "Return the counts", sub: "created, updated, errors", lines: [31, 31] },
+      ],
+    },
+    vi: {
+      title: "Nhập đơn hàng từ CSV",
+      summary: "Đọc file CSV của nhà cung cấp, ghi lại dòng lỗi thay vì dừng, bỏ cuộc nếu quá 10% dòng lỗi, rồi lưu đơn mới và đơn thay đổi trong một transaction.",
+      steps: [
+        { kind: "step", title: "Nhận file", sub: "đường dẫn, cờ dry_run", lines: [1, 2] },
+        { kind: "loop", title: "Với mỗi dòng CSV", sub: "đánh số từ dòng 2", lines: [4, 14], steps: [
+          { kind: "step", title: "Đọc dòng", sub: "giá thành Decimal, SKU viết hoa", lines: [5, 9] },
+          { kind: "step", title: "Dòng lỗi: ghi lại", sub: "vẫn nhập tiếp", attention: true, lines: [10, 13], detail: "Thiếu cột hay giá sai định dạng chỉ làm dòng đó vào danh sách lỗi." },
+        ] },
+        { kind: "step", title: "Kiểm tra tỉ lệ lỗi", sub: "quá 10% dòng lỗi?", lines: [16, 16] },
+        { kind: "branch", lanes: [
+          { title: "Quá 10%", lines: [16, 17], steps: [{ kind: "end", title: "Ném ImportAborted", sub: "không ghi gì", lines: [17, 17] }] },
+          { title: "Trong ngưỡng", sub: "dòng lỗi bị bỏ qua", lines: [19, 19], steps: [] },
+        ] },
+        { kind: "group", title: "1. So với database", lines: [19, 26], items: [{ title: "Tra theo SKU", sub: "một truy vấn", lines: [19, 19] }, { title: "Mới", sub: "chưa có SKU" }, { title: "Thay đổi", sub: "khác giá hoặc tồn" }], note: "Dòng không đổi thì bỏ qua" },
+        { kind: "stage", title: "2. Lưu trong một transaction", sub: "tạo hàng loạt + cập nhật hàng loạt", lines: [28, 30] },
+        { kind: "stage", title: "Trả về các con số", sub: "đã tạo, đã cập nhật, lỗi", lines: [31, 31] },
+      ],
+    },
+  };
 
   /** The instruction Claude receives, with the numbered code. */
   function buildPrompt(code, opts) {
@@ -827,12 +902,12 @@ details.alt[open] summary { margin-bottom: 8px; }
       '- {"kind": "step", "title", "sub", "detail", "lines": [from, to], "attention": false}  one action',
       '- {"kind": "stage", ...same}  a main phase of the code (shown highlighted). Number main phases "1. ...", "2. ..." when the code has clear phases.',
       '- {"kind": "end", ...same}  the path STOPS here: return, throw, raise, exit, early response. A lane that ends with "end" does not rejoin the flow.',
-      '- {"kind": "group", ...same, "items": [{"title", "sub"}], "note"}  several things combined in one phase: tables joined, sources merged, calls run in parallel. 2 to 6 items.',
+      '- {"kind": "group", ...same, "items": [{"title", "sub", "lines"}], "note"}  several things combined in one phase: tables joined, sources merged, calls run in parallel. 2 to 6 items.',
       '- {"kind": "loop", ...same, "steps": [Node, ...]}  repeated work (for, while, map, cursor). title starts with "For each ..." (or the Vietnamese equivalent); steps are the body.',
-      '- {"kind": "branch", "title": "the question being decided", "lanes": [{"title": "answer / condition value", "sub", "detail", "lines", "attention", "steps": [Node, ...]}]}  mutually exclusive paths (if/else, switch, modes). Lanes that do not end rejoin after the branch.',
+      '- {"kind": "branch", "title": "", "lanes": [{"title": "answer / condition value", "sub", "detail", "lines", "attention", "steps": [Node, ...]}]}  mutually exclusive paths (if/else, switch, modes). Lanes that do not end rejoin after the branch.',
       "",
-      "Example of the shape (content invented):",
-      EXAMPLE_JSON,
+      "Example of the shape (an invented import function; copy the structure and the style of the wording, not the content):",
+      JSON.stringify(EXAMPLE[o.language === "en" ? "en" : "vi"]),
       "",
       "Hard limits (the diagram becomes unreadable beyond them):",
       `- At most ${size.total} boxes in total, counting lanes and loop/branch contents. ${size.top} boxes at the top level.`,
@@ -842,10 +917,12 @@ details.alt[open] summary { margin-bottom: 8px; }
       "",
       "How to model the code:",
       "- The first box is the input (parameters, request, arguments). The last box on the main path is the output or final effect.",
-      "- Put a step right before each branch that says what is being checked, or give the branch a title with the question. Lane titles are the answers (\"empty\", \"= 'kanban'\", \"error\").",
+      "- Name the decision once: normally a step right before the branch says what is checked (\"Check the error rate\" / sub \"more than 10% bad rows?\") and the branch title stays empty. Give the branch a title only when there is no such step. Lane titles are the answers (\"empty\", \"= 'kanban'\", \"error\").",
+      "- Nothing follows an end box in the same list: an end is always the last box of its lane or of the whole flow.",
       "- Guard clauses (if bad: return / throw) are a branch with a lane ending in an \"end\" box and a lane for the normal path (that lane may have no steps).",
       "- try/catch: a branch with lanes \"success\" and \"error\" when the error path does something meaningful.",
       "- If the code has several functions, diagram the main entry point; show calls to the others as single steps titled with the function name.",
+      "- Use a loop only for real repetition in the code (for, while, forEach, map, a cursor). A SQL sub-query or a JOIN is not a loop.",
       `- ${size.extra} Describe behavior, not syntax. Merge trivial lines. Never invent behavior the code does not have.`,
       "- detail: 1 to 3 plain sentences: why this step exists and what to watch for. No code.",
       '- lines: 1-based line numbers from the numbered listing below, first and last line the box describes. Every box gets lines.',
@@ -881,7 +958,7 @@ details.alt[open] summary { margin-bottom: 8px; }
     return { flow: null, error: "Không tìm thấy sơ đồ trong nội dung này. Hãy dán nguyên đoạn JSON mà Claude trả về." };
   }
 
-  LL.flow = { normalize, parseText, toText, walkNodes, eachNode, endsPath, countBoxes, toMermaid, guessLanguage, numberLines, resolveAnchors, buildPrompt, parseReply, LIMITS };
+  Object.assign(LL.flow, { buildPrompt, parseReply });
 })(globalThis.LL = globalThis.LL || {});
 
 // ── layout.js
@@ -987,7 +1064,7 @@ details.alt[open] summary { margin-bottom: 8px; }
     for (const n of list) {
       if (n.kind === "branch") {
         const lanes = n.lanes.map((l) => Math.max(MIN_LANE, minWidth(l.steps, depth + 1, narrow)));
-        const need = narrow ? Math.max(...lanes) + 38 : lanes.reduce((a, b) => a + b, 0) + LANE_GAP * (lanes.length - 1);
+        const need = narrow ? Math.max(...lanes) + 24 : lanes.reduce((a, b) => a + b, 0) + LANE_GAP * (lanes.length - 1);
         w = Math.max(w, need);
       } else if (n.kind === "loop") {
         w = Math.max(w, minWidth(n.steps, depth + 1, narrow) + LOOP_PAD * 2 + 16);
@@ -1091,7 +1168,7 @@ details.alt[open] summary { margin-bottom: 8px; }
             const total = r.reduce((a, q) => a + q.w, 0) + 12 * (r.length - 1);
             let xx = gx + (gw - total) / 2;
             for (const q of r) {
-              itemBoxes.push({ id: id + ".i" + itemBoxes.length, x: xx, y: yy, w: q.w, h: rh, kind: "item", attention: q.it.attention, titleLines: q.tl, subLines: q.sl, groupId: id, full: q.it.title + (q.it.sub ? " — " + q.it.sub : "") });
+              itemBoxes.push({ id: id + ".i" + itemBoxes.length, x: xx, y: yy, w: q.w, h: rh, kind: "item", attention: q.it.attention, titleLines: q.tl, subLines: q.sl, groupId: id, lines: q.it.lines || null, full: q.it.title + (q.it.sub ? " — " + q.it.sub : "") });
               xx += q.w + 12;
             }
             yy += rh + 10;
@@ -1123,8 +1200,10 @@ details.alt[open] summary { margin-bottom: 8px; }
             const r = seq(node.steps, ix, iw, fy + headH + GAP - 6, id + ".", depth + 1, [{ x: icx, y: fy + headH }]);
             bottom = r.bottom;
             // return arrow: from the end of the body back up to the loop header
-            const rx = fx + fw - 12;
-            if (!r.ended) edges.push({ d: `M${icx} ${bottom}V${bottom + 10}H${rx}V${fy + 16}`, arrow: true, loop: true });
+            const rx = fx + fw - 10;
+            const from = r.tails.length ? r.tails[r.tails.length - 1] : { x: icx, y: bottom };
+            const headMid = fy + Math.min(headH / 2 + 2, 22);
+            if (!r.ended) edges.push({ d: `M${from.x} ${from.y}V${bottom + 10}H${rx}V${headMid}H${rx - 12}`, arrow: true, loop: true });
           }
           const fh = bottom - fy + (node.steps.length ? 22 : PAD_Y);
           boxes.push({ id, x: fx, y: fy, w: fw, h: fh, kind: "loop", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, node, container: true, headH });
@@ -1226,46 +1305,46 @@ details.alt[open] summary { margin-bottom: 8px; }
       return { tails: [{ x: cx, y: mergeY }], merged: true, ended: false, next: mergeY + GAP - BUS + 6 };
     }
 
+    /**
+     * Phones: lanes stacked under one another, hanging off a rail on the left. The rail starts at the fork and
+     * continues past the last lane to where the paths join again; lanes that end early stop at their end box.
+     */
     function branchNarrow(node, id, x, w, top, depth, hasPrev) {
       const railX = x + 9;
       const lx = x + 24;
-      const lw = w - 24 - 16;
-      const rightX = x + w - 7;
+      const lw = w - 24;
       const cx = x + w / 2;
       const forkY = top - GAP + BUS;
       if (hasPrev) edges.push({ d: `M${cx} ${top - GAP}V${forkY}H${railX}`, arrow: false });
-      if (node.title) questionLabel(node.title, railX + 8, forkY - 12, "start");
-      let y = forkY + 14 + (node.title ? 10 : 0);
-      const continuing = [];
+      let y = forkY + 14;
+      if (node.title) { questionLabel(node.title, railX + 10, y + 4, "start"); y += 24; }
+      const n = node.lanes.length;
+      let anyContinues = false;
       let lastHeadMid = forkY;
       node.lanes.forEach((lane, j) => {
         const lid = id + ".l" + j;
-        const hh = laneHead(lane, lid, lx, y, lw);
+        // the lane number makes it clear these are alternatives, not a sequence
+        const head = Object.assign({}, lane, { sub: `nhánh ${j + 1}/${n}` + (lane.sub ? " · " + lane.sub : "") });
+        const hh = laneHead(head, lid, lx, y, lw);
         const mid = y + hh / 2;
         edges.push({ d: `M${railX} ${mid}H${lx}`, arrow: true });
         lastHeadMid = mid;
         let bottom = y + hh;
-        let tails = [{ x: lx + lw / 2, y: bottom }];
-        let laneEnded = false;
         if (lane.steps.length) {
-          const r = seq(lane.steps, lx, lw, bottom + GAP, lid + ".", depth + 1, tails);
-          tails = r.tails;
-          laneEnded = r.ended;
+          const r = seq(lane.steps, lx, lw, bottom + GAP, lid + ".", depth + 1, [{ x: lx + lw / 2, y: bottom }]);
+          if (!r.ended) anyContinues = true;
           bottom = r.bottom;
-        }
-        if (!laneEnded) {
-          // each continuing lane drops a short line and runs right to the merge rail
-          const jy = bottom + 10;
-          for (const p of tails) edges.push({ d: `M${p.x} ${p.y}V${jy}H${rightX}`, arrow: false });
-          continuing.push(jy);
-        }
-        y = bottom + 26;
+        } else anyContinues = true;
+        y = bottom + 22;
       });
-      edges.push({ d: `M${railX} ${hasPrev ? forkY : forkY + 14}V${lastHeadMid}`, arrow: false });
-      if (!continuing.length) return { tails: [], merged: false, ended: true, next: y - 26 + GAP };
-      const mergeY = y - 6;
-      edges.push({ d: `M${rightX} ${Math.min(...continuing)}V${mergeY}H${cx}`, arrow: false });
-      return { tails: [{ x: cx, y: mergeY }], merged: true, ended: false, next: mergeY + GAP - BUS + 6 };
+      if (!anyContinues) {
+        edges.push({ d: `M${railX} ${forkY}V${lastHeadMid}`, arrow: false });
+        return { tails: [], merged: false, ended: true, next: y - 22 + GAP };
+      }
+      // the rail runs on to the join point, then back to the middle where the main path continues
+      const joinY = y - 4;
+      edges.push({ d: `M${railX} ${forkY}V${joinY}H${cx}`, arrow: false });
+      return { tails: [{ x: cx, y: joinY }], merged: true, ended: false, next: joinY + GAP - BUS + 6 };
     }
 
     const r = seq(flow.steps, margin, W - margin * 2, 16, "", 1, null);
@@ -1273,6 +1352,16 @@ details.alt[open] summary { margin-bottom: 8px; }
     for (const b of boxes) bottom = Math.max(bottom, b.y + b.h);
     return { width: W, height: Math.ceil(bottom + 20), boxes, edges, labels, narrow };
   }
+
+  LL.layout = Object.assign(LL.layout || {}, { layout, wrap, setMeasure, browserMeasure, minWidth, BASE_W, FAMILY, FONT, MIN_LANE, PAD_Y });
+})(globalThis.LL = globalThis.LL || {});
+
+// ── svg.js
+/* Logic Lens — draw a laid-out flow as SVG (theme-aware through CSS variables with light fallbacks). */
+(function (LL) {
+  "use strict";
+
+  const { layout, FONT, FAMILY, PAD_Y } = LL.layout;
 
   // ───────────────────────── SVG ─────────────────────────
 
@@ -1348,7 +1437,7 @@ details.alt[open] summary { margin-bottom: 8px; }
       const label = [b.node && b.node.title, b.node && b.node.sub].filter(Boolean).join(": ");
       const tip = b.clipped || b.kind === "item" ? `<title>${esc(b.full || label)}</title>` : "";
       const body = shapeOf(b) + textLines(b, r1(b.x + b.w / 2)).join("") + tip;
-      if (b.kind === "item") return `<g class="ll-itemg" data-group="${esc(b.groupId)}">${body}</g>`;
+      if (b.kind === "item") return `<g class="ll-itemg" data-group="${esc(b.groupId)}"${b.lines ? ` data-lines="${b.lines[0]}-${b.lines[1]}"` : ""}>${body}</g>`;
       return o.interactive ? `<g class="ll-node" data-id="${esc(b.id)}" data-kind="${b.kind}" tabindex="0" role="button" aria-label="${esc(label)}">${body}</g>` : `<g>${body}</g>`;
     };
 
@@ -1361,7 +1450,7 @@ details.alt[open] summary { margin-bottom: 8px; }
     return p.join("");
   }
 
-  LL.layout = { layout, toSvg, wrap, setMeasure, browserMeasure, minWidth, BASE_W, FAMILY, FONT, MIN_LANE };
+  Object.assign(LL.layout, { toSvg });
 })(globalThis.LL = globalThis.LL || {});
 
 // ── sample.js
@@ -1483,8 +1572,8 @@ END`;
       { kind: "group", title: "2. Ghép phần FROM (nối bảng)", anchor: ["-- 2. Build the FROM", "WHERE r2.StyleId = r.StyleId"], detail: "Cùng một phần FROM được dùng lại cho mọi chế độ xem. Sáu lần nối StandardRegistry chỉ để đổi mã thành tên hiển thị.",
         items: [{ title: "plm.RFD" }, { title: "Style", sub: "(Product + Collection)" }, { title: "6 bảng tra mã", sub: "(StandardRegistry)" }, { title: "File bản vẽ", sub: "gộp thành 1 chuỗi" }],
         note: "Show latest: chỉ giữ RFD có Id lớn nhất mỗi style, tính sau khi lọc" },
-      { kind: "step", title: "3. Chọn chế độ", sub: "chỉ một nhánh được chạy", anchor: ["-- 3. Pick the view mode", "IF @ViewMode = 'list'"] },
-      { kind: "branch", title: "@ViewMode", lanes: [
+      { kind: "step", title: "3. Chọn chế độ", sub: "theo @ViewMode, chỉ một nhánh chạy", anchor: ["-- 3. Pick the view mode", "IF @ViewMode = 'list'"] },
+      { kind: "branch", lanes: [
         { title: "Lưới Rows", sub: "= 'list'", anchor: ["IF @ViewMode = 'list'", "OFFSET (@PageIndex - 1)"], steps: [
           { kind: "step", title: "Đếm tổng", sub: "số RFD sau lọc", anchor: ["SELECT @ov_TotalRows = COUNT(*) ' + @from"] },
           { kind: "step", title: "Lấy một trang", sub: "Id giảm dần", anchor: ["ORDER BY r.Id DESC", "OFFSET (@PageIndex - 1)"] },
@@ -1666,8 +1755,8 @@ router.post("/checkout", requireAuth, async (req, res) => {
   LL.sample = { EXAMPLES, getExample };
 })(globalThis.LL = globalThis.LL || {});
 
-// ── app.js
-/* Logic Lens — page logic. */
+// ── app-core.js
+/* Logic Lens — page state, drafts, small helpers and the code panel. Used by app-diagram.js and app.js. */
 (function (LL) {
   "use strict";
 
@@ -1682,7 +1771,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
     byId: new Map(),
     selected: null,
     tour: false,
-    zoom: "fit",
+    zoom: "auto", // "auto" = fit the frame but never below MIN_FIT; "all" = whole drawing; number = fixed scale
     lang: "vi",
     detail: "normal",
     codeAtDraw: null,
@@ -1711,6 +1800,9 @@ router.post("/checkout", requireAuth, async (req, res) => {
     if (now) { writeDraft(); return; }
     clearTimeout(saveTimer);
     saveTimer = setTimeout(writeDraft, 400);
+  }
+  function flushDraft() {
+    if (saveTimer) writeDraft();
   }
 
   // ───────────────────────── small helpers ─────────────────────────
@@ -1806,6 +1898,16 @@ router.post("/checkout", requireAuth, async (req, res) => {
     }
   }
 
+  LL.app = Object.assign(LL.app || {}, { S, $, F, LAY, toast, copyText, setStatus, linesLabel, capability, setCode, updateCodeInfo, buildCodeView, setCodeMode, highlightLines, loadDraft, writeDraft, saveDraft, flushDraft });
+})(globalThis.LL = globalThis.LL || {});
+
+// ── app-diagram.js
+/* Logic Lens — the diagram on the page: drawing, zoom, selection, explanation panel, step-by-step tour. */
+(function (LL) {
+  "use strict";
+
+  const { S, $, F, LAY, toast, copyText, setStatus, linesLabel, capability, setCode, updateCodeInfo, buildCodeView, setCodeMode, highlightLines, loadDraft, writeDraft, saveDraft, flushDraft } = LL.app;
+
   // ───────────────────────── diagram ─────────────────────────
   function setFlow(flow, opts) {
     const o = opts || {};
@@ -1845,24 +1947,37 @@ router.post("/checkout", requireAuth, async (req, res) => {
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(g.getAttribute("data-id"), { fromDiagram: true }); }
       });
     });
-    svg.querySelectorAll(".ll-itemg").forEach((g) => g.addEventListener("click", () => select(g.getAttribute("data-group"), { fromDiagram: true })));
+    svg.querySelectorAll(".ll-itemg").forEach((g) => g.addEventListener("click", () => {
+      select(g.getAttribute("data-group"), { fromDiagram: true });
+      const r = (g.getAttribute("data-lines") || "").split("-").map(Number);
+      if (r.length === 2 && r[0]) highlightLines(r, true);
+    }));
     applySelection(false);
   }
 
+  const MIN_FIT = 0.85; // below this, text gets too small to read: scroll sideways instead
   function applyZoom() {
     const canvas = $("canvas");
     const svg = canvas.querySelector("svg");
     if (!svg || !S.lay) return;
-    canvas.classList.toggle("fit", S.zoom === "fit");
-    if (S.zoom === "fit") { svg.style.width = ""; }
-    else svg.style.width = Math.round(S.lay.width * S.zoom) + "px";
-    $("zoom-fit").textContent = S.zoom === "fit" ? "Vừa khung" : Math.round(S.zoom * 100) + "%";
+    const avail = Math.max(200, canvas.clientWidth - 16);
+    const fitScale = avail / S.lay.width;
+    let scale = null;
+    if (typeof S.zoom === "number") scale = S.zoom;
+    else if (S.zoom === "auto" && fitScale < MIN_FIT && !S.narrow) scale = MIN_FIT;
+    canvas.classList.toggle("fit", scale == null);
+    svg.style.width = scale == null ? "" : Math.round(S.lay.width * scale) + "px";
+    const btn = $("zoom-fit");
+    if (typeof S.zoom === "number") btn.textContent = Math.round(S.zoom * 100) + "%";
+    else if (scale != null) btn.textContent = "Xem toàn bộ";
+    else btn.textContent = S.zoom === "all" ? "Cỡ chữ vừa đọc" : "Vừa khung";
+    btn.title = scale != null ? "Thu nhỏ để thấy cả sơ đồ" : S.zoom === "all" ? "Quay lại cỡ chữ dễ đọc" : "";
   }
   function zoomBy(f) {
     const canvas = $("canvas");
     const svg = canvas.querySelector("svg");
     if (!svg || !S.lay) return;
-    const current = S.zoom === "fit" ? svg.getBoundingClientRect().width / S.lay.width : S.zoom;
+    const current = typeof S.zoom === "number" ? S.zoom : svg.getBoundingClientRect().width / S.lay.width;
     S.zoom = Math.min(2.5, Math.max(0.4, Math.round(current * f * 10) / 10));
     applyZoom();
   }
@@ -1889,10 +2004,14 @@ router.post("/checkout", requireAuth, async (req, res) => {
         const y = svgTop + (box.y + box.h / 2) * scale;
         const x = svgLeft + (box.x + box.w / 2) * scale;
         canvas.scrollTo({ top: Math.max(0, y - canvas.clientHeight / 2), left: Math.max(0, x - canvas.clientWidth / 2), behavior: "smooth" });
-        // on phones the canvas is not a scroll box: bring the diagram row into view
+        // when the canvas is not its own scroll box (phones, fit mode) scroll the page instead;
+        // with the explanation sheet open, keep the box in the top part of the screen, above the sheet
         const r = svg.getBoundingClientRect();
         const by = r.top + (box.y + box.h / 2) * scale;
-        if (canvas.scrollHeight <= canvas.clientHeight + 2 && (by < 80 || by > window.innerHeight - 40)) window.scrollBy({ top: by - window.innerHeight / 2, behavior: "smooth" });
+        const sheet = sheetMode();
+        const targetY = sheet ? window.innerHeight * 0.24 : window.innerHeight / 2;
+        const visibleBottom = sheet ? window.innerHeight * 0.48 : window.innerHeight - 40;
+        if (canvas.scrollHeight <= canvas.clientHeight + 2 && (by < 80 || by > visibleBottom)) window.scrollBy({ top: by - targetY, behavior: "smooth" });
       }
     }
   }
@@ -1901,13 +2020,22 @@ router.post("/checkout", requireAuth, async (req, res) => {
     const o = opts || {};
     if (!S.byId.has(id)) id = null;
     S.selected = id;
-    applySelection(!o.fromDiagram);
+    applySelection(!o.fromDiagram || sheetMode());
     renderExplain();
     updateTourUi();
     const entry = id ? S.byId.get(id) : null;
     highlightLines(entry && entry.node.lines, !o.fromCode);
+    if (id && document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("ll-node")) {
+      const g = $("canvas").querySelector(`.ll-node[data-id="${CSS.escape(id)}"]`);
+      if (g && g !== document.activeElement) g.focus({ preventScroll: true });
+    }
     $("explain-panel").classList.toggle("open", !!entry);
     document.body.classList.toggle("sheet-open", !!entry);
+  }
+
+  /** Narrow screens show the explanation as a sheet over the bottom of the screen. */
+  function sheetMode() {
+    return window.matchMedia && window.matchMedia("(max-width: 1060px)").matches;
   }
 
   /** Smallest box whose line range contains this code line. */
@@ -1926,7 +2054,8 @@ router.post("/checkout", requireAuth, async (req, res) => {
     const el = $("explain");
     el.textContent = "";
     const entry = S.selected ? S.byId.get(S.selected) : null;
-    $("explain-hint").textContent = entry ? "" : "bấm một ô trên sơ đồ";
+    $("explain-hint").textContent = entry ? "" : "bấm một ô trên sơ đồ để xem nó làm gì";
+    $("explain-panel").classList.toggle("idle", !entry);
     if (!entry) {
       const p = document.createElement("p");
       p.className = "explain-empty";
@@ -2032,6 +2161,17 @@ router.post("/checkout", requireAuth, async (req, res) => {
     else { applySelection(false); updateTourUi(); }
   }
 
+  Object.assign(LL.app, { setFlow, renderDiagram, MIN_FIT, applyZoom, zoomBy, applySelection, select, sheetMode, boxForLine, renderExplain, whereText, snippet, updateTourUi, step, toggleTour });
+})(globalThis.LL = globalThis.LL || {});
+
+// ── app.js
+/* Logic Lens — asking Claude, exports, and wiring the page together (boot). */
+(function (LL) {
+  "use strict";
+
+  const { S, $, F, LAY, toast, copyText, setStatus, linesLabel, capability, setCode, updateCodeInfo, buildCodeView, setCodeMode, highlightLines, loadDraft, writeDraft, saveDraft, flushDraft } = LL.app;
+  const { setFlow, renderDiagram, MIN_FIT, applyZoom, zoomBy, applySelection, select, sheetMode, boxForLine, renderExplain, whereText, snippet, updateTourUi, step, toggleTour } = LL.app;
+
   // ───────────────────────── Claude ─────────────────────────
   const ERR = {
     not_granted: "Bạn chưa cho phép trang này dùng Claude. Có thể dùng Claude ở nơi khác (mục bên dưới).",
@@ -2072,7 +2212,10 @@ router.post("/checkout", requireAuth, async (req, res) => {
       const result = await S.sample.json(prompt, {
         signal: S.ctl.signal,
         modelTier: "default",
-        onText: ({ text }) => setStatus(`Claude đang viết sơ đồ… ${text.length.toLocaleString("vi-VN")} ký tự`, "busy"),
+        onText: ({ text }) => {
+          const titles = [...text.matchAll(/"title"\s*:\s*"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1]).slice(1);
+          setStatus(titles.length ? `Claude đã thấy ${titles.length} bước: ${titles.slice(-6).join(" · ")}…` : "Claude đang viết sơ đồ…", "busy");
+        },
       });
       let flow;
       try { flow = F.normalize(result); } catch (err) { throw { code: "bad_shape" }; }
@@ -2084,7 +2227,9 @@ router.post("/checkout", requireAuth, async (req, res) => {
       $("example").value = "";
       setFlow(flow);
       setCodeMode("view");
-      setStatus(`Xong sau ${Math.round((Date.now() - started) / 1000)} giây: ${S.nodes.length} ô. Bấm vào ô để xem giải thích.`);
+      const limit = { simple: 10, normal: 16, detailed: 26 }[S.detail] || 16;
+      const dense = S.nodes.length > limit * 1.5;
+      setStatus(`Xong sau ${Math.round((Date.now() - started) / 1000)} giây: ${S.nodes.length} ô. Bấm vào ô để xem giải thích.` + (dense ? " Sơ đồ khá dày: thử mức “Gọn” hoặc dán từng hàm để dễ đọc hơn." : ""));
     } catch (e) {
       const code = e && e.code;
       if (code === "cancelled") setStatus("Đã dừng.");
@@ -2198,6 +2343,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
       const line = S.lineEls.indexOf(row) + 1;
       const hit = line ? boxForLine(line) : null;
       if (hit) select(hit.id, { fromCode: true });
+      else if (line && S.nodes.length) { select(null); toast("Dòng " + line + " không thuộc ô nào trên sơ đồ."); }
     });
     $("sheet-prev").addEventListener("click", () => step(-1));
     $("sheet-next").addEventListener("click", () => step(1));
@@ -2207,6 +2353,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
       new ResizeObserver(() => {
         const w = $("canvas").clientWidth;
         if (S.flow && w > 0 && (w < 600) !== !!S.narrow) renderDiagram();
+        else applyZoom();
       }).observe($("canvas"));
     }
     $("stop").addEventListener("click", () => S.ctl && S.ctl.abort());
@@ -2230,11 +2377,23 @@ router.post("/checkout", requireAuth, async (req, res) => {
     });
 
     $("tour").addEventListener("click", toggleTour);
+    $("paste-own").addEventListener("click", () => {
+      setCodeMode("edit");
+      $("code").scrollIntoView({ block: "center", behavior: "smooth" });
+      $("code").focus({ preventScroll: true });
+      $("code").select();
+      setStatus("Dán code của bạn vào khung (thay cho ví dụ), rồi bấm “Vẽ sơ đồ bằng Claude”.");
+    });
     $("prev").addEventListener("click", () => step(-1));
     $("next").addEventListener("click", () => step(1));
     $("zoom-in").addEventListener("click", () => zoomBy(1.2));
     $("zoom-out").addEventListener("click", () => zoomBy(1 / 1.2));
-    $("zoom-fit").addEventListener("click", () => { S.zoom = "fit"; applyZoom(); });
+    $("zoom-fit").addEventListener("click", () => {
+      const svg = $("canvas").querySelector("svg");
+      const shrunk = svg && S.lay && $("canvas").classList.contains("fit") && svg.getBoundingClientRect().width / S.lay.width < MIN_FIT;
+      S.zoom = typeof S.zoom === "number" ? "auto" : S.zoom === "all" || shrunk ? "auto" : "all";
+      applyZoom();
+    });
     $("copy-mermaid").addEventListener("click", async () => {
       if (!S.flow) return;
       const ok = await copyText(F.toMermaid(S.flow));
@@ -2264,12 +2423,13 @@ router.post("/checkout", requireAuth, async (req, res) => {
     document.addEventListener("keydown", (e) => {
       const tag = (e.target && e.target.tagName) || "";
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target && e.target.closest && e.target.closest("#code-view") && /^Arrow/.test(e.key)) return;
       if (e.key === "ArrowRight" || e.key === "ArrowDown" && S.tour) { if (S.nodes.length) { e.preventDefault(); step(1); } }
       else if (e.key === "ArrowLeft" || e.key === "ArrowUp" && S.tour) { if (S.nodes.length) { e.preventDefault(); step(-1); } }
       else if (e.key === "Escape" && (S.tour || S.selected)) { S.tour = false; select(null); }
     });
 
-    window.addEventListener("pagehide", () => { if (saveTimer) writeDraft(); });
+    window.addEventListener("pagehide", flushDraft);
 
     // theme
     const themeBtn = $("theme");
@@ -2319,7 +2479,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
-  LL.app = { _state: S, select, setFlow };
+  LL.app._state = S;
 })(globalThis.LL = globalThis.LL || {});
 
 </script>

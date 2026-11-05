@@ -158,6 +158,7 @@ details.alt[open] summary { margin-bottom: 8px; }
 
 /* explanation: top of the left column on desktop, a bottom sheet on narrow screens */
 .explain-panel .sheet-only { display: none; }
+@media (min-width: 1061px) { .explain-panel.idle .explain { display: none; } .explain-panel.idle .panel-h { border-bottom: 0; } }
 .snippet { margin: 2px 0 0; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 6px; padding: 6px 0; font: 12px/1.55 var(--f-mono); overflow-x: auto; max-height: 220px; overflow-y: auto; }
 .snippet div { display: grid; grid-template-columns: 3em 1fr; white-space: pre; min-width: max-content; }
 .snippet span:first-child { text-align: right; padding-right: 10px; color: var(--faint); user-select: none; }
@@ -186,11 +187,11 @@ details.alt[open] summary { margin-bottom: 8px; }
   .grid > .col:not(.col-left) { order: 1; }
   .code-edit, .code-view { height: 40vh; min-height: 260px; }
   /* explanation becomes a sheet over the bottom of the screen while a box is selected */
-  .explain-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; border-radius: 14px 14px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18); max-height: 52vh; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom, 0px); transform: translateY(105%); visibility: hidden; transition: transform 0.2s ease, visibility 0s linear 0.2s; }
+  .explain-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; border-radius: 14px 14px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18); max-height: 46vh; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom, 0px); transform: translateY(105%); visibility: hidden; transition: transform 0.2s ease, visibility 0s linear 0.2s; }
   .explain-panel.open { transform: none; visibility: visible; transition: transform 0.2s ease; }
   .explain-panel .explain { overflow: auto; }
   .explain-panel .sheet-only { display: grid; }
-  body.sheet-open main { padding-bottom: 52vh; }
+  body.sheet-open main { padding-bottom: 46vh; }
 }
 @media (max-width: 560px) {
   .brand span { display: none; }

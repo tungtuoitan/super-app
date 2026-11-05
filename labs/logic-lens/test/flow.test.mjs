@@ -170,3 +170,38 @@ test("mermaid: ends are stadium shapes, loops are subgraphs, fork edges carry th
   const endId = m.match(/(n\d+)\(\[/)[1];
   assert.ok(!new RegExp(endId + " -->").test(m), "an end box has no outgoing edge");
 });
+
+test("boxes after an end are flagged as never reached (normalize and text)", () => {
+  const f = F.normalize({ steps: [{ kind: "branch", lanes: [{ title: "a", steps: [{ kind: "end", title: "return" }, { title: "orphan" }] }] }, { kind: "end", title: "stop" }, { title: "after" }] });
+  const orphan = f.steps[0].lanes[0].steps[1];
+  assert.ok(orphan.unreachable && orphan.attention && orphan.sub.startsWith("không bao giờ chạy tới"));
+  assert.ok(f.steps[2].unreachable);
+  const { errors } = F.parseText("end stop\nstep after\n");
+  assert.ok(errors.some((e) => /không bao giờ chạy tới/.test(e.message)));
+});
+
+test("text format: `||` stays in the title, branch detail is kept, item lines round-trip", () => {
+  const { flow, errors } = F.parseText("step user || guest | fallback\nbranch Which?\n  > why this matters\n  lane a\n  lane b\ngroup G\n  item T1 | sub   @3-4\n");
+  assert.deepEqual(errors, []);
+  assert.equal(flow.steps[0].title, "user || guest");
+  assert.equal(flow.steps[0].sub, "fallback");
+  assert.equal(flow.steps[1].detail, "why this matters");
+  assert.deepEqual(flow.steps[2].items[0].lines, [3, 4]);
+  assert.deepEqual(F.parseText(F.toText(flow)).flow, flow);
+});
+
+test("prompt example follows the output language and never duplicates the branch question", () => {
+  const vi = F.buildPrompt("x", { language: "vi" });
+  const en = F.buildPrompt("x", { language: "en" });
+  assert.ok(vi.includes("Nhập đơn hàng từ CSV") && !vi.includes("Import orders from CSV"));
+  assert.ok(en.includes("Import orders from CSV"));
+  assert.ok(vi.includes("Nothing follows an end box"));
+  const ex = JSON.parse(vi.match(/\{"title":"Nhập đơn hàng.*\}\]\}/)[0]);
+  const branch = ex.steps.find((n) => n.kind === "branch");
+  assert.ok(!branch.title, "the decision is named by the step before the branch, not repeated");
+});
+
+test("mermaid escapes < and quotes", () => {
+  const m = F.toMermaid(F.normalize({ steps: [{ title: 'a < b "c"' }] }));
+  assert.ok(m.includes("a #lt; b #quot;c#quot;"), m);
+});

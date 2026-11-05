@@ -184,6 +184,23 @@ await bare.locator("#use-reply").click();
 ok((await bare.locator(".ll-node").count()) === 8, "a pasted reply is drawn");
 ok(!(await bare.locator("#dl-png").isVisible()), "download buttons stay hidden without the capability");
 
+console.log("Wide diagrams stay readable");
+const WIDE = { title: "wide", steps: [{ title: "Input" }, { title: "Pick mode" }, { kind: "branch", lanes: ["A", "B", "C", "D"].map((t) => ({ title: "Mode " + t, steps: [{ title: "Check " + t }, { kind: "branch", lanes: [{ title: "ok", steps: [{ title: "Do " + t }] }, { title: "fail", steps: [{ kind: "end", title: "Stop" }] }] }] })) }, { title: "Output" }] };
+const laptop = await newPage({ viewport: { width: 1280, height: 800 } });
+await laptop.goto(app);
+await laptop.waitForSelector(".ll-node");
+const drawTop = await laptop.locator("#draw").boundingBox();
+ok(drawTop && drawTop.y + drawTop.height <= 800, `first open at 1280×800: the draw button is visible (${Math.round(drawTop.y)}px)`);
+await laptop.locator("#alt summary").click();
+await laptop.locator("#reply").fill(JSON.stringify(WIDE));
+await laptop.locator("#use-reply").click();
+await laptop.waitForTimeout(300);
+const scale = await laptop.evaluate(() => { const svg = document.querySelector("#canvas svg"); return svg.getBoundingClientRect().width / svg.viewBox.baseVal.width; });
+ok(scale >= 0.84, `a wide diagram is drawn at a readable scale (${scale.toFixed(2)}) and scrolls sideways`);
+await laptop.locator("#zoom-fit").click();
+const scaleAll = await laptop.evaluate(() => { const svg = document.querySelector("#canvas svg"); return svg.getBoundingClientRect().width / svg.viewBox.baseVal.width; });
+ok(scaleAll < scale, `"Xem toàn bộ" shrinks it to fit (${scaleAll.toFixed(2)})`);
+
 console.log("Examples, dark theme, phone");
 for (const id of ["js", "py"]) {
   await bare.selectOption("#example", id);
@@ -204,6 +221,16 @@ const overflow = await phone.evaluate(() => document.documentElement.scrollWidth
 ok(overflow <= 0, `no horizontal page scroll on a phone (${overflow}px)`);
 const order = await phone.evaluate(() => document.querySelector("#canvas").getBoundingClientRect().top < [...document.querySelectorAll("#code-view, #code")].find((e) => !e.hidden).getBoundingClientRect().top);
 ok(order, "on a phone the diagram comes before the code");
+await phone.locator('.ll-node[data-id="4.l3.2"]').tap();
+await phone.waitForTimeout(700);
+const boxR = await phone.locator('.ll-node[data-id="4.l3.2"]').boundingBox();
+const sheetR = await phone.locator("#explain-panel").boundingBox();
+ok(boxR.y + boxR.height <= sheetR.y + 2, `the tapped box stays above the sheet (box ends ${Math.round(boxR.y + boxR.height)}, sheet starts ${Math.round(sheetR.y)})`);
+await phone.locator("#sheet-next").tap();
+await phone.waitForTimeout(700);
+const nextBox = await phone.evaluate(() => { const g = document.querySelector(".ll-node.sel"); const r = g.getBoundingClientRect(); return { bottom: r.bottom, top: r.top }; });
+const sheet2 = await phone.locator("#explain-panel").boundingBox();
+ok(nextBox.bottom <= sheet2.y + 2 && nextBox.top >= 0, "› in the sheet keeps the next box visible above it");
 await phone.locator('.ll-node[data-id="3"]').tap();
 ok((await phone.locator("#explain h3").textContent()).includes("Chọn chế độ"), "tapping a box works on a phone");
 await phone.waitForTimeout(300);

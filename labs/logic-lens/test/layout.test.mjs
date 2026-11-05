@@ -136,3 +136,12 @@ test("identifiers break at punctuation, not mid-word, when they must break", () 
   const lines = LL.layout.wrap("window.someVeryLongIdentifierName", LL.layout.FONT.title, 150);
   assert.ok(lines[0].endsWith("."), JSON.stringify(lines));
 });
+
+test("narrow layout: the question label sits below the box above it", () => {
+  const L = LL.layout.layout(LL.flow.normalize({ steps: [{ title: "Input" }, { kind: "branch", title: "Hợp lệ?", lanes: [{ title: "no", steps: [{ kind: "end", title: "400" }] }, { title: "yes" }] }, { title: "Save" }] }), { narrow: true, width: 360 });
+  const input = L.boxes.find((b) => b.node && b.node.title === "Input");
+  for (const l of L.labels) assert.ok(l.y >= input.y + input.h, "label below the box above");
+  const lanes = L.boxes.filter((b) => b.lane);
+  assert.ok(lanes.every((b, i) => b.subLines.join(" ").includes(`nhánh ${i + 1}/2`)), "lane heads are numbered");
+  for (const b of L.boxes) assert.ok(b.x + b.w <= L.width + 0.5);
+});
