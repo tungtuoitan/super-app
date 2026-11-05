@@ -206,7 +206,8 @@
       $("example").value = "";
       setFlow(r.flow);
       setCodeMode("view");
-      setStatus(`Đã vẽ từ câu trả lời: ${S.nodes.length} ô.`);
+      $("alt").open = false;
+      setStatus(`Đã vẽ từ câu trả lời: ${S.nodes.length} ô. Bấm vào ô để xem giải thích.`);
     });
 
     $("tour").addEventListener("click", toggleTour);

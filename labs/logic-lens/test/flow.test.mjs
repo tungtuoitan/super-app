@@ -205,3 +205,12 @@ test("mermaid escapes < and quotes", () => {
   const m = F.toMermaid(F.normalize({ steps: [{ title: 'a < b "c"' }] }));
   assert.ok(m.includes("a #lt; b #quot;c#quot;"), m);
 });
+
+test("the 'never reached' mark is not written to the text, so fixing the order clears it", () => {
+  const { flow } = F.parseText("end stop\nstep after | real sub\n");
+  assert.ok(flow.steps[1].unreachable);
+  const text = F.toText(flow);
+  assert.ok(!text.includes("không bao giờ chạy tới") && /step\s+after \| real sub\n/.test(text), text);
+  const fixed = F.parseText("step after | real sub\nend stop\n").flow;
+  assert.ok(!fixed.steps[0].unreachable && !fixed.steps[0].attention && fixed.steps[0].sub === "real sub");
+});

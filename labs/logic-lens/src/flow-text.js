@@ -100,11 +100,16 @@
     if (flow.title) out.push("title: " + flow.title);
     if (flow.summary) out.push("summary: " + flow.summary.replace(/\n+/g, " "));
     if (out.length) out.push("");
+    const UNREACHABLE = "không bao giờ chạy tới";
     const head = (kw, n, pad) => {
+      // the "never reached" mark is derived from the order of boxes, so it is not written out
+      const sub = n.unreachable ? (n.sub || "").replace(UNREACHABLE + " · ", "").replace(UNREACHABLE, "") : n.sub;
+      const attention = n.attention && !(n.unreachable && !n.attentionOwn);
+      if (kw === "warn" && !attention) kw = "step";
       let s = pad + (kw + " ").padEnd(6) + (n.title || "");
-      if (n.sub) s += " | " + n.sub;
+      if (sub) s += " | " + sub;
       if (n.lines) s += "   @" + n.lines[0] + (n.lines[1] !== n.lines[0] ? "-" + n.lines[1] : "");
-      if (n.attention && kw !== "warn") s += " !";
+      if (attention && kw !== "warn") s += " !";
       out.push(s.replace(/\s+$/, ""));
       if (n.detail) for (const d of n.detail.split("\n")) if (d.trim()) out.push(pad + "  > " + d.trim());
     };

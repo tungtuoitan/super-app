@@ -68,6 +68,11 @@
     else if (scale != null) btn.textContent = "Xem toàn bộ";
     else btn.textContent = S.zoom === "all" ? "Cỡ chữ vừa đọc" : "Vừa khung";
     btn.title = scale != null ? "Thu nhỏ để thấy cả sơ đồ" : S.zoom === "all" ? "Quay lại cỡ chữ dễ đọc" : "";
+    // a drawing wider than the frame opens on its middle (where the main path runs), or on the selected box
+    if (canvas.scrollWidth > canvas.clientWidth + 2) {
+      if (S.selected) applySelection(true);
+      else canvas.scrollLeft = (canvas.scrollWidth - canvas.clientWidth) / 2;
+    }
   }
   function zoomBy(f) {
     const canvas = $("canvas");
@@ -121,6 +126,11 @@
     updateTourUi();
     const entry = id ? S.byId.get(id) : null;
     highlightLines(entry && entry.node.lines, !o.fromCode);
+    // desktop: the explanation sits at the top of the left column, which may be scrolled down (paste panel, long code)
+    if (entry && !sheetMode()) {
+      const col = document.querySelector(".col-left");
+      if (col && col.scrollTop > 0) col.scrollTo({ top: 0, behavior: "smooth" });
+    }
     if (id && document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("ll-node")) {
       const g = $("canvas").querySelector(`.ll-node[data-id="${CSS.escape(id)}"]`);
       if (g && g !== document.activeElement) g.focus({ preventScroll: true });

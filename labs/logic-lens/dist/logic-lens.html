@@ -508,6 +508,7 @@ details.alt[open] summary { margin-bottom: 8px; }
       for (const n of list) {
         if (ended && !n.unreachable) {
           n.unreachable = true;
+          n.attentionOwn = n.attention; // remember whether the attention mark was the author's own
           n.attention = true;
           if (!n.sub.startsWith(UNREACHABLE)) n.sub = n.sub ? UNREACHABLE + " · " + n.sub : UNREACHABLE;
         }
@@ -726,11 +727,16 @@ details.alt[open] summary { margin-bottom: 8px; }
     if (flow.title) out.push("title: " + flow.title);
     if (flow.summary) out.push("summary: " + flow.summary.replace(/\n+/g, " "));
     if (out.length) out.push("");
+    const UNREACHABLE = "không bao giờ chạy tới";
     const head = (kw, n, pad) => {
+      // the "never reached" mark is derived from the order of boxes, so it is not written out
+      const sub = n.unreachable ? (n.sub || "").replace(UNREACHABLE + " · ", "").replace(UNREACHABLE, "") : n.sub;
+      const attention = n.attention && !(n.unreachable && !n.attentionOwn);
+      if (kw === "warn" && !attention) kw = "step";
       let s = pad + (kw + " ").padEnd(6) + (n.title || "");
-      if (n.sub) s += " | " + n.sub;
+      if (sub) s += " | " + sub;
       if (n.lines) s += "   @" + n.lines[0] + (n.lines[1] !== n.lines[0] ? "-" + n.lines[1] : "");
-      if (n.attention && kw !== "warn") s += " !";
+      if (attention && kw !== "warn") s += " !";
       out.push(s.replace(/\s+$/, ""));
       if (n.detail) for (const d of n.detail.split("\n")) if (d.trim()) out.push(pad + "  > " + d.trim());
     };
@@ -1972,6 +1978,11 @@ router.post("/checkout", requireAuth, async (req, res) => {
     else if (scale != null) btn.textContent = "Xem toàn bộ";
     else btn.textContent = S.zoom === "all" ? "Cỡ chữ vừa đọc" : "Vừa khung";
     btn.title = scale != null ? "Thu nhỏ để thấy cả sơ đồ" : S.zoom === "all" ? "Quay lại cỡ chữ dễ đọc" : "";
+    // a drawing wider than the frame opens on its middle (where the main path runs), or on the selected box
+    if (canvas.scrollWidth > canvas.clientWidth + 2) {
+      if (S.selected) applySelection(true);
+      else canvas.scrollLeft = (canvas.scrollWidth - canvas.clientWidth) / 2;
+    }
   }
   function zoomBy(f) {
     const canvas = $("canvas");
@@ -2025,6 +2036,11 @@ router.post("/checkout", requireAuth, async (req, res) => {
     updateTourUi();
     const entry = id ? S.byId.get(id) : null;
     highlightLines(entry && entry.node.lines, !o.fromCode);
+    // desktop: the explanation sits at the top of the left column, which may be scrolled down (paste panel, long code)
+    if (entry && !sheetMode()) {
+      const col = document.querySelector(".col-left");
+      if (col && col.scrollTop > 0) col.scrollTo({ top: 0, behavior: "smooth" });
+    }
     if (id && document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("ll-node")) {
       const g = $("canvas").querySelector(`.ll-node[data-id="${CSS.escape(id)}"]`);
       if (g && g !== document.activeElement) g.focus({ preventScroll: true });
@@ -2373,7 +2389,8 @@ router.post("/checkout", requireAuth, async (req, res) => {
       $("example").value = "";
       setFlow(r.flow);
       setCodeMode("view");
-      setStatus(`Đã vẽ từ câu trả lời: ${S.nodes.length} ô.`);
+      $("alt").open = false;
+      setStatus(`Đã vẽ từ câu trả lời: ${S.nodes.length} ô. Bấm vào ô để xem giải thích.`);
     });
 
     $("tour").addEventListener("click", toggleTour);

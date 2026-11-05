@@ -169,6 +169,7 @@
       for (const n of list) {
         if (ended && !n.unreachable) {
           n.unreachable = true;
+          n.attentionOwn = n.attention; // remember whether the attention mark was the author's own
           n.attention = true;
           if (!n.sub.startsWith(UNREACHABLE)) n.sub = n.sub ? UNREACHABLE + " · " + n.sub : UNREACHABLE;
         }
