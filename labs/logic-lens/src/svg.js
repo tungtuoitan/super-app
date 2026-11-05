@@ -17,6 +17,7 @@
   .ll-start{fill:var(--ll-start-bg,#1e2935);stroke:var(--ll-start-bg,#1e2935)}
   .ll-start.ll-user{fill:var(--ll-user-bg,#e5f5f2);stroke:var(--ll-user,#0f8f83);stroke-width:1.6}
   .ll-userbg{fill:var(--ll-user,#0f8f83)} .ll-usert{fill:#fff}
+  .ll-ulane{fill:var(--ll-user-bg,#e5f5f2);stroke:var(--ll-user,#0f8f83)} .ll-uband{fill:var(--ll-user,#0f8f83)}
   .ll-end{fill:var(--ll-end-bg,#f1f3f5);stroke:var(--ll-end-line,#97a2ad);stroke-width:1.2}
   .ll-lane{fill:var(--ll-step-bg,#fff);stroke:var(--ll-stage-line,#8db3cd);stroke-width:1.2}
   .ll-plane{fill:var(--ll-step-bg,#fff);stroke:var(--ll-par-line,#a99be6);stroke-width:1.2}
@@ -42,7 +43,7 @@
   .ll-on-dark-sub{font-size:12px;fill:var(--ll-start-sub,#b8c4cf)}
   .ll-itemt{font-weight:500;font-size:13px;fill:var(--ll-ink,#16212b)}
   .ll-note{font-size:12px;fill:var(--ll-attn,#c8462f)}
-  .ll-data{font-size:11.5px;font-weight:500;font-family:${FAMILY}}
+  .ll-data{font-size:12px;font-weight:600;font-family:${FAMILY}}
   .ll-d-read{fill:var(--ll-d-read,#2f6f95)} .ll-d-insert,.ll-d-update,.ll-d-write{fill:var(--ll-d-write,#a35a00)} .ll-d-delete{fill:var(--ll-del,#c8462f)}
   .ll-dop{fill:var(--ll-muted,#66727e);font-weight:400} .ll-dsep{fill:var(--ll-muted,#66727e)}
   .ll-node.dt-on .ll-shape{stroke:var(--ll-d-read,#2f6f95);stroke-width:2.4;stroke-dasharray:none}
@@ -73,6 +74,7 @@
   .ll-node:focus-visible .ll-shape,.ll-node.sel .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:2.6;stroke-dasharray:none}
   .ll-node.dim,.ll-itemg.dim,.ll-node.run-dim,.ll-node.dt-dim{opacity:.28}
   .ll-node.run-now .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:3;stroke-dasharray:none;filter:drop-shadow(0 0 9px var(--ll-glow,rgba(37,99,235,.35)))}
+  .ll-node.run-ask .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:2;stroke-dasharray:5 4}
   .ll-node.run-trail .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:1.8;stroke-opacity:.55;stroke-dasharray:none}
   .ll-node.hl .ll-shape{filter:drop-shadow(0 0 7px var(--ll-glow,rgba(37,99,235,.35)))}
   .ll-shadow{filter:drop-shadow(0 1px 1.5px rgba(16,24,40,.07))}
@@ -112,11 +114,13 @@
   }
 
   const CHANGE_LABEL = { added: "+ MỚI", modified: "✎ SỬA", removed: "− XOÁ" };
-  const EXIT_LABEL = { return: "TRẢ VỀ", throw: "NÉM LỖI", break: "THOÁT VÒNG", continue: "BỎ QUA LƯỢT", exit: "THOÁT", respond: "PHẢN HỒI", navigate: "CHUYỂN TRANG", back: "VỀ MÀN HÌNH" };
+  const EXIT_LABEL = { return: "TRẢ VỀ", throw: "NÉM LỖI", break: "THOÁT VÒNG", continue: "BỎ QUA LƯỢT", exit: "THOÁT", respond: "PHẢN HỒI", navigate: "CHUYỂN TRANG", back: "VỀ MÀN HÌNH", stay: "Ở LẠI" };
   // tags shown in words: a user action and what the screen shows read better than code-ish labels
   const TAG_LABEL = { USER: "NGƯỜI DÙNG", UI: "MÀN HÌNH" };
   /** A start box the user triggers (click, type, open a page) looks different from a system trigger. */
   const userStart = (b) => b.kind === "start" && b.node && b.node.tag === "USER";
+  /** A lane that is something the user does (an action, a dialog button). */
+  const userLane = (b) => b.kind === "lane" && b.node && b.node.tag === "USER";
 
   function chip(x, y, text, bgClass, textClass) {
     const w = chipW(text);
@@ -169,9 +173,9 @@
     const pill = b.kind === "end" || b.kind === "start";
     const rx = pill ? Math.min(b.h / 2, 22) : b.kind === "loop" ? 12 : b.kind === "section" ? 8 : 10;
     const shadow = !b.container && b.kind !== "section" ? " ll-shadow" : "";
-    const user = userStart(b) ? " ll-user" : "";
+    const user = userStart(b) ? " ll-user" : userLane(b) ? " ll-ulane" : "";
     let s = `<rect class="ll-shape ${base}${user}${cont}${change}${attn}${shadow}" x="${r1(b.x)}" y="${r1(b.y)}" width="${r1(b.w)}" height="${r1(b.h)}" rx="${rx}"/>`;
-    if (b.kind === "lane" || b.kind === "plane") s += `<path class="${b.kind === "plane" ? "ll-pband" : "ll-band"}" d="M${r1(b.x + 8)} ${r1(b.y + 0.6)}H${r1(b.x + b.w - 8)}a6 6 0 0 1 6 3.4v.6H${r1(b.x + 2)}v-.6a6 6 0 0 1 6-3.4z"/>`;
+    if (b.kind === "lane" || b.kind === "plane") s += `<path class="${b.kind === "plane" ? "ll-pband" : userLane(b) ? "ll-uband" : "ll-band"}" d="M${r1(b.x + 8)} ${r1(b.y + 0.6)}H${r1(b.x + b.w - 8)}a6 6 0 0 1 6 3.4v.6H${r1(b.x + 2)}v-.6a6 6 0 0 1 6-3.4z"/>`;
     if (b.kind === "section") s += `<rect class="ll-sbar" x="${r1(b.x)}" y="${r1(b.y + 8)}" width="4" height="${r1(b.h - 16)}" rx="2"/>`;
     if (b.kind === "call") s += `<text class="ll-callic" x="${r1(b.x + b.w - 12)}" y="${r1(b.y + b.h - 9)}" text-anchor="end">↗</text>`; // calls another function
     // chips sit on the top edge: the change (left), the exit kind (left on end boxes), the effect tag (right)
@@ -188,7 +192,7 @@
       s += `<g class="ll-chipg"><title>Đáng chú ý</title><circle class="ll-attnbg" cx="${r1(right - 7.5)}" cy="${r1(b.y)}" r="7.5"/><text class="ll-chip ll-ct" x="${r1(right - 7.5)}" y="${r1(b.y + 3.6)}" text-anchor="middle">!</text></g>`;
       right -= 19;
     }
-    if (n.tag && right - chipW(TAG_LABEL[n.tag] || n.tag) > leftEnd + 6) {
+    if (n.tag && !userLane(b) && right - chipW(TAG_LABEL[n.tag] || n.tag) > leftEnd + 6) {
       const label = TAG_LABEL[n.tag] || n.tag;
       const w = chipW(label);
       s += n.tag === "USER" ? chip(right - w, b.y - 7.5, label, "ll-userbg", "ll-usert") : chip(right - w, b.y - 7.5, label, "ll-tagbg", "ll-tagt");

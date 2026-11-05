@@ -18,11 +18,12 @@
       steps: [
         { kind: "start", title: "importOrders(path)", sub: "called by the nightly job", lines: [1, 2] },
         { kind: "loop", title: "For each CSV row", sub: "numbered from line 2", tag: "FILE", lines: [4, 14], steps: [
-          { kind: "step", title: "Parse the row", sub: "price as Decimal, SKU upper-cased", lines: [5, 9] },
-          { kind: "step", title: "Bad row: note it", sub: "the import goes on", attention: true, lines: [10, 13], detail: "Missing columns or a malformed price only add the row to the error list." },
+          { kind: "branch", title: "Row parses?", lines: [5, 13], lanes: [
+            { title: "yes", lines: [5, 9], steps: [{ kind: "step", title: "Keep the order", sub: "price as Decimal, SKU upper-cased", lines: [5, 9] }] },
+            { title: "bad row", lines: [10, 13], steps: [{ kind: "step", title: "Note the bad row", sub: "the import goes on", attention: true, lines: [10, 13], detail: "Missing columns or a malformed price only add the row to the error list." }] },
+          ] },
         ] },
-        { kind: "step", title: "Check the error rate", sub: "more than 10% bad rows?", lines: [16, 16] },
-        { kind: "branch", lanes: [
+        { kind: "branch", title: "More than 10% bad rows?", lines: [16, 16], lanes: [
           { title: "Over 10%", lines: [16, 17], steps: [{ kind: "end", exit: "throw", title: "ImportAborted", sub: "nothing is written", lines: [17, 17] }] },
           { title: "Within the limit", sub: "bad rows are skipped", lines: [16, 16], steps: [] },
         ] },
@@ -34,7 +35,7 @@
         { kind: "end", exit: "return", title: "Return the counts", sub: "created, updated, errors", lines: [33, 33] },
       ],
       entities: [{ name: "orders", note: "one supplier order" }, { name: "order_lines", note: "the products of an order" }],
-      scenarios: [{ title: "Clean file", picks: ["Within the limit"] }, { title: "Too many bad rows", picks: ["Over 10%"] }],
+      scenarios: [{ title: "Clean file", picks: ["yes", "Within the limit"] }, { title: "Too many bad rows", picks: ["bad row", "Over 10%"] }],
     },
     vi: {
       title: "Nhập đơn hàng từ CSV",
@@ -42,11 +43,12 @@
       steps: [
         { kind: "start", title: "importOrders(path)", sub: "job chạy mỗi đêm gọi vào", lines: [1, 2] },
         { kind: "loop", title: "Với mỗi dòng CSV", sub: "đánh số từ dòng 2", tag: "FILE", lines: [4, 14], steps: [
-          { kind: "step", title: "Đọc dòng", sub: "giá thành Decimal, SKU viết hoa", lines: [5, 9] },
-          { kind: "step", title: "Dòng lỗi: ghi lại", sub: "vẫn nhập tiếp", attention: true, lines: [10, 13], detail: "Thiếu cột hay giá sai định dạng chỉ làm dòng đó vào danh sách lỗi." },
+            { kind: "branch", title: "Dòng đọc được?", lines: [5, 13], lanes: [
+            { title: "được", lines: [5, 9], steps: [{ kind: "step", title: "Giữ lại đơn", sub: "giá thành Decimal, SKU viết hoa", lines: [5, 9] }] },
+            { title: "dòng lỗi", lines: [10, 13], steps: [{ kind: "step", title: "Ghi lại dòng lỗi", sub: "vẫn nhập tiếp", attention: true, lines: [10, 13], detail: "Thiếu cột hay giá sai định dạng chỉ làm dòng đó vào danh sách lỗi." }] },
+          ] },
         ] },
-        { kind: "step", title: "Kiểm tra tỉ lệ lỗi", sub: "quá 10% dòng lỗi?", lines: [16, 16] },
-        { kind: "branch", lanes: [
+        { kind: "branch", title: "Quá 10% dòng lỗi?", lines: [16, 16], lanes: [
           { title: "Quá 10%", lines: [16, 17], steps: [{ kind: "end", exit: "throw", title: "ImportAborted", sub: "không ghi gì", lines: [17, 17] }] },
           { title: "Trong ngưỡng", sub: "dòng lỗi bị bỏ qua", lines: [16, 16], steps: [] },
         ] },
@@ -58,12 +60,12 @@
         { kind: "end", exit: "return", title: "Trả về các con số", sub: "đã tạo, đã cập nhật, lỗi", lines: [33, 33] },
       ],
       entities: [{ name: "orders", note: "một đơn của nhà cung cấp" }, { name: "order_lines", note: "các sản phẩm trong một đơn" }],
-      scenarios: [{ title: "File sạch", picks: ["Trong ngưỡng"] }, { title: "Quá nhiều dòng lỗi", picks: ["Quá 10%"] }],
+      scenarios: [{ title: "File sạch", picks: ["được", "Trong ngưỡng"] }, { title: "Quá nhiều dòng lỗi", picks: ["dòng lỗi", "Quá 10%"] }],
     },
   };
 
   // A second, tiny example for code with several entry points (a UI component, a controller, a class).
-  const SECTIONS_EXAMPLE = '{"kind": "section", "title": "3. Click \u201cSave\u201d in the edit dialog", "sub": "onSave()", "steps": [{"kind": "start", "title": "Click \u201cSave\u201d", "sub": "onSave(), button disabled while saving", "tag": "USER"}, {"kind": "call", "title": "PUT /products/:id", "tag": "API"}, {"kind": "branch", "lanes": [{"title": "saved", "steps": [{"kind": "step", "title": "Close dialog, show toast", "sub": "list shows the new price", "tag": "UI"}]}, {"title": "error", "steps": [{"kind": "step", "title": "Show error under the form", "sub": "dialog stays open to retry", "tag": "UI"}]}]}]}';
+  const SECTIONS_EXAMPLE = '{"kind": "section", "title": "Payment webhook", "sub": "POST /webhooks/pay", "steps": [{"kind": "start", "title": "Provider calls the webhook", "tag": "API"}, {"kind": "branch", "title": "Signature valid?", "lanes": [{"title": "no", "steps": [{"kind": "end", "exit": "respond", "title": "400 bad signature"}]}, {"title": "yes", "steps": [{"kind": "call", "title": "Mark the order paid", "tag": "DB", "data": [{"table": "orders", "op": "update"}]}]}]}]}';
 
   const CHANGE_RULES = [
     "This is a CODE CHANGE. The listing below is the NEW code with the change marked: \"N+|\" lines were added, \"-|\" lines were removed (they have no number in the new code), \"N |\" lines are unchanged.",
@@ -95,14 +97,14 @@
       '- "step": one action.',
       '- "call": a call into another function, method or service whose inside is not shown here.',
       '- "stage": a main phase (shown highlighted). Number main phases "1. ...", "2. ..." when the code has clear phases.',
-      '- "end": the path STOPS here. Add "exit": "return" | "throw" | "respond" (HTTP response, render) | "navigate" (go to another page / screen) | "back" (the user is back on the same screen) | "break" | "continue" | "exit". A lane that ends does not rejoin; inside a loop, "continue" and "break" end only that pass.',
+      '- "end": the path STOPS here. Add "exit": "return" | "throw" | "respond" (HTTP response, render) | "navigate" (go to another page / screen) | "back" (the user is back on the same screen) | "stay" (still in the same dialog or form) | "break" | "continue" | "exit". A lane that ends does not rejoin; inside a loop, "continue" and "break" end only that pass.',
       '- "group": several things combined in one phase (tables joined, sources merged). + "items": [{"title", "sub", "lines"}], "note". 2 to 6 items.',
       '- "loop": repeated work (for, while, map, retry, cursor, polling). title like "For each …" / "Retry up to 3×"; + "steps": the body.',
       '- "branch": mutually exclusive paths (if/else, switch, match, pattern, try/catch). + "lanes": [{"title": answer / condition value, "sub", "detail", "lines", "attention", "steps"}]. Lanes that do not end rejoin after the branch.',
       '- "parallel": paths that ALL run at the same time and are awaited together (Promise.all, goroutines + WaitGroup, Task.WhenAll, async gather). Same "lanes" shape.',
       '- "section": only at the top level, for code with several independent entry points (a UI component with effects and event handlers, a controller with several endpoints, a class with several public methods, a reducer with actions). + "steps". Each section starts with its own "start". Example: ' + SECTIONS_EXAMPLE,
       '"data" (optional, any box): the database tables, collections, entities, caches or files the box reads or writes: [{\"table\": name exactly as in the code, \"op\": \"read\" | \"insert\" | \"update\" | \"delete\" | \"write\"}]. Put it on every box that really touches stored data, and only there.',
-      'Top level "entities" (when the code touches stored data): [{"name", "note"}], one short note per table: what one row is. Top level "scenarios": 1 to 3 typical runs a reader can replay: [{"title", "picks": [the lane title chosen at each branch on the way, in order]}]; loops run once.',
+      'Top level "entities" (when the code touches stored data): [{"name", "note"}], one short note per table: what one row is. Top level "scenarios": 1 to 3 typical runs a reader can replay: [{"title", "picks": [the exact lane title chosen at each branch on the way, in order]}]; with several sections the first pick is the section title; loops run once.',
       '"tag" marks an external effect with one short word: DB, API, FILE, QUEUE, CACHE, UI (what the screen shows changes), USER (something the user does), EMAIL, AI, LOG, AUTH, TIMER, STATE.',
       "",
       "Example of the shape (an invented import function; copy the structure and the style of the wording, not the content):",
@@ -116,9 +118,10 @@
       "",
       "How to model the code:",
       "- Start each flow with a \"start\" box. The last box on the main path is the output, the response or the final effect (often an \"end\").",
-      "- Name the decision once: normally a step right before the branch says what is checked (\"Check the error rate\" / sub \"more than 10% bad rows?\") and the branch title stays empty. Give the branch a title only when there is no such step. Lane titles are the answers (\"empty\", \"= 'kanban'\", \"error\", \"Ok(v)\").",
+      "- Put the question in the branch title (\"More than 10% bad rows?\", \"Cart empty?\"), with no separate check step before it. Lane titles are the answers (\"yes\", \"empty\", \"= 'kanban'\", \"error\", \"Ok(v)\").",
+      "- A box that runs only in some cases must sit in a lane of a branch, never as a plain step next to the box that runs in the other cases: a reader replays the flow and must never walk through both. Fold a check into a box only when both outcomes do the same thing.",
       "- Guard clauses (if bad: return / throw) are a branch with a lane ending in an \"end\" box and a lane for the normal path (that lane may have no steps).",
-      "- try/catch: put the try body's steps before the branch; then a branch with lanes like \"success\" (usually empty) and \"error\" when the error path does something meaningful; finally work goes after the branch.",
+      "- try/catch: a branch with lanes like \"success\" (the try body's steps) and \"error\" (its sub names the step that can fail); finally work goes after the branch.",
       "- An empty lane (the normal path just goes on) gets the line of the condition it answers.",
       "- Nothing follows an end box in the same list: an end is always the last box of its lane, section or flow.",
       "- Use a loop only for real repetition. A SQL sub-query or a JOIN is not a loop; recursion is a \"call\" to the same function with a note in \"detail\".",
@@ -133,8 +136,9 @@
       "Frontend / UI code (components, pages, screens, forms, event handlers; React, Vue, Angular, Svelte, mobile, plain DOM):",
       "- Tell it as the USER'S JOURNEY, not as code internals, in ONE flow: a \"start\" tagged USER \"Open the page\" (the load effect in the sub), what loads and what the screen shows (loading / error / data as a branch when it matters), then a step tagged UI naming what the user sees and can do, then a branch titled \"User does what?\" with one lane per action in on-screen order (\"Click “Edit”\", \"Type in the search box\", \"Click “Delete”\"; the handler name in the sub).",
       "- Inside a lane: what appears (a dialog, a toast, a disabled button: steps tagged UI with the visible result as the title), the user's choices as nested branches (\"Save\" / \"Cancel\", \"OK\" / \"Cancel\"), the API calls. Validation is a branch whose failing lane shows the error.",
-      "- End each lane with an \"end\": \"exit\": \"back\" when the user is back on the same screen (\"Back to the list\"), \"navigate\" when they go to another page. Use sections only for things that happen without a user action (polling, websocket, timers).",
-      "- Lanes of \"User does what?\" do not count as nesting depth.",
+      "- Give every lane that is something the user does (an action of \"User does what?\", a dialog button) \"tag\": \"USER\".",
+      "- How a lane ends: \"end\" with \"exit\": \"stay\" when the user is still in the same dialog or form (a validation or save error), \"back\" when the dialog closes and the user is back on the page (an action lane that simply runs out also means back, so it needs no end box), \"navigate\" when they go to another page. Use sections only for things that happen without a user action (polling, websocket, timers).",
+      "- Lanes of \"User does what?\" do not count as nesting depth, and a screen may use up to 6 boxes more than the limit.",
     ];
     if (change) out.push("", ...CHANGE_RULES);
     out.push("", "Reply with only the JSON object.", "");

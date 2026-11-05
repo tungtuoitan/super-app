@@ -46,7 +46,7 @@
   "use strict";
 
   const KINDS = ["start", "step", "call", "stage", "end", "group", "loop", "branch", "parallel", "section"];
-  const EXITS = ["return", "throw", "break", "continue", "exit", "respond", "navigate", "back"];
+  const EXITS = ["return", "throw", "break", "continue", "exit", "respond", "navigate", "back", "stay"];
   /** Kinds that hold lanes / child steps. */
   const LANED = { branch: 1, parallel: 1 };
   const NESTED = { loop: 1, section: 1 };
@@ -95,7 +95,7 @@
     entrypoint: "section", method: "section", endpoint: "section", effect: "section",
   };
   // kind words that also say how a path stops
-  const EXIT_KINDS = { exit: "exit", return: "return", throw: "throw", raise: "throw", break: "break", continue: "continue", respond: "respond", reject: "throw", navigate: "navigate", redirect: "navigate", back: "back" };
+  const EXIT_KINDS = { exit: "exit", return: "return", throw: "throw", raise: "throw", break: "break", continue: "continue", respond: "respond", reject: "throw", navigate: "navigate", redirect: "navigate", back: "back", stay: "stay" };
 
   const CHANGES = { added: "added", add: "added", new: "added", modified: "modified", changed: "modified", modify: "modified", updated: "modified", fixed: "modified", removed: "removed", deleted: "removed", remove: "removed", delete: "removed" };
   /** Copy change marks from a loose object onto a normalized one. */
@@ -145,7 +145,8 @@
     const lane = (l, depth, fallbackTitle) => {
       const o = l && typeof l === "object" ? l : { title: l };
       const data = dataOf(o.data || o.tables);
-      return changeOf(o, Object.assign(data.length ? { data } : {}, {
+      const tag = tagOf(o.tag);
+      return changeOf(o, Object.assign(data.length ? { data } : {}, tag ? { tag } : {}, {
         title: str(o.title || o.label || o.when || o.condition || o.case || o.name, LIMITS.title) || fallbackTitle || "…",
         sub: str(o.sub || o.subtitle, LIMITS.sub),
         detail: longStr(o.detail || o.explanation, LIMITS.detail),
@@ -187,7 +188,7 @@
       if (kind === "group") {
         out.items = arr(n.items || n.children || n.parts).slice(0, LIMITS.items)
           .map((it) => (it && typeof it === "object"
-            ? changeOf(it, { title: str(it.title || it.label || it.name, LIMITS.title), sub: str(it.sub || it.subtitle, LIMITS.sub), attention: !!(it.attention || it.warn), lines: rng(it.lines || it.range) })
+            ? changeOf(it, Object.assign({ title: str(it.title || it.label || it.name, LIMITS.title), sub: str(it.sub || it.subtitle, LIMITS.sub), attention: !!(it.attention || it.warn), lines: rng(it.lines || it.range) }, dataOf(it.data || it.tables).length ? { data: dataOf(it.data || it.tables) } : {}))
             : { title: str(it, LIMITS.title), sub: "", attention: false, lines: null }))
           .filter((it) => it.title);
         out.note = str(n.note, LIMITS.sub);

@@ -58,7 +58,7 @@ test("run: several sections ask where to start", () => {
   ] });
   const r = walk(LL.flowRun.create(f), [1]);
   assert.deepEqual(r.asked, ["section:On load/On click"]);
-  assert.deepEqual(r.seen, ["On click", "click", "back"]);
+  assert.deepEqual(r.seen, ["click", "back"], "a section header is not a step of the run");
 });
 
 test("run: 'back' returns to the user's choice on the same screen", () => {
@@ -73,4 +73,54 @@ test("run: 'back' returns to the user's choice on the same screen", () => {
   assert.deepEqual(r.seen, ["Open the page", "Edit", "Cancel", "closed", "Edit", "Save", "saved", "Add", "new page"]);
   assert.equal(r.asked.filter((a) => a.startsWith("branch:Edit/Add")).length, 3, "asked again after each 'back'");
   assert.equal(r.end, "new page");
+});
+
+test("run: 'stay' returns to the dialog, a user action that runs out returns to the page, untitled branches borrow the question", () => {
+  const f = F.normalize({ steps: [
+    { kind: "start", title: "Open", tag: "USER" },
+    { kind: "branch", title: "User does what?", lanes: [
+      { title: "Edit", tag: "USER", steps: [
+        { kind: "step", title: "Show dialog" },
+        { kind: "branch", title: "In the dialog", lanes: [
+          { title: "Save", tag: "USER", steps: [
+            { kind: "step", title: "Check the price", sub: "price > 0?" },
+            { kind: "branch", lanes: [{ title: "no", steps: [{ kind: "end", exit: "stay", title: "error under the field" }] }, { title: "yes", steps: [{ kind: "end", exit: "back", title: "saved" }] }] },
+          ] },
+          { title: "Cancel", tag: "USER", steps: [{ kind: "end", exit: "back", title: "closed" }] },
+        ] },
+      ] },
+      { title: "Search", tag: "USER", steps: [{ kind: "step", title: "reload list" }] },
+      { title: "Add", steps: [{ kind: "end", exit: "navigate", title: "new page" }] },
+    ] },
+  ] });
+  const questions = [];
+  const run = LL.flowRun.create(f);
+  const seen = [];
+  const answers = [0, 0, 0, 0, 1, 0, 1, 1, 2];
+  for (let g = 0; g < 80; g++) {
+    const r = run.next();
+    if (r.done) break;
+    if (r.choice) { questions.push(r.choice.question); run.choose(answers.shift()); continue; }
+    seen.push(r.node.title);
+  }
+  assert.deepEqual(seen, ["Open", "Edit", "Show dialog", "Save", "Check the price", "no", "error under the field", "Save", "Check the price", "yes", "saved",
+    "Edit", "Show dialog", "Cancel", "closed", "Search", "reload list", "Add", "new page"]);
+  assert.equal(questions[2], "price > 0?", "an untitled branch asks the check of the box before it");
+  assert.equal(questions[3], "In the dialog", "after 'stay' the dialog's choice comes back");
+});
+
+test("run: a UI scenario ends once its picks are used and the user is back on the screen", () => {
+  const f = F.normalize({ steps: [
+    { kind: "start", title: "Open" },
+    { kind: "branch", title: "User does what?", lanes: [{ title: "Delete", steps: [{ kind: "end", exit: "back", title: "row removed" }] }, { title: "Save", steps: [] }, { title: "Save all", steps: [] }] },
+  ] });
+  const run = LL.flowRun.create(f, { picks: ["Delete"] });
+  let r;
+  const seen = [];
+  for (let g = 0; g < 20 && !(r = run.next()).done; g++) { assert.ok(!r.choice, "never waits"); seen.push(r.node.title); }
+  assert.ok(r.scenarioDone);
+  assert.deepEqual(seen, ["Open", "Delete", "row removed"]);
+  const amb = LL.flowRun.create(f, { picks: ["sav"] });
+  amb.next();
+  assert.ok(amb.next().choice, "a pick that matches two options is not guessed");
 });

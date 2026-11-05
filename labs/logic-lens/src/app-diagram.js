@@ -3,7 +3,7 @@
   "use strict";
 
   const { S, $, F, LAY, saveDraft, linesLabel, diagramEditor, toast } = LL.app;
-  const MIN_FIT = 0.85; // below this the text is too small to read: scroll sideways instead
+  const MIN_FIT = 0.74; // below this the text is too small to read: scroll sideways instead
   const CHANGE_TEXT = { added: "Thêm mới", modified: "Đã sửa", removed: "Đã xoá" };
 
   // ───────────────────────── diagram ─────────────────────────
@@ -135,8 +135,14 @@
     });
     svg.querySelectorAll(".ll-itemg").forEach((g) => g.classList.toggle("dim", S.tour && S.selected != null && g.getAttribute("data-group") !== S.selected));
     LL.app.emit("paint");
-    if (scrollIntoView && S.selected && S.lay) {
-      const box = S.lay.boxes.find((b) => b.id === S.selected);
+    if (scrollIntoView && S.selected) scrollToBox(S.selected);
+  }
+
+  /** Scroll the canvas so a box sits in the part of it the card does not cover. */
+  function scrollToBox(id) {
+    const svg = $("canvas").querySelector("svg");
+    if (svg && S.lay) {
+      const box = S.lay.boxes.find((b) => b.id === id);
       const canvas = $("canvas");
       if (!box) return;
       const scale = svg.getBoundingClientRect().width / S.lay.width;
@@ -146,7 +152,7 @@
       const sheet = window.matchMedia("(max-width: 900px)").matches;
       // keep the box clear of the explanation card (right side on desktop, bottom sheet on phones)
       const visW = canvas.clientWidth - (cardOpen && !sheet ? parseFloat(getComputedStyle(canvas).paddingRight) : 0);
-      const visH = canvas.clientHeight * (cardOpen && sheet ? 0.48 : 1);
+      const visH = canvas.clientHeight * (cardOpen && sheet ? (S.run ? 0.58 : 0.48) : 1);
       const x = sr.left - cr.left + canvas.scrollLeft + (box.x + box.w / 2) * scale;
       const y = sr.top - cr.top + canvas.scrollTop + (box.y + box.h / 2) * scale;
       canvas.scrollTo({ left: Math.max(0, x - visW / 2), top: Math.max(0, y - visH * (sheet ? 0.45 : 0.4)), behavior: "smooth" });
@@ -260,7 +266,7 @@
       loop: `Các bước trong khung được lặp lại (${(n.steps || []).length} bước).`,
       section: "Một điểm vào độc lập của cùng đoạn code.",
     };
-    if (n.kind === "end") box.appendChild(el("p", "", { throw: "Ném lỗi: đường đi dừng ở đây.", break: "Thoát khỏi vòng lặp.", continue: "Bỏ qua phần còn lại, sang vòng lặp kế tiếp.", respond: "Trả phản hồi và dừng xử lý.", exit: "Thoát chương trình.", navigate: "Chuyển sang trang khác: luồng trên trang này dừng ở đây." }[n.exit] || "Trả về: đường đi dừng ở đây."));
+    if (n.kind === "end") box.appendChild(el("p", "", { throw: "Ném lỗi: đường đi dừng ở đây.", break: "Thoát khỏi vòng lặp.", continue: "Bỏ qua phần còn lại, sang vòng lặp kế tiếp.", respond: "Trả phản hồi và dừng xử lý.", exit: "Thoát chương trình.", navigate: "Chuyển sang trang khác: luồng trên trang này dừng ở đây.", back: "Về lại màn hình; người dùng chọn thao tác tiếp theo.", stay: "Vẫn ở hộp thoại / form đó; người dùng thử lại hoặc chọn nút khác." }[n.exit] || "Trả về: đường đi dừng ở đây."));
     else if (KIND_NOTE[n.kind]) box.appendChild(el("p", "hint-empty", KIND_NOTE[n.kind]));
     const tags = el("div", "tags");
     if (n.tag) tags.appendChild(el("span", "tag", n.tag));
@@ -317,5 +323,5 @@
     else { applySelection(false); updateTourUi(); renderExplain(); }
   }
 
-  Object.assign(LL.app, { setFlow, renderDiagram, applyZoom, zoomBy, toggleFit, applySelection, select, boxForLine, renderExplain, updateTourUi, step, toggleTour, setOnlyChanges, changedNodes, MIN_FIT });
+  Object.assign(LL.app, { scrollToBox, setFlow, renderDiagram, applyZoom, zoomBy, toggleFit, applySelection, select, boxForLine, renderExplain, updateTourUi, step, toggleTour, setOnlyChanges, changedNodes, MIN_FIT });
 })(globalThis.LL = globalThis.LL || {});

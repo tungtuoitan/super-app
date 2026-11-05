@@ -30,7 +30,8 @@
     stopTimer();
     const pick = scn !== "" && scn != null ? scenarios()[+scn] : null;
     S.tour = false;
-    S.run = { runner: LL.flowRun.create(S.flow, pick ? { picks: pick.picks } : null), trail: [], current: null, steps: 0, timer: 0, ended: null, scenario: pick };
+    S.run = { runner: LL.flowRun.create(S.flow, pick ? { picks: pick.picks } : null), trail: [], current: null, asking: [], steps: 0, timer: 0, ended: null, scenario: pick, wantPlay: false, written: new Map() };
+    $("pane-canvas").classList.add("running");
     $("tour-bar").hidden = true;
     $("run-bar").hidden = false;
     $("run-scn").value = pick ? String(scn) : "";
@@ -41,6 +42,7 @@
   function stop() {
     stopTimer();
     S.run = null;
+    $("pane-canvas").classList.remove("running");
     $("run-bar").hidden = true;
     $("tour-bar").hidden = false;
     $("run-box").hidden = true;
@@ -52,26 +54,34 @@
     const run = S.run;
     if (!run) return;
     const r = run.runner.next();
+    run.asking = [];
     if (r.node) {
       const id = idOf(r.node);
       run.steps++;
       if (id) { run.current = id; if (!run.trail.includes(id)) run.trail.push(id); }
+      for (const d of r.node.data || []) if (d.op !== "read") run.written.set(d.table, d.op);
       LL.app.select(id);
     } else if (r.done) {
       run.ended = r;
       stopTimer();
     } else if (r.choice) {
-      if (!run.scenario) stopTimer(); // a question pauses "Tự chạy" until it is answered
+      // back on the screen: a fresh path starts here
+      if (r.back) run.trail = run.current ? [run.current] : [];
+      // show the choices on the diagram too: the lanes light up and come into view
+      run.asking = (r.choice.lanes || []).map(idOf).filter(Boolean);
+      if (run.asking[0]) LL.app.scrollToBox(run.asking[0]);
+      if (run.playing) { setPlaying(false); run.wantPlay = true; } // a question pauses "Tự chạy" until answered
     }
     showBox(r);
     paint();
+    $("explain-pos").textContent = "Chạy thử · bước " + run.steps;
   }
 
   function choose(i) {
     if (!S.run) return;
     S.run.runner.choose(i);
     advance();
-    if (S.run && S.run.playing) schedule();
+    if (S.run && S.run.wantPlay && !S.run.runner.waiting && !S.run.ended) { S.run.wantPlay = false; play(true); }
   }
 
   /** The run's part of the card: a question with one button per answer, or how the run ended. */
@@ -98,7 +108,11 @@
     $("run-step").disabled = !!r.done;
     if (r.done) {
       const end = r.end;
-      box.appendChild(el("div", "run-q", end ? `Kết thúc: ${EXIT_WORD[end.exit] || "trả về"} tại “${end.title}”.` : "Đã chạy hết luồng."));
+      box.appendChild(el("div", "run-q", r.scenarioDone ? "Kịch bản xong: người dùng về lại màn hình." : end ? `Kết thúc: ${EXIT_WORD[end.exit] || "trả về"} tại “${end.title}”.` : "Đã chạy hết luồng."));
+      if (S.run.written.size) {
+        const OPW = { insert: "thêm", update: "sửa", delete: "xoá", write: "ghi" };
+        box.appendChild(el("div", "run-w", "Lần chạy này ghi vào: " + [...S.run.written].map(([t, op]) => `${t} (${OPW[op] || "ghi"})`).join(", ")));
+      }
       const again = el("button", "btn sm primary", "↺ Chạy lại");
       again.type = "button";
       again.addEventListener("click", () => start($("run-scn").value));
@@ -116,8 +130,9 @@
       if (!S.run || !S.run.playing) return;
       if (S.run.runner.waiting || S.run.ended) { setPlaying(false); return; }
       advance();
-      if (S.run && S.run.playing && !S.run.ended && !S.run.runner.waiting) schedule();
-      else if (S.run && (S.run.ended || S.run.runner.waiting)) setPlaying(S.run.runner.waiting && !S.run.ended);
+      if (!S.run) return;
+      if (S.run.ended) setPlaying(false);
+      else if (S.run.playing && !S.run.runner.waiting) schedule();
     }, STEP_MS);
   }
   function setPlaying(on) {
@@ -129,7 +144,9 @@
   }
   function play(on) {
     if (!S.run) return;
-    if (S.run.ended) start($("run-scn").value);
+    if (on && S.run.ended) start($("run-scn").value);
+    if (!on) S.run.wantPlay = false;
+    if (on && S.run.runner.waiting) { S.run.wantPlay = true; return; } // waits for the answer, then plays on
     setPlaying(on);
     if (on) schedule();
     else clearTimeout(S.run.timer);
@@ -147,12 +164,17 @@
       const id = g.getAttribute("data-id");
       g.classList.toggle("run-now", !!run && id === run.current);
       g.classList.toggle("run-trail", !!run && id !== run.current && run.trail.includes(id));
-      g.classList.toggle("run-dim", !!run && !run.trail.includes(id));
+      const ask = !!run && run.asking.includes(id);
+      g.classList.toggle("run-ask", ask);
+      g.classList.toggle("run-dim", !!run && !run.trail.includes(id) && !ask);
     });
   }
 
   function boot() {
     $("run").addEventListener("click", () => start(""));
+    // during a run the card's › is "next step" and ‹ does nothing (it would leave the path)
+    $("card-next").addEventListener("click", (e) => { if (!S.run) return; e.stopImmediatePropagation(); if (!S.run.runner.waiting && !S.run.ended) { stopTimer(); advance(); } }, true);
+    $("card-prev").addEventListener("click", (e) => { if (S.run) e.stopImmediatePropagation(); }, true);
     $("run-stop").addEventListener("click", stop);
     $("run-restart").addEventListener("click", () => start($("run-scn").value));
     $("run-step").addEventListener("click", () => { stopTimer(); advance(); });

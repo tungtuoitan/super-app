@@ -16,7 +16,7 @@
     item: { size: 13, weight: 500, lh: 17 },
     note: { size: 12, weight: 400, lh: 16 },
     label: { size: 11.5, weight: 500, lh: 14 },
-    data: { size: 11.5, weight: 500, lh: 15 },
+    data: { size: 12, weight: 600, lh: 15 },
   };
   const OP_WORD = { read: "đọc", insert: "thêm", update: "sửa", delete: "xoá", write: "ghi" };
   const PAD_X = 14;

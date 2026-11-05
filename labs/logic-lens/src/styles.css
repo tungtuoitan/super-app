@@ -136,7 +136,6 @@ label.check input { accent-color: var(--accent); }
 .ed-body { position: relative; overflow: hidden; }
 .ed-hl { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .ed-hin { padding: 10px 14px; will-change: transform; min-width: max-content; }
-.ed, .snippet, .dsl { font-variant-ligatures: none; }
 .ed-l { height: 20px; font: 12.5px/20px var(--f-mono); white-space: pre; color: var(--ink); }
 .ed-l.add { background: var(--add-soft); }
 .ed-l.rm, .ed-g.rm { background: var(--del-soft); }
@@ -285,6 +284,10 @@ label.check input { accent-color: var(--accent); }
   .canvas { padding: 6px 8px 96px; }
   .card { left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 50%; border-radius: 16px 16px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
   .pane-canvas.card-on .tour { bottom: calc(50% + 10px); } /* above the bottom sheet */
+  /* running on a phone: the diagram gets the room; the card shows the question and a short explanation */
+  .pane-canvas.running .titles p, .pane-canvas.running .change-bar, .pane-canvas.running .data-bar { display: none; }
+  .pane-canvas.running .card { max-height: 40%; }
+  .pane-canvas.running.card-on .tour { bottom: calc(40% + 10px); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 
@@ -308,3 +311,8 @@ label.check input { accent-color: var(--accent); }
 .run-box { padding: 12px 14px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--ll-accent, #2563eb) 7%, var(--panel)); }
 .run-q { font-weight: 600; font-size: 14px; margin-bottom: 8px; }
 .run-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.run-w { font-size: 12.5px; color: var(--ink-2); margin: -2px 0 8px; }
+.pane-canvas.running #card-prev { visibility: hidden; }
+
+/* code shows the exact characters: no ligatures (<= stays <=, != stays !=). Last, so the font shorthands above do not reset it */
+.ed-ta, .ed-l, .ed-l *, .snippet, .snippet *, .dsl, code { font-variant-ligatures: none !important; font-feature-settings: "calt" 0, "liga" 0, "dlig" 0 !important; }

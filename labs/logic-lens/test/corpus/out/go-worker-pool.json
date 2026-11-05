@@ -1,1 +1,220 @@
-{"title":"Tạo thumbnail song song","summary":"Generate chạy một nhóm worker để thu nhỏ ảnh, một goroutine đẩy ảnh vào hàng đợi, rồi trả danh sách thumbnail hoặc lỗi đầu tiên; dừng sớm khi context bị huỷ.","steps":[{"kind":"start","title":"Generate()","sub":"tạo thumbnail cho danh sách ảnh","lines":[12,16],"detail":"Tạo kênh jobs, results (đủ chỗ cho mọi ảnh), errc (chỉ giữ 1 lỗi) và WaitGroup."},{"kind":"parallel","title":"Workers và feeder cùng chạy","sub":"workers đọc jobs, feeder ghi jobs","lines":[18,45],"lanes":[{"title":"Pool workers","sub":"workers goroutine đọc từ jobs","lines":[18,34],"steps":[{"kind":"loop","title":"Với mỗi path trong jobs","sub":"chạy đến khi jobs bị đóng","lines":[22,32],"steps":[{"kind":"call","title":"resize(ctx, path, 320)","sub":"thumbnail rộng 320px, timeout 10 giây","tag":"FILE","lines":[23,23],"detail":"Mỗi ảnh có timeout riêng 10 giây, tính từ ctx của người gọi."},{"kind":"step","title":"Lỗi: lưu lỗi đầu tiên","sub":"lỗi sau bị bỏ, worker làm tiếp","attention":true,"lines":[24,30],"detail":"Chỉ lỗi đầu tiên vào errc, các lỗi sau bị bỏ im lặng. Lỗi không làm các worker khác dừng lại."},{"kind":"step","title":"Ghi thumbnail vào results","sub":"kênh có đệm nên không bị chặn","lines":[31,31]}]}]},{"title":"Feeder","sub":"đẩy từng ảnh vào jobs","lines":[36,45],"steps":[{"kind":"loop","title":"Với mỗi ảnh","sub":"đưa vào jobs hoặc dừng khi ctx huỷ","lines":[38,44],"detail":"Khi vòng lặp xong hoặc bị dừng, jobs được đóng để các worker kết thúc.","steps":[{"kind":"step","title":"Gửi ảnh vào jobs","sub":"ctx.Done() thì bỏ phần còn lại","lines":[39,43]}]}]}]},{"kind":"step","title":"Chờ workers xong","sub":"wg.Wait rồi đóng results","lines":[47,48]},{"kind":"branch","title":"Kết quả sau khi chờ","lines":[50,57],"lanes":[{"title":"ctx bị huỷ","sub":"trả lỗi của context","attention":true,"lines":[50,52],"detail":"Kiểm tra này đứng trước kiểm tra lỗi ảnh, nên thumbnail đã làm xong cũng bị bỏ.","steps":[{"kind":"end","exit":"return","title":"Trả nil và ctx.Err()","sub":"bỏ hết kết quả","lines":[51,51]}]},{"title":"Có lỗi trong errc","sub":"bọc lỗi đầu tiên","lines":[53,55],"steps":[{"kind":"end","exit":"return","title":"Trả nil và lỗi gộp","sub":"some thumbnails failed","lines":[55,55]}]},{"title":"Không lỗi","sub":"đi tiếp","lines":[56,57],"steps":[]}]},{"kind":"end","exit":"return","title":"Trả về danh sách thumbnail","sub":"gom từ results","lines":[58,62],"detail":"Thứ tự kết quả theo thứ tự worker xong, không theo thứ tự ảnh đầu vào."}]}
+{
+ "title": "Tạo thumbnail song song",
+ "summary": "Generate chạy một nhóm worker để thu nhỏ ảnh, một goroutine đẩy ảnh vào hàng đợi, rồi trả danh sách thumbnail hoặc lỗi đầu tiên; dừng sớm khi context bị huỷ.",
+ "steps": [
+  {
+   "kind": "start",
+   "title": "Generate()",
+   "sub": "tạo thumbnail cho danh sách ảnh",
+   "lines": [
+    12,
+    16
+   ],
+   "detail": "Tạo kênh jobs, results (đủ chỗ cho mọi ảnh), errc (chỉ giữ 1 lỗi) và WaitGroup."
+  },
+  {
+   "kind": "parallel",
+   "title": "Workers và feeder cùng chạy",
+   "sub": "workers đọc jobs, feeder ghi jobs",
+   "lines": [
+    18,
+    45
+   ],
+   "lanes": [
+    {
+     "title": "Pool workers",
+     "sub": "workers goroutine đọc từ jobs",
+     "lines": [
+      18,
+      34
+     ],
+     "steps": [
+      {
+       "kind": "loop",
+       "title": "Với mỗi path trong jobs",
+       "sub": "chạy đến khi jobs bị đóng",
+       "lines": [
+        22,
+        32
+       ],
+       "steps": [
+        {
+         "kind": "call",
+         "title": "resize(ctx, path, 320)",
+         "sub": "thumbnail rộng 320px, timeout 10 giây",
+         "tag": "FILE",
+         "lines": [
+          23,
+          23
+         ],
+         "detail": "Mỗi ảnh có timeout riêng 10 giây, tính từ ctx của người gọi."
+        },
+        {
+         "kind": "branch",
+         "title": "resize có lỗi?",
+         "lines": [
+          24,
+          31
+         ],
+         "lanes": [
+          {
+           "title": "lỗi",
+           "lines": [
+            24,
+            30
+           ],
+           "steps": [
+            {
+             "kind": "end",
+             "title": "Lưu lỗi đầu tiên",
+             "sub": "lỗi sau bị bỏ, worker làm tiếp",
+             "attention": true,
+             "lines": [
+              24,
+              30
+             ],
+             "detail": "Chỉ lỗi đầu tiên vào errc, các lỗi sau bị bỏ im lặng. Lỗi không làm các worker khác dừng lại.",
+             "exit": "continue"
+            }
+           ]
+          },
+          {
+           "title": "thành công",
+           "lines": [
+            31,
+            31
+           ],
+           "steps": [
+            {
+             "kind": "step",
+             "title": "Ghi thumbnail vào results",
+             "sub": "kênh có đệm nên không bị chặn",
+             "lines": [
+              31,
+              31
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "title": "Feeder",
+     "sub": "đẩy từng ảnh vào jobs",
+     "lines": [
+      36,
+      45
+     ],
+     "steps": [
+      {
+       "kind": "loop",
+       "title": "Với mỗi ảnh",
+       "sub": "đưa vào jobs hoặc dừng khi ctx huỷ",
+       "lines": [
+        38,
+        44
+       ],
+       "detail": "Khi vòng lặp xong hoặc bị dừng, jobs được đóng để các worker kết thúc.",
+       "steps": [
+        {
+         "kind": "step",
+         "title": "Gửi ảnh vào jobs",
+         "sub": "ctx.Done() thì bỏ phần còn lại",
+         "lines": [
+          39,
+          43
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "step",
+   "title": "Chờ workers xong",
+   "sub": "wg.Wait rồi đóng results",
+   "lines": [
+    47,
+    48
+   ]
+  },
+  {
+   "kind": "branch",
+   "title": "Kết quả sau khi chờ",
+   "lines": [
+    50,
+    57
+   ],
+   "lanes": [
+    {
+     "title": "ctx bị huỷ",
+     "sub": "trả lỗi của context",
+     "attention": true,
+     "lines": [
+      50,
+      52
+     ],
+     "detail": "Kiểm tra này đứng trước kiểm tra lỗi ảnh, nên thumbnail đã làm xong cũng bị bỏ.",
+     "steps": [
+      {
+       "kind": "end",
+       "exit": "return",
+       "title": "Trả nil và ctx.Err()",
+       "sub": "bỏ hết kết quả",
+       "lines": [
+        51,
+        51
+       ]
+      }
+     ]
+    },
+    {
+     "title": "Có lỗi trong errc",
+     "sub": "bọc lỗi đầu tiên",
+     "lines": [
+      53,
+      55
+     ],
+     "steps": [
+      {
+       "kind": "end",
+       "exit": "return",
+       "title": "Trả nil và lỗi gộp",
+       "sub": "some thumbnails failed",
+       "lines": [
+        55,
+        55
+       ]
+      }
+     ]
+    },
+    {
+     "title": "Không lỗi",
+     "sub": "đi tiếp",
+     "lines": [
+      56,
+      57
+     ],
+     "steps": []
+    }
+   ]
+  },
+  {
+   "kind": "end",
+   "exit": "return",
+   "title": "Trả về danh sách thumbnail",
+   "sub": "gom từ results",
+   "lines": [
+    58,
+    62
+   ],
+   "detail": "Thứ tự kết quả theo thứ tự worker xong, không theo thứ tự ảnh đầu vào."
+  }
+ ]
+}

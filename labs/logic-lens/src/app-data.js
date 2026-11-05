@@ -9,13 +9,18 @@
 
   /** name -> {name, note, uses: [{entry, op}]}, in order of first use (declared entities first). */
   function tables() {
-    const map = new Map();
+    const map = new Map(); // keyed case-insensitively: Orders and orders are one table
     const get = (name) => {
-      if (!map.has(name)) map.set(name, { name, note: "", uses: [] });
-      return map.get(name);
+      const k = name.toLowerCase();
+      if (!map.has(k)) map.set(k, { name, note: "", uses: [] });
+      return map.get(k);
     };
     for (const e of (S.flow && S.flow.entities) || []) get(e.name).note = e.note || "";
-    for (const entry of S.nodes) for (const d of entry.node.data || []) get(d.table).uses.push({ entry, op: d.op });
+    for (const entry of S.nodes) {
+      for (const d of entry.node.data || []) get(d.table).uses.push({ entry, op: d.op });
+      // tables named on a group's items (the tables a phase joins) count for the group
+      for (const it of entry.node.items || []) for (const d of it.data || []) get(d.table).uses.push({ entry, op: d.op, item: it.title });
+    }
     return [...map.values()].filter((t) => t.uses.length || t.note);
   }
 
@@ -76,7 +81,8 @@
     const name = S.dataFocus;
     svg.querySelectorAll(".ll-node").forEach((g) => {
       const entry = S.byId.get(g.getAttribute("data-id"));
-      const hit = !!(name && entry && (entry.node.data || []).some((d) => d.table === name));
+      const touches = (list) => (list || []).some((d) => d.table.toLowerCase() === String(name).toLowerCase());
+      const hit = !!(name && entry && (touches(entry.node.data) || (entry.node.items || []).some((it) => touches(it.data))));
       g.classList.toggle("dt-on", hit);
       g.classList.toggle("dt-dim", !!name && !hit && !(S.run && S.run.trail.includes(g.getAttribute("data-id"))));
     });

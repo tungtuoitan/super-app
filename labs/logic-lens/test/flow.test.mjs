@@ -198,9 +198,11 @@ test("prompt example follows the output language and never duplicates the branch
   assert.ok(vi.includes("Nhập đơn hàng từ CSV") && !vi.includes("Import orders from CSV"));
   assert.ok(en.includes("Import orders from CSV"));
   assert.ok(vi.includes("Nothing follows an end box"));
-  const ex = JSON.parse(vi.match(/\{"title":"Nhập đơn hàng.*\}\]\}/)[0]);
+  const ex = JSON.parse(vi.split("\n").find((l) => l.startsWith('{"title":"Nhập đơn hàng')));
   const branch = ex.steps.find((n) => n.kind === "branch");
-  assert.ok(!branch.title, "the decision is named by the step before the branch, not repeated");
+  assert.ok(branch.title.endsWith("?"), "the branch carries its question");
+  assert.ok(!ex.steps.some((n) => n.kind === "step" && /\?$/.test(n.sub || "")), "no separate check step repeats it");
+  assert.ok(ex.scenarios.length && ex.entities.length, "the example shows scenarios and tables");
 });
 
 test("mermaid escapes < and quotes", () => {
