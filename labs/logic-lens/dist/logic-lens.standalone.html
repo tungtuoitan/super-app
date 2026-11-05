@@ -36,6 +36,7 @@
   /* diagram tokens (read by the SVG) */
   --ll-step-bg: #ffffff; --ll-step-line: #1d2a36; --ll-stage-bg: #e4eff6; --ll-stage-line: #3c7fa8; --ll-item-line: #b8c4ce;
   --ll-attn: #c8462f; --ll-ink: #16212b; --ll-muted: #6b7884; --ll-edge: #2a3540; --ll-accent: #d4561b; --ll-glow: rgba(212, 86, 27, 0.45);
+  --ll-end-bg: #eef1f4; --ll-end-line: #5f6c78; --ll-loop-bg: rgba(60, 127, 168, 0.05); --ll-q-bg: #fff7e6; --ll-q-line: #e3b866; --ll-q-ink: #7a5310;
   --f-body: "Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
@@ -45,7 +46,7 @@
     --accent: #ff8a4c; --accent-ink: #1b0e06; --accent-soft: #3a2316; --blue: #6fb0d8; --blue-soft: #1c2f3c; --red: #ff7a66; --good: #47c98f;
     --hl-line: #3a3218; --hl-gutter: #8a7330; --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
     --ll-step-bg: #161d24; --ll-step-line: #c9d4dd; --ll-stage-bg: #1c2f3c; --ll-stage-line: #6fb0d8; --ll-item-line: #3a4753;
-    --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #aab6c1; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5);
+    --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #aab6c1; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5); --ll-end-bg: #222b33; --ll-end-line: #8796a3; --ll-loop-bg: rgba(111, 176, 216, 0.06); --ll-q-bg: #33280f; --ll-q-line: #8a6a2a; --ll-q-ink: #f0c873;
     color-scheme: dark;
   }
 }
@@ -54,7 +55,7 @@
   --accent: #ff8a4c; --accent-ink: #1b0e06; --accent-soft: #3a2316; --blue: #6fb0d8; --blue-soft: #1c2f3c; --red: #ff7a66; --good: #47c98f;
   --hl-line: #3a3218; --hl-gutter: #8a7330; --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
   --ll-step-bg: #161d24; --ll-step-line: #c9d4dd; --ll-stage-bg: #1c2f3c; --ll-stage-line: #6fb0d8; --ll-item-line: #3a4753;
-  --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #aab6c1; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5);
+  --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #aab6c1; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5); --ll-end-bg: #222b33; --ll-end-line: #8796a3; --ll-loop-bg: rgba(111, 176, 216, 0.06); --ll-q-bg: #33280f; --ll-q-line: #8a6a2a; --ll-q-ink: #f0c873;
   color-scheme: dark;
 }
 
@@ -143,11 +144,16 @@ details.alt[open] summary { margin-bottom: 8px; }
 .canvas.fit { max-height: none; }
 .canvas svg { display: block; margin: 0 auto; height: auto; }
 .canvas.fit svg { width: 100%; min-width: 640px; }
+.canvas.fit.narrow svg { min-width: 0; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--muted); padding: 10px 16px 12px; border-top: 1px solid var(--line-2); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .lg { width: 22px; height: 13px; border-radius: 3px; display: inline-block; border: 1.4px solid var(--ll-step-line); background: var(--ll-step-bg); }
 .lg.stage { background: var(--ll-stage-bg); border-color: var(--ll-stage-line); }
 .lg.attn { border: 1.6px dashed var(--ll-attn); }
+.lg.lane { background: var(--ll-step-bg); border-color: var(--ll-stage-line); border-top-width: 4px; }
+.lg.end { background: var(--ll-end-bg); border-color: var(--ll-end-line); border-radius: 7px; }
+.lg.loop { background: var(--ll-loop-bg); border: 1.3px dotted var(--ll-stage-line); }
+.lg.qlabel { background: var(--ll-q-bg); border: 1px solid var(--ll-q-line); border-radius: 7px; }
 .empty { padding: 40px 20px; text-align: center; color: var(--muted); }
 
 /* explanation */
@@ -164,6 +170,17 @@ details.alt[open] summary { margin-bottom: 8px; }
 .tag.lines:hover { border-color: var(--accent); color: var(--accent); }
 .explain-empty { color: var(--muted); }
 
+/* explanation: top of the left column on desktop, a bottom sheet on narrow screens */
+.explain-panel .sheet-only { display: none; }
+.snippet { margin: 2px 0 0; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 6px; padding: 6px 0; font: 12px/1.55 var(--f-mono); overflow-x: auto; max-height: 220px; overflow-y: auto; }
+.snippet div { display: grid; grid-template-columns: 3em 1fr; white-space: pre; min-width: max-content; }
+.snippet span:first-child { text-align: right; padding-right: 10px; color: var(--faint); user-select: none; }
+.snippet span:last-child { padding-right: 10px; }
+.snippet .more { color: var(--muted); font-family: var(--f-body); font-size: 12px; padding: 2px 10px; display: block; }
+.crumb { font-size: 12px; color: var(--blue); font-weight: 500; }
+.code-line { cursor: pointer; }
+.code-line:hover .n { color: var(--accent); }
+
 /* text editor */
 .dsl { width: 100%; min-height: 300px; font: 12.5px/1.6 var(--f-mono); white-space: pre; resize: vertical; }
 .dsl-errors { margin: 0; padding-left: 18px; color: var(--red); font-size: 12.5px; }
@@ -172,10 +189,22 @@ details.alt[open] summary { margin-bottom: 8px; }
 
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 7px; font-size: 13px; box-shadow: var(--shadow); max-width: calc(100vw - 32px); }
 
+@media (min-width: 1061px) {
+  .col-left { max-height: calc(100vh - 88px); overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .explain-panel .explain { max-height: 42vh; overflow: auto; }
+  .code-edit, .code-view { height: 46vh; }
+}
 @media (max-width: 1060px) {
   .grid { grid-template-columns: minmax(0, 1fr); }
-  .col-left { position: static; }
+  .col-left { position: static; order: 2; }
+  .grid > .col:not(.col-left) { order: 1; }
   .code-edit, .code-view { height: 40vh; min-height: 260px; }
+  /* explanation becomes a sheet over the bottom of the screen while a box is selected */
+  .explain-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; border-radius: 14px 14px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18); max-height: 52vh; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom, 0px); transform: translateY(105%); visibility: hidden; transition: transform 0.2s ease, visibility 0s linear 0.2s; }
+  .explain-panel.open { transform: none; visibility: visible; transition: transform 0.2s ease; }
+  .explain-panel .explain { overflow: auto; }
+  .explain-panel .sheet-only { display: grid; }
+  body.sheet-open main { padding-bottom: 52vh; }
 }
 @media (max-width: 560px) {
   .brand span { display: none; }
@@ -205,7 +234,15 @@ details.alt[open] summary { margin-bottom: 8px; }
 </header>
 <main class="wrap">
   <div class="grid">
-    <section class="col col-left" aria-label="Code">
+    <section class="col col-left" aria-label="Code và giải thích">
+      <div class="panel explain-panel" id="explain-panel" aria-label="Giải thích ô đang chọn">
+        <div class="panel-h"><h2>Giải thích</h2><span class="hint" id="explain-hint"></span><span class="spacer"></span>
+          <button class="icon-btn sheet-only" id="sheet-prev" type="button" aria-label="Ô trước">‹</button>
+          <button class="icon-btn sheet-only" id="sheet-next" type="button" aria-label="Ô sau">›</button>
+          <button class="icon-btn sheet-only" id="sheet-close" type="button" aria-label="Đóng giải thích">✕</button>
+        </div>
+        <div class="panel-b explain" id="explain"></div>
+      </div>
       <div class="panel">
         <div class="panel-h">
           <h2>Code</h2>
@@ -277,16 +314,14 @@ details.alt[open] summary { margin-bottom: 8px; }
         <div class="legend" aria-label="Chú thích">
           <span><i class="lg"></i>Một bước</span>
           <span><i class="lg stage"></i>Giai đoạn chính</span>
+          <span><i class="lg lane"></i>Một nhánh: chỉ một nhánh chạy, rồi gộp lại</span>
+          <span><i class="lg end"></i>Dừng tại đây (return / throw)</span>
+          <span><i class="lg loop"></i>Lặp lại</span>
           <span><i class="lg attn"></i>Đáng chú ý</span>
-          <span>Các ô nằm cạnh nhau: chỉ một nhánh được chạy</span>
-          <span>Bấm vào ô để xem giải thích và dòng code</span>
+          <span><i class="lg qlabel"></i>Câu hỏi quyết định nhánh</span>
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-h"><h2>Giải thích</h2><span class="hint" id="explain-hint"></span></div>
-        <div class="panel-b explain" id="explain"></div>
-      </div>
 
       <details class="panel" id="dsl-panel">
         <summary class="panel-h" style="cursor:pointer;list-style:none"><h2>Sửa sơ đồ bằng chữ</h2><span class="hint">mỗi dòng là một ô, sơ đồ cập nhật ngay</span></summary>
@@ -294,8 +329,9 @@ details.alt[open] summary { margin-bottom: 8px; }
           <textarea class="dsl" id="dsl" spellcheck="false" aria-label="Sơ đồ dạng chữ"></textarea>
           <ul class="dsl-errors" id="dsl-errors"></ul>
           <div class="cheat">
-            <div><code>step Tiêu đề | dòng phụ</code> một bước &nbsp; <code>stage …</code> giai đoạn chính (xanh) &nbsp; <code>warn …</code> đáng chú ý (viền đỏ)</div>
-            <div><code>group …</code> rồi thụt vào <code>item …</code> và <code>note …</code> &nbsp; <code>branch</code> rồi thụt vào <code>lane …</code>, các bước của nhánh thụt sâu hơn</div>
+            <div><code>step Tiêu đề | dòng phụ</code> một bước &nbsp; <code>stage …</code> giai đoạn chính (xanh) &nbsp; <code>warn …</code> đáng chú ý (viền đỏ) &nbsp; <code>end …</code> dừng tại đây</div>
+            <div><code>group …</code> rồi thụt vào <code>item …</code> và <code>note …</code> &nbsp; <code>loop …</code> rồi thụt vào các bước lặp</div>
+            <div><code>branch Câu hỏi</code> rồi thụt vào <code>lane Trường hợp</code>, các bước của nhánh thụt sâu hơn</div>
             <div><code>@12-40</code> cuối dòng: dòng code tương ứng &nbsp; <code>!</code> cuối dòng: đánh dấu đáng chú ý &nbsp; <code>&gt; …</code> dòng giải thích</div>
           </div>
           <div class="row"><button class="btn sm" id="copy-dsl" type="button">Copy dạng chữ</button></div>
@@ -311,9 +347,13 @@ details.alt[open] summary { margin-bottom: 8px; }
  *
  * Model
  *   Flow  = { title, summary, steps: Node[] }
- *   Node  = { kind: "step" | "stage" | "group" | "branch", title, sub, detail, lines: [from, to] | null, attention,
- *             items?: {title, sub}[], note?: string,        // group
- *             lanes?: Lane[] }                               // branch
+ *   Node  = { kind, title, sub, detail, lines: [from, to] | null, attention, ... }
+ *     kind "step"   one action
+ *     kind "stage"  a main phase (drawn highlighted)
+ *     kind "end"    the path stops here: return / throw / exit (drawn as a pill; its lane does not rejoin)
+ *     kind "group"  several things combined in one phase: + items: {title, sub, attention}[], note
+ *     kind "loop"   repeated work: + steps: Node[] (the body)
+ *     kind "branch" mutually exclusive paths: + lanes: Lane[] (title = the question, optional)
  *   Lane  = { title, sub, detail, lines, attention, steps: Node[] }
  *
  * Text format (2-space indentation)
@@ -327,104 +367,174 @@ details.alt[open] summary { margin-bottom: 8px; }
  *     item plm.RFD
  *     item Style | Product + Collection
  *     note Show latest: keep the highest Id per style
- *   branch
+ *   loop  For each row | parse and validate
+ *     step Parse price
+ *   branch Which view mode?
  *     lane Rows
  *       step Count | rows after filtering
- *     lane Timeline !
- *       step Group | by GroupBy
+ *     lane Invalid !
+ *       end Return 400
  *   stage Return result
  *   ("!" at the end of any line marks the box for attention.)
  */
 (function (LL) {
   "use strict";
 
-  const KINDS = ["step", "stage", "group", "branch"];
-  const LIMITS = { depth: 4, lanes: 6, items: 8, steps: 40, title: 80, sub: 140, detail: 1200 };
+  const KINDS = ["step", "stage", "end", "group", "loop", "branch"];
+  const LIMITS = { depth: 4, lanes: 6, items: 8, steps: 40, title: 80, sub: 140, detail: 1200, total: 80 };
 
   // ───────────────────────── normalize ─────────────────────────
 
-  const str = (v, max) => (v == null ? "" : String(v).replace(/\s+/g, " ").trim().slice(0, max || 400));
-  const longStr = (v, max) => (v == null ? "" : String(v).replace(/\r\n/g, "\n").trim().slice(0, max || 2000));
+  /** One-line text, cut at a word boundary with "…" when longer than max. */
+  const str = (v, max) => {
+    if (v == null || typeof v === "object") return "";
+    const t = String(v).replace(/\s+/g, " ").trim();
+    const m = max || 400;
+    if (t.length <= m) return t;
+    const cut = t.slice(0, m - 1);
+    const sp = cut.lastIndexOf(" ");
+    return (sp > m * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,.;:]+$/, "") + "…";
+  };
+  const longStr = (v, max) => (v == null || typeof v === "object" ? "" : String(v).replace(/\r\n/g, "\n").trim().slice(0, max || 2000));
+  const arr = (v) => (Array.isArray(v) ? v : v && typeof v === "object" ? (Array.isArray(v.steps) ? v.steps : [v]) : []);
 
+  /** Parse a line range in any of the shapes a model tends to produce. Returns [a, b] (may be 0-based; fixed later) or null. */
   function lines(v) {
-    if (!v) return null;
+    if (v == null || v === false) return null;
     let a, b;
     if (Array.isArray(v)) [a, b] = v;
     else if (typeof v === "object") { a = v.from != null ? v.from : v.start; b = v.to != null ? v.to : v.end; }
-    else if (typeof v === "string") { const m = v.match(/(\d+)\s*(?:[-–:]\s*(\d+))?/); if (m) { a = m[1]; b = m[2]; } }
+    else if (typeof v === "string") { const m = v.match(/(\d+)\s*(?:[-–:,]\s*(\d+))?/); if (m) { a = m[1]; b = m[2]; } }
     else if (typeof v === "number") a = v;
     a = Math.round(Number(a));
     b = b == null ? a : Math.round(Number(b));
-    if (!Number.isFinite(a) || a < 1) return null;
+    if (!Number.isFinite(a) || a < 0) return null;
     if (!Number.isFinite(b) || b < a) b = a;
     return [a, b];
   }
 
+  const KIND_ALIASES = {
+    warn: "step", attention: "step", note: "step", action: "step", call: "step", process: "step", task: "step", input: "step", output: "step",
+    phase: "stage", section: "stage", milestone: "stage",
+    exit: "end", return: "end", throw: "end", stop: "end", terminate: "end", raise: "end",
+    if: "branch", switch: "branch", fork: "branch", decision: "branch", condition: "branch", match: "branch", case: "branch",
+    for: "loop", foreach: "loop", while: "loop", repeat: "loop", iterate: "loop", each: "loop",
+    parallel: "group", combine: "group", join: "group", merge: "group",
+  };
+
   /** Make any loosely shaped object (from Claude or hand-written JSON) a valid Flow. */
   function normalize(raw) {
     const r = raw && typeof raw === "object" ? raw : {};
-    const steps = Array.isArray(r) ? r : r.steps || r.flow || r.nodes || [];
+    const top = Array.isArray(r) ? r : arr(r.steps || r.flow || r.nodes || r.diagram);
     let count = 0;
+    let sawZero = false;
+    const rng = (v) => {
+      const x = lines(v);
+      if (x && x[0] === 0) sawZero = true;
+      return x;
+    };
+
+    const lane = (l, depth, fallbackTitle) => {
+      const o = l && typeof l === "object" ? l : { title: l };
+      return {
+        title: str(o.title || o.label || o.when || o.condition || o.case || o.name, LIMITS.title) || fallbackTitle || "…",
+        sub: str(o.sub || o.subtitle, LIMITS.sub),
+        detail: longStr(o.detail || o.explanation, LIMITS.detail),
+        lines: rng(o.lines || o.range || o.lineRange),
+        attention: !!(o.attention || o.warn),
+        steps: depth < LIMITS.depth ? arr(o.steps || o.flow || o.nodes || o.body || o.then).map((c) => node(c, depth + 1)).filter(Boolean) : [],
+      };
+    };
+
     const node = (n, depth) => {
-      if (!n || typeof n !== "object" || count >= LIMITS.steps * 3) return null;
+      if (!n || typeof n !== "object" || count >= LIMITS.total) return null;
       count++;
-      let kind = String(n.kind || n.type || "step").toLowerCase();
+      let kind = String(n.kind || n.type || "step").toLowerCase().trim();
       let attention = !!(n.attention || n.warn || n.highlight === "warn");
-      if (kind === "warn" || kind === "attention" || kind === "note") { kind = "step"; attention = true; }
-      if (kind === "phase" || kind === "section") kind = "stage";
-      if (kind === "if" || kind === "switch" || kind === "fork") kind = "branch";
+      if (kind === "warn" || kind === "attention") attention = true;
+      if (KIND_ALIASES[kind]) kind = KIND_ALIASES[kind];
       if (!KINDS.includes(kind)) kind = "step";
-      const out = { kind, title: str(n.title || n.label || n.name, LIMITS.title), sub: str(n.sub || n.subtitle || n.description, LIMITS.sub), detail: longStr(n.detail || n.explanation, LIMITS.detail), lines: lines(n.lines || n.lineRange || n.range), attention };
+      if (n.end === true || n.exit === true) kind = "end";
+      const out = {
+        kind,
+        title: str(n.title || n.label || n.name || n.question, LIMITS.title),
+        sub: str(n.sub || n.subtitle || n.description, LIMITS.sub),
+        detail: longStr(n.detail || n.explanation, LIMITS.detail),
+        lines: rng(n.lines || n.lineRange || n.range),
+        attention,
+      };
       if (kind === "group") {
-        out.items = (Array.isArray(n.items) ? n.items : Array.isArray(n.children) ? n.children : []).slice(0, LIMITS.items)
-          .map((it) => (typeof it === "string" ? { title: str(it, LIMITS.title), sub: "" } : { title: str(it && (it.title || it.label), LIMITS.title), sub: str(it && (it.sub || it.subtitle), LIMITS.sub) }))
+        out.items = arr(n.items || n.children || n.parts).slice(0, LIMITS.items)
+          .map((it) => (it && typeof it === "object"
+            ? { title: str(it.title || it.label || it.name, LIMITS.title), sub: str(it.sub || it.subtitle, LIMITS.sub), attention: !!(it.attention || it.warn) }
+            : { title: str(it, LIMITS.title), sub: "", attention: false }))
           .filter((it) => it.title);
         out.note = str(n.note, LIMITS.sub);
-      }
-      if (kind === "branch") {
-        const lanes = (Array.isArray(n.lanes) ? n.lanes : Array.isArray(n.branches) ? n.branches : Array.isArray(n.cases) ? n.cases : []).slice(0, LIMITS.lanes);
-        out.lanes = lanes.map((l) => ({
-          title: str(l && (l.title || l.label || l.when || l.condition), LIMITS.title) || "…",
-          sub: str(l && (l.sub || l.subtitle), LIMITS.sub),
-          detail: longStr(l && (l.detail || l.explanation), LIMITS.detail),
-          lines: lines(l && (l.lines || l.range)),
-          attention: !!(l && (l.attention || l.warn)),
-          steps: depth < LIMITS.depth ? ((l && (l.steps || l.flow || l.nodes)) || []).map((c) => node(c, depth + 1)).filter(Boolean) : [],
-        }));
+      } else if (kind === "loop") {
+        out.steps = depth < LIMITS.depth ? arr(n.steps || n.body || n.children || n.flow).map((c) => node(c, depth + 1)).filter(Boolean) : [];
+      } else if (kind === "branch") {
+        let lanes = n.lanes || n.branches || n.cases || n.paths || n.options;
+        if (!lanes && (n.then || n.else || n.yes || n.no)) {
+          // if/else shape: {condition, then: [...], else: [...]}
+          lanes = [];
+          if (n.then || n.yes) lanes.push({ title: str(n.condition || n.if, LIMITS.title) || "Đúng", steps: n.then || n.yes });
+          if (n.else || n.no) lanes.push({ title: n.condition ? "Ngược lại" : "Sai", steps: n.else || n.no });
+          if (!out.title) out.title = str(n.condition || n.if, LIMITS.title);
+        }
+        out.lanes = arr(lanes).slice(0, LIMITS.lanes).map((l) => lane(l, depth));
+        if (!out.title) out.title = str(n.condition || n.question, LIMITS.title);
         if (!out.lanes.length) { out.kind = "step"; delete out.lanes; }
       }
-      if (!out.title && kind !== "branch") out.title = "…";
+      if (!out.title && out.kind !== "branch") out.title = "…";
       return out;
     };
-    return {
+
+    const flow = {
       title: str(r.title, 120),
       summary: longStr(r.summary, 600),
-      steps: (Array.isArray(steps) ? steps : []).slice(0, LIMITS.steps).map((n) => node(n, 1)).filter(Boolean),
+      steps: top.slice(0, LIMITS.steps).map((n) => node(n, 1)).filter(Boolean),
     };
+    // a model that numbers lines from 0: shift every range by one
+    if (sawZero) eachNode(flow, (n) => { if (n.lines) n.lines = [n.lines[0] + 1, n.lines[1] + 1]; });
+    else eachNode(flow, (n) => { if (n.lines && n.lines[0] < 1) n.lines = null; });
+    return flow;
+  }
+
+  /** Visit every node and lane (not group items). */
+  function eachNode(flow, fn) {
+    const visit = (list) => {
+      for (const n of list) {
+        fn(n);
+        if (n.kind === "branch") for (const l of n.lanes) { fn(l); visit(l.steps); }
+        if (n.kind === "loop") visit(n.steps);
+      }
+    };
+    visit(flow.steps);
   }
 
   // ───────────────────────── text format ─────────────────────────
 
-  const KEYWORDS = { step: "step", stage: "stage", warn: "warn", group: "group", branch: "branch", lane: "lane", item: "item", note: "note",
+  const KEYWORDS = { step: "step", stage: "stage", warn: "warn", end: "end", group: "group", loop: "loop", branch: "branch", lane: "lane", item: "item", note: "note",
     // Vietnamese aliases
-    buoc: "step", "bước": "step", "giai-doan": "stage", "nhom": "group", "nhóm": "group", "nhanh": "branch", "nhánh": "branch" };
+    buoc: "step", "bước": "step", "giai-doan": "stage", "nhom": "group", "nhóm": "group", "nhanh": "branch", "nhánh": "branch", lap: "loop", "lặp": "loop", "ket-thuc": "end" };
 
   /** Parse the text format. Returns {flow, errors: [{line, message}]}. Never throws. */
   function parseText(text) {
     const errors = [];
     const flow = { title: "", summary: "", steps: [] };
-    // stack of {indent, container: array to push nodes into, kind: "root"|"lane"|"group"|"branch", owner}
+    // containers: root / lane / loop take nodes; group takes item/note; branch takes lanes
     const stack = [{ indent: -1, list: flow.steps, kind: "root" }];
-    let lastNode = null; // the node that a following "> detail" line belongs to
+    let lastNode = null; // where a following "> detail" line goes
+    let lastItem = null;
     const src = String(text || "").replace(/\t/g, "  ").split(/\r?\n/);
 
     for (let i = 0; i < src.length; i++) {
       const raw = src[i];
       if (!raw.trim() || /^\s*(#|\/\/)/.test(raw)) continue;
       const indent = raw.match(/^ */)[0].length;
-      let line = raw.trim();
+      const line = raw.trim();
 
-      const meta = line.match(/^(title|summary|tiêu đề|tom tat|tóm tắt)\s*:\s*(.*)$/i);
+      const meta = line.match(/^(title|summary|tiêu đề|tóm tắt)\s*:\s*(.*)$/i);
       if (meta && indent === 0) {
         if (/^(title|tiêu đề)$/i.test(meta[1])) flow.title = str(meta[2], 120);
         else flow.summary = longStr(meta[2], 600);
@@ -439,7 +549,7 @@ details.alt[open] summary { margin-bottom: 8px; }
       const m = line.match(/^([^\s]+)\s*(.*)$/);
       const kw = KEYWORDS[m[1].toLowerCase()];
       if (!kw) {
-        errors.push({ line: i + 1, message: `Không hiểu từ “${m[1]}”. Mỗi dòng bắt đầu bằng step, stage, warn, group, item, note, branch hoặc lane.` });
+        errors.push({ line: i + 1, message: `Không hiểu từ “${m[1]}”. Mỗi dòng bắt đầu bằng step, stage, warn, end, group, item, note, loop, branch hoặc lane.` });
         continue;
       }
       let rest = m[2];
@@ -452,23 +562,22 @@ details.alt[open] summary { margin-bottom: 8px; }
       const t = str(title, LIMITS.title);
       const sub = str(subParts.join("|"), LIMITS.sub);
 
-      // pop to the container this indentation belongs to
       while (stack.length > 1 && indent <= stack[stack.length - 1].indent) stack.pop();
       const top = stack[stack.length - 1];
 
       if (kw === "item" || kw === "note") {
         if (top.kind !== "group") { errors.push({ line: i + 1, message: `“${m[1]}” phải thụt vào bên dưới một group.` }); continue; }
-        if (kw === "item") { if (top.owner.items.length < LIMITS.items) top.owner.items.push({ title: t || "…", sub }); }
+        if (kw === "item") { if (top.owner.items.length < LIMITS.items) top.owner.items.push({ title: t || "…", sub, attention }); }
         else top.owner.note = str(rest, LIMITS.sub);
         lastNode = null;
         continue;
       }
       if (kw === "lane") {
         if (top.kind !== "branch") { errors.push({ line: i + 1, message: "“lane” phải thụt vào bên dưới một branch." }); continue; }
-        const lane = { title: t || "…", sub, detail: "", lines: range, attention, steps: [] };
-        top.owner.lanes.push(lane);
-        stack.push({ indent, list: lane.steps, kind: "lane", owner: lane });
-        lastNode = lane;
+        const ln = { title: t || "…", sub, detail: "", lines: range, attention, steps: [] };
+        top.owner.lanes.push(ln);
+        stack.push({ indent, list: ln.steps, kind: "lane", owner: ln });
+        lastNode = ln;
         continue;
       }
       if (top.kind === "branch") { errors.push({ line: i + 1, message: "Bên dưới branch, mỗi dòng phải là một lane." }); continue; }
@@ -476,23 +585,17 @@ details.alt[open] summary { margin-bottom: 8px; }
 
       const node = { kind: kw === "warn" ? "step" : kw, title: t, sub, detail: "", lines: range, attention: attention || kw === "warn" };
       if (kw === "group") { node.items = []; node.note = ""; }
+      if (kw === "loop") node.steps = [];
       if (kw === "branch") node.lanes = [];
       if (kw !== "branch" && !t) errors.push({ line: i + 1, message: "Ô này cần có tiêu đề." });
       top.list.push(node);
-      if (kw === "group") stack.push({ indent, list: null, kind: "group", owner: node });
-      if (kw === "branch") stack.push({ indent, list: null, kind: "branch", owner: node });
+      if (kw === "group") stack.push({ indent, kind: "group", owner: node });
+      if (kw === "branch") stack.push({ indent, kind: "branch", owner: node });
+      if (kw === "loop") stack.push({ indent, list: node.steps, kind: "loop", owner: node });
       lastNode = kw === "branch" ? null : node;
+      lastItem = null;
     }
-    // empty branches are errors that would render nothing
-    const check = (list) => {
-      for (const n of list) {
-        if (n.kind === "branch") {
-          if (!n.lanes.length) errors.push({ line: 0, message: "Có một branch chưa có lane nào." });
-          n.lanes.forEach((l) => check(l.steps));
-        }
-      }
-    };
-    check(flow.steps);
+    eachNode(flow, (n) => { if (n.kind === "branch" && !n.lanes.length) errors.push({ line: 0, message: "Có một branch chưa có lane nào." }); });
     return { flow, errors };
   }
 
@@ -503,7 +606,7 @@ details.alt[open] summary { margin-bottom: 8px; }
     if (flow.summary) out.push("summary: " + flow.summary.replace(/\n+/g, " "));
     if (out.length) out.push("");
     const head = (kw, n, pad) => {
-      let s = pad + kw.padEnd(6) + (n.title || "");
+      let s = pad + (kw + " ").padEnd(6) + (n.title || "");
       if (n.sub) s += " | " + n.sub;
       if (n.lines) s += "   @" + n.lines[0] + (n.lines[1] !== n.lines[0] ? "-" + n.lines[1] : "");
       if (n.attention && kw !== "warn") s += " !";
@@ -513,7 +616,7 @@ details.alt[open] summary { margin-bottom: 8px; }
     const walk = (list, pad) => {
       for (const n of list) {
         if (n.kind === "branch") {
-          out.push(pad + "branch" + (n.title ? " " + n.title : ""));
+          head("branch", n, pad);
           for (const l of n.lanes) {
             head("lane", l, pad + "  ");
             walk(l.steps, pad + "    ");
@@ -522,9 +625,10 @@ details.alt[open] summary { margin-bottom: 8px; }
         }
         head(n.kind === "step" && n.attention ? "warn" : n.kind, n, pad);
         if (n.kind === "group") {
-          for (const it of n.items || []) out.push(pad + "  item  " + it.title + (it.sub ? " | " + it.sub : ""));
+          for (const it of n.items || []) out.push(pad + "  item  " + it.title + (it.sub ? " | " + it.sub : "") + (it.attention ? " !" : ""));
           if (n.note) out.push(pad + "  note  " + n.note);
         }
+        if (n.kind === "loop") walk(n.steps, pad + "  ");
       }
     };
     walk(flow.steps, "");
@@ -533,29 +637,43 @@ details.alt[open] summary { margin-bottom: 8px; }
 
   // ───────────────────────── traversal ─────────────────────────
 
-  /** Depth-first list of every clickable box, in reading order, each with a stable id. */
+  /**
+   * Depth-first list of every clickable box, in reading order, each with a stable id and its place in the structure:
+   * {id, node, lane?: true, path: [{lane, laneIndex, laneCount, branchTitle}]}.
+   */
   function walkNodes(flow) {
     const out = [];
-    const visit = (list, path) => {
+    const visit = (list, prefix, ctx) => {
       list.forEach((n, i) => {
-        const id = path + i;
+        const id = prefix + i;
         if (n.kind === "branch") {
           n.lanes.forEach((l, j) => {
             const lid = id + ".l" + j;
-            out.push({ id: lid, node: l, lane: true, depth: path.split(".").length });
-            visit(l.steps, lid + ".");
+            const here = ctx.concat([{ lane: l.title, laneIndex: j, laneCount: n.lanes.length, branchTitle: n.title || "" }]);
+            out.push({ id: lid, node: l, lane: true, path: here });
+            visit(l.steps, lid + ".", here);
           });
         } else {
-          out.push({ id, node: n, depth: path.split(".").length });
+          out.push({ id, node: n, path: ctx });
+          if (n.kind === "loop") visit(n.steps, id + ".", ctx.concat([{ loop: n.title }]));
         }
       });
     };
-    visit(flow.steps, "");
+    visit(flow.steps, "", []);
     return out;
   }
 
   function countBoxes(flow) {
     return walkNodes(flow).length;
+  }
+
+  /** Does a sequence end the path (its last box is an end, or a branch whose every lane ends)? */
+  function endsPath(list) {
+    const last = list[list.length - 1];
+    if (!last) return false;
+    if (last.kind === "end") return true;
+    if (last.kind === "branch") return last.lanes.every((l) => endsPath(l.steps));
+    return false;
   }
 
   // ───────────────────────── Mermaid ─────────────────────────
@@ -569,9 +687,9 @@ details.alt[open] summary { margin-bottom: 8px; }
       const s = (x.sub || "").replace(/"/g, "'");
       return `"${s ? `<b>${t}</b><br/><small>${s}</small>` : t}"`;
     };
-    const styles = { stage: [], attention: [] };
-    // returns {first: [ids], last: [ids]} of a sequence
-    const seq = (list) => {
+    const cls = { stage: [], attention: [], end: [] };
+    // returns {first: [ids], last: [ids that continue]}
+    const seq = (list, indent) => {
       let first = null;
       let prevLast = null;
       for (const node of list) {
@@ -581,41 +699,51 @@ details.alt[open] summary { margin-bottom: 8px; }
           const tails = [];
           for (const l of node.lanes) {
             const lid = id();
-            out.push(`  ${lid}[${label(l)}]`);
-            styles.stage.push(lid);
-            if (l.attention) styles.attention.push(lid);
+            out.push(`${indent}${lid}[${label(l)}]`);
+            if (l.attention) cls.attention.push(lid);
             heads.push(lid);
-            const inner = seq(l.steps);
-            if (inner.first) { for (const f of inner.first) out.push(`  ${lid} --> ${f}`); tails.push(...inner.last); }
+            const inner = seq(l.steps, indent);
+            if (inner.first) { for (const f of inner.first) out.push(`${indent}${lid} --> ${f}`); tails.push(...inner.last); }
             else tails.push(lid);
           }
-          ends = { first: heads, last: tails };
+          ends = { first: heads, last: tails, label: node.title };
         } else if (node.kind === "group") {
           const gid = id();
           const parts = (node.items || []).map((it) => it.title + (it.sub ? " (" + it.sub + ")" : "")).join(" · ");
           const sub = [node.sub, parts, node.note].filter(Boolean).join("<br/>");
-          out.push(`  ${gid}[${label({ title: node.title, sub })}]`);
-          styles.stage.push(gid);
-          if (node.attention) styles.attention.push(gid);
+          out.push(`${indent}${gid}[${label({ title: node.title, sub })}]`);
+          cls.stage.push(gid);
+          if (node.attention) cls.attention.push(gid);
           ends = { first: [gid], last: [gid] };
+        } else if (node.kind === "loop") {
+          const sid = "s" + ++n;
+          out.push(`${indent}subgraph ${sid}["↻ ${(node.title || "").replace(/"/g, "'")}"]`);
+          const inner = seq(node.steps, indent + "  ");
+          out.push(`${indent}end`);
+          if (node.attention) cls.attention.push(sid);
+          ends = inner.first ? { first: inner.first, last: inner.last } : { first: [sid], last: [sid] };
         } else {
           const nid = id();
-          out.push(`  ${nid}[${label(node)}]`);
-          if (node.kind === "stage") styles.stage.push(nid);
-          if (node.attention) styles.attention.push(nid);
-          ends = { first: [nid], last: [nid] };
+          out.push(node.kind === "end" ? `${indent}${nid}([${label(node)}])` : `${indent}${nid}[${label(node)}]`);
+          if (node.kind === "stage") cls.stage.push(nid);
+          if (node.kind === "end") cls.end.push(nid);
+          if (node.attention) cls.attention.push(nid);
+          ends = { first: [nid], last: node.kind === "end" ? [] : [nid] };
         }
-        if (prevLast) for (const a of prevLast) for (const b of ends.first) out.push(`  ${a} --> ${b}`);
+        const arrow = ends.label ? ` -- "${ends.label.replace(/"/g, "'")}" --> ` : " --> ";
+        if (prevLast) for (const a of prevLast) for (const b of ends.first) out.push(`${indent}${a}${arrow}${b}`);
         if (!first) first = ends.first;
         prevLast = ends.last;
       }
       return { first, last: prevLast || [] };
     };
-    seq(flow.steps);
-    out.push("  classDef stage fill:#e3eef5,stroke:#3d7ea6,color:#16232e");
+    seq(flow.steps, "  ");
+    out.push("  classDef stage fill:#e4eff6,stroke:#3c7fa8,color:#16212b");
+    out.push("  classDef endnode fill:#eef1f4,stroke:#5f6c78,color:#16212b");
     out.push("  classDef attention stroke:#c8462f,stroke-dasharray:5 4");
-    if (styles.stage.length) out.push("  class " + styles.stage.join(",") + " stage");
-    if (styles.attention.length) out.push("  class " + styles.attention.join(",") + " attention");
+    if (cls.stage.length) out.push("  class " + cls.stage.join(",") + " stage");
+    if (cls.end.length) out.push("  class " + cls.end.join(",") + " endnode");
+    if (cls.attention.length) out.push("  class " + cls.attention.join(",") + " attention");
     return out.join("\n") + "\n";
   }
 
@@ -644,7 +772,7 @@ details.alt[open] summary { margin-bottom: 8px; }
     return ls.map((l, i) => String(i + 1).padStart(w) + "| " + l).join("\n");
   }
 
-  /** Resolve {from: "text", to: "text"} anchors against code into [line, line] (used by the examples). */
+  /** Resolve {anchor: [from, to]} text anchors against code into lines (used by the examples). */
   function resolveAnchors(flow, code) {
     const ls = String(code).split("\n");
     const find = (needle, start) => {
@@ -667,47 +795,72 @@ details.alt[open] summary { margin-bottom: 8px; }
 
   // ───────────────────────── prompt ─────────────────────────
 
-  const DETAIL_GUIDE = {
-    simple: "Keep it short: 4 to 7 top-level boxes, branches only for the main split.",
-    normal: "Aim for 5 to 10 top-level boxes; use branches and groups where the code really has them.",
-    detailed: "Be thorough: up to 14 top-level boxes, include nested branches and every meaningful check.",
+  const SIZE = {
+    simple: { total: 10, top: "4 to 7", depth: 1, extra: "Only show the main path and the main split; fold everything else into the boxes." },
+    normal: { total: 16, top: "5 to 9", depth: 2, extra: "Show the real branches and phases; fold small checks into the box they belong to." },
+    detailed: { total: 26, top: "6 to 12", depth: 2, extra: "Include every meaningful check and branch, still within the limits." },
   };
+
+  const EXAMPLE_JSON = `{
+  "title": "Search RFD",
+  "summary": "Builds a dynamic SQL query from optional filters, then runs exactly one view mode and returns rows plus totals.",
+  "steps": [
+    {"kind": "step", "title": "Receive parameters", "sub": "filters, page, view mode", "lines": [1, 14], "detail": "Every filter defaults to NULL, meaning: do not filter on it."},
+    {"kind": "stage", "title": "1. Build the filter", "sub": "one AND clause per non-NULL parameter", "lines": [19, 25]},
+    {"kind": "group", "title": "2. Build FROM", "lines": [27, 46], "items": [{"title": "plm.RFD"}, {"title": "Style", "sub": "Product + Collection"}], "note": "Show latest keeps the newest RFD per style"},
+    {"kind": "step", "title": "3. Pick the view mode", "sub": "@ViewMode", "lines": [53, 53]},
+    {"kind": "branch", "title": "@ViewMode", "lanes": [
+      {"title": "= 'list'", "lines": [54, 64], "steps": [
+        {"kind": "step", "title": "Count all rows", "lines": [56, 56]},
+        {"kind": "loop", "title": "For each row on the page", "sub": "add file count", "lines": [57, 62], "steps": [{"kind": "step", "title": "Count files", "sub": "one sub-query per row", "attention": true, "lines": [59, 59]}]}
+      ]},
+      {"title": "unknown mode", "attention": true, "lines": [90, 92], "steps": [{"kind": "end", "title": "Throw error", "sub": "RAISERROR 50001", "lines": [91, 91]}]}
+    ]},
+    {"kind": "stage", "title": "Return result", "sub": "rows + @ov_TotalRows", "lines": [94, 97]}
+  ]
+}`;
 
   /** The instruction Claude receives, with the numbered code. */
   function buildPrompt(code, opts) {
     const o = opts || {};
     const lang = o.language === "en" ? "English" : "Vietnamese";
+    const size = SIZE[o.detail] || SIZE.normal;
     const codeLang = o.codeLanguage || guessLanguage(code);
+    const nLines = String(code).split("\n").length;
     return [
-      "You turn source code into a simple, visual flow diagram that helps a developer understand the logic step by step.",
+      "You turn source code into a simple, visual flow diagram that helps a developer understand the logic step by step, top to bottom.",
       "",
-      "Read the code below and describe its control flow as a JSON object with this exact shape:",
-      "{",
-      '  "title": "short name of what the code does",',
-      '  "summary": "one or two plain sentences: what goes in, what comes out",',
-      '  "steps": [ Node, ... ]',
-      "}",
-      "Node is one of:",
-      '  {"kind": "step",   "title": "...", "sub": "...", "detail": "...", "lines": [from, to], "attention": false}',
-      '  {"kind": "stage",  ...same fields}   // a main phase of the code; shown highlighted',
-      '  {"kind": "group",  ...same fields, "items": [{"title": "...", "sub": "..."}], "note": "..."}   // several things combined in one phase (tables joined, sources merged, parallel calls)',
-      '  {"kind": "branch", "lanes": [ {"title": "...", "sub": "...", "detail": "...", "lines": [from, to], "attention": false, "steps": [Node, ...]} ]}   // mutually exclusive paths (if/else, switch, modes); lanes rejoin afterwards',
+      "Return one JSON object: {\"title\", \"summary\", \"steps\": [Node, ...]}. Node kinds:",
+      '- {"kind": "step", "title", "sub", "detail", "lines": [from, to], "attention": false}  one action',
+      '- {"kind": "stage", ...same}  a main phase of the code (shown highlighted). Number main phases "1. ...", "2. ..." when the code has clear phases.',
+      '- {"kind": "end", ...same}  the path STOPS here: return, throw, raise, exit, early response. A lane that ends with "end" does not rejoin the flow.',
+      '- {"kind": "group", ...same, "items": [{"title", "sub"}], "note"}  several things combined in one phase: tables joined, sources merged, calls run in parallel. 2 to 6 items.',
+      '- {"kind": "loop", ...same, "steps": [Node, ...]}  repeated work (for, while, map, cursor). title starts with "For each ..." (or the Vietnamese equivalent); steps are the body.',
+      '- {"kind": "branch", "title": "the question being decided", "lanes": [{"title": "answer / condition value", "sub", "detail", "lines", "attention", "steps": [Node, ...]}]}  mutually exclusive paths (if/else, switch, modes). Lanes that do not end rejoin after the branch.',
       "",
-      "Rules:",
-      `- Write every title, sub, detail and note in ${lang}. Keep code identifiers (table names, variables, functions) as they are.`,
-      "- title: at most 5 words, starting with a verb or a noun phrase, e.g. \"Build the filter\". Number the main stages (\"1. ...\", \"2. ...\") when the code has clear phases.",
-      "- sub: at most 10 words saying what concretely happens, e.g. \"one AND clause per non-NULL parameter\".",
-      "- detail: 1 to 3 plain sentences a newcomer needs: why this step exists, what to watch for. No code.",
-      "- lines: the first and last line numbers (from the numbered listing) that this box describes. Every box should have them.",
-      "- attention: true for the few boxes a reader should look at twice: surprising behavior, side effects, performance traps, a branch that differs from the others, values that are NOT set. Use it sparingly.",
-      "- Describe the logic, not the syntax. Merge trivial lines into one box. Never invent behavior the code does not have.",
-      "- Use a branch only when paths really diverge; put each path's own steps inside its lane, and the shared steps after the branch.",
-      "- " + (DETAIL_GUIDE[o.detail] || DETAIL_GUIDE.normal),
-      "- The first box is the input (parameters, request, arguments). The last box is the output or the final effect.",
+      "Example of the shape (content invented):",
+      EXAMPLE_JSON,
+      "",
+      "Hard limits (the diagram becomes unreadable beyond them):",
+      `- At most ${size.total} boxes in total, counting lanes and loop/branch contents. ${size.top} boxes at the top level.`,
+      `- At most 4 lanes per branch. Branches and loops nest at most ${size.depth} level${size.depth > 1 ? "s" : ""} deep. If the code goes deeper, summarize the inner part as one step and explain it in "detail".`,
+      "- title: at most 30 characters. sub: at most 60 characters. Plain words a newcomer understands; keep code identifiers (table, variable, function names) exactly as written.",
+      `- Write every title, sub, detail and note in ${lang}.`,
+      "",
+      "How to model the code:",
+      "- The first box is the input (parameters, request, arguments). The last box on the main path is the output or final effect.",
+      "- Put a step right before each branch that says what is being checked, or give the branch a title with the question. Lane titles are the answers (\"empty\", \"= 'kanban'\", \"error\").",
+      "- Guard clauses (if bad: return / throw) are a branch with a lane ending in an \"end\" box and a lane for the normal path (that lane may have no steps).",
+      "- try/catch: a branch with lanes \"success\" and \"error\" when the error path does something meaningful.",
+      "- If the code has several functions, diagram the main entry point; show calls to the others as single steps titled with the function name.",
+      `- ${size.extra} Describe behavior, not syntax. Merge trivial lines. Never invent behavior the code does not have.`,
+      "- detail: 1 to 3 plain sentences: why this step exists and what to watch for. No code.",
+      '- lines: 1-based line numbers from the numbered listing below, first and last line the box describes. Every box gets lines.',
+      "- attention: true on at most 3 boxes a reader must look at twice: surprising behavior, side effects, performance traps, values left unset, a path that behaves differently.",
       "",
       "Reply with only the JSON object.",
       "",
-      `Code (${codeLang}, ${String(code).split("\n").length} lines, numbered):`,
+      `Code (${codeLang}, ${nLines} lines, numbered):`,
       "```",
       numberLines(code),
       "```",
@@ -725,44 +878,52 @@ details.alt[open] summary { margin-bottom: 8px; }
     if (first !== -1 && last > first) candidates.push(t.slice(first, last + 1));
     for (const c of candidates) {
       if (!c) continue;
-      try {
-        const flow = normalize(JSON.parse(c));
-        if (flow.steps.length) return { flow, error: null };
-      } catch (e) { /* try the next form */ }
+      let parsed;
+      try { parsed = JSON.parse(c); } catch (e) { continue; }
+      const flow = normalize(parsed);
+      if (flow.steps.length) return { flow, error: null };
     }
     const asText = parseText(t);
-    if (asText.flow.steps.length) return { flow: asText.flow, error: null, errors: asText.errors };
+    if (asText.flow.steps.length && asText.errors.length < asText.flow.steps.length) return { flow: asText.flow, error: null, errors: asText.errors };
     return { flow: null, error: "Không tìm thấy sơ đồ trong nội dung này. Hãy dán nguyên đoạn JSON mà Claude trả về." };
   }
 
-  LL.flow = { normalize, parseText, toText, walkNodes, countBoxes, toMermaid, guessLanguage, numberLines, resolveAnchors, buildPrompt, parseReply, LIMITS };
+  LL.flow = { normalize, parseText, toText, walkNodes, eachNode, endsPath, countBoxes, toMermaid, guessLanguage, numberLines, resolveAnchors, buildPrompt, parseReply, LIMITS };
 })(globalThis.LL = globalThis.LL || {});
 
 // ── layout.js
 /* Logic Lens — lay a Flow out top-to-bottom and draw it as SVG.
  * Pure apart from text measurement, which is injected (canvas in the browser, an estimate in Node).
+ *
+ * Two arrangements for branches:
+ *   wide   lanes side by side under a fork bus, rejoining on a merge bus (the reference style)
+ *   narrow lanes stacked one under another, hanging off a rail on the left (phones)
+ * The drawing widens instead of shrinking boxes when nesting needs more room.
  */
 (function (LL) {
   "use strict";
 
-  const W = 880; // drawing width in SVG units; the SVG scales to its container
+  const BASE_W = 880; // default drawing width in SVG units; the SVG scales to its container
   const FONT = {
     title: { size: 15, weight: 600, lh: 19 },
     sub: { size: 12.5, weight: 400, lh: 16 },
     item: { size: 13, weight: 500, lh: 17 },
     note: { size: 12, weight: 400, lh: 16 },
+    label: { size: 11.5, weight: 500, lh: 14 },
   };
-  const PAD_X = 16;
+  const PAD_X = 14;
   const PAD_Y = 10;
   const GAP = 30; // vertical space between boxes (arrow length)
   const BUS = 18; // fork / merge bus offset
   const LANE_GAP = 16;
+  const MIN_LANE = 150; // a lane never gets narrower than this
+  const TOP_BOX_MIN = 340;
+  const LOOP_PAD = 14;
   const FAMILY = '"Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif';
 
   // ───────────────────────── measurement ─────────────────────────
 
   let measureFn = null;
-  /** Use a canvas to measure text in the browser; falls back to an estimate. */
   function setMeasure(fn) {
     measureFn = fn;
   }
@@ -776,7 +937,7 @@ details.alt[open] summary { margin-bottom: 8px; }
       if (v == null) {
         ctx.font = `${f.weight} ${f.size}px ${FAMILY}`;
         v = ctx.measureText(text).width;
-        if (cache.size > 5000) cache.clear();
+        if (cache.size > 8000) cache.clear();
         cache.set(key, v);
       }
       return v;
@@ -789,128 +950,134 @@ details.alt[open] summary { margin-bottom: 8px; }
   }
   const measure = (text, f) => (measureFn || estimate)(text, f);
 
-  /** Greedy word wrap; very long words are split. Returns lines (at most maxLines, last one ellipsized). */
+  /**
+   * Greedy word wrap. Over-long words (identifiers) break after . _ / ( - when possible, else mid-word.
+   * Returns {lines, clipped}; at most maxLines lines, the last one ellipsized when text was cut.
+   */
   function wrap(text, f, maxW, maxLines) {
     const words = String(text || "").split(/\s+/).filter(Boolean);
     const out = [];
     let cur = "";
-    const push = (s) => out.push(s);
     for (let word of words) {
       while (measure(word, f) > maxW && word.length > 1) {
-        // split an over-long word
         let cut = word.length - 1;
         while (cut > 1 && measure(word.slice(0, cut), f) > maxW) cut--;
-        if (cur) { push(cur); cur = ""; }
-        push(word.slice(0, cut));
+        // prefer a break right after punctuation inside an identifier
+        const soft = Math.max(word.lastIndexOf(".", cut - 1), word.lastIndexOf("_", cut - 1), word.lastIndexOf("/", cut - 1), word.lastIndexOf("(", cut - 1), word.lastIndexOf("-", cut - 1));
+        if (soft > cut / 3) cut = soft + 1;
+        if (cur) { out.push(cur); cur = ""; }
+        out.push(word.slice(0, cut));
         word = word.slice(cut);
       }
       const next = cur ? cur + " " + word : word;
       if (measure(next, f) <= maxW) cur = next;
-      else { if (cur) push(cur); cur = word; }
+      else { if (cur) out.push(cur); cur = word; }
     }
-    if (cur) push(cur);
+    if (cur) out.push(cur);
     if (maxLines && out.length > maxLines) {
       const kept = out.slice(0, maxLines);
       let last = kept[maxLines - 1];
       while (last.length > 1 && measure(last + "…", f) > maxW) last = last.slice(0, -1);
-      kept[maxLines - 1] = last + "…";
-      return kept;
+      kept[maxLines - 1] = last.replace(/[\s,.;:]+$/, "") + "…";
+      return Object.assign(kept, { clipped: true });
     }
     return out;
+  }
+
+  // ───────────────────────── sizing ─────────────────────────
+
+  const ends = (list) => LL.flow.endsPath(list);
+
+  /** Minimum width a sequence needs so no lane drops below MIN_LANE. */
+  function minWidth(list, depth, narrow) {
+    let w = depth === 1 ? TOP_BOX_MIN : MIN_LANE;
+    for (const n of list) {
+      if (n.kind === "branch") {
+        const lanes = n.lanes.map((l) => Math.max(MIN_LANE, minWidth(l.steps, depth + 1, narrow)));
+        const need = narrow ? Math.max(...lanes) + 38 : lanes.reduce((a, b) => a + b, 0) + LANE_GAP * (lanes.length - 1);
+        w = Math.max(w, need);
+      } else if (n.kind === "loop") {
+        w = Math.max(w, minWidth(n.steps, depth + 1, narrow) + LOOP_PAD * 2 + 16);
+      } else if (n.kind === "group") {
+        w = Math.max(w, depth === 1 ? 360 : MIN_LANE);
+      }
+    }
+    return w;
   }
 
   // ───────────────────────── layout ─────────────────────────
 
   /**
-   * Lay out a flow. Returns {width, height, boxes, edges, groups} in SVG units.
-   * boxes: {id, x, y, w, h, kind, attention, titleLines, subLines, lane?, item?, groupId?}
-   * edges: {d, arrow}
+   * Lay out a flow. opts: {width (preferred drawing width), narrow (stack lanes vertically)}.
+   * Returns {width, height, boxes, edges, labels}.
    */
-  function layout(flow) {
+  function layout(flow, opts) {
+    const o = opts || {};
+    const narrow = !!o.narrow;
+    const margin = narrow ? 10 : 20;
+    const W = Math.ceil(Math.max(o.width || BASE_W, minWidth(flow.steps, 1, narrow) + margin * 2));
     const boxes = [];
     const edges = [];
-    const containers = [];
-    const top = 16;
+    const labels = [];
 
-    // a simple box (step/stage/lane head/group item); returns its height for a given width
-    const textBlock = (node, w, f1, f2) => {
+    const textBlock = (node, w, maxTitle) => {
       const inner = w - PAD_X * 2;
-      const titleLines = wrap(node.title || "", f1 || FONT.title, inner, 3);
-      const subLines = node.sub ? wrap(node.sub, f2 || FONT.sub, inner, 3) : [];
-      const h = PAD_Y * 2 + titleLines.length * (f1 || FONT.title).lh + (subLines.length ? 3 + subLines.length * (f2 || FONT.sub).lh : 0);
-      return { titleLines, subLines, h: Math.max(h, subLines.length ? 52 : 40) };
+      const titleLines = wrap(node.title || "", FONT.title, inner, maxTitle || 2);
+      const subLines = node.sub ? wrap(node.sub, FONT.sub, inner, 2) : [];
+      const h = PAD_Y * 2 + titleLines.length * FONT.title.lh + (subLines.length ? 3 + subLines.length * FONT.sub.lh : 0);
+      return { titleLines, subLines, h: Math.max(h, subLines.length ? 52 : 40), clipped: !!(titleLines.clipped || subLines.clipped) };
     };
+    const arrowTo = (from, to) => edges.push({ d: `M${from.x} ${from.y}V${to.y}`, arrow: true });
 
-    /** Lay out a sequence starting at (x..x+w, y). Returns {bottom, firstTop: {x,y}|null, lastBottoms: [{x,y}], isEmpty}. */
+    /**
+     * Lay out a sequence in the column [x, x+w] starting at y.
+     * from: points the first box connects from. Returns {bottom, tails: points that continue, ended}.
+     */
     function seq(list, x, w, y, path, depth, from) {
       let cursor = y;
-      let prev = from || null; // [{x, y}] bottoms to connect from
-      let firstTop = null;
+      let prev = from && from.length ? from : null;
+      let merged = false; // prev is a merge-bus point: connect straight down
+      let ended = false;
+      const cx = x + w / 2;
+
+      const connect = (to) => {
+        if (!prev) return;
+        if (merged || prev.length === 1) {
+          const p = prev[0];
+          if (Math.abs(p.x - to.x) < 0.5) arrowTo(p, to);
+          else { const midY = to.y - BUS; edges.push({ d: `M${p.x} ${p.y}V${midY}H${to.x}V${to.y}`, arrow: true }); }
+        } else {
+          const busY = to.y - BUS;
+          for (const p of prev) edges.push({ d: `M${p.x} ${p.y}V${busY}`, arrow: false });
+          const xs = prev.map((p) => p.x).concat([to.x]);
+          edges.push({ d: `M${Math.min(...xs)} ${busY}H${Math.max(...xs)}`, arrow: false });
+          edges.push({ d: `M${to.x} ${busY}V${to.y}`, arrow: true });
+        }
+      };
+
       list.forEach((node, i) => {
         const id = path + i;
+        const isLast = i === list.length - 1;
+
         if (node.kind === "branch") {
-          const n = node.lanes.length;
-          const laneW = (w - LANE_GAP * (n - 1)) / n;
-          const centers = node.lanes.map((_, j) => x + j * (laneW + LANE_GAP) + laneW / 2);
-          let laneTop = cursor;
-          if (prev) {
-            const busY = cursor - GAP + BUS;
-            // from the previous box(es) down to the fork bus
-            const from = prev.length === 1 ? prev[0] : null;
-            if (from) edges.push({ d: `M${from.x} ${from.y}V${busY}`, arrow: false });
-            else for (const p of prev) edges.push({ d: `M${p.x} ${p.y}V${busY}`, arrow: false });
-            const xs = centers.concat(prev.map((p) => p.x));
-            if (n > 1 || prev.some((p) => Math.abs(p.x - centers[0]) > 0.5)) edges.push({ d: `M${Math.min(...xs)} ${busY}H${Math.max(...xs)}`, arrow: false });
-            for (const c of centers) edges.push({ d: `M${c} ${busY}V${laneTop}`, arrow: true });
-          }
-          const bottoms = [];
-          let maxBottom = laneTop;
-          node.lanes.forEach((lane, j) => {
-            const lid = id + ".l" + j;
-            const lx = x + j * (laneW + LANE_GAP);
-            const bw = Math.min(laneW, Math.max(140, laneW));
-            const tb = textBlock(lane, bw);
-            boxes.push({ id: lid, x: lx + (laneW - bw) / 2, y: laneTop, w: bw, h: tb.h, kind: "stage", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane });
-            let lb = [{ x: centers[j], y: laneTop + tb.h }];
-            let bottom = laneTop + tb.h;
-            if (lane.steps.length) {
-              const r = seq(lane.steps, lx, laneW, bottom + GAP, lid + ".", depth + 1, [{ x: centers[j], y: bottom }]);
-              lb = r.lastBottoms;
-              bottom = r.bottom;
-            }
-            bottoms.push(lb);
-            maxBottom = Math.max(maxBottom, bottom);
-          });
-          if (!firstTop) firstTop = { x: centers[0], y: laneTop };
-          // merge: drop each lane's tail to a shared bus; the next box connects from the bus center
-          const mergeY = maxBottom + BUS;
-          const isLast = i === list.length - 1;
-          if (!isLast || depth > 1) {
-            for (const lb of bottoms) for (const p of lb) edges.push({ d: `M${p.x} ${p.y}V${mergeY}`, arrow: false });
-            const xs = bottoms.flat().map((p) => p.x);
-            if (xs.length > 1) edges.push({ d: `M${Math.min(...xs)} ${mergeY}H${Math.max(...xs)}`, arrow: false });
-            prev = [{ x: x + w / 2, y: mergeY }];
-            cursor = mergeY + GAP - BUS + 6;
-            // connector from the merge bus center to the next box is drawn by the next box; mark it
-            prev.merge = true;
-          } else {
-            prev = bottoms.flat();
-            cursor = maxBottom;
-          }
+          const r = narrow ? branchNarrow(node, id, x, w, cursor, depth, !!prev) : branchWide(node, id, x, w, cursor, depth, isLast, !!prev);
+          prev = r.tails.length ? r.tails : null;
+          merged = r.merged;
+          ended = r.ended;
+          cursor = r.next;
           return;
         }
 
         if (node.kind === "group") {
-          const gw = depth === 1 ? w : w;
-          const gx = x + (w - gw) / 2;
+          const gw = w;
+          const gx = x;
           const head = textBlock(node, gw);
-          // item boxes laid out in rows
           const inner = gw - PAD_X * 2;
           const items = (node.items || []).map((it) => {
             const tw = Math.max(measure(it.title, FONT.item), it.sub ? measure(it.sub, FONT.sub) : 0);
-            const iw = Math.min(inner, Math.max(110, tw + 28));
-            const tl = wrap(it.title, FONT.item, iw - 24, 2);
-            const sl = it.sub ? wrap(it.sub, FONT.sub, iw - 24, 2) : [];
+            const iw = Math.min(inner, Math.max(104, tw + 28));
+            const tl = wrap(it.title, FONT.item, iw - 22, 2);
+            const sl = it.sub ? wrap(it.sub, FONT.sub, iw - 22, 2) : [];
             const ih = 16 + tl.length * FONT.item.lh + (sl.length ? 2 + sl.length * FONT.sub.lh : 0);
             return { it, w: iw, h: Math.max(ih, 40), tl, sl };
           });
@@ -923,8 +1090,7 @@ details.alt[open] summary { margin-bottom: 8px; }
             row.push(it);
           }
           if (row.length) rows.push(row);
-          // equalize heights within a row
-          let gy = cursor;
+          const gy = cursor;
           let yy = gy + PAD_Y + head.titleLines.length * FONT.title.lh + (head.subLines.length ? 3 + head.subLines.length * FONT.sub.lh : 0) + 12;
           const itemBoxes = [];
           for (const r of rows) {
@@ -932,68 +1098,202 @@ details.alt[open] summary { margin-bottom: 8px; }
             const total = r.reduce((a, q) => a + q.w, 0) + 12 * (r.length - 1);
             let xx = gx + (gw - total) / 2;
             for (const q of r) {
-              itemBoxes.push({ id: id + ".i" + itemBoxes.length, x: xx, y: yy, w: q.w, h: rh, kind: "item", titleLines: q.tl, subLines: q.sl, item: true, groupId: id });
+              itemBoxes.push({ id: id + ".i" + itemBoxes.length, x: xx, y: yy, w: q.w, h: rh, kind: "item", attention: q.it.attention, titleLines: q.tl, subLines: q.sl, groupId: id, full: q.it.title + (q.it.sub ? " — " + q.it.sub : "") });
               xx += q.w + 12;
             }
             yy += rh + 10;
           }
           const noteLines = node.note ? wrap(node.note, FONT.note, inner, 3) : [];
           if (noteLines.length) yy += 2 + noteLines.length * FONT.note.lh;
-          const gh = yy - gy + (rows.length || noteLines.length ? 6 : 0) + PAD_Y - 4;
-          boxes.push({ id, x: gx, y: gy, w: gw, h: Math.max(gh, head.h), kind: "group", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, noteLines, node, noteY: yy - noteLines.length * FONT.note.lh });
+          const gh = Math.max(yy - gy + (rows.length || noteLines.length ? 6 : 0) + PAD_Y - 4, head.h);
+          boxes.push({ id, x: gx, y: gy, w: gw, h: gh, kind: "group", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, noteLines, node, noteY: yy - noteLines.length * FONT.note.lh, container: true });
           for (const b of itemBoxes) boxes.push(b);
-          connect({ x: x + w / 2, y: gy });
-          prev = [{ x: x + w / 2, y: gy + Math.max(gh, head.h) }];
-          cursor = gy + Math.max(gh, head.h) + GAP;
+          connect({ x: cx, y: gy });
+          prev = [{ x: cx, y: gy + gh }];
+          merged = false;
+          cursor = gy + gh + GAP;
           return;
         }
 
-        // step / stage
-        const maxW = depth === 1 ? Math.min(w, Math.max(340, w * 0.56)) : w - 8;
-        const tb = textBlock(node, maxW);
-        const bx = x + (w - maxW) / 2;
-        boxes.push({ id, x: bx, y: cursor, w: maxW, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node });
-        connect({ x: x + w / 2, y: cursor });
-        prev = [{ x: x + w / 2, y: cursor + tb.h }];
+        if (node.kind === "loop") {
+          const fw = depth === 1 ? Math.min(w, Math.max(minWidth(node.steps, depth + 1, narrow) + LOOP_PAD * 2 + 16, w * 0.72)) : w - 4;
+          const fx = x + (w - fw) / 2;
+          const head = textBlock({ title: "↻ " + (node.title || ""), sub: node.sub }, fw - 24);
+          const fy = cursor;
+          connect({ x: cx, y: fy });
+          const headH = PAD_Y + head.titleLines.length * FONT.title.lh + (head.subLines.length ? 3 + head.subLines.length * FONT.sub.lh : 0) + 4;
+          const ix = fx + LOOP_PAD;
+          const iw = fw - LOOP_PAD * 2 - 16; // leave room for the return arrow on the right
+          const icx = ix + iw / 2;
+          let bottom = fy + headH;
+          if (node.steps.length) {
+            const r = seq(node.steps, ix, iw, fy + headH + GAP - 6, id + ".", depth + 1, [{ x: icx, y: fy + headH }]);
+            bottom = r.bottom;
+            // return arrow: from the end of the body back up to the loop header
+            const rx = fx + fw - 12;
+            if (!r.ended) edges.push({ d: `M${icx} ${bottom}V${bottom + 10}H${rx}V${fy + 16}`, arrow: true, loop: true });
+          }
+          const fh = bottom - fy + (node.steps.length ? 22 : PAD_Y);
+          boxes.push({ id, x: fx, y: fy, w: fw, h: fh, kind: "loop", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, node, container: true, headH });
+          prev = [{ x: cx, y: fy + fh }];
+          merged = false;
+          cursor = fy + fh + GAP;
+          return;
+        }
+
+        // step / stage / end
+        const bw = depth === 1 ? Math.min(w, Math.max(TOP_BOX_MIN, w * 0.56)) : Math.max(60, w - 8);
+        const tb = textBlock(node, bw);
+        const bx = x + (w - bw) / 2;
+        const isEnd = node.kind === "end";
+        boxes.push({ id, x: bx, y: cursor, w: bw, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node, clipped: tb.clipped });
+        connect({ x: cx, y: cursor });
+        merged = false;
+        if (isEnd) { prev = null; ended = true; }
+        else prev = [{ x: cx, y: cursor + tb.h }];
         cursor += tb.h + GAP;
       });
 
-      function connect(to) {
-        if (!firstTop) firstTop = to;
-        if (!prev) return;
-        if (prev.merge) {
-          edges.push({ d: `M${prev[0].x} ${prev[0].y}V${to.y}`, arrow: true });
-        } else if (prev.length === 1) {
-          edges.push({ d: `M${prev[0].x} ${prev[0].y}V${to.y}`, arrow: true });
-        } else {
-          const busY = to.y - BUS;
-          for (const p of prev) edges.push({ d: `M${p.x} ${p.y}V${busY}`, arrow: false });
-          const xs = prev.map((p) => p.x).concat([to.x]);
-          edges.push({ d: `M${Math.min(...xs)} ${busY}H${Math.max(...xs)}`, arrow: false });
-          edges.push({ d: `M${to.x} ${busY}V${to.y}`, arrow: true });
-        }
-      }
-
-      const lastBottoms = prev || [];
-      const bottom = list.length ? Math.max(...lastBottoms.map((p) => p.y), y) : y;
-      return { bottom, firstTop: firstTop || { x: x + w / 2, y }, lastBottoms };
+      const tails = ended ? [] : prev || [];
+      let bottom = y;
+      for (const b of boxes) if (b.id.startsWith(path) && b.id.slice(path.length).split(".").length >= 1 && isInside(b.id, path, list.length)) bottom = Math.max(bottom, b.y + b.h);
+      for (const t of tails) bottom = Math.max(bottom, t.y);
+      return { bottom, tails, ended: ended && !tails.length };
     }
 
-    const margin = 20;
-    const r = seq(flow.steps, margin, W - margin * 2, top, "", 1);
-    const height = Math.ceil(r.bottom + 20);
-    return { width: W, height, boxes, edges, containers };
+    // is box id directly or deeply inside one of the first n children of path?
+    function isInside(id, path, n) {
+      const rest = id.slice(path.length);
+      const head = parseInt(rest, 10);
+      return Number.isFinite(head) && head < n;
+    }
+
+    function laneHead(lane, lid, x, y, w) {
+      const tb = textBlock(lane, w);
+      boxes.push({ id: lid, x, y, w, h: tb.h, kind: "lane", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane, clipped: tb.clipped });
+      return tb.h;
+    }
+
+    function questionLabel(text, x, y, anchor) {
+      if (!text) return;
+      const f = FONT.label;
+      const t = wrap(text, f, 260, 1)[0];
+      const tw = measure(t, f) + 14;
+      const lx = anchor === "end" ? x - tw : x;
+      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text });
+    }
+
+    function branchWide(node, id, x, w, top, depth, isLast, hasPrev) {
+      const n = node.lanes.length;
+      const mins = node.lanes.map((l) => Math.max(MIN_LANE, minWidth(l.steps, depth + 1, false)));
+      const sumMin = mins.reduce((a, b) => a + b, 0);
+      const spare = Math.max(0, w - sumMin - LANE_GAP * (n - 1));
+      const widths = mins.map((m) => m + (spare * m) / sumMin);
+      const lefts = [];
+      let acc = x;
+      for (const lw of widths) { lefts.push(acc); acc += lw + LANE_GAP; }
+      const centers = widths.map((lw, j) => lefts[j] + lw / 2);
+      const cx = x + w / 2;
+      // fork bus sits just above the lanes; the previous box's arrow ends on it
+      const busY = top - GAP + BUS;
+      const laneTop = busY + 22 + (node.title ? 8 : 0);
+      if (hasPrev) {
+        edges.push({ d: `M${cx} ${top - GAP}V${busY}`, arrow: false, fork: true });
+        const xs = centers.concat([cx]);
+        if (n > 1 || Math.abs(centers[0] - cx) > 0.5) edges.push({ d: `M${Math.min(...xs)} ${busY}H${Math.max(...xs)}`, arrow: false });
+      }
+      if (hasPrev) for (const c of centers) edges.push({ d: `M${c} ${busY}V${laneTop}`, arrow: true });
+      if (node.title) questionLabel(node.title, Math.min(...centers) + 8, busY + 13, "start");
+
+      const tails = [];
+      let maxBottom = laneTop;
+      node.lanes.forEach((lane, j) => {
+        const lid = id + ".l" + j;
+        const lw = widths[j];
+        const hh = laneHead(lane, lid, lefts[j] + 4, laneTop, lw - 8);
+        let bottom = laneTop + hh;
+        let laneTails = [{ x: centers[j], y: bottom }];
+        let laneEnded = false;
+        if (lane.steps.length) {
+          const r = seq(lane.steps, lefts[j], lw, bottom + GAP, lid + ".", depth + 1, laneTails);
+          laneTails = r.tails;
+          laneEnded = r.ended;
+          bottom = r.bottom;
+        }
+        maxBottom = Math.max(maxBottom, bottom);
+        if (!laneEnded) tails.push(...laneTails);
+      });
+      if (!tails.length) return { tails: [], merged: false, ended: true, next: maxBottom + GAP };
+      if (isLast && depth === 1) return { tails, merged: false, ended: false, next: maxBottom + GAP };
+      // merge: drop each continuing lane to a shared bus; the next box hangs off the bus center
+      const mergeY = maxBottom + BUS;
+      for (const p of tails) edges.push({ d: `M${p.x} ${p.y}V${mergeY}`, arrow: false });
+      const xs = tails.map((p) => p.x).concat([cx]);
+      if (Math.max(...xs) - Math.min(...xs) > 0.5) edges.push({ d: `M${Math.min(...xs)} ${mergeY}H${Math.max(...xs)}`, arrow: false });
+      return { tails: [{ x: cx, y: mergeY }], merged: true, ended: false, next: mergeY + GAP - BUS + 6 };
+    }
+
+    function branchNarrow(node, id, x, w, top, depth, hasPrev) {
+      const railX = x + 9;
+      const lx = x + 24;
+      const lw = w - 24 - 16;
+      const rightX = x + w - 7;
+      const cx = x + w / 2;
+      const forkY = top - GAP + BUS;
+      if (hasPrev) edges.push({ d: `M${cx} ${top - GAP}V${forkY}H${railX}`, arrow: false });
+      if (node.title) questionLabel(node.title, railX + 8, forkY - 12, "start");
+      let y = forkY + 14 + (node.title ? 10 : 0);
+      const continuing = [];
+      let lastHeadMid = forkY;
+      node.lanes.forEach((lane, j) => {
+        const lid = id + ".l" + j;
+        const hh = laneHead(lane, lid, lx, y, lw);
+        const mid = y + hh / 2;
+        edges.push({ d: `M${railX} ${mid}H${lx}`, arrow: true });
+        lastHeadMid = mid;
+        let bottom = y + hh;
+        let tails = [{ x: lx + lw / 2, y: bottom }];
+        let laneEnded = false;
+        if (lane.steps.length) {
+          const r = seq(lane.steps, lx, lw, bottom + GAP, lid + ".", depth + 1, tails);
+          tails = r.tails;
+          laneEnded = r.ended;
+          bottom = r.bottom;
+        }
+        if (!laneEnded) {
+          // each continuing lane drops a short line and runs right to the merge rail
+          const jy = bottom + 10;
+          for (const p of tails) edges.push({ d: `M${p.x} ${p.y}V${jy}H${rightX}`, arrow: false });
+          continuing.push(jy);
+        }
+        y = bottom + 26;
+      });
+      edges.push({ d: `M${railX} ${hasPrev ? forkY : forkY + 14}V${lastHeadMid}`, arrow: false });
+      if (!continuing.length) return { tails: [], merged: false, ended: true, next: y - 26 + GAP };
+      const mergeY = y - 6;
+      edges.push({ d: `M${rightX} ${Math.min(...continuing)}V${mergeY}H${cx}`, arrow: false });
+      return { tails: [{ x: cx, y: mergeY }], merged: true, ended: false, next: mergeY + GAP - BUS + 6 };
+    }
+
+    const r = seq(flow.steps, margin, W - margin * 2, 16, "", 1, null);
+    let bottom = r.bottom;
+    for (const b of boxes) bottom = Math.max(bottom, b.y + b.h);
+    return { width: W, height: Math.ceil(bottom + 20), boxes, edges, labels, narrow };
   }
 
   // ───────────────────────── SVG ─────────────────────────
 
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const r1 = (v) => Math.round(v * 10) / 10;
 
-  // Colors are CSS variables with light fallbacks, so the on-page SVG follows the theme and an exported SVG still looks right.
+  // Colors are CSS variables with light fallbacks: the on-page SVG follows the theme, an exported SVG still looks right.
   const SVG_STYLE = `
   .ll-box{fill:var(--ll-step-bg,#ffffff);stroke:var(--ll-step-line,#1d2a36);stroke-width:1.4}
-  .ll-stage{fill:var(--ll-stage-bg,#e4eff6);stroke:var(--ll-stage-line,#3c7fa8);stroke-width:1.4}
-  .ll-group{fill:var(--ll-stage-bg,#e4eff6);stroke:var(--ll-stage-line,#3c7fa8);stroke-width:1.4}
+  .ll-stage,.ll-group{fill:var(--ll-stage-bg,#e4eff6);stroke:var(--ll-stage-line,#3c7fa8);stroke-width:1.4}
+  .ll-lane{fill:var(--ll-step-bg,#ffffff);stroke:var(--ll-stage-line,#3c7fa8);stroke-width:1.4}
+  .ll-band{fill:var(--ll-stage-line,#3c7fa8)}
+  .ll-end{fill:var(--ll-end-bg,#eef1f4);stroke:var(--ll-end-line,#5f6c78);stroke-width:1.4}
+  .ll-loop{fill:var(--ll-loop-bg,rgba(60,127,168,.05));stroke:var(--ll-stage-line,#3c7fa8);stroke-width:1.3;stroke-dasharray:2 3}
   .ll-item{fill:var(--ll-step-bg,#ffffff);stroke:var(--ll-item-line,#b8c4ce);stroke-width:1.2}
   .ll-attn{stroke:var(--ll-attn,#c8462f);stroke-dasharray:6 4;stroke-width:1.6}
   .ll-title{font-weight:600;font-size:15px;fill:var(--ll-ink,#16212b)}
@@ -1001,14 +1301,39 @@ details.alt[open] summary { margin-bottom: 8px; }
   .ll-itemt{font-weight:500;font-size:13px;fill:var(--ll-ink,#16212b)}
   .ll-note{font-size:12px;fill:var(--ll-attn,#c8462f)}
   .ll-edge{fill:none;stroke:var(--ll-edge,#2a3540);stroke-width:1.5}
+  .ll-edge.ll-back{stroke:var(--ll-stage-line,#3c7fa8);stroke-dasharray:4 3}
   .ll-head{fill:var(--ll-edge,#2a3540)}
+  .ll-headb{fill:var(--ll-stage-line,#3c7fa8)}
+  .ll-qbg{fill:var(--ll-q-bg,#fff7e6);stroke:var(--ll-q-line,#e3b866);stroke-width:1}
+  .ll-q{font-size:11.5px;font-weight:500;fill:var(--ll-q-ink,#7a5310)}
   text{font-family:${FAMILY}}
   .ll-node{cursor:pointer}
   .ll-node:focus{outline:none}
   .ll-node:focus-visible .ll-shape,.ll-node.sel .ll-shape{stroke:var(--ll-accent,#d4561b);stroke-width:2.6;stroke-dasharray:none}
-  .ll-node.dim{opacity:.32}
+  .ll-node.dim,.ll-itemg.dim{opacity:.3}
   .ll-node.hl .ll-shape{filter:drop-shadow(0 0 6px var(--ll-glow,rgba(212,86,27,.45)))}
   `;
+
+  function textLines(b, centerX) {
+    const t = [];
+    if (b.kind === "item") {
+      let yy = b.y + (b.h - (b.titleLines.length * FONT.item.lh + (b.subLines.length ? 2 + b.subLines.length * FONT.sub.lh : 0))) / 2 + FONT.item.size;
+      for (const l of b.titleLines) { t.push(`<text class="ll-itemt" x="${centerX}" y="${r1(yy)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.item.lh; }
+      yy += 2;
+      for (const l of b.subLines) { t.push(`<text class="ll-sub" x="${centerX}" y="${r1(yy - 2)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.sub.lh; }
+      return t;
+    }
+    const textH = b.titleLines.length * FONT.title.lh + (b.subLines.length ? 3 + b.subLines.length * FONT.sub.lh : 0);
+    let yy = b.container ? b.y + PAD_Y + FONT.title.size : b.y + (b.h - textH) / 2 + FONT.title.size - 1 + (b.kind === "lane" ? 2 : 0);
+    for (const l of b.titleLines) { t.push(`<text class="ll-title" x="${centerX}" y="${r1(yy)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.title.lh; }
+    yy += 2;
+    for (const l of b.subLines) { t.push(`<text class="ll-sub" x="${centerX}" y="${r1(yy)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.sub.lh; }
+    if (b.noteLines && b.noteLines.length) {
+      let ny = b.noteY + FONT.note.size;
+      for (const l of b.noteLines) { t.push(`<text class="ll-note" x="${centerX}" y="${r1(ny)}" text-anchor="middle">${esc(l)}</text>`); ny += FONT.note.lh; }
+    }
+    return t;
+  }
 
   /** Render to an SVG string. opts: {interactive, background} */
   function toSvg(flow, lay, opts) {
@@ -1016,45 +1341,34 @@ details.alt[open] summary { margin-bottom: 8px; }
     const L = lay || layout(flow);
     const p = [];
     p.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${L.width} ${L.height}" width="${L.width}" height="${L.height}" class="ll-svg" role="img" aria-label="${esc(flow.title || "Sơ đồ logic")}">`);
-    p.push(`<defs><marker id="ll-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ll-head"/></marker><style>${SVG_STYLE}</style></defs>`);
+    p.push(`<defs><marker id="ll-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ll-head"/></marker><marker id="ll-arrow-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ll-headb"/></marker><style>${SVG_STYLE}</style></defs>`);
     if (o.background) p.push(`<rect width="100%" height="100%" fill="${esc(o.background)}"/>`);
-    for (const e of L.edges) p.push(`<path class="ll-edge" d="${e.d}"${e.arrow ? ' marker-end="url(#ll-arrow)"' : ""}/>`);
-    // groups first so items draw on top
-    const order = L.boxes.slice().sort((a, b) => (a.kind === "group" ? -1 : 0) - (b.kind === "group" ? -1 : 0));
-    for (const b of order) {
-      const cls = b.kind === "item" ? "ll-item" : b.kind === "group" ? "ll-group" : b.kind === "stage" ? "ll-stage" : "ll-box";
-      const shape = `<rect class="ll-shape ${cls}${b.attention ? " ll-attn" : ""}" x="${r(b.x)}" y="${r(b.y)}" width="${r(b.w)}" height="${r(b.h)}" rx="6"/>`;
-      const cx = r(b.x + b.w / 2);
-      const t = [];
-      if (b.kind === "item") {
-        let yy = b.y + (b.h - (b.titleLines.length * FONT.item.lh + (b.subLines.length ? 2 + b.subLines.length * FONT.sub.lh : 0))) / 2 + FONT.item.size;
-        for (const l of b.titleLines) { t.push(`<text class="ll-itemt" x="${cx}" y="${r(yy)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.item.lh; }
-        yy += 2;
-        for (const l of b.subLines) { t.push(`<text class="ll-sub" x="${cx}" y="${r(yy - 2)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.sub.lh; }
-        p.push(`<g class="ll-itemg" data-group="${esc(b.groupId)}">${shape}${t.join("")}</g>`);
-        continue;
-      }
-      const textH = b.titleLines.length * FONT.title.lh + (b.subLines.length ? 3 + b.subLines.length * FONT.sub.lh : 0);
-      let yy = b.kind === "group" ? b.y + PAD_Y + FONT.title.size : b.y + (b.h - textH) / 2 + FONT.title.size - 1;
-      for (const l of b.titleLines) { t.push(`<text class="ll-title" x="${cx}" y="${r(yy)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.title.lh; }
-      yy += 2;
-      for (const l of b.subLines) { t.push(`<text class="ll-sub" x="${cx}" y="${r(yy)}" text-anchor="middle">${esc(l)}</text>`); yy += FONT.sub.lh; }
-      if (b.noteLines && b.noteLines.length) {
-        let ny = b.noteY + FONT.note.size;
-        for (const l of b.noteLines) { t.push(`<text class="ll-note" x="${cx}" y="${r(ny)}" text-anchor="middle">${esc(l)}</text>`); ny += FONT.note.lh; }
-      }
+
+    const shapeOf = (b) => {
+      const cls = { item: "ll-item", group: "ll-group", loop: "ll-loop", stage: "ll-stage", lane: "ll-lane", end: "ll-end" }[b.kind] || "ll-box";
+      const rx = b.kind === "end" ? Math.min(b.h / 2, 22) : b.kind === "loop" ? 10 : 6;
+      let s = `<rect class="ll-shape ${cls}${b.attention ? " ll-attn" : ""}" x="${r1(b.x)}" y="${r1(b.y)}" width="${r1(b.w)}" height="${r1(b.h)}" rx="${rx}"/>`;
+      if (b.kind === "lane") s += `<path class="ll-band" d="M${r1(b.x + 6)} ${r1(b.y + 1)}H${r1(b.x + b.w - 6)}a5 5 0 0 1 5 3v1H${r1(b.x + 1)}v-1a5 5 0 0 1 5-3z"/>`;
+      return s;
+    };
+    const node = (b) => {
       const label = [b.node && b.node.title, b.node && b.node.sub].filter(Boolean).join(": ");
-      p.push(o.interactive
-        ? `<g class="ll-node" data-id="${esc(b.id)}" tabindex="0" role="button" aria-label="${esc(label)}">${shape}${t.join("")}</g>`
-        : `<g>${shape}${t.join("")}</g>`);
-    }
+      const tip = b.clipped || b.kind === "item" ? `<title>${esc(b.full || label)}</title>` : "";
+      const body = shapeOf(b) + textLines(b, r1(b.x + b.w / 2)).join("") + tip;
+      if (b.kind === "item") return `<g class="ll-itemg" data-group="${esc(b.groupId)}">${body}</g>`;
+      return o.interactive ? `<g class="ll-node" data-id="${esc(b.id)}" data-kind="${b.kind}" tabindex="0" role="button" aria-label="${esc(label)}">${body}</g>` : `<g>${body}</g>`;
+    };
+
+    // containers first, then edges (so loop bodies' arrows sit on the frame), then boxes and labels
+    for (const b of L.boxes) if (b.container) p.push(node(b));
+    for (const e of L.edges) p.push(`<path class="ll-edge${e.loop ? " ll-back" : ""}" d="${e.d}"${e.arrow ? ` marker-end="url(#${e.loop ? "ll-arrow-b" : "ll-arrow"})"` : ""}/>`);
+    for (const b of L.boxes) if (!b.container) p.push(node(b));
+    for (const l of L.labels) p.push(`<g class="ll-qg"><rect class="ll-qbg" x="${r1(l.x)}" y="${r1(l.y)}" width="${r1(l.w)}" height="${l.h}" rx="9"/><text class="ll-q" x="${r1(l.x + 7)}" y="${r1(l.y + 12.5)}">${esc(l.text)}</text>${l.full !== l.text ? `<title>${esc(l.full)}</title>` : ""}</g>`);
     p.push("</svg>");
     return p.join("");
   }
 
-  const r = (v) => Math.round(v * 10) / 10;
-
-  LL.layout = { layout, toSvg, wrap, setMeasure, browserMeasure, W, FAMILY, FONT };
+  LL.layout = { layout, toSvg, wrap, setMeasure, browserMeasure, minWidth, BASE_W, FAMILY, FONT, MIN_LANE };
 })(globalThis.LL = globalThis.LL || {});
 
 // ── sample.js
@@ -1177,23 +1491,23 @@ END`;
         items: [{ title: "plm.RFD" }, { title: "Style", sub: "(Product + Collection)" }, { title: "6 bảng tra mã", sub: "(StandardRegistry)" }, { title: "File bản vẽ", sub: "gộp thành 1 chuỗi" }],
         note: "Show latest: chỉ giữ RFD có Id lớn nhất mỗi style, tính sau khi lọc" },
       { kind: "step", title: "3. Chọn chế độ", sub: "chỉ một nhánh được chạy", anchor: ["-- 3. Pick the view mode", "IF @ViewMode = 'list'"] },
-      { kind: "branch", lanes: [
-        { title: "Lưới Rows", anchor: ["IF @ViewMode = 'list'", "OFFSET (@PageIndex - 1)"], steps: [
+      { kind: "branch", title: "@ViewMode", lanes: [
+        { title: "Lưới Rows", sub: "= 'list'", anchor: ["IF @ViewMode = 'list'", "OFFSET (@PageIndex - 1)"], steps: [
           { kind: "step", title: "Đếm tổng", sub: "số RFD sau lọc", anchor: ["SELECT @ov_TotalRows = COUNT(*) ' + @from"] },
           { kind: "step", title: "Lấy một trang", sub: "Id giảm dần", anchor: ["ORDER BY r.Id DESC", "OFFSET (@PageIndex - 1)"] },
-          { kind: "step", title: "Kèm giờ, số file,", sub: "danh sách file", attention: true, anchor: ["DATEDIFF(HOUR", "dw.Drawings"], detail: "Mỗi dòng chạy thêm một truy vấn con COUNT(*) trên RFDFile. Với trang lớn đây là chỗ dễ chậm nhất của nhánh này." },
+          { kind: "step", title: "Kèm giờ và số file", sub: "cùng danh sách bản vẽ", attention: true, anchor: ["DATEDIFF(HOUR", "dw.Drawings"], detail: "Mỗi dòng chạy thêm một truy vấn con COUNT(*) trên RFDFile. Với trang lớn đây là chỗ dễ chậm nhất của nhánh này." },
         ] },
-        { title: "Kanban", anchor: ["ELSE IF @ViewMode = 'kanban'", "WHERE rn BETWEEN"], steps: [
+        { title: "Kanban", sub: "= 'kanban'", anchor: ["ELSE IF @ViewMode = 'kanban'", "WHERE rn BETWEEN"], steps: [
           { kind: "step", title: "Đánh số thẻ", sub: "từ 1 trong mỗi cột", anchor: ["ROW_NUMBER() OVER (PARTITION BY r.StatusCode"] },
-          { kind: "step", title: "Đếm tổng và", sub: "cột dài nhất", anchor: ["SELECT @ov_TotalRows = COUNT(*),", "FROM (SELECT StatusCode, COUNT(*)"], detail: "@ov_TotalRowsMax là số thẻ của cột dài nhất, dùng để biết còn trang sau hay không." },
+          { kind: "step", title: "Đếm tổng thẻ", sub: "và số thẻ của cột dài nhất", anchor: ["SELECT @ov_TotalRows = COUNT(*),", "FROM (SELECT StatusCode, COUNT(*)"], detail: "@ov_TotalRowsMax là số thẻ của cột dài nhất, dùng để biết còn trang sau hay không." },
           { kind: "step", title: "Lấy thẻ của trang", sub: "cho từng cột", anchor: ["SELECT * FROM cards", "WHERE rn BETWEEN"], detail: "Phân trang theo từng cột: trang 2 lấy thẻ 51 đến 100 của MỖI cột, không phải của cả bảng." },
         ] },
-        { title: "Timeline", attention: true, anchor: ["ELSE IF @ViewMode = 'timeline'", "SET @ov_TotalRows = 0;"], detail: "Nhánh này khác hẳn ba nhánh còn lại: trả về số liệu theo nhóm chứ không phải từng RFD.", steps: [
+        { title: "Timeline", sub: "= 'timeline'", attention: true, anchor: ["ELSE IF @ViewMode = 'timeline'", "SET @ov_TotalRows = 0;"], detail: "Nhánh này khác hẳn ba nhánh còn lại: trả về số liệu theo nhóm chứ không phải từng RFD.", steps: [
           { kind: "step", title: "Gom nhóm", sub: "theo GroupBy", attention: true, anchor: ["SET @sql = N'SELECT CASE @GroupBy", "ELSE c.Name END AS GroupName"] },
           { kind: "step", title: "1 dòng mỗi nhóm", sub: "số RFD, ngày tạo, due", attention: true, anchor: ["COUNT(*) AS RFDCount", "ELSE c.Name END;"] },
           { kind: "step", title: "Không phân trang", sub: "tổng số dòng = 0", attention: true, anchor: ["SET @ov_TotalRows = 0;"], detail: "@PageIndex và @PageSize bị bỏ qua, và tổng luôn bằng 0 nên giao diện không được dựa vào nó để phân trang." },
         ] },
-        { title: "Download", anchor: ["ELSE IF @ViewMode = 'download'", "-- note: @ov_TotalRows is not assigned"], steps: [
+        { title: "Download", sub: "= 'download'", anchor: ["ELSE IF @ViewMode = 'download'", "-- note: @ov_TotalRows is not assigned"], steps: [
           { kind: "step", title: "File đính kèm", sub: "của RFD đã lọc", anchor: ["SET @sql = N'SELECT r.Id, f.FileName"] },
           { kind: "step", title: "Milestone", sub: "nếu được bật", anchor: ["IF @WithMilestone = 1", "WHERE m.RFDId IN"] },
           { kind: "step", title: "Không gán tổng", sub: "giá trị OUTPUT là NULL", anchor: ["-- note: @ov_TotalRows is not assigned"], detail: "Không nhánh nào trong Download gán @ov_TotalRows, nên phía gọi nhận NULL thay vì 0." },
@@ -1247,24 +1561,35 @@ router.post("/checkout", requireAuth, async (req, res) => {
 
   const JS_FLOW = {
     title: "Thanh toán giỏ hàng (POST /checkout)",
-    summary: "Kiểm tra giỏ, tính lại giá từ catalog, áp mã giảm giá, tạo đơn rồi trừ tiền thẻ. Thành công thì xoá giỏ và gửi mail, thất bại thì đánh dấu đơn lỗi.",
+    summary: "Kiểm tra giỏ, tính lại giá từ catalog, áp mã giảm giá, tạo đơn rồi trừ tiền thẻ. Mỗi bước kiểm tra có thể dừng sớm và trả lỗi.",
     steps: [
       { kind: "step", title: "Nhận yêu cầu", sub: "user đã đăng nhập, mã giảm giá, thẻ", anchor: ["router.post(\"/checkout\"", "const { couponCode, paymentMethodId }"] },
-      { kind: "step", title: "Kiểm tra giỏ hàng", sub: "giỏ trống thì trả lỗi 400", anchor: ["const cart = await carts.get", "return res.status(400)"] },
-      { kind: "stage", title: "1. Tính lại giá", sub: "lấy giá và tồn kho từ catalog", anchor: ["// Re-price every item", "return res.status(409)"], detail: "Giá trong giỏ có thể đã cũ, nên mọi món đều được tra lại. Hết hàng ở bất kỳ món nào thì dừng cả đơn với lỗi 409." },
-      { kind: "stage", title: "2. Tính tổng tiền", sub: "trừ mã giảm giá nếu hợp lệ", anchor: ["let total = priced.reduce", "if (coupon) total"], detail: "Mã không hợp lệ bị bỏ qua lặng lẽ: đơn vẫn đi tiếp với giá gốc, người dùng không được báo." },
-      { kind: "step", title: "Tạo đơn hàng", sub: "trạng thái pending", anchor: ["const order = await orders.create"], detail: "Đơn được tạo TRƯỚC khi trừ tiền, nên nếu tiến trình chết giữa chừng sẽ còn đơn pending cần dọn." },
-      { kind: "branch", lanes: [
-        { title: "Trừ tiền thành công", anchor: ["const charge = await payments.charge", "return res.status(201)"], steps: [
-          { kind: "step", title: "Đánh dấu đã trả", sub: "lưu chargeId", anchor: ["await orders.update(order.id, { status: \"paid\""] },
-          { kind: "step", title: "Xoá giỏ hàng", anchor: ["await carts.clear(userId);"] },
-          { kind: "step", title: "Gửi mail xác nhận", sub: "không chờ kết quả", attention: true, anchor: ["mailer.send(userId"], detail: "Không có await: nếu gửi mail lỗi, request vẫn báo thành công và lỗi chỉ hiện trong log." },
+      { kind: "branch", title: "Giỏ có hàng không?", anchor: ["const cart = await carts.get", "return res.status(400)"], lanes: [
+        { title: "Giỏ trống", anchor: ["if (!cart || cart.items.length === 0)"], steps: [
+          { kind: "end", title: "Trả lỗi 400", sub: "cart_empty", anchor: ["return res.status(400)"] },
         ] },
-        { title: "Trừ tiền thất bại", attention: true, anchor: ["} catch (err) {", "return res.status(402)"], steps: [
+        { title: "Có hàng", sub: "đi tiếp", anchor: ["const cart = await carts.get"], steps: [] },
+      ] },
+      { kind: "stage", title: "1. Tính lại giá", sub: "lấy giá và tồn kho từ catalog", anchor: ["// Re-price every item", "}).catch((err) => err);"], detail: "Giá trong giỏ có thể đã cũ, nên mọi món đều được tra lại song song (Promise.all)." },
+      { kind: "branch", title: "Còn đủ hàng?", anchor: ["if (priced instanceof OutOfStock)", "return res.status(409)"], lanes: [
+        { title: "Thiếu một món", attention: true, anchor: ["if (priced instanceof OutOfStock)"], detail: "Chỉ cần một món hết hàng là cả đơn dừng lại, kể cả khi các món khác còn đủ.", steps: [
+          { kind: "end", title: "Trả lỗi 409", sub: "out_of_stock + mã SKU", anchor: ["return res.status(409)"] },
+        ] },
+        { title: "Đủ hàng", anchor: ["let total = priced.reduce"], steps: [] },
+      ] },
+      { kind: "stage", title: "2. Tính tổng tiền", sub: "trừ mã giảm giá nếu hợp lệ", attention: true, anchor: ["let total = priced.reduce", "if (coupon) total"], detail: "Mã không hợp lệ bị bỏ qua lặng lẽ: đơn vẫn đi tiếp với giá gốc, người dùng không được báo." },
+      { kind: "step", title: "Tạo đơn hàng", sub: "trạng thái pending", anchor: ["const order = await orders.create"], detail: "Đơn được tạo TRƯỚC khi trừ tiền, nên nếu tiến trình chết giữa chừng sẽ còn đơn pending cần dọn." },
+      { kind: "branch", title: "Trừ tiền thẻ", anchor: ["try {", "return res.status(402)"], lanes: [
+        { title: "Thành công", anchor: ["const charge = await payments.charge", "return res.status(201)"], steps: [
+          { kind: "step", title: "Đánh dấu đã trả", sub: "lưu chargeId, xoá giỏ", anchor: ["await orders.update(order.id, { status: \"paid\"", "await carts.clear(userId);"] },
+          { kind: "step", title: "Gửi mail xác nhận", sub: "không chờ kết quả", attention: true, anchor: ["mailer.send(userId"], detail: "Không có await: nếu gửi mail lỗi, request vẫn báo thành công và lỗi chỉ hiện trong log." },
+          { kind: "end", title: "Trả 201", sub: "mã đơn và tổng tiền", anchor: ["return res.status(201)"] },
+        ] },
+        { title: "Thất bại", anchor: ["} catch (err) {", "return res.status(402)"], steps: [
           { kind: "step", title: "Đánh dấu lỗi", sub: "payment_failed, giữ nguyên giỏ", anchor: ["status: \"payment_failed\""] },
+          { kind: "end", title: "Trả lỗi 402", sub: "payment_failed", anchor: ["return res.status(402)"] },
         ] },
       ] },
-      { kind: "stage", title: "Trả kết quả", sub: "201 kèm mã đơn, hoặc 402", anchor: ["return res.status(201)", "return res.status(402)"] },
     ],
   };
 
@@ -1309,14 +1634,22 @@ router.post("/checkout", requireAuth, async (req, res) => {
     summary: "Đọc file CSV của nhà cung cấp, bỏ qua dòng lỗi (nhưng dừng nếu quá 10% lỗi), so với dữ liệu hiện có rồi tạo mới hoặc cập nhật. Chế độ dry run chỉ báo con số.",
     steps: [
       { kind: "step", title: "Nhận đường dẫn file", sub: "dry_run, kích thước lô", anchor: ["def import_products"] },
-      { kind: "stage", title: "1. Đọc và kiểm tra CSV", sub: "dòng lỗi được ghi lại, không dừng ngay", anchor: ["rows, errors = [], []", "errors.append((i, str(e)))"], detail: "Số dòng bắt đầu từ 2 vì dòng 1 là tiêu đề, nên lỗi báo ra khớp với số dòng khi mở file bằng Excel." },
-      { kind: "step", title: "Dừng nếu lỗi > 10%", sub: "ném ImportAborted", attention: true, anchor: ["if errors and len(errors) >", "raise ImportAborted"], detail: "Dưới ngưỡng 10% thì các dòng lỗi bị bỏ qua và chỉ được trả về trong danh sách errors, không chặn việc nhập." },
-      { kind: "group", title: "2. So với dữ liệu hiện có", anchor: ["existing = {p.sku: p", "to_update.append(old)"], items: [{ title: "Tra theo SKU", sub: "một truy vấn" }, { title: "Mới", sub: "chưa có SKU" }, { title: "Cần cập nhật", sub: "đổi giá hoặc tồn" }], note: "SKU đã có mà không đổi gì thì bỏ qua" },
-      { kind: "branch", lanes: [
-        { title: "Dry run", anchor: ["if dry_run:", "return {\"create\""], steps: [
-          { kind: "step", title: "Chỉ trả con số", sub: "không ghi gì vào DB", anchor: ["return {\"create\""] },
+      { kind: "loop", title: "Với mỗi dòng CSV", sub: "đánh số từ dòng 2", anchor: ["for i, rec in enumerate", "errors.append((i, str(e)))"], detail: "Số dòng bắt đầu từ 2 vì dòng 1 là tiêu đề, nên lỗi báo ra khớp với số dòng khi mở file bằng Excel.", steps: [
+        { kind: "step", title: "Chuyển thành Product", sub: "SKU viết hoa, giá đổi dấu phẩy", anchor: ["rows.append(Product(", "stock=int(rec.get"] },
+        { kind: "step", title: "Dòng lỗi: ghi lại", sub: "không dừng ngay", attention: true, anchor: ["except (KeyError", "errors.append((i, str(e)))"], detail: "Thiếu cột, giá sai định dạng hay số tồn không phải số đều chỉ bị ghi vào danh sách errors." },
+      ] },
+      { kind: "branch", title: "Lỗi quá 10%?", anchor: ["if errors and len(errors) >", "raise ImportAborted"], lanes: [
+        { title: "Quá 10%", attention: true, anchor: ["if errors and len(errors) >"], steps: [
+          { kind: "end", title: "Ném ImportAborted", sub: "không ghi gì vào DB", anchor: ["raise ImportAborted"] },
         ] },
-        { title: "Chạy thật", anchor: ["with transaction.atomic():", "cache.delete_many"], steps: [
+        { title: "Trong ngưỡng", sub: "dòng lỗi bị bỏ qua", anchor: ["existing = {p.sku: p"], steps: [] },
+      ] },
+      { kind: "group", title: "So với dữ liệu hiện có", anchor: ["existing = {p.sku: p", "to_update.append(old)"], items: [{ title: "Tra theo SKU", sub: "một truy vấn" }, { title: "Mới", sub: "chưa có SKU" }, { title: "Cần cập nhật", sub: "đổi giá hoặc tồn" }], note: "SKU đã có mà không đổi gì thì bỏ qua" },
+      { kind: "branch", title: "dry_run", anchor: ["if dry_run:", "cache.delete_many"], lanes: [
+        { title: "Dry run", sub: "= True", anchor: ["if dry_run:", "return {\"create\""], steps: [
+          { kind: "end", title: "Chỉ trả con số", sub: "không ghi gì vào DB", anchor: ["return {\"create\""] },
+        ] },
+        { title: "Chạy thật", sub: "= False", anchor: ["with transaction.atomic():", "cache.delete_many"], steps: [
           { kind: "step", title: "Ghi trong transaction", sub: "tạo mới và cập nhật theo lô", anchor: ["with transaction.atomic():", "Product.objects.bulk_update"] },
           { kind: "step", title: "Xoá cache sản phẩm", sub: "chỉ các SKU vừa cập nhật", attention: true, anchor: ["cache.delete_many"], detail: "Chạy SAU khi transaction commit. Sản phẩm mới tạo không cần xoá cache vì chưa từng được cache." },
         ] },
@@ -1505,7 +1838,10 @@ router.post("/checkout", requireAuth, async (req, res) => {
       canvas.innerHTML = '<div class="empty">Dán code bên trái rồi bấm “Vẽ sơ đồ bằng Claude”, hoặc chọn một ví dụ.</div>';
       return;
     }
-    const lay = LAY.layout(S.flow);
+    S.narrow = canvas.clientWidth > 0 && canvas.clientWidth < 600;
+    // on narrow screens draw at the real width so text stays at its true size
+    const lay = LAY.layout(S.flow, S.narrow ? { narrow: true, width: Math.max(320, canvas.clientWidth - 16) } : {});
+    canvas.classList.toggle("narrow", S.narrow);
     S.lay = lay;
     canvas.innerHTML = LAY.toSvg(S.flow, lay, { interactive: true });
     const svg = canvas.firstElementChild;
@@ -1549,6 +1885,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
       g.classList.toggle("dim", S.tour && !on && S.selected != null);
       g.setAttribute("aria-pressed", String(on));
     });
+    svg.querySelectorAll(".ll-itemg").forEach((g) => g.classList.toggle("dim", S.tour && S.selected != null && g.getAttribute("data-group") !== S.selected));
     if (scrollIntoView && S.selected && S.lay) {
       const box = S.lay.boxes.find((b) => b.id === S.selected);
       const canvas = $("canvas");
@@ -1575,7 +1912,20 @@ router.post("/checkout", requireAuth, async (req, res) => {
     renderExplain();
     updateTourUi();
     const entry = id ? S.byId.get(id) : null;
-    highlightLines(entry && entry.node.lines, true);
+    highlightLines(entry && entry.node.lines, !o.fromCode);
+    $("explain-panel").classList.toggle("open", !!entry);
+    document.body.classList.toggle("sheet-open", !!entry);
+  }
+
+  /** Smallest box whose line range contains this code line. */
+  function boxForLine(line) {
+    let best = null;
+    for (const e of S.nodes) {
+      const r = e.node.lines;
+      if (!r || line < r[0] || line > r[1]) continue;
+      if (!best || r[1] - r[0] < best.node.lines[1] - best.node.lines[0] || (r[1] - r[0] === best.node.lines[1] - best.node.lines[0] && e.path.length > best.path.length)) best = e;
+    }
+    return best;
   }
 
   // ───────────────────────── explanation ─────────────────────────
@@ -1596,10 +1946,13 @@ router.post("/checkout", requireAuth, async (req, res) => {
     const n = entry.node;
     const pos = document.createElement("div");
     pos.className = "pos";
-    pos.textContent = `Ô ${entry.index + 1} / ${S.nodes.length}` + (entry.lane ? " · một nhánh" : "");
+    pos.textContent = `Ô ${entry.index + 1} / ${S.nodes.length}`;
+    el.appendChild(pos);
+    const crumb = whereText(entry);
+    if (crumb) { const c = document.createElement("div"); c.className = "crumb"; c.textContent = crumb; el.appendChild(c); }
     const h = document.createElement("h3");
     h.textContent = n.title || "…";
-    el.append(pos, h);
+    el.appendChild(h);
     if (n.sub) { const s = document.createElement("div"); s.className = "sub"; s.textContent = n.sub; el.appendChild(s); }
     if (n.detail) for (const para of n.detail.split("\n")) { const p = document.createElement("p"); p.textContent = para; el.appendChild(p); }
     if (n.items && n.items.length) {
@@ -1608,6 +1961,8 @@ router.post("/checkout", requireAuth, async (req, res) => {
       el.appendChild(p);
     }
     if (n.note) { const p = document.createElement("p"); p.style.color = "var(--red)"; p.textContent = n.note; el.appendChild(p); }
+    if (n.kind === "end") { const p = document.createElement("p"); p.textContent = "Đường đi này dừng ở đây (return / throw / thoát), không đi tiếp xuống các bước bên dưới."; el.appendChild(p); }
+    if (n.kind === "loop") { const p = document.createElement("p"); p.textContent = `Các bước bên trong khung được lặp lại (${(n.steps || []).length} bước).`; el.appendChild(p); }
     const tags = document.createElement("div");
     tags.className = "tags";
     const tag = (cls, text) => { const t = document.createElement("span"); t.className = "tag " + cls; t.textContent = text; tags.appendChild(t); return t; };
@@ -1625,6 +1980,39 @@ router.post("/checkout", requireAuth, async (req, res) => {
       if (S.codeAtDraw != null && S.codeAtDraw !== S.code) tag("", "code đã sửa sau khi vẽ, số dòng có thể lệch");
     }
     if (tags.childNodes.length) el.appendChild(tags);
+    if (n.lines && S.code) el.appendChild(snippet(n.lines));
+  }
+
+  /** "Nhánh 2/4 · Kanban → bước 1/3" style location of a box inside branches and loops. */
+  function whereText(entry) {
+    const parts = [];
+    for (const p of entry.path || []) {
+      if (p.loop != null) parts.push("Trong vòng lặp “" + p.loop + "”");
+      else parts.push(`${p.branchTitle ? p.branchTitle + ": " : ""}nhánh ${p.laneIndex + 1}/${p.laneCount} “${p.lane}”`);
+    }
+    if (entry.lane) return parts.length ? parts.join(" › ") + " · chỉ chạy khi rơi vào trường hợp này" : "Chỉ chạy khi rơi vào trường hợp này";
+    return parts.join(" › ");
+  }
+
+  function snippet(range) {
+    const ls = S.code.split("\n");
+    const a = Math.max(1, range[0]);
+    const b = Math.min(ls.length, range[1]);
+    const box = document.createElement("div");
+    box.className = "snippet";
+    box.setAttribute("aria-label", linesLabel(range));
+    const MAX = 14;
+    for (let i = a; i <= Math.min(b, a + MAX - 1); i++) {
+      const row = document.createElement("div");
+      const num = document.createElement("span");
+      num.textContent = i;
+      const txt = document.createElement("span");
+      txt.textContent = ls[i - 1] || " ";
+      row.append(num, txt);
+      box.appendChild(row);
+    }
+    if (b - a + 1 > MAX) { const more = document.createElement("span"); more.className = "more"; more.textContent = `… thêm ${b - a + 1 - MAX} dòng (xem trong khung code)`; box.appendChild(more); }
+    return box;
   }
 
   // ───────────────────────── tour ─────────────────────────
@@ -1662,6 +2050,9 @@ router.post("/checkout", requireAuth, async (req, res) => {
     invalid_json: "Claude trả lời không đúng định dạng. Bấm vẽ lại, hoặc chọn mức “Gọn”.",
     empty_completion: "Claude không trả lời gì. Thử lại với đoạn code ngắn hơn.",
     upstream_error: "Kết nối tới Claude bị gián đoạn. Thử lại.",
+    capability_disabled: "Claude không dùng được trong cửa sổ này. Có thể dùng Claude ở nơi khác (mục bên dưới).",
+    not_declared: "Trang này không còn được phép gọi Claude. Có thể dùng Claude ở nơi khác (mục bên dưới).",
+    bad_shape: "Claude trả về sơ đồ sai cấu trúc. Bấm vẽ lại, hoặc chọn mức “Gọn”.",
   };
 
   async function draw() {
@@ -1679,7 +2070,10 @@ router.post("/checkout", requireAuth, async (req, res) => {
     S.ctl = new AbortController();
     $("draw").disabled = true;
     $("stop").hidden = false;
-    setStatus("Claude đang đọc code… (thường mất 20–60 giây)", "busy");
+    const nLines = S.code.split("\n").length;
+    setStatus(nLines > 400
+      ? `Claude đang đọc ${nLines} dòng code… Code dài: sơ đồ sẽ chỉ giữ luồng chính. Muốn rõ hơn, hãy dán từng hàm. (thường mất 30–90 giây)`
+      : "Claude đang đọc code và tìm các bước chính… (thường mất 20–60 giây)", "busy");
     const started = Date.now();
     try {
       const result = await S.sample.json(prompt, {
@@ -1687,8 +2081,9 @@ router.post("/checkout", requireAuth, async (req, res) => {
         modelTier: "default",
         onText: ({ text }) => setStatus(`Claude đang viết sơ đồ… ${text.length.toLocaleString("vi-VN")} ký tự`, "busy"),
       });
-      const flow = F.normalize(result);
-      if (!flow.steps.length) throw { code: "invalid_json" };
+      let flow;
+      try { flow = F.normalize(result); } catch (err) { throw { code: "bad_shape" }; }
+      if (!flow.steps.length) throw { code: "bad_shape" };
       buildCodeView();
       S.codeAtDraw = S.code;
       S.selected = null;
@@ -1803,6 +2198,24 @@ router.post("/checkout", requireAuth, async (req, res) => {
     });
 
     $("draw").addEventListener("click", draw);
+    // clicking a code line selects the smallest box that covers it
+    $("code-view").addEventListener("click", (e) => {
+      const row = e.target.closest(".code-line");
+      if (!row || (window.getSelection && String(window.getSelection()).length)) return;
+      const line = S.lineEls.indexOf(row) + 1;
+      const hit = line ? boxForLine(line) : null;
+      if (hit) select(hit.id, { fromCode: true });
+    });
+    $("sheet-prev").addEventListener("click", () => step(-1));
+    $("sheet-next").addEventListener("click", () => step(1));
+    $("sheet-close").addEventListener("click", () => { S.tour = false; select(null); });
+    // switch between the side-by-side and stacked branch layouts when the frame width crosses 600px
+    if (window.ResizeObserver) {
+      new ResizeObserver(() => {
+        const w = $("canvas").clientWidth;
+        if (S.flow && w > 0 && (w < 600) !== !!S.narrow) renderDiagram();
+      }).observe($("canvas"));
+    }
     $("stop").addEventListener("click", () => S.ctl && S.ctl.abort());
     $("copy-prompt").addEventListener("click", async () => {
       const c = $("code").hidden ? S.code : $("code").value;
@@ -1846,6 +2259,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
       clearTimeout(dslTimer);
       dslTimer = setTimeout(() => {
         const { flow, errors } = F.parseText($("dsl").value);
+        $("example").value = ""; // an edited example is the viewer's own diagram now
         const ul = $("dsl-errors");
         ul.textContent = "";
         for (const e of errors.slice(0, 8)) { const li = document.createElement("li"); li.textContent = (e.line ? "Dòng " + e.line + ": " : "") + e.message; ul.appendChild(li); }
@@ -1901,10 +2315,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
     // capabilities light up later; the page works without them
     capability("sample").then((s) => {
       S.sample = s;
-      if (!s) {
-        $("draw").title = "Trang này không gọi trực tiếp được Claude";
-        $("alt").open = true;
-      }
+      if (!s) $("draw").title = "Trang này không gọi trực tiếp được Claude: bấm để xem cách khác";
     });
     capability("downloads").then((d) => {
       S.downloads = d;

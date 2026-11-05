@@ -23,7 +23,7 @@ const MOCK_FLOW = {
     { kind: "step", title: "Nhận đường dẫn", sub: "từ dòng lệnh", lines: [1, 2] },
     { kind: "stage", title: "1. Đọc file", sub: "từng dòng, bỏ dấu câu", lines: [3, 5], detail: "Mở file bằng UTF-8." },
     { kind: "branch", lanes: [
-      { title: "File rỗng", attention: true, lines: [6, 7], steps: [{ kind: "step", title: "Báo lỗi", sub: "thoát với mã 1", lines: [7, 7] }] },
+      { title: "File rỗng", attention: true, lines: [6, 7], steps: [{ kind: "end", title: "Thoát với mã 1", sub: "sys.exit(1)", lines: [7, 7] }] },
       { title: "Có nội dung", lines: [8, 10], steps: [{ kind: "step", title: "Đếm bằng Counter", lines: [9, 9] }, { kind: "step", title: "In top 10", lines: [10, 10] }] },
     ] },
     { kind: "stage", title: "Kết thúc", lines: [11, 11] },
@@ -81,6 +81,12 @@ const hlVisible = await page.evaluate(() => { const v = document.getElementById(
 await page.waitForTimeout(500);
 ok(await page.evaluate(() => { const v = document.getElementById("code-view"); const l = v.querySelector(".code-line.hl"); return l.offsetTop >= v.scrollTop - 1 && l.offsetTop < v.scrollTop + v.clientHeight; }), "code panel scrolled to the highlighted lines");
 
+// clicking a code line selects the smallest box covering it
+const execLine = await page.evaluate(() => [...document.querySelectorAll(".code-line .c")].findIndex((c) => c.textContent.includes("EXEC sp_executesql")));
+await page.locator(".code-line").nth(execLine).click();
+ok((await page.locator("#explain h3").textContent()).includes("Trả kết quả"), "clicking a code line selects its box (" + (await page.locator("#explain h3").textContent()) + ")");
+ok((await page.locator(".snippet div").count()) >= 2, "the explanation shows the box's own code lines");
+
 // click a group item selects the group
 await page.locator(".ll-itemg").first().click();
 ok((await page.locator("#explain h3").textContent()).includes("FROM"), "clicking an inner box selects its group");
@@ -134,7 +140,7 @@ await page.locator("#draw").click();
 await page.waitForFunction(() => document.querySelectorAll(".ll-node").length === 8, null, { timeout: 5000 });
 ok(true, "Claude's answer is drawn (8 boxes)");
 const prompt = await page.evaluate(() => window.__prompts[0]);
-ok(prompt.includes(" 1| import sys") && prompt.includes("4 to 7 top-level boxes") && prompt.includes("Vietnamese"), "prompt carries numbered code, detail level and language");
+ok(prompt.includes(" 1| import sys") && prompt.includes("4 to 7 boxes at the top level") && prompt.includes("Vietnamese"), "prompt carries numbered code, detail level and language");
 ok(/Xong sau/.test(await page.locator("#status").textContent()), "status reports completion");
 await page.locator('.ll-node[data-id="2.l0"]').click();
 ok((await page.locator(".code-line.hl .c").first().textContent()).includes("if not words"), "Claude's line numbers map to the pasted code");
@@ -196,8 +202,18 @@ await phone.goto(app);
 await phone.waitForSelector(".ll-node");
 const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 ok(overflow <= 0, `no horizontal page scroll on a phone (${overflow}px)`);
+const order = await phone.evaluate(() => document.querySelector("#canvas").getBoundingClientRect().top < [...document.querySelectorAll("#code-view, #code")].find((e) => !e.hidden).getBoundingClientRect().top);
+ok(order, "on a phone the diagram comes before the code");
 await phone.locator('.ll-node[data-id="3"]').tap();
 ok((await phone.locator("#explain h3").textContent()).includes("Chọn chế độ"), "tapping a box works on a phone");
+await phone.waitForTimeout(300);
+const sheet = await phone.locator("#explain-panel").boundingBox();
+ok(sheet && sheet.y > 300 && sheet.y < 844, "on a phone the explanation slides up as a bottom sheet");
+const laneYs = await phone.evaluate(() => [...document.querySelectorAll('.ll-node[data-kind="lane"]')].map((g) => g.getBBox().y));
+ok(laneYs.length === 4 && new Set(laneYs.map(Math.round)).size === 4, "on a phone the branches stack vertically");
+await phone.locator("#sheet-close").tap();
+await phone.waitForTimeout(300);
+ok(!(await phone.locator("#explain-panel").evaluate((e) => e.classList.contains("open"))), "the sheet closes");
 await phone.screenshot({ path: path.join(shots, "6-phone.png"), fullPage: true });
 
 await browser.close();

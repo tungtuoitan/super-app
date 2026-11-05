@@ -22,6 +22,7 @@
   /* diagram tokens (read by the SVG) */
   --ll-step-bg: #ffffff; --ll-step-line: #1d2a36; --ll-stage-bg: #e4eff6; --ll-stage-line: #3c7fa8; --ll-item-line: #b8c4ce;
   --ll-attn: #c8462f; --ll-ink: #16212b; --ll-muted: #6b7884; --ll-edge: #2a3540; --ll-accent: #d4561b; --ll-glow: rgba(212, 86, 27, 0.45);
+  --ll-end-bg: #eef1f4; --ll-end-line: #5f6c78; --ll-loop-bg: rgba(60, 127, 168, 0.05); --ll-q-bg: #fff7e6; --ll-q-line: #e3b866; --ll-q-ink: #7a5310;
   --f-body: "Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
@@ -31,7 +32,7 @@
     --accent: #ff8a4c; --accent-ink: #1b0e06; --accent-soft: #3a2316; --blue: #6fb0d8; --blue-soft: #1c2f3c; --red: #ff7a66; --good: #47c98f;
     --hl-line: #3a3218; --hl-gutter: #8a7330; --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
     --ll-step-bg: #161d24; --ll-step-line: #c9d4dd; --ll-stage-bg: #1c2f3c; --ll-stage-line: #6fb0d8; --ll-item-line: #3a4753;
-    --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #aab6c1; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5);
+    --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #aab6c1; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5); --ll-end-bg: #222b33; --ll-end-line: #8796a3; --ll-loop-bg: rgba(111, 176, 216, 0.06); --ll-q-bg: #33280f; --ll-q-line: #8a6a2a; --ll-q-ink: #f0c873;
     color-scheme: dark;
   }
 }
@@ -40,7 +41,7 @@
   --accent: #ff8a4c; --accent-ink: #1b0e06; --accent-soft: #3a2316; --blue: #6fb0d8; --blue-soft: #1c2f3c; --red: #ff7a66; --good: #47c98f;
   --hl-line: #3a3218; --hl-gutter: #8a7330; --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
   --ll-step-bg: #161d24; --ll-step-line: #c9d4dd; --ll-stage-bg: #1c2f3c; --ll-stage-line: #6fb0d8; --ll-item-line: #3a4753;
-  --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #aab6c1; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5);
+  --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #aab6c1; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5); --ll-end-bg: #222b33; --ll-end-line: #8796a3; --ll-loop-bg: rgba(111, 176, 216, 0.06); --ll-q-bg: #33280f; --ll-q-line: #8a6a2a; --ll-q-ink: #f0c873;
   color-scheme: dark;
 }
 
@@ -129,11 +130,16 @@ details.alt[open] summary { margin-bottom: 8px; }
 .canvas.fit { max-height: none; }
 .canvas svg { display: block; margin: 0 auto; height: auto; }
 .canvas.fit svg { width: 100%; min-width: 640px; }
+.canvas.fit.narrow svg { min-width: 0; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--muted); padding: 10px 16px 12px; border-top: 1px solid var(--line-2); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .lg { width: 22px; height: 13px; border-radius: 3px; display: inline-block; border: 1.4px solid var(--ll-step-line); background: var(--ll-step-bg); }
 .lg.stage { background: var(--ll-stage-bg); border-color: var(--ll-stage-line); }
 .lg.attn { border: 1.6px dashed var(--ll-attn); }
+.lg.lane { background: var(--ll-step-bg); border-color: var(--ll-stage-line); border-top-width: 4px; }
+.lg.end { background: var(--ll-end-bg); border-color: var(--ll-end-line); border-radius: 7px; }
+.lg.loop { background: var(--ll-loop-bg); border: 1.3px dotted var(--ll-stage-line); }
+.lg.qlabel { background: var(--ll-q-bg); border: 1px solid var(--ll-q-line); border-radius: 7px; }
 .empty { padding: 40px 20px; text-align: center; color: var(--muted); }
 
 /* explanation */
@@ -150,6 +156,17 @@ details.alt[open] summary { margin-bottom: 8px; }
 .tag.lines:hover { border-color: var(--accent); color: var(--accent); }
 .explain-empty { color: var(--muted); }
 
+/* explanation: top of the left column on desktop, a bottom sheet on narrow screens */
+.explain-panel .sheet-only { display: none; }
+.snippet { margin: 2px 0 0; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 6px; padding: 6px 0; font: 12px/1.55 var(--f-mono); overflow-x: auto; max-height: 220px; overflow-y: auto; }
+.snippet div { display: grid; grid-template-columns: 3em 1fr; white-space: pre; min-width: max-content; }
+.snippet span:first-child { text-align: right; padding-right: 10px; color: var(--faint); user-select: none; }
+.snippet span:last-child { padding-right: 10px; }
+.snippet .more { color: var(--muted); font-family: var(--f-body); font-size: 12px; padding: 2px 10px; display: block; }
+.crumb { font-size: 12px; color: var(--blue); font-weight: 500; }
+.code-line { cursor: pointer; }
+.code-line:hover .n { color: var(--accent); }
+
 /* text editor */
 .dsl { width: 100%; min-height: 300px; font: 12.5px/1.6 var(--f-mono); white-space: pre; resize: vertical; }
 .dsl-errors { margin: 0; padding-left: 18px; color: var(--red); font-size: 12.5px; }
@@ -158,10 +175,22 @@ details.alt[open] summary { margin-bottom: 8px; }
 
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--panel); padding: 8px 16px; border-radius: 7px; font-size: 13px; box-shadow: var(--shadow); max-width: calc(100vw - 32px); }
 
+@media (min-width: 1061px) {
+  .col-left { max-height: calc(100vh - 88px); overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .explain-panel .explain { max-height: 42vh; overflow: auto; }
+  .code-edit, .code-view { height: 46vh; }
+}
 @media (max-width: 1060px) {
   .grid { grid-template-columns: minmax(0, 1fr); }
-  .col-left { position: static; }
+  .col-left { position: static; order: 2; }
+  .grid > .col:not(.col-left) { order: 1; }
   .code-edit, .code-view { height: 40vh; min-height: 260px; }
+  /* explanation becomes a sheet over the bottom of the screen while a box is selected */
+  .explain-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; border-radius: 14px 14px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18); max-height: 52vh; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom, 0px); transform: translateY(105%); visibility: hidden; transition: transform 0.2s ease, visibility 0s linear 0.2s; }
+  .explain-panel.open { transform: none; visibility: visible; transition: transform 0.2s ease; }
+  .explain-panel .explain { overflow: auto; }
+  .explain-panel .sheet-only { display: grid; }
+  body.sheet-open main { padding-bottom: 52vh; }
 }
 @media (max-width: 560px) {
   .brand span { display: none; }

@@ -162,7 +162,10 @@
       canvas.innerHTML = '<div class="empty">Dán code bên trái rồi bấm “Vẽ sơ đồ bằng Claude”, hoặc chọn một ví dụ.</div>';
       return;
     }
-    const lay = LAY.layout(S.flow);
+    S.narrow = canvas.clientWidth > 0 && canvas.clientWidth < 600;
+    // on narrow screens draw at the real width so text stays at its true size
+    const lay = LAY.layout(S.flow, S.narrow ? { narrow: true, width: Math.max(320, canvas.clientWidth - 16) } : {});
+    canvas.classList.toggle("narrow", S.narrow);
     S.lay = lay;
     canvas.innerHTML = LAY.toSvg(S.flow, lay, { interactive: true });
     const svg = canvas.firstElementChild;
@@ -206,6 +209,7 @@
       g.classList.toggle("dim", S.tour && !on && S.selected != null);
       g.setAttribute("aria-pressed", String(on));
     });
+    svg.querySelectorAll(".ll-itemg").forEach((g) => g.classList.toggle("dim", S.tour && S.selected != null && g.getAttribute("data-group") !== S.selected));
     if (scrollIntoView && S.selected && S.lay) {
       const box = S.lay.boxes.find((b) => b.id === S.selected);
       const canvas = $("canvas");
@@ -232,7 +236,20 @@
     renderExplain();
     updateTourUi();
     const entry = id ? S.byId.get(id) : null;
-    highlightLines(entry && entry.node.lines, true);
+    highlightLines(entry && entry.node.lines, !o.fromCode);
+    $("explain-panel").classList.toggle("open", !!entry);
+    document.body.classList.toggle("sheet-open", !!entry);
+  }
+
+  /** Smallest box whose line range contains this code line. */
+  function boxForLine(line) {
+    let best = null;
+    for (const e of S.nodes) {
+      const r = e.node.lines;
+      if (!r || line < r[0] || line > r[1]) continue;
+      if (!best || r[1] - r[0] < best.node.lines[1] - best.node.lines[0] || (r[1] - r[0] === best.node.lines[1] - best.node.lines[0] && e.path.length > best.path.length)) best = e;
+    }
+    return best;
   }
 
   // ───────────────────────── explanation ─────────────────────────
@@ -253,10 +270,13 @@
     const n = entry.node;
     const pos = document.createElement("div");
     pos.className = "pos";
-    pos.textContent = `Ô ${entry.index + 1} / ${S.nodes.length}` + (entry.lane ? " · một nhánh" : "");
+    pos.textContent = `Ô ${entry.index + 1} / ${S.nodes.length}`;
+    el.appendChild(pos);
+    const crumb = whereText(entry);
+    if (crumb) { const c = document.createElement("div"); c.className = "crumb"; c.textContent = crumb; el.appendChild(c); }
     const h = document.createElement("h3");
     h.textContent = n.title || "…";
-    el.append(pos, h);
+    el.appendChild(h);
     if (n.sub) { const s = document.createElement("div"); s.className = "sub"; s.textContent = n.sub; el.appendChild(s); }
     if (n.detail) for (const para of n.detail.split("\n")) { const p = document.createElement("p"); p.textContent = para; el.appendChild(p); }
     if (n.items && n.items.length) {
@@ -265,6 +285,8 @@
       el.appendChild(p);
     }
     if (n.note) { const p = document.createElement("p"); p.style.color = "var(--red)"; p.textContent = n.note; el.appendChild(p); }
+    if (n.kind === "end") { const p = document.createElement("p"); p.textContent = "Đường đi này dừng ở đây (return / throw / thoát), không đi tiếp xuống các bước bên dưới."; el.appendChild(p); }
+    if (n.kind === "loop") { const p = document.createElement("p"); p.textContent = `Các bước bên trong khung được lặp lại (${(n.steps || []).length} bước).`; el.appendChild(p); }
     const tags = document.createElement("div");
     tags.className = "tags";
     const tag = (cls, text) => { const t = document.createElement("span"); t.className = "tag " + cls; t.textContent = text; tags.appendChild(t); return t; };
@@ -282,6 +304,39 @@
       if (S.codeAtDraw != null && S.codeAtDraw !== S.code) tag("", "code đã sửa sau khi vẽ, số dòng có thể lệch");
     }
     if (tags.childNodes.length) el.appendChild(tags);
+    if (n.lines && S.code) el.appendChild(snippet(n.lines));
+  }
+
+  /** "Nhánh 2/4 · Kanban → bước 1/3" style location of a box inside branches and loops. */
+  function whereText(entry) {
+    const parts = [];
+    for (const p of entry.path || []) {
+      if (p.loop != null) parts.push("Trong vòng lặp “" + p.loop + "”");
+      else parts.push(`${p.branchTitle ? p.branchTitle + ": " : ""}nhánh ${p.laneIndex + 1}/${p.laneCount} “${p.lane}”`);
+    }
+    if (entry.lane) return parts.length ? parts.join(" › ") + " · chỉ chạy khi rơi vào trường hợp này" : "Chỉ chạy khi rơi vào trường hợp này";
+    return parts.join(" › ");
+  }
+
+  function snippet(range) {
+    const ls = S.code.split("\n");
+    const a = Math.max(1, range[0]);
+    const b = Math.min(ls.length, range[1]);
+    const box = document.createElement("div");
+    box.className = "snippet";
+    box.setAttribute("aria-label", linesLabel(range));
+    const MAX = 14;
+    for (let i = a; i <= Math.min(b, a + MAX - 1); i++) {
+      const row = document.createElement("div");
+      const num = document.createElement("span");
+      num.textContent = i;
+      const txt = document.createElement("span");
+      txt.textContent = ls[i - 1] || " ";
+      row.append(num, txt);
+      box.appendChild(row);
+    }
+    if (b - a + 1 > MAX) { const more = document.createElement("span"); more.className = "more"; more.textContent = `… thêm ${b - a + 1 - MAX} dòng (xem trong khung code)`; box.appendChild(more); }
+    return box;
   }
 
   // ───────────────────────── tour ─────────────────────────
@@ -319,6 +374,9 @@
     invalid_json: "Claude trả lời không đúng định dạng. Bấm vẽ lại, hoặc chọn mức “Gọn”.",
     empty_completion: "Claude không trả lời gì. Thử lại với đoạn code ngắn hơn.",
     upstream_error: "Kết nối tới Claude bị gián đoạn. Thử lại.",
+    capability_disabled: "Claude không dùng được trong cửa sổ này. Có thể dùng Claude ở nơi khác (mục bên dưới).",
+    not_declared: "Trang này không còn được phép gọi Claude. Có thể dùng Claude ở nơi khác (mục bên dưới).",
+    bad_shape: "Claude trả về sơ đồ sai cấu trúc. Bấm vẽ lại, hoặc chọn mức “Gọn”.",
   };
 
   async function draw() {
@@ -336,7 +394,10 @@
     S.ctl = new AbortController();
     $("draw").disabled = true;
     $("stop").hidden = false;
-    setStatus("Claude đang đọc code… (thường mất 20–60 giây)", "busy");
+    const nLines = S.code.split("\n").length;
+    setStatus(nLines > 400
+      ? `Claude đang đọc ${nLines} dòng code… Code dài: sơ đồ sẽ chỉ giữ luồng chính. Muốn rõ hơn, hãy dán từng hàm. (thường mất 30–90 giây)`
+      : "Claude đang đọc code và tìm các bước chính… (thường mất 20–60 giây)", "busy");
     const started = Date.now();
     try {
       const result = await S.sample.json(prompt, {
@@ -344,8 +405,9 @@
         modelTier: "default",
         onText: ({ text }) => setStatus(`Claude đang viết sơ đồ… ${text.length.toLocaleString("vi-VN")} ký tự`, "busy"),
       });
-      const flow = F.normalize(result);
-      if (!flow.steps.length) throw { code: "invalid_json" };
+      let flow;
+      try { flow = F.normalize(result); } catch (err) { throw { code: "bad_shape" }; }
+      if (!flow.steps.length) throw { code: "bad_shape" };
       buildCodeView();
       S.codeAtDraw = S.code;
       S.selected = null;
@@ -460,6 +522,24 @@
     });
 
     $("draw").addEventListener("click", draw);
+    // clicking a code line selects the smallest box that covers it
+    $("code-view").addEventListener("click", (e) => {
+      const row = e.target.closest(".code-line");
+      if (!row || (window.getSelection && String(window.getSelection()).length)) return;
+      const line = S.lineEls.indexOf(row) + 1;
+      const hit = line ? boxForLine(line) : null;
+      if (hit) select(hit.id, { fromCode: true });
+    });
+    $("sheet-prev").addEventListener("click", () => step(-1));
+    $("sheet-next").addEventListener("click", () => step(1));
+    $("sheet-close").addEventListener("click", () => { S.tour = false; select(null); });
+    // switch between the side-by-side and stacked branch layouts when the frame width crosses 600px
+    if (window.ResizeObserver) {
+      new ResizeObserver(() => {
+        const w = $("canvas").clientWidth;
+        if (S.flow && w > 0 && (w < 600) !== !!S.narrow) renderDiagram();
+      }).observe($("canvas"));
+    }
     $("stop").addEventListener("click", () => S.ctl && S.ctl.abort());
     $("copy-prompt").addEventListener("click", async () => {
       const c = $("code").hidden ? S.code : $("code").value;
@@ -503,6 +583,7 @@
       clearTimeout(dslTimer);
       dslTimer = setTimeout(() => {
         const { flow, errors } = F.parseText($("dsl").value);
+        $("example").value = ""; // an edited example is the viewer's own diagram now
         const ul = $("dsl-errors");
         ul.textContent = "";
         for (const e of errors.slice(0, 8)) { const li = document.createElement("li"); li.textContent = (e.line ? "Dòng " + e.line + ": " : "") + e.message; ul.appendChild(li); }
@@ -558,10 +639,7 @@
     // capabilities light up later; the page works without them
     capability("sample").then((s) => {
       S.sample = s;
-      if (!s) {
-        $("draw").title = "Trang này không gọi trực tiếp được Claude";
-        $("alt").open = true;
-      }
+      if (!s) $("draw").title = "Trang này không gọi trực tiếp được Claude: bấm để xem cách khác";
     });
     capability("downloads").then((d) => {
       S.downloads = d;

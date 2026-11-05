@@ -97,7 +97,7 @@ test("prompt numbers the code and asks for the chosen language", () => {
   const p = F.buildPrompt("a\nb\nc", { language: "vi", detail: "simple" });
   assert.ok(p.includes("1| a\n2| b\n3| c"));
   assert.ok(p.includes("in Vietnamese"));
-  assert.ok(p.includes("4 to 7 top-level boxes"));
+  assert.ok(p.includes("At most 10 boxes in total") && p.includes("4 to 7 boxes at the top level"));
   assert.ok(F.buildPrompt("x", { language: "en" }).includes("in English"));
 });
 
@@ -124,4 +124,49 @@ test("mermaid export lists every box and edge", () => {
   assert.equal((m.match(/\]\s*$/gm) || []).length, F.countBoxes(flow) - 0, "one node line per box (group counted once)");
   assert.ok(m.includes("-->"));
   assert.ok(m.includes("class ") && m.includes(" attention"));
+});
+
+test("normalize: if/then/else, loops, exits, object-valued steps, 0-based lines", () => {
+  const f = F.normalize({ steps: [
+    { kind: "if", condition: "cart empty?", then: [{ kind: "return", title: "400" }], else: [{ title: "go on" }] },
+    { kind: "for", title: "each row", body: [{ title: "parse" }] },
+    { kind: "branch", lanes: [{ title: "A", steps: { kind: "step", title: "single object" } }] },
+    { kind: "step", title: "x", lines: [0, 3] },
+  ] });
+  assert.equal(f.steps[0].kind, "branch");
+  assert.equal(f.steps[0].title, "cart empty?");
+  assert.equal(f.steps[0].lanes.length, 2);
+  assert.equal(f.steps[0].lanes[0].steps[0].kind, "end");
+  assert.equal(f.steps[1].kind, "loop");
+  assert.equal(f.steps[1].steps[0].title, "parse");
+  assert.equal(f.steps[2].lanes[0].steps[0].title, "single object");
+  assert.deepEqual(f.steps[3].lines, [1, 4], "0-based ranges are shifted to 1-based");
+});
+
+test("text format handles loop and end, and round-trips them", () => {
+  const src = "loop  For each row | parse\n  step  Parse price\n  end   Bad row | stop\nbranch Valid?\n  lane  no !\n    end   Throw\n  lane  yes\nstep  Save\n";
+  const { flow, errors } = F.parseText(src);
+  assert.deepEqual(errors, []);
+  assert.equal(flow.steps[0].kind, "loop");
+  assert.equal(flow.steps[0].steps.length, 2);
+  assert.equal(flow.steps[1].title, "Valid?");
+  assert.equal(flow.steps[1].lanes[0].steps[0].kind, "end");
+  assert.deepEqual(F.parseText(F.toText(flow)).flow, flow);
+});
+
+test("endsPath: a lane that returns does not continue", () => {
+  assert.equal(F.endsPath([{ kind: "step" }, { kind: "end" }]), true);
+  assert.equal(F.endsPath([{ kind: "branch", lanes: [{ steps: [{ kind: "end" }] }, { steps: [] }] }]), false);
+  assert.equal(F.endsPath([{ kind: "branch", lanes: [{ steps: [{ kind: "end" }] }, { steps: [{ kind: "end" }] }] }]), true);
+});
+
+test("mermaid: ends are stadium shapes, loops are subgraphs, fork edges carry the question", () => {
+  const f = F.normalize({ steps: [{ title: "in" }, { kind: "branch", title: "ok?", lanes: [{ title: "no", steps: [{ kind: "end", title: "stop" }] }, { title: "yes" }] }, { kind: "loop", title: "each", steps: [{ title: "work" }] }, { title: "out" }] });
+  const m = F.toMermaid(f);
+  assert.ok(/\(\[".*stop.*"\]\)/.test(m), m);
+  assert.ok(m.includes("subgraph"));
+  assert.ok(m.includes('-- "ok?" -->'));
+  // the "no" lane ends: no edge from the end box to the loop
+  const endId = m.match(/(n\d+)\(\[/)[1];
+  assert.ok(!new RegExp(endId + " -->").test(m), "an end box has no outgoing edge");
 });

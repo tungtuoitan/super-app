@@ -25,7 +25,15 @@
 </header>
 <main class="wrap">
   <div class="grid">
-    <section class="col col-left" aria-label="Code">
+    <section class="col col-left" aria-label="Code và giải thích">
+      <div class="panel explain-panel" id="explain-panel" aria-label="Giải thích ô đang chọn">
+        <div class="panel-h"><h2>Giải thích</h2><span class="hint" id="explain-hint"></span><span class="spacer"></span>
+          <button class="icon-btn sheet-only" id="sheet-prev" type="button" aria-label="Ô trước">‹</button>
+          <button class="icon-btn sheet-only" id="sheet-next" type="button" aria-label="Ô sau">›</button>
+          <button class="icon-btn sheet-only" id="sheet-close" type="button" aria-label="Đóng giải thích">✕</button>
+        </div>
+        <div class="panel-b explain" id="explain"></div>
+      </div>
       <div class="panel">
         <div class="panel-h">
           <h2>Code</h2>
@@ -97,16 +105,14 @@
         <div class="legend" aria-label="Chú thích">
           <span><i class="lg"></i>Một bước</span>
           <span><i class="lg stage"></i>Giai đoạn chính</span>
+          <span><i class="lg lane"></i>Một nhánh: chỉ một nhánh chạy, rồi gộp lại</span>
+          <span><i class="lg end"></i>Dừng tại đây (return / throw)</span>
+          <span><i class="lg loop"></i>Lặp lại</span>
           <span><i class="lg attn"></i>Đáng chú ý</span>
-          <span>Các ô nằm cạnh nhau: chỉ một nhánh được chạy</span>
-          <span>Bấm vào ô để xem giải thích và dòng code</span>
+          <span><i class="lg qlabel"></i>Câu hỏi quyết định nhánh</span>
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-h"><h2>Giải thích</h2><span class="hint" id="explain-hint"></span></div>
-        <div class="panel-b explain" id="explain"></div>
-      </div>
 
       <details class="panel" id="dsl-panel">
         <summary class="panel-h" style="cursor:pointer;list-style:none"><h2>Sửa sơ đồ bằng chữ</h2><span class="hint">mỗi dòng là một ô, sơ đồ cập nhật ngay</span></summary>
@@ -114,8 +120,9 @@
           <textarea class="dsl" id="dsl" spellcheck="false" aria-label="Sơ đồ dạng chữ"></textarea>
           <ul class="dsl-errors" id="dsl-errors"></ul>
           <div class="cheat">
-            <div><code>step Tiêu đề | dòng phụ</code> một bước &nbsp; <code>stage …</code> giai đoạn chính (xanh) &nbsp; <code>warn …</code> đáng chú ý (viền đỏ)</div>
-            <div><code>group …</code> rồi thụt vào <code>item …</code> và <code>note …</code> &nbsp; <code>branch</code> rồi thụt vào <code>lane …</code>, các bước của nhánh thụt sâu hơn</div>
+            <div><code>step Tiêu đề | dòng phụ</code> một bước &nbsp; <code>stage …</code> giai đoạn chính (xanh) &nbsp; <code>warn …</code> đáng chú ý (viền đỏ) &nbsp; <code>end …</code> dừng tại đây</div>
+            <div><code>group …</code> rồi thụt vào <code>item …</code> và <code>note …</code> &nbsp; <code>loop …</code> rồi thụt vào các bước lặp</div>
+            <div><code>branch Câu hỏi</code> rồi thụt vào <code>lane Trường hợp</code>, các bước của nhánh thụt sâu hơn</div>
             <div><code>@12-40</code> cuối dòng: dòng code tương ứng &nbsp; <code>!</code> cuối dòng: đánh dấu đáng chú ý &nbsp; <code>&gt; …</code> dòng giải thích</div>
           </div>
           <div class="row"><button class="btn sm" id="copy-dsl" type="button">Copy dạng chữ</button></div>
