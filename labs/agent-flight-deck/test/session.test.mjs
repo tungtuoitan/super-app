@@ -130,3 +130,32 @@ test("findings: heredoc writes are not 'file dumps'; long pauses and model switc
   const rb = s.insights.find((i) => i.id === "cache-rebuild");
   assert.ok(rb && rb.level === "info" && /expected/.test(rb.title), rb && rb.title);
 });
+
+test("the same log loaded twice is counted once", () => {
+  const lines = [
+    L({ type: "user", uuid: "u1", message: { role: "user", content: "go" } }),
+    L({ type: "assistant", uuid: "u2", message: { id: "a", model: "claude-opus-5-5", content: [{ type: "tool_use", id: "t1", name: "Read", input: { file_path: "/w/proj/a.ts" } }], usage: usage() } }),
+    L({ type: "user", uuid: "u3", message: { role: "user", content: [{ type: "tool_result", tool_use_id: "t1", content: "x" }] } }),
+  ].join("\n");
+  const once = analyzeFiles([{ name: "p/s.jsonl", text: lines }]).sessions[0];
+  const twice = analyzeFiles([{ name: "p/s.jsonl", text: lines }, { name: "backup/s.jsonl", text: lines }]).sessions[0];
+  assert.equal(twice.tools.length, once.tools.length);
+  assert.equal(twice.promptCount, once.promptCount);
+  assert.equal(twice.events.length, once.events.length);
+});
+
+test("re-reads after an edit are not counted as repeated reads", () => {
+  const lines = [L({ type: "user", message: { role: "user", content: "go" } })];
+  const tool = (id, name, input) => {
+    lines.push(L({ type: "assistant", message: { id: "m" + id, model: "claude-opus-5-5", content: [{ type: "tool_use", id: "t" + id, name, input }], usage: usage() } }));
+    lines.push(L({ type: "user", message: { role: "user", content: [{ type: "tool_result", tool_use_id: "t" + id, content: "ok" }] } }));
+  };
+  const f = "/w/proj/a.ts";
+  tool(1, "Read", { file_path: f }); tool(2, "Edit", { file_path: f, old_string: "a", new_string: "b" });
+  tool(3, "Read", { file_path: f }); tool(4, "Bash", { command: "node gen.js > a.ts" }); tool(5, "Read", { file_path: f });
+  let s = analyzeFiles([{ name: "x.jsonl", text: lines.join("\n") }]).sessions[0];
+  assert.ok(!s.insights.some((i) => i.id === "rereads"), "every read followed a change");
+  tool(6, "Read", { file_path: f }); tool(7, "Read", { file_path: f });
+  s = analyzeFiles([{ name: "x.jsonl", text: lines.join("\n") }]).sessions[0];
+  assert.ok(s.insights.some((i) => i.id === "rereads"), "two reads of an unchanged file are flagged");
+});

@@ -16,7 +16,9 @@
   ];
 
   // Files that usually hold credentials: never read, never sent to a model.
-  const SECRET = /(^|\/)(id_(rsa|dsa|ecdsa|ed25519)(\.pub)?|\.npmrc|\.pypirc|\.netrc|\.htpasswd|credentials[^/]*\.json|[^/]*service[-_]?account[^/]*\.json|[^/]*\.(pem|key|p12|pfx|keystore|jks))$/i;
+  const SECRET = /(^|\/)(id_(rsa|dsa|ecdsa|ed25519)(\.pub)?|\.npmrc|\.pypirc|\.netrc|\.htpasswd|credentials[^/]*\.json|[^/]*service[-_]?account[^/]*\.json|[^/]*\.(pem|key|p12|pfx|keystore|jks|tfvars|tfstate)|\.aws\/credentials|\.docker\/config\.json)$/i;
+  // Content that looks like a credential: the file stays listed but is not loaded unless the user ticks it.
+  const SECRET_CONTENT = /-----BEGIN [A-Z ]*PRIVATE KEY-----|\bAKIA[0-9A-Z]{16}\b|\bgh[pousr]_[A-Za-z0-9]{36}\b|\bxox[abprs]-[A-Za-z0-9-]{10,}|\bsk-(?:ant-|proj-)?[A-Za-z0-9_-]{24,}|\bAIza[0-9A-Za-z_-]{35}\b/;
 
   const BINARY_EXT = new Set(("png jpg jpeg gif webp bmp ico icns tiff psd ai sketch fig pdf zip gz tgz bz2 xz 7z rar jar war " +
     "exe dll so dylib a o class pyc wasm bin dat db sqlite sqlite3 mp3 mp4 mov avi mkv webm wav flac ogg m4a " +
@@ -207,7 +209,8 @@
       if (typeof f.text !== "string") { skipped.push({ path: rel, reason: "unreadable", size }); continue; }
       if (looksBinary(f.text)) { skipped.push({ path: rel, reason: "binary", size }); continue; }
       const text = f.text.replace(/\r\n/g, "\n");
-      files.push({ path: rel, lang: langOf(rel), size, text, lines: text ? text.split("\n").length : 0, tokens: estimateTokens(text), score: 0, include: true });
+      const secretHint = SECRET_CONTENT.test(text);
+      files.push({ path: rel, lang: langOf(rel), size, text, lines: text ? text.split("\n").length : 0, tokens: estimateTokens(text), score: 0, include: !secretHint, secretHint });
     }
     files.sort((a, b) => a.path.localeCompare(b.path));
     return { root, files, skipped };
@@ -236,6 +239,20 @@
   }
 
   /** Score each file against the question: path hits weigh most, then content term frequency (TF-IDF-like). */
+  /** Fill the per-file term cache ahead of the first question (called in idle time after loading). */
+  function warmTerms(files, deadline) {
+    for (const f of files) {
+      if (deadline && deadline.timeRemaining && deadline.timeRemaining() < 2) return false;
+      if (f._terms && f._termsOf === f.text) continue;
+      const counts = new Map();
+      for (const t of terms(f.text)) { const st = stem(t); counts.set(st, (counts.get(st) || 0) + 1); }
+      f._terms = counts;
+      f._termsOf = f.text;
+      f._pathTerms = new Set(terms(f.path).map(stem));
+    }
+    return true;
+  }
+
   function scoreFiles(files, question) {
     const q = [...new Set(terms(question).map(stem))];
     if (!q.length) {
@@ -285,6 +302,7 @@
     let n = 0;
     const hasScores = ranked.some((f) => f.score > 0);
     for (const f of ranked) {
+      if (f.secretHint) { f.include = false; continue; } // never auto-load something that looks like a credential
       const cost = AFD.packer.docTokens(f, transformOpts);
       if ((hasScores && f.score <= 0) || used + cost > budget) {
         f.include = false;
@@ -299,6 +317,6 @@
 
   AFD.packer = Object.assign(AFD.packer || {}, {
     DEFAULT_IGNORES, MAX_FILE_BYTES, compileIgnore, isIgnored, globToRegex, estimateTokens, looksBinary, prepare,
-    terms, scoreFiles, autoSelect, langOf, ext, BINARY_EXT,
+    terms, scoreFiles, warmTerms, autoSelect, langOf, ext, BINARY_EXT, SECRET_CONTENT,
   });
 })(globalThis.AFD = globalThis.AFD || {});

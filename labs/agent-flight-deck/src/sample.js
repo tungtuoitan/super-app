@@ -127,6 +127,11 @@
     prompt("Also add a test for the lockout, and make sure a successful login clears the counter.");
     ids = call([{ thinking: "" }, { tool: { name: "Read", input: { file_path: cwd + "/src/routes/login.ts" } } }]);
     result(ids[0], fileBody("login.ts", 78));
+    // the same unchanged file read again in slices: a re-read the findings should catch
+    ids = call([{ tool: { name: "Read", input: { file_path: cwd + "/src/routes/login.ts", offset: 30, limit: 40 } } }]);
+    result(ids[0], fileBody("login.ts", 40));
+    ids = call([{ tool: { name: "Read", input: { file_path: cwd + "/src/routes/login.ts", offset: 60, limit: 20 } } }]);
+    result(ids[0], fileBody("login.ts", 20));
     ids = call([{ tool: { name: "Bash", input: { command: "cat test/login.test.ts", description: "Show login tests" } } }]);
     result(ids[0], fileBody("login.test.ts", 52));
     ids = call([{ tool: { name: "Bash", input: { command: "grep -rn \"clearFailures\" src test", description: "Find clearFailures usage" } } }]);

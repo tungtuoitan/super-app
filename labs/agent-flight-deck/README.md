@@ -40,18 +40,23 @@ Thả một thư mục project vào trang.
 
 ```
 src/
-  pricing.js    bảng giá, chuẩn hoá tên model, tính chi phí một usage
-  session.js    parse .jsonl → phiên: call (gộp theo message.id), tool, turn, file, findings
-  packer.js     .gitignore, ước lượng token, độ liên quan, bỏ comment, dựng prompt, treemap
-  sample.js     phiên ví dụ (đúng format log thật) + project ví dụ
-  ui.js         helper DOM, format, tooltip, đọc thư mục khi kéo thả
-  recorder.js   giao diện Flight Recorder
-  loadsheet.js  giao diện Load Sheet
-  app.js        tab, hash routing (#recorder, #loadsheet), theme
-  index.html    template; styles.css
-build.mjs       gộp tất cả thành 1 file: dist/agent-flight-deck.html (+ bản .standalone.html mở trực tiếp được)
-test/           unit test (node --test) và e2e chạy Chromium thật (Playwright)
+  pricing.js            bảng giá (đối chiếu trang giá chính thức), chuẩn hoá tên model, tính chi phí một usage
+  session.js            đọc .jsonl, gộp file theo phiên (giữ nguyên thứ tự file chính, bỏ dòng trùng uuid)
+  session-build.js      dựng phiên: call (gộp theo message.id), tool, turn, file, tổng, đối chiếu với cost-state
+  insights.js           findings (cache rebuild tránh được / không tránh được, tool lỗi, đọc lặp…)
+  packer.js             .gitignore, bỏ file bí mật, ước lượng token, độ liên quan, chọn file theo ngân sách
+  packer-output.js      bỏ comment an toàn (không đụng chuỗi, regex, heredoc), dựng prompt, cây thư mục, treemap
+  sample.js             phiên ví dụ (đúng format log thật) + project ví dụ
+  ui.js                 helper DOM, format, tooltip, đọc thư mục khi kéo thả
+  recorder*.js          Flight Recorder: nạp log + danh sách phiên, timeline, phiên & replay, inspector & bảng
+  loadsheet*.js         Load Sheet: nạp project + chọn file, phần hiển thị
+  app.js                tab, hash routing (#recorder, #loadsheet), theme
+  index.html            template; styles.css
+build.mjs               gộp tất cả thành 1 file: dist/agent-flight-deck.html (+ bản .standalone.html mở trực tiếp được)
+test/                   unit test (node --test) và e2e chạy Chromium thật (Playwright)
 ```
+
+Mỗi file dưới 400 dòng theo quy định của repo; các file `recorder*` và `loadsheet*` chia sẻ trạng thái qua `AFD.rec` / `AFD.ls`.
 
 ## Lệnh
 

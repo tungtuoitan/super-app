@@ -112,7 +112,7 @@
         box.addEventListener("change", () => { r.include = box.checked; renderAll(); });
         return box;
       } },
-      { key: "path", label: "File", render: (r) => h("div.path", { title: r.path }, h("bdi", r.path)), ascFirst: true },
+      { key: "path", label: "File", render: (r) => h("div.path", { title: r.secretHint ? r.path + " — looks like it contains a key or token; check before sending it to a model" : r.path }, h("bdi", (r.secretHint ? "⚠ " : "") + r.path)), ascFirst: true },
       { key: "lang", label: "Type", render: (r) => h("span", { style: { display: "inline-flex", alignItems: "center", gap: "5px", whiteSpace: "nowrap" } }, h("i.swatch", { style: { background: LANG_COLOR[r.lang] || LANG_COLOR.other } }), LANG_NAME[r.lang] || r.lang) },
       { key: "tokens", label: "≈Tokens", num: true, render: (r) => tok(P().packedTokens(r, S.opts)), sort: (r) => P().packedTokens(r, S.opts) },
     ];

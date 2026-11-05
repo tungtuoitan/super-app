@@ -258,7 +258,12 @@
     if (!S.session || !S.view || S.root.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
     const tag = (e.target && e.target.tagName) || "";
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || (e.target && e.target.isContentEditable)) {
-      if (e.key === "Escape" && e.target === S.view.search) e.target.blur();
+      if (e.key === "Escape" && e.target === S.view.search) {
+        e.target.value = "";
+        S.query = "";
+        R.renderFeed();
+        e.target.blur();
+      }
       return;
     }
     if (e.key === " " && tag !== "BUTTON") { e.preventDefault(); R.togglePlay(); }

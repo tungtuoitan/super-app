@@ -76,7 +76,10 @@
       g.files.push(fr.fileName);
       g.bad += fr.bad;
       const sub = isSubagentFile(fr.fileName);
+      g.seen = g.seen || new Set();
       for (const e of fr.entries) {
+        // the same log dropped twice (a file and its folder, a backup copy) must not double the counts
+        if (e.uuid) { if (g.seen.has(e.uuid)) continue; g.seen.add(e.uuid); }
         if (sub && e.isSidechain === undefined) e.isSidechain = true;
         (sub ? g.side : g.main).push(e);
       }

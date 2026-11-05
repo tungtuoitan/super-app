@@ -240,10 +240,15 @@
     // a dropped folder names the project; loose files picked one by one do not
     S.projectName = (S.prep && S.prep.root) || (S.raw.some((r) => r.path.includes("/")) ? S.raw.find((r) => r.path.includes("/")).path.split("/")[0] : "selected files");
     // default selection: everything that fits, smallest-first is unhelpful, so load all and let the user trim
-    for (const f of S.files) f.include = true;
+    for (const f of S.files) f.include = !f.secretHint;
+    const flagged = S.files.filter((f) => f.secretHint).length;
+    // warm the relevance index while the user reads the result, so the first question is instant
+    const warm = (dl) => { if (!P().warmTerms(S.files, dl) && window.requestIdleCallback) requestIdleCallback(warm); };
+    if (window.requestIdleCallback) requestIdleCallback(warm); else setTimeout(() => P().warmTerms(S.files), 200);
     const totalTok = S.files.reduce((a, f) => a + f.tokens, 0);
     const msg = [`Loaded ${plural(S.files.length, "file")} (${tok(totalTok)} tokens).`];
     if (S.skipped.length) msg.push(`${S.skipped.length} skipped.`);
+    if (flagged) msg.push(`${plural(flagged, "file looks", "files look")} like ${flagged === 1 ? "it contains" : "they contain"} a key or token and ${flagged === 1 ? "was" : "were"} not loaded (marked ⚠ in the manifest).`);
     if (budgetLeft <= 0) msg.push(`Stopped reading after ${bytes(MAX_TOTAL_READ)}.`);
     if (totalTok > S.budget - S.reserve) msg.push("That is over budget: type a question and press Auto-load, or unload files.");
     setNotice(msg.join(" "));

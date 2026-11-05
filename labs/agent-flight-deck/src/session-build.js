@@ -136,7 +136,8 @@
           if (a.type === "queued_command" && a.prompt && a.commandMode !== "task-notification") {
             // placed where it was delivered; the time it was typed is kept separately
             if (!title) title = a.prompt.trim();
-            pushEvent({ t, kind: "prompt", text: a.prompt.trim(), queued: true, queuedAt: ts(a.timestamp) || t, sidechain: side });
+            const prevT = events.length ? events[events.length - 1].t : 0;
+            pushEvent({ t: Math.max(t, prevT || 0), kind: "prompt", text: a.prompt.trim(), queued: true, queuedAt: ts(a.timestamp) || t, sidechain: side });
           }
           break;
         }
@@ -217,18 +218,29 @@
     // ── file activity
     const files = new Map();
     const fileOf = (p) => {
-      if (!files.has(p)) files.set(p, { path: p, reads: 0, edits: 0, writes: 0, added: 0, removed: 0, tools: [] });
+      if (!files.has(p)) files.set(p, { path: p, reads: 0, rereads: 0, edits: 0, writes: 0, added: 0, removed: 0, tools: [], lastAct: "" });
       return files.get(p);
     };
     for (const tool of tools) {
       const inp = tool.input || {};
       const p = inp.file_path || inp.notebook_path || inp.path && (tool.name === "Read") && inp.path;
-      if (!p || typeof p !== "string") continue;
+      if (!p || typeof p !== "string") {
+        // a shell command that names a file may have changed it (a script regenerating a screenshot, a build)
+        if (tool.name === "Bash" && inp.command) for (const f of files.values()) if (inp.command.includes(f.path.split("/").pop())) f.lastAct = "change";
+        continue;
+      }
       tool.filePath = p;
       const f = fileOf(p);
       f.tools.push(tool.idx);
-      if (tool.name === "Read" || tool.name === "NotebookRead") f.reads++;
-      else if (tool.name === "Write") {
+      if (tool.name === "Read" || tool.name === "NotebookRead") {
+        f.reads++;
+        // a read right after another read of an unchanged file adds the same text again
+        if (f.lastAct === "read") f.rereads++;
+        f.lastAct = "read";
+        continue;
+      }
+      f.lastAct = "change";
+      if (tool.name === "Write") {
         f.writes++;
         if (!tool.isError) f.added += countLines(inp.content || "");
       } else if (tool.name === "Edit" || tool.name === "NotebookEdit") {

@@ -9,9 +9,9 @@
    * (template literals, triple quotes); `single` lists delimiters that end at the end of the line.
    */
   const SYNTAX = {
-    c: { line: "//", block: ["/*", "*/"], single: ['"', "'"], multi: ["`"] },
+    c: { line: "//", block: ["/*", "*/"], single: ['"', "'"], multi: ["`"], regex: true },
     py: { line: "#", block: null, single: ['"', "'"], multi: ['"""', "'''"] },
-    sh: { line: "#", block: null, single: ['"', "'"], multi: [] },
+    sh: { line: "#", block: null, single: ['"', "'"], multi: [], heredoc: true },
     sql: { line: "--", block: ["/*", "*/"], single: [], multi: ["'"] },
     css: { line: null, block: ["/*", "*/"], single: ['"', "'"], multi: [] },
   };
@@ -26,6 +26,7 @@
   function scan(line, st, syn) {
     let { block, str } = st;
     let i = 0;
+    let prev = ""; // last significant character outside strings, to tell a regex literal from division
     while (i < line.length) {
       if (block) {
         const end = line.indexOf(syn.block[1], i);
@@ -42,10 +43,25 @@
       }
       if (syn.line && line.startsWith(syn.line, i)) break;
       if (syn.block && line.startsWith(syn.block[0], i)) { block = true; i += syn.block[0].length; continue; }
+      // a regex literal (/…/) in C-like code: skip it so a quote or backtick inside it is not taken as a string
+      if (syn.regex && line[i] === "/" && (prev === "" || /[(,=:[!&|?{};+\-*%<>~^]/.test(prev) || /\breturn\s*$/.test(line.slice(0, i)))) {
+        let j = i + 1;
+        let cls = false;
+        while (j < line.length) {
+          const ch = line[j];
+          if (ch === "\\") { j += 2; continue; }
+          if (ch === "[") cls = true;
+          else if (ch === "]") cls = false;
+          else if (ch === "/" && !cls) break;
+          j++;
+        }
+        if (j < line.length) { i = j + 1; prev = "/"; continue; }
+      }
       const multi = syn.multi.find((d) => line.startsWith(d, i));
       if (multi) { str = multi; i += multi.length; continue; }
       const single = syn.single.find((d) => line[i] === d);
       if (single) { str = single; i++; continue; }
+      if (line[i] !== " " && line[i] !== "\t") prev = line[i];
       i++;
     }
     // single-line strings do not continue onto the next line
@@ -63,9 +79,19 @@
     const lines = text.split("\n");
     const out = [];
     let st = { block: false, str: null };
+    let heredoc = null; // shell: the word that closes a here-document; its body is data, never comments
     for (let n = 0; n < lines.length; n++) {
       const line = lines[n];
       const t = line.trim();
+      if (heredoc) {
+        out.push(line);
+        if (t === heredoc) heredoc = null;
+        continue;
+      }
+      if (syn.heredoc) {
+        const hd = line.match(/<<-?\s*(['"]?)([A-Za-z_]\w*)\1/);
+        if (hd && !t.startsWith("#")) { out.push(line); heredoc = hd[2]; continue; }
+      }
       if (st.str) { out.push(line); st = scan(line, st, syn); continue; }
       if (st.block) {
         const end = line.indexOf(syn.block[1]);

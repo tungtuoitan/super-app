@@ -596,7 +596,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       g.files.push(fr.fileName);
       g.bad += fr.bad;
       const sub = isSubagentFile(fr.fileName);
+      g.seen = g.seen || new Set();
       for (const e of fr.entries) {
+        // the same log dropped twice (a file and its folder, a backup copy) must not double the counts
+        if (e.uuid) { if (g.seen.has(e.uuid)) continue; g.seen.add(e.uuid); }
         if (sub && e.isSidechain === undefined) e.isSidechain = true;
         (sub ? g.side : g.main).push(e);
       }
@@ -847,7 +850,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
           if (a.type === "queued_command" && a.prompt && a.commandMode !== "task-notification") {
             // placed where it was delivered; the time it was typed is kept separately
             if (!title) title = a.prompt.trim();
-            pushEvent({ t, kind: "prompt", text: a.prompt.trim(), queued: true, queuedAt: ts(a.timestamp) || t, sidechain: side });
+            const prevT = events.length ? events[events.length - 1].t : 0;
+            pushEvent({ t: Math.max(t, prevT || 0), kind: "prompt", text: a.prompt.trim(), queued: true, queuedAt: ts(a.timestamp) || t, sidechain: side });
           }
           break;
         }
@@ -928,18 +932,29 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     // ── file activity
     const files = new Map();
     const fileOf = (p) => {
-      if (!files.has(p)) files.set(p, { path: p, reads: 0, edits: 0, writes: 0, added: 0, removed: 0, tools: [] });
+      if (!files.has(p)) files.set(p, { path: p, reads: 0, rereads: 0, edits: 0, writes: 0, added: 0, removed: 0, tools: [], lastAct: "" });
       return files.get(p);
     };
     for (const tool of tools) {
       const inp = tool.input || {};
       const p = inp.file_path || inp.notebook_path || inp.path && (tool.name === "Read") && inp.path;
-      if (!p || typeof p !== "string") continue;
+      if (!p || typeof p !== "string") {
+        // a shell command that names a file may have changed it (a script regenerating a screenshot, a build)
+        if (tool.name === "Bash" && inp.command) for (const f of files.values()) if (inp.command.includes(f.path.split("/").pop())) f.lastAct = "change";
+        continue;
+      }
       tool.filePath = p;
       const f = fileOf(p);
       f.tools.push(tool.idx);
-      if (tool.name === "Read" || tool.name === "NotebookRead") f.reads++;
-      else if (tool.name === "Write") {
+      if (tool.name === "Read" || tool.name === "NotebookRead") {
+        f.reads++;
+        // a read right after another read of an unchanged file adds the same text again
+        if (f.lastAct === "read") f.rereads++;
+        f.lastAct = "read";
+        continue;
+      }
+      f.lastAct = "change";
+      if (tool.name === "Write") {
         f.writes++;
         if (!tool.isError) f.added += countLines(inp.content || "");
       } else if (tool.name === "Edit" || tool.name === "NotebookEdit") {
@@ -1204,8 +1219,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     if (editMiss.length >= 2) out.push({ level: "warn", id: "edit-miss", title: `${editMiss.length} edits were rejected`, detail: "Usually the old text did not match exactly or the file changed since it was read. Re-reading the exact region before editing avoids the retry loop.", refs: editMiss.map((t) => t.event) });
 
     // 6. Repeated reads
-    const reread = s.files.filter((f) => f.reads >= 3);
-    if (reread.length) out.push({ level: "info", id: "rereads", title: `${plural(reread.length, "file was", "files were")} read 3+ times`, detail: reread.slice(0, 4).map((f) => `${shortPath(f.path)} (${f.reads}×)`).join(", ") + ". Repeated reads re-add the same text to context.", refs: reread.slice(0, 3).flatMap((f) => f.tools.map((ti) => s.tools[ti].event)).slice(0, 20) });
+    const reread = s.files.filter((f) => (f.rereads != null ? f.rereads : f.reads - 1) >= 2);
+    if (reread.length) out.push({ level: "info", id: "rereads", title: `${plural(reread.length, "file was", "files were")} re-read without changing`, detail: reread.slice(0, 4).map((f) => `${shortPath(f.path)} (${f.reads} reads)`).join(", ") + ". Reading an unchanged file again re-adds the same text to context; reads after an edit are not counted.", refs: reread.slice(0, 3).flatMap((f) => f.tools.map((ti) => s.tools[ti].event)).slice(0, 20) });
 
     // 7. Bash used to dump files: only plain reads (no redirects, heredocs or pipes) whose output was actually large
     const dumps = s.tools.filter((t) => {
@@ -1398,6 +1413,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     prompt("Also add a test for the lockout, and make sure a successful login clears the counter.");
     ids = call([{ thinking: "" }, { tool: { name: "Read", input: { file_path: cwd + "/src/routes/login.ts" } } }]);
     result(ids[0], fileBody("login.ts", 78));
+    // the same unchanged file read again in slices: a re-read the findings should catch
+    ids = call([{ tool: { name: "Read", input: { file_path: cwd + "/src/routes/login.ts", offset: 30, limit: 40 } } }]);
+    result(ids[0], fileBody("login.ts", 40));
+    ids = call([{ tool: { name: "Read", input: { file_path: cwd + "/src/routes/login.ts", offset: 60, limit: 20 } } }]);
+    result(ids[0], fileBody("login.ts", 20));
     ids = call([{ tool: { name: "Bash", input: { command: "cat test/login.test.ts", description: "Show login tests" } } }]);
     result(ids[0], fileBody("login.test.ts", 52));
     ids = call([{ tool: { name: "Bash", input: { command: "grep -rn \"clearFailures\" src test", description: "Find clearFailures usage" } } }]);
@@ -1494,7 +1514,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   ];
 
   // Files that usually hold credentials: never read, never sent to a model.
-  const SECRET = /(^|\/)(id_(rsa|dsa|ecdsa|ed25519)(\.pub)?|\.npmrc|\.pypirc|\.netrc|\.htpasswd|credentials[^/]*\.json|[^/]*service[-_]?account[^/]*\.json|[^/]*\.(pem|key|p12|pfx|keystore|jks))$/i;
+  const SECRET = /(^|\/)(id_(rsa|dsa|ecdsa|ed25519)(\.pub)?|\.npmrc|\.pypirc|\.netrc|\.htpasswd|credentials[^/]*\.json|[^/]*service[-_]?account[^/]*\.json|[^/]*\.(pem|key|p12|pfx|keystore|jks|tfvars|tfstate)|\.aws\/credentials|\.docker\/config\.json)$/i;
+  // Content that looks like a credential: the file stays listed but is not loaded unless the user ticks it.
+  const SECRET_CONTENT = /-----BEGIN [A-Z ]*PRIVATE KEY-----|\bAKIA[0-9A-Z]{16}\b|\bgh[pousr]_[A-Za-z0-9]{36}\b|\bxox[abprs]-[A-Za-z0-9-]{10,}|\bsk-(?:ant-|proj-)?[A-Za-z0-9_-]{24,}|\bAIza[0-9A-Za-z_-]{35}\b/;
 
   const BINARY_EXT = new Set(("png jpg jpeg gif webp bmp ico icns tiff psd ai sketch fig pdf zip gz tgz bz2 xz 7z rar jar war " +
     "exe dll so dylib a o class pyc wasm bin dat db sqlite sqlite3 mp3 mp4 mov avi mkv webm wav flac ogg m4a " +
@@ -1685,7 +1707,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       if (typeof f.text !== "string") { skipped.push({ path: rel, reason: "unreadable", size }); continue; }
       if (looksBinary(f.text)) { skipped.push({ path: rel, reason: "binary", size }); continue; }
       const text = f.text.replace(/\r\n/g, "\n");
-      files.push({ path: rel, lang: langOf(rel), size, text, lines: text ? text.split("\n").length : 0, tokens: estimateTokens(text), score: 0, include: true });
+      const secretHint = SECRET_CONTENT.test(text);
+      files.push({ path: rel, lang: langOf(rel), size, text, lines: text ? text.split("\n").length : 0, tokens: estimateTokens(text), score: 0, include: !secretHint, secretHint });
     }
     files.sort((a, b) => a.path.localeCompare(b.path));
     return { root, files, skipped };
@@ -1714,6 +1737,20 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   }
 
   /** Score each file against the question: path hits weigh most, then content term frequency (TF-IDF-like). */
+  /** Fill the per-file term cache ahead of the first question (called in idle time after loading). */
+  function warmTerms(files, deadline) {
+    for (const f of files) {
+      if (deadline && deadline.timeRemaining && deadline.timeRemaining() < 2) return false;
+      if (f._terms && f._termsOf === f.text) continue;
+      const counts = new Map();
+      for (const t of terms(f.text)) { const st = stem(t); counts.set(st, (counts.get(st) || 0) + 1); }
+      f._terms = counts;
+      f._termsOf = f.text;
+      f._pathTerms = new Set(terms(f.path).map(stem));
+    }
+    return true;
+  }
+
   function scoreFiles(files, question) {
     const q = [...new Set(terms(question).map(stem))];
     if (!q.length) {
@@ -1763,6 +1800,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     let n = 0;
     const hasScores = ranked.some((f) => f.score > 0);
     for (const f of ranked) {
+      if (f.secretHint) { f.include = false; continue; } // never auto-load something that looks like a credential
       const cost = AFD.packer.docTokens(f, transformOpts);
       if ((hasScores && f.score <= 0) || used + cost > budget) {
         f.include = false;
@@ -1777,7 +1815,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 
   AFD.packer = Object.assign(AFD.packer || {}, {
     DEFAULT_IGNORES, MAX_FILE_BYTES, compileIgnore, isIgnored, globToRegex, estimateTokens, looksBinary, prepare,
-    terms, scoreFiles, autoSelect, langOf, ext, BINARY_EXT,
+    terms, scoreFiles, warmTerms, autoSelect, langOf, ext, BINARY_EXT, SECRET_CONTENT,
   });
 })(globalThis.AFD = globalThis.AFD || {});
 
@@ -1793,9 +1831,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
    * (template literals, triple quotes); `single` lists delimiters that end at the end of the line.
    */
   const SYNTAX = {
-    c: { line: "//", block: ["/*", "*/"], single: ['"', "'"], multi: ["`"] },
+    c: { line: "//", block: ["/*", "*/"], single: ['"', "'"], multi: ["`"], regex: true },
     py: { line: "#", block: null, single: ['"', "'"], multi: ['"""', "'''"] },
-    sh: { line: "#", block: null, single: ['"', "'"], multi: [] },
+    sh: { line: "#", block: null, single: ['"', "'"], multi: [], heredoc: true },
     sql: { line: "--", block: ["/*", "*/"], single: [], multi: ["'"] },
     css: { line: null, block: ["/*", "*/"], single: ['"', "'"], multi: [] },
   };
@@ -1810,6 +1848,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   function scan(line, st, syn) {
     let { block, str } = st;
     let i = 0;
+    let prev = ""; // last significant character outside strings, to tell a regex literal from division
     while (i < line.length) {
       if (block) {
         const end = line.indexOf(syn.block[1], i);
@@ -1826,10 +1865,25 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
       }
       if (syn.line && line.startsWith(syn.line, i)) break;
       if (syn.block && line.startsWith(syn.block[0], i)) { block = true; i += syn.block[0].length; continue; }
+      // a regex literal (/…/) in C-like code: skip it so a quote or backtick inside it is not taken as a string
+      if (syn.regex && line[i] === "/" && (prev === "" || /[(,=:[!&|?{};+\-*%<>~^]/.test(prev) || /\breturn\s*$/.test(line.slice(0, i)))) {
+        let j = i + 1;
+        let cls = false;
+        while (j < line.length) {
+          const ch = line[j];
+          if (ch === "\\") { j += 2; continue; }
+          if (ch === "[") cls = true;
+          else if (ch === "]") cls = false;
+          else if (ch === "/" && !cls) break;
+          j++;
+        }
+        if (j < line.length) { i = j + 1; prev = "/"; continue; }
+      }
       const multi = syn.multi.find((d) => line.startsWith(d, i));
       if (multi) { str = multi; i += multi.length; continue; }
       const single = syn.single.find((d) => line[i] === d);
       if (single) { str = single; i++; continue; }
+      if (line[i] !== " " && line[i] !== "\t") prev = line[i];
       i++;
     }
     // single-line strings do not continue onto the next line
@@ -1847,9 +1901,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     const lines = text.split("\n");
     const out = [];
     let st = { block: false, str: null };
+    let heredoc = null; // shell: the word that closes a here-document; its body is data, never comments
     for (let n = 0; n < lines.length; n++) {
       const line = lines[n];
       const t = line.trim();
+      if (heredoc) {
+        out.push(line);
+        if (t === heredoc) heredoc = null;
+        continue;
+      }
+      if (syn.heredoc) {
+        const hd = line.match(/<<-?\s*(['"]?)([A-Za-z_]\w*)\1/);
+        if (hd && !t.startsWith("#")) { out.push(line); heredoc = hd[2]; continue; }
+      }
       if (st.str) { out.push(line); st = scan(line, st, syn); continue; }
       if (st.block) {
         const end = line.indexOf(syn.block[1]);
@@ -2642,7 +2706,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     if (!S.session || !S.view || S.root.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
     const tag = (e.target && e.target.tagName) || "";
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || (e.target && e.target.isContentEditable)) {
-      if (e.key === "Escape" && e.target === S.view.search) e.target.blur();
+      if (e.key === "Escape" && e.target === S.view.search) {
+        e.target.value = "";
+        S.query = "";
+        R.renderFeed();
+        e.target.blur();
+      }
       return;
     }
     if (e.key === " " && tag !== "BUTTON") { e.preventDefault(); R.togglePlay(); }
@@ -2917,9 +2986,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     S.cursor = -1;
     S.selected = -1;
     S.query = "";
-    // thinking text is usually not written to the log; when none of it is, hide those rows to start with
-    const thinking = s.events.filter((e) => e.kind === "thinking");
-    if (thinking.length && thinking.every((e) => !e.text)) S.filters.delete("thinking");
+    // thinking text is often not written to the log: start with the Thinking chip off; thinking that has text still shows
+    if (s.events.some((e) => e.kind === "thinking" && !e.text)) S.filters.delete("thinking");
     else S.filters.add("thinking");
     clear(S.content);
     const v = (S.view = {});
@@ -2948,7 +3016,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     const costBar = t.cost > 0 ? [["input", "--c-input"], ["cacheWrite", "--c-cwrite"], ["cacheRead", "--c-cread"], ["output", "--c-output"]].map(([k, c]) => h("i", { style: { width: (parts[k] / t.cost) * 100 + "%", background: `var(${c})` } })) : null;
     const peakRatio = s.peak.window ? s.peak.ctx / s.peak.window : 0;
     S.content.appendChild(h("section.gauges", { "aria-label": "Session summary" },
-      gauge("Est. cost", usd(t.cost), reported ? `Claude Code logged ${usd(reported.usd)}` : t.unpricedCalls ? `${t.unpricedCalls} calls unpriced` : "at API list prices", costBar,
+      gauge("Est. cost", usd(t.cost), reported && s.reconcile ? `${s.reconcile.partial ? "up to its last snapshot, " : ""}Claude Code logged ${usd(reported.usd)} vs est. ${usd(s.reconcile.estimateUsd)}` : t.unpricedCalls ? `${t.unpricedCalls} calls unpriced` : "at API list prices", costBar,
         "Every call priced at Anthropic's API list prices. Pro and Max plans are billed differently, so this is what the same work would cost through the API." + (reported ? " Claude Code also saves its own running total in the log, sometimes only up to an earlier point in the session; see the Inspector for the comparison." : "")),
       gauge("API calls", t.apiCalls.toLocaleString("en-US"), `${plural(s.promptCount, "prompt")} · ${plural(s.turns.filter((x) => x.calls.length).length, "turn")}`),
       gauge("Tool calls", s.tools.length.toLocaleString("en-US"), s.tools.length ? `${s.tools.filter((x) => x.isError).length} failed` : "none"),
@@ -2987,7 +3055,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 
     v.feed = h("div.feed", { style: { position: "relative" }, tabindex: "0", "aria-label": "Session transcript" });
     v.search = h("input", { type: "search", placeholder: "Search transcript, files, commands", "aria-label": "Search transcript", id: "rec-search" });
-    v.search.addEventListener("input", () => { S.query = v.search.value.trim().toLowerCase(); renderFeed(); });
+    const onSearch = () => { S.query = v.search.value.trim().toLowerCase(); renderFeed(); };
+    v.search.addEventListener("input", onSearch);
+    v.search.addEventListener("search", onSearch); // fires when the browser clears the box (Escape, the ✕)
     const filterBtns = h("div.filters", FILTERS.map((f) => {
       const b = h("button", { type: "button", "aria-pressed": String(S.filters.has(f.key)), onclick: () => {
         if (S.filters.has(f.key)) S.filters.delete(f.key); else S.filters.add(f.key);
@@ -3094,7 +3164,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     v.drawnSel = null;
     v.drawnCursor = null;
     for (const ev of s.events) {
-      if (!kinds.has(ev.kind) || !matchesQuery(ev, q)) continue;
+      if (!(kinds.has(ev.kind) || (ev.kind === "thinking" && ev.text)) || !matchesQuery(ev, q)) continue;
       const row = feedRow(ev);
       v.rows.set(ev.idx, row);
       frag.appendChild(row);
@@ -3748,10 +3818,15 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     // a dropped folder names the project; loose files picked one by one do not
     S.projectName = (S.prep && S.prep.root) || (S.raw.some((r) => r.path.includes("/")) ? S.raw.find((r) => r.path.includes("/")).path.split("/")[0] : "selected files");
     // default selection: everything that fits, smallest-first is unhelpful, so load all and let the user trim
-    for (const f of S.files) f.include = true;
+    for (const f of S.files) f.include = !f.secretHint;
+    const flagged = S.files.filter((f) => f.secretHint).length;
+    // warm the relevance index while the user reads the result, so the first question is instant
+    const warm = (dl) => { if (!P().warmTerms(S.files, dl) && window.requestIdleCallback) requestIdleCallback(warm); };
+    if (window.requestIdleCallback) requestIdleCallback(warm); else setTimeout(() => P().warmTerms(S.files), 200);
     const totalTok = S.files.reduce((a, f) => a + f.tokens, 0);
     const msg = [`Loaded ${plural(S.files.length, "file")} (${tok(totalTok)} tokens).`];
     if (S.skipped.length) msg.push(`${S.skipped.length} skipped.`);
+    if (flagged) msg.push(`${plural(flagged, "file looks", "files look")} like ${flagged === 1 ? "it contains" : "they contain"} a key or token and ${flagged === 1 ? "was" : "were"} not loaded (marked ⚠ in the manifest).`);
     if (budgetLeft <= 0) msg.push(`Stopped reading after ${bytes(MAX_TOTAL_READ)}.`);
     if (totalTok > S.budget - S.reserve) msg.push("That is over budget: type a question and press Auto-load, or unload files.");
     setNotice(msg.join(" "));
@@ -3952,7 +4027,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         box.addEventListener("change", () => { r.include = box.checked; renderAll(); });
         return box;
       } },
-      { key: "path", label: "File", render: (r) => h("div.path", { title: r.path }, h("bdi", r.path)), ascFirst: true },
+      { key: "path", label: "File", render: (r) => h("div.path", { title: r.secretHint ? r.path + " — looks like it contains a key or token; check before sending it to a model" : r.path }, h("bdi", (r.secretHint ? "⚠ " : "") + r.path)), ascFirst: true },
       { key: "lang", label: "Type", render: (r) => h("span", { style: { display: "inline-flex", alignItems: "center", gap: "5px", whiteSpace: "nowrap" } }, h("i.swatch", { style: { background: LANG_COLOR[r.lang] || LANG_COLOR.other } }), LANG_NAME[r.lang] || r.lang) },
       { key: "tokens", label: "≈Tokens", num: true, render: (r) => tok(P().packedTokens(r, S.opts)), sort: (r) => P().packedTokens(r, S.opts) },
     ];

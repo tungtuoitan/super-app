@@ -14,9 +14,8 @@
     S.cursor = -1;
     S.selected = -1;
     S.query = "";
-    // thinking text is usually not written to the log; when none of it is, hide those rows to start with
-    const thinking = s.events.filter((e) => e.kind === "thinking");
-    if (thinking.length && thinking.every((e) => !e.text)) S.filters.delete("thinking");
+    // thinking text is often not written to the log: start with the Thinking chip off; thinking that has text still shows
+    if (s.events.some((e) => e.kind === "thinking" && !e.text)) S.filters.delete("thinking");
     else S.filters.add("thinking");
     clear(S.content);
     const v = (S.view = {});
@@ -45,7 +44,7 @@
     const costBar = t.cost > 0 ? [["input", "--c-input"], ["cacheWrite", "--c-cwrite"], ["cacheRead", "--c-cread"], ["output", "--c-output"]].map(([k, c]) => h("i", { style: { width: (parts[k] / t.cost) * 100 + "%", background: `var(${c})` } })) : null;
     const peakRatio = s.peak.window ? s.peak.ctx / s.peak.window : 0;
     S.content.appendChild(h("section.gauges", { "aria-label": "Session summary" },
-      gauge("Est. cost", usd(t.cost), reported ? `Claude Code logged ${usd(reported.usd)}` : t.unpricedCalls ? `${t.unpricedCalls} calls unpriced` : "at API list prices", costBar,
+      gauge("Est. cost", usd(t.cost), reported && s.reconcile ? `${s.reconcile.partial ? "up to its last snapshot, " : ""}Claude Code logged ${usd(reported.usd)} vs est. ${usd(s.reconcile.estimateUsd)}` : t.unpricedCalls ? `${t.unpricedCalls} calls unpriced` : "at API list prices", costBar,
         "Every call priced at Anthropic's API list prices. Pro and Max plans are billed differently, so this is what the same work would cost through the API." + (reported ? " Claude Code also saves its own running total in the log, sometimes only up to an earlier point in the session; see the Inspector for the comparison." : "")),
       gauge("API calls", t.apiCalls.toLocaleString("en-US"), `${plural(s.promptCount, "prompt")} · ${plural(s.turns.filter((x) => x.calls.length).length, "turn")}`),
       gauge("Tool calls", s.tools.length.toLocaleString("en-US"), s.tools.length ? `${s.tools.filter((x) => x.isError).length} failed` : "none"),
@@ -84,7 +83,9 @@
 
     v.feed = h("div.feed", { style: { position: "relative" }, tabindex: "0", "aria-label": "Session transcript" });
     v.search = h("input", { type: "search", placeholder: "Search transcript, files, commands", "aria-label": "Search transcript", id: "rec-search" });
-    v.search.addEventListener("input", () => { S.query = v.search.value.trim().toLowerCase(); renderFeed(); });
+    const onSearch = () => { S.query = v.search.value.trim().toLowerCase(); renderFeed(); };
+    v.search.addEventListener("input", onSearch);
+    v.search.addEventListener("search", onSearch); // fires when the browser clears the box (Escape, the ✕)
     const filterBtns = h("div.filters", FILTERS.map((f) => {
       const b = h("button", { type: "button", "aria-pressed": String(S.filters.has(f.key)), onclick: () => {
         if (S.filters.has(f.key)) S.filters.delete(f.key); else S.filters.add(f.key);
@@ -191,7 +192,7 @@
     v.drawnSel = null;
     v.drawnCursor = null;
     for (const ev of s.events) {
-      if (!kinds.has(ev.kind) || !matchesQuery(ev, q)) continue;
+      if (!(kinds.has(ev.kind) || (ev.kind === "thinking" && ev.text)) || !matchesQuery(ev, q)) continue;
       const row = feedRow(ev);
       v.rows.set(ev.idx, row);
       frag.appendChild(row);

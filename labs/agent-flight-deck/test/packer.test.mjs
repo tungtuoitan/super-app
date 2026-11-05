@@ -159,3 +159,36 @@ test("auto-select counts the wrapper around each file", () => {
   const prompt = P.buildPrompt(prepared, { format: "xml", includeTree: false });
   assert.ok(prompt.tokens <= 4400, "prompt with wrappers stays near the budget: " + prompt.tokens);
 });
+
+test("comment stripping: regex literals with quotes/backticks, shell heredocs", () => {
+  const js = "const r = /`/;\nconst t = `\n// part of the string\n`;\n// real comment\nconst q = s.replace(/'/g, \"\");\n// another\n";
+  const out = P.transform(js, "js", { stripComments: true });
+  assert.ok(out.includes("// part of the string"), out);
+  assert.ok(!out.includes("// real comment") && !out.includes("// another"), out);
+  assert.ok(out.includes("const q = s.replace(/'/g"), out);
+  const a = 6, b = 3; // division is not a regex
+  const div = P.transform("const x = a / b; const y = `\n// in string\n`;\n", "js", { stripComments: true });
+  assert.ok(div.includes("// in string"), div);
+  const sh = "cat <<EOF\n# keep in heredoc\nEOF\n# real comment\necho done\ncat <<-'END'\n\t# also kept\n\tEND\n";
+  const sout = P.transform(sh, "sh", { stripComments: true });
+  assert.ok(sout.includes("# keep in heredoc") && sout.includes("# also kept"), sout);
+  assert.ok(!sout.includes("# real comment"));
+});
+
+test("files that look like they hold a credential are listed but not loaded", () => {
+  const { files } = P.prepare([
+    { path: "src/a.ts", text: "const key = 'AKIAABCDEFGHIJKLMNOP';" },
+    { path: "src/b.ts", text: "-----BEGIN RSA PRIVATE KEY-----\nabc" },
+    { path: "src/c.ts", text: "export const ok = 1;" },
+    { path: "infra/prod.tfvars", text: "x = 1" },
+    { path: "home/.aws/credentials", text: "[default]" },
+  ]);
+  const by = Object.fromEntries(files.map((f) => [f.path, f]));
+  assert.ok(by["src/a.ts"].secretHint && !by["src/a.ts"].include);
+  assert.ok(by["src/b.ts"].secretHint && !by["src/b.ts"].include);
+  assert.ok(!by["src/c.ts"].secretHint && by["src/c.ts"].include);
+  assert.ok(!by["infra/prod.tfvars"] && !by["home/.aws/credentials"], "secret files are skipped by path");
+  P.scoreFiles(files, "key");
+  P.autoSelect(files, 100000, {});
+  assert.ok(!by["src/a.ts"].include, "auto-load never picks a flagged file");
+});

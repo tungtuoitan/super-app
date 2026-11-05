@@ -106,8 +106,8 @@
     if (editMiss.length >= 2) out.push({ level: "warn", id: "edit-miss", title: `${editMiss.length} edits were rejected`, detail: "Usually the old text did not match exactly or the file changed since it was read. Re-reading the exact region before editing avoids the retry loop.", refs: editMiss.map((t) => t.event) });
 
     // 6. Repeated reads
-    const reread = s.files.filter((f) => f.reads >= 3);
-    if (reread.length) out.push({ level: "info", id: "rereads", title: `${plural(reread.length, "file was", "files were")} read 3+ times`, detail: reread.slice(0, 4).map((f) => `${shortPath(f.path)} (${f.reads}×)`).join(", ") + ". Repeated reads re-add the same text to context.", refs: reread.slice(0, 3).flatMap((f) => f.tools.map((ti) => s.tools[ti].event)).slice(0, 20) });
+    const reread = s.files.filter((f) => (f.rereads != null ? f.rereads : f.reads - 1) >= 2);
+    if (reread.length) out.push({ level: "info", id: "rereads", title: `${plural(reread.length, "file was", "files were")} re-read without changing`, detail: reread.slice(0, 4).map((f) => `${shortPath(f.path)} (${f.reads} reads)`).join(", ") + ". Reading an unchanged file again re-adds the same text to context; reads after an edit are not counted.", refs: reread.slice(0, 3).flatMap((f) => f.tools.map((ti) => s.tools[ti].event)).slice(0, 20) });
 
     // 7. Bash used to dump files: only plain reads (no redirects, heredocs or pipes) whose output was actually large
     const dumps = s.tools.filter((t) => {

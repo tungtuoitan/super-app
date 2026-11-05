@@ -78,6 +78,10 @@ await page.keyboard.press("Escape");
 // filters & search
 await page.fill("#rec-search", "npm test");
 ok((await page.locator(".feed .ev").count()) >= 2 && (await page.locator(".feed .ev").count()) < 10, "search narrows the transcript");
+const rowsFiltered = await page.locator(".feed .ev").count();
+await page.locator("#rec-search").press("Escape");
+await page.waitForTimeout(100);
+ok((await page.locator(".feed .ev").count()) > rowsFiltered, "Escape in the search box clears the filter too");
 await page.fill("#rec-search", "");
 ok((await page.locator(".feed .ev.k-thinking").count()) === 0, "empty thinking rows are hidden by default");
 await page.locator(".filters button", { hasText: "Thinking" }).click();
