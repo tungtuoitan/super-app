@@ -175,19 +175,27 @@
   function applyDiff() {
     const text = $("diff-input").value;
     if (!LL.diff.isUnifiedDiff(text)) { toast("Không thấy diff hợp lệ (cần các dòng @@ -a,b +c,d @@)."); return; }
-    const files = LL.diff.parseUnified(text);
     const after = S.ed.after.getValue();
     const before = S.ed.before.getValue();
-    const fd = files[0];
-    if (files.length > 1) toast(`Diff có ${files.length} file, dùng file đầu: ${fd.newPath || fd.oldPath}.`);
-    let r;
-    if (after.trim()) { r = LL.diff.applyPatch(after, fd, "reverse"); S.ed.before.setValue(r.code); showTab("after"); }
-    else if (before.trim()) { r = LL.diff.applyPatch(before, fd, "forward"); S.ed.after.setValue(r.code); showTab("after"); }
-    else { toast("Dán code Trước hoặc Sau trước, rồi mới dán diff."); return; }
+    const fromAfter = !!after.trim();
+    if (!fromAfter && !before.trim()) { toast("Dán code Trước hoặc Sau trước, rồi mới dán diff."); return; }
+    // a diff of several files: use the file whose hunks fit the pasted code
+    let best = null;
+    for (const fd of LL.diff.parseUnified(text)) {
+      const r = LL.diff.applyPatch(fromAfter ? after : before, fd, fromAfter ? "reverse" : "forward");
+      if (!best || r.applied - r.failed > best.r.applied - best.r.failed) best = { fd, r };
+    }
+    if (!best || !best.r.applied) { setStatus(`Diff không khớp với code ${fromAfter ? "Sau" : "Trước"} đang có. Kiểm tra lại đúng file và đúng phiên bản.`, "err"); return; }
+    const { fd, r } = best;
+    (fromAfter ? S.ed.before : S.ed.after).setValue(r.code);
+    showTab("after");
     refreshChange();
     updateCodeInfo();
     $("diff-dialog").hidden = true;
-    setStatus(r.failed ? `Áp được ${r.applied}/${r.applied + r.failed} đoạn của diff. Kiểm tra lại code Trước / Sau.` : `Đã dựng lại từ diff (+${S.cmp ? S.cmp.stats.added : 0} −${S.cmp ? S.cmp.stats.removed : 0} dòng). Bấm “Vẽ sơ đồ thay đổi”.`, r.failed ? "err" : "");
+    const st = S.cmp ? S.cmp.stats : { added: 0, removed: 0 };
+    const file = fd.newPath || fd.oldPath;
+    if (!st.added && !st.removed) setStatus("Diff áp xong nhưng Trước và Sau giống hệt nhau. Kiểm tra lại diff.", "err");
+    else setStatus(r.failed ? `Áp được ${r.applied}/${r.applied + r.failed} đoạn của diff${file ? " (" + file + ")" : ""}. Kiểm tra lại code Trước / Sau.` : `Đã dựng lại từ diff${file ? " của " + file : ""} (+${st.added} −${st.removed} dòng). Bấm “Vẽ sơ đồ thay đổi”.`, r.failed ? "err" : "");
     saveDraft();
   }
 
@@ -227,8 +235,19 @@
     $("mode-seg").addEventListener("click", (e) => {
       const b = e.target.closest("button");
       if (!b || b.dataset.v === S.mode) return;
+      // each mode keeps its own diagram: a code diagram never sits next to a change, or the other way round
+      S.parked[S.mode] = S.flow ? { flow: S.flow, codeAtDraw: S.codeAtDraw } : null;
       setMode(b.dataset.v);
-      saveDraft();
+      const back = S.parked[S.mode];
+      S.parked[S.mode] = null;
+      S.codeAtDraw = back ? back.codeAtDraw : null;
+      S.selected = null;
+      S.tour = false;
+      exSel.value = "";
+      setFlow(back ? F.normalize(back.flow) : null);
+      select(null);
+      setStatus(back || S.mode === "code" ? "" : "Dán code Trước và Sau (hoặc một bên + git diff), rồi bấm “Vẽ sơ đồ thay đổi”.");
+      saveDraft(true);
     });
     $("code-tabs").addEventListener("click", (e) => { const b = e.target.closest("[role=tab]"); if (b) showTab(b.dataset.tab); });
     document.querySelectorAll(".mobile-tabs button").forEach((b) => b.addEventListener("click", () => showPane(b.dataset.pane)));
@@ -269,7 +288,7 @@
     $("card-next").addEventListener("click", () => step(1));
     $("card-close").addEventListener("click", () => { S.tour = false; select(null); });
     $("only-changes").addEventListener("change", () => setOnlyChanges($("only-changes").checked));
-    // phones clamp long summaries to 2 lines; a tap shows the rest
+    // phones clamp long summaries to 1 line; a tap shows the rest
     for (const id of ["d-summary", "change-bar"]) $(id).addEventListener("click", (e) => { const p = e.target.closest("p, .cs"); if (p) p.classList.toggle("open"); });
     $("zoom-in").addEventListener("click", () => zoomBy(1.2));
     $("zoom-out").addEventListener("click", () => zoomBy(1 / 1.2));
@@ -306,8 +325,10 @@
 
     // keyboard: ← → move between boxes, Esc closes the explanation
     document.addEventListener("keydown", (e) => {
-      const tag = (e.target && e.target.tagName) || "";
-      if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "Escape" && !$("diff-dialog").hidden) { $("diff-dialog").hidden = true; $("paste-diff").focus(); return; }
+      const t = e.target || {};
+      const typing = /^(TEXTAREA|SELECT)$/.test(t.tagName || "") || (t.tagName === "INPUT" && t.type !== "checkbox");
+      if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === "ArrowRight" || (e.key === "ArrowDown" && S.tour)) { if (S.nodes.length) { e.preventDefault(); step(1); } }
       else if (e.key === "ArrowLeft" || (e.key === "ArrowUp" && S.tour)) { if (S.nodes.length) { e.preventDefault(); step(-1); } }
       else if (e.key === "Escape") { toggleMenu($("export-btn"), $("export-menu"), false); toggleMenu($("legend-btn"), $("legend"), false); if (S.selected || S.tour) { S.tour = false; select(null); } }
@@ -340,6 +361,7 @@
         S.ed.after.setValue(draft.after || "");
         setMode(draft.mode);
         S.codeAtDraw = draft.codeAtDraw != null ? draft.codeAtDraw : diagramCode();
+        if (draft.parked && typeof draft.parked === "object") S.parked = draft.parked;
         setFlow(draft.flow ? F.normalize(draft.flow) : null);
       }
     } else {

@@ -82,3 +82,40 @@ test("a diff ending in a newline, or with a stripped empty context line, still a
   assert.equal(r.code, "a\n\nB\nc");
   assert.equal(D.applyPatch(r.code, D.parseUnified(diff)[0], "reverse").code, before);
 });
+
+test("a removed SQL comment ('--- …' inside a hunk) is content, not a new file header", () => {
+  const before = "SELECT 1;\n-- old comment\nSELECT 2;\nSELECT 3;";
+  const diff = "diff --git a/p.sql b/p.sql\n--- a/p.sql\n+++ b/p.sql\n@@ -1,4 +1,3 @@\n SELECT 1;\n--- old comment\n SELECT 2;\n-SELECT 3;\n+SELECT 4;\n";
+  const files = D.parseUnified(diff);
+  assert.equal(files.length, 1);
+  assert.equal(D.applyPatch(before, files[0], "forward").code, "SELECT 1;\nSELECT 2;\nSELECT 4;");
+});
+
+test("change marks: comments and re-indentation do not count, new code after a deletion stays 'added'", () => {
+  const before = "function f(x) {\n  // old note\n  if (x) {\n    save(x);\n  }\n  return x;\n}";
+  const after = "function f(x) {\n  // new note\n  if (!x) return null;\n  if (x) {\n      save(x);\n  }\n  return x;\n}";
+  const c = D.compare(before, after);
+  assert.equal(D.changeIn(c, [2, 2]), "", "comment-only edit");
+  assert.equal(D.changeIn(c, [5, 5]), "", "re-indented line");
+  assert.equal(D.changeIn(c, [3, 3]), "added", "a new guard right after a removed comment");
+  const tail = D.compare("a()\nb()\nc()", "a()\nb()");
+  assert.equal(D.changeIn(tail, [2, 2]), "modified", "lines removed at the end belong to the last box");
+  assert.equal(D.listingFor(tail, [2, 2]).filter((l) => l.type === "del").length, 1);
+  assert.equal(D.listingFor(tail, [1, 1]).filter((l) => l.type === "del").length, 0);
+});
+
+test("webhook bug fix: new branch paths are new, the new guard stays 'added', the edited call is 'modified'", () => {
+  const fs = createRequire(import.meta.url)("node:fs");
+  const read = (f) => fs.readFileSync(new URL("./corpus/" + f, import.meta.url), "utf8");
+  const cmp = D.compare(read("changes/webhook.before.js"), read("changes/webhook.after.js"));
+  const flow = LL.flow.normalize(JSON.parse(read("out/change-webhook.json")));
+  D.reconcileChanges(flow, cmp);
+  const by = {};
+  LL.flow.eachNode(flow, (n) => { by[n.title] = n; });
+  assert.equal(by["Trùng"].change, "added");
+  assert.equal(by["Lần đầu"].change, "added");
+  assert.ok(by["Lần đầu"].changeInherited, "only the first path of a new branch is a stop of its own");
+  assert.equal(by["200 already paid"].change, "added");
+  assert.equal(by["db.tx: paid và giữ kho"].change, "modified");
+  assert.equal(by["Kiểm tra chữ ký"].change, undefined);
+});

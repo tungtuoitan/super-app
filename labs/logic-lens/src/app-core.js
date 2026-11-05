@@ -22,6 +22,7 @@
     detail: "normal",
     cmp: null, // diff of before → after (change mode)
     codeAtDraw: null, // the code the diagram's line numbers refer to
+    parked: {}, // mode -> {flow, codeAtDraw}: the other mode's diagram, kept while that mode is not shown
     ctl: null,
     sample: undefined, // undefined = still checking, null = unavailable
     downloads: null,
@@ -42,7 +43,7 @@
     try {
       localStorage.setItem(KEY, JSON.stringify({
         mode: S.mode, code: S.ed.code.getValue(), before: S.ed.before.getValue(), after: S.ed.after.getValue(),
-        flow: S.flow, codeAtDraw: S.codeAtDraw, lang: S.lang, detail: S.detail, example: $("example").value,
+        flow: S.flow, codeAtDraw: S.codeAtDraw, parked: S.parked, lang: S.lang, detail: S.detail, example: $("example").value,
       }));
     } catch (e) { /* storage unavailable: drafts just won't persist */ }
   }
@@ -110,6 +111,7 @@
     const a = S.ed.after.getValue();
     S.cmp = b.trim() && a.trim() ? LL.diff.compare(b, a) : null;
     S.ed.after.setMarks(S.cmp ? { added: S.cmp.added, delAt: S.cmp.delAt } : null);
+    S.ed.before.setMarks(S.cmp ? { removed: new Set(S.cmp.listing.filter((l) => l.type === "del").map((l) => l.oldLine)) } : null);
     return S.cmp;
   }
 

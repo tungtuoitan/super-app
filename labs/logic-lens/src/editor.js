@@ -17,7 +17,7 @@
     if (o.label) ta.setAttribute("aria-label", o.label);
     if (o.readOnly) ta.readOnly = true;
     let language = "code";
-    let marks = { added: new Set(), delAt: new Map() };
+    let marks = { added: new Set(), delAt: new Map(), removed: new Set() };
     let range = null;
     let timer = 0;
 
@@ -30,10 +30,13 @@
         const n = i + 1;
         const on = range && n >= range[0] && n <= range[1] ? " on" : "";
         const add = marks.added.has(n) ? " add" : "";
-        const del = marks.delAt.has(n) ? " del" : "";
-        const title = del ? ` title="${marks.delAt.get(n).length} dòng đã xoá ở đây"` : "";
-        g.push(`<div class="ed-g${on}${add}${del}"${title}>${n}</div>`);
-        h.push(`<div class="ed-l${on}${add}">${html}</div>`);
+        const gone = (marks.delAt.get(n) || []).length;
+        const tail = n === lines.length ? (marks.delAt.get(n + 1) || []).length : 0; // removed after the last line
+        const del = gone ? " del" : tail ? " del-after" : "";
+        const title = gone || tail ? ` title="${gone || tail} dòng đã xoá ${gone ? "ngay trước dòng này" : "sau dòng này"}"` : "";
+        const rm = marks.removed.has(n) ? " rm" : "";
+        g.push(`<div class="ed-g${on}${add}${del}${rm}"${title}>${n}</div>`);
+        h.push(`<div class="ed-l${on}${add}${del}${rm}">${html}</div>`);
       });
       gin.innerHTML = g.join("");
       hin.innerHTML = h.join("");
@@ -78,7 +81,7 @@
         if (l !== language) { language = l; render(); }
       },
       setMarks(m) {
-        marks = { added: (m && m.added) || new Set(), delAt: (m && m.delAt) || new Map() };
+        marks = { added: (m && m.added) || new Set(), delAt: (m && m.delAt) || new Map(), removed: (m && m.removed) || new Set() };
         render();
       },
       /** Highlight a line range and optionally scroll it into view. */

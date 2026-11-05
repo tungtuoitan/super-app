@@ -25,7 +25,7 @@
   }
 
   function changedNodes() {
-    return S.nodes.filter((x) => x.node.change);
+    return S.nodes.filter((x) => x.node.change && !x.node.changeInherited);
   }
 
   function renderChangeBar() {
@@ -64,7 +64,7 @@
     svg.querySelectorAll(".ll-itemg").forEach((g) => g.addEventListener("click", () => {
       select(g.getAttribute("data-group"), { fromDiagram: true });
       const r = (g.getAttribute("data-lines") || "").split("-").map(Number);
-      if (r.length === 2 && r[0]) diagramEditor().setRange(r, true);
+      if (r.length === 2 && r[0]) diagramEditor().setRange(liveRange(r), true);
     }));
     applyZoom();
     applySelection(false);
@@ -75,16 +75,20 @@
     const svg = canvas.querySelector("svg");
     if (!svg || !S.lay) return;
     const cs = getComputedStyle(canvas);
-    const avail = Math.max(200, canvas.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+    const cardOn = $("pane-canvas").classList.contains("card-on") && !S.narrow && parseFloat(cs.paddingRight) > 100;
+    const avail = Math.max(200, canvas.clientWidth - parseFloat(cs.paddingLeft) - (cardOn ? parseFloat(cs.paddingLeft) : parseFloat(cs.paddingRight)));
     const fit = Math.min(1100, avail) / S.lay.width;
     let scale = null;
     if (typeof S.zoom === "number") scale = S.zoom;
     else if (S.zoom === "auto" && fit < MIN_FIT && !S.narrow) scale = MIN_FIT;
+    // the open card adds room to scroll into instead of shrinking the diagram
+    const shrunk = scale != null; // shown bigger than "fit" so it stays readable
+    if (scale == null && cardOn) scale = Math.min(1100, avail) / S.lay.width;
     canvas.classList.toggle("fit", scale == null);
     svg.style.width = scale == null ? "" : Math.round(S.lay.width * scale) + "px";
     svg.style.maxWidth = scale == null ? "" : "none";
     const btn = $("zoom-fit");
-    btn.textContent = typeof S.zoom === "number" ? Math.round(S.zoom * 100) + "%" : scale != null ? "Xem toàn bộ" : S.zoom === "all" ? "Cỡ dễ đọc" : "Vừa khung";
+    btn.textContent = typeof S.zoom === "number" ? Math.round(S.zoom * 100) + "%" : shrunk ? "Xem toàn bộ" : S.zoom === "all" ? "Cỡ dễ đọc" : "Vừa khung";
     if (canvas.scrollWidth > canvas.clientWidth + 2) {
       if (S.selected) applySelection(true);
       else canvas.scrollLeft = (canvas.scrollWidth - canvas.clientWidth) / 2;
@@ -153,18 +157,35 @@
     renderExplain();
     updateTourUi();
     const entry = id ? S.byId.get(id) : null;
-    diagramEditor().setRange(entry && entry.node.lines, !o.fromCode);
+    diagramEditor().setRange(entry && liveRange(entry.node.lines), !o.fromCode);
     if (id && document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("ll-node")) {
       const g = $("canvas").querySelector(`.ll-node[data-id="${CSS.escape(id)}"]`);
       if (g && g !== document.activeElement) g.focus({ preventScroll: true });
     }
   }
 
+  /** A box's line range in the code as it is now: edits made after drawing shift it (null if its lines are gone). */
+  let liveCache = null;
+  function liveRange(r) {
+    if (!r) return null;
+    const now = LL.app.diagramCode();
+    if (S.codeAtDraw == null || S.codeAtDraw === now) return r;
+    if (!liveCache || liveCache.from !== S.codeAtDraw || liveCache.to !== now) {
+      const map = [];
+      for (const l of LL.diff.compare(S.codeAtDraw, now).listing) if (l.type === "eq") map[l.oldLine] = l.newLine;
+      liveCache = { from: S.codeAtDraw, to: now, map };
+    }
+    let a = null;
+    let b = null;
+    for (let i = r[0]; i <= r[1]; i++) if (liveCache.map[i]) { if (a == null) a = liveCache.map[i]; b = liveCache.map[i]; }
+    return a == null ? null : [a, b];
+  }
+
   /** Smallest box whose line range contains this code line. */
   function boxForLine(line) {
     let best = null;
     for (const e of S.nodes) {
-      const r = e.node.lines;
+      const r = liveRange(e.node.lines);
       if (!r || line < r[0] || line > r[1] || e.node.change === "removed") continue;
       const span = r[1] - r[0];
       if (!best || span < best.span || (span === best.span && e.path.length > best.e.path.length)) best = { e, span };
@@ -189,8 +210,7 @@
   /** Code lines of a box; with a change, the removed lines are shown struck through where they used to be. */
   function snippet(range) {
     const box = el("div", "snippet");
-    const code = S.codeAtDraw != null ? S.codeAtDraw : LL.app.diagramCode();
-    const ls = code.split("\n");
+    const ls = LL.app.diagramCode().split("\n");
     const rows = S.cmp ? LL.diff.listingFor(S.cmp, range) : [];
     const list = rows.length ? rows : Array.from({ length: Math.max(0, Math.min(ls.length, range[1]) - range[0] + 1) }, (_, i) => ({ type: "eq", newLine: range[0] + i, text: ls[range[0] + i - 1] }));
     const MAX = 18;
@@ -238,19 +258,21 @@
     if (n.kind === "stage" || n.kind === "group") tags.appendChild(el("span", "tag stage", "Giai đoạn chính"));
     if (n.attention && !n.unreachable) tags.appendChild(el("span", "tag attn", "Đáng chú ý"));
     if (n.unreachable) tags.appendChild(el("span", "tag attn", "Không bao giờ chạy tới"));
-    if (n.lines) {
-      const t = el("span", "tag lines", linesLabel(n.lines));
+    const live = liveRange(n.lines);
+    if (live) {
+      const t = el("span", "tag lines", linesLabel(live));
       t.setAttribute("role", "button");
       t.tabIndex = 0;
       t.title = "Hiện các dòng này trong khung code";
-      const go = () => { LL.app.showPane && LL.app.showPane("code"); diagramEditor().setRange(n.lines, true); };
+      const go = () => { LL.app.showPane && LL.app.showPane("code"); diagramEditor().setRange(live, true); };
       t.addEventListener("click", go);
       t.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
       tags.appendChild(t);
     }
     if (tags.childNodes.length) box.appendChild(tags);
-    if (n.lines) box.appendChild(snippet(n.lines));
-    if (S.codeAtDraw != null && S.codeAtDraw !== LL.app.diagramCode()) box.appendChild(el("p", "hint-empty", "Code đã sửa sau khi vẽ, số dòng có thể lệch. Bấm vẽ lại để cập nhật."));
+    if (live) box.appendChild(snippet(live));
+    else if (n.lines) box.appendChild(el("p", "hint-empty", "Các dòng code của ô này đã bị sửa hoặc xoá sau khi vẽ. Bấm vẽ lại để cập nhật."));
+    if (live && S.codeAtDraw != null && S.codeAtDraw !== LL.app.diagramCode()) box.appendChild(el("p", "hint-empty", "Code đã sửa sau khi vẽ; số dòng đã được dời theo. Bấm vẽ lại nếu logic thay đổi."));
   }
 
   // ───────────────────────── tour ─────────────────────────

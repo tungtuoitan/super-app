@@ -25,6 +25,7 @@
   const MIN_LANE = 150; // a lane never gets narrower than this
   const TOP_BOX_MIN = 340;
   const LOOP_PAD = 14;
+  const LOOP_GUTTER = 24; // room on the right of a loop body for the return arrow
   const FAMILY = '"Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif';
 
   // ───────────────────────── measurement ─────────────────────────
@@ -105,7 +106,7 @@
       } else if (n.kind === "section") {
         w = Math.max(w, minWidth(n.steps, 1, narrow));
       } else if (n.kind === "loop") {
-        w = Math.max(w, minWidth(n.steps, depth + 1, narrow) + LOOP_PAD * 2 + 16);
+        w = Math.max(w, minWidth(n.steps, depth + 1, narrow) + LOOP_PAD * 2 + LOOP_GUTTER);
       } else if (n.kind === "group") {
         w = Math.max(w, depth === 1 ? 360 : MIN_LANE);
       }
@@ -242,26 +243,26 @@
         }
 
         if (node.kind === "loop") {
-          const fw = depth === 1 ? Math.min(w, Math.max(minWidth(node.steps, depth + 1, narrow) + LOOP_PAD * 2 + 16, w * 0.72)) : w - 4;
+          const fw = depth === 1 && !narrow ? Math.min(w, Math.max(minWidth(node.steps, depth + 1, narrow) + LOOP_PAD * 2 + LOOP_GUTTER, w * 0.72)) : w - 4;
           const fx = x + (w - fw) / 2;
           const head = textBlock({ title: "↻ " + (node.title || ""), sub: node.sub }, fw - 24);
           const fy = cursor;
           connect({ x: cx, y: fy }, node.change === "removed");
           const headH = PAD_Y + head.titleLines.length * FONT.title.lh + (head.subLines.length ? 3 + head.subLines.length * FONT.sub.lh : 0) + 4;
           const ix = fx + LOOP_PAD;
-          const iw = fw - LOOP_PAD * 2 - 16; // leave room for the return arrow on the right
+          const iw = fw - LOOP_PAD * 2 - LOOP_GUTTER + 8; // leave room for the return arrow on the right
           const icx = ix + iw / 2;
           let bottom = fy + headH;
           if (node.steps.length) {
             const r = seq(node.steps, ix, iw, fy + headH + GAP - 6, id + ".", depth + 1, [{ x: icx, y: fy + headH }]);
             bottom = r.bottom;
             // return arrow: from the end of the body back up to the loop header
-            const rx = fx + fw - 10;
+            const rx = fx + fw - 13;
             const from = r.tails.length ? r.tails[r.tails.length - 1] : { x: icx, y: bottom };
             const headMid = fy + Math.min(headH / 2 + 2, 22);
-            if (!r.ended) edges.push({ d: `M${from.x} ${from.y}V${bottom + 10}H${rx}V${headMid}H${rx - 12}`, arrow: true, loop: true });
+            if (!r.ended) edges.push({ d: `M${from.x} ${from.y}V${bottom + 14}H${rx}V${headMid}H${rx - 16}`, arrow: true, loop: true });
           }
-          const fh = bottom - fy + (node.steps.length ? 22 : PAD_Y);
+          const fh = bottom - fy + (node.steps.length ? 28 : PAD_Y);
           boxes.push({ id, x: fx, y: fy, w: fw, h: fh, kind: "loop", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, node, container: true, headH, change: node.change });
           prev = [{ x: cx, y: fy + fh }];
           merged = false;
@@ -271,13 +272,18 @@
         }
 
         // start / step / call / stage / end
-        const bw = depth === 1 ? Math.min(w, Math.max(TOP_BOX_MIN, w * 0.56)) : Math.max(60, w - 8);
+        const bw = depth === 1 && !narrow ? Math.min(w, Math.max(TOP_BOX_MIN, w * 0.56)) : Math.max(60, w - 8);
         // room for the effect tag and the change chip so they never cover the title
         const tb = textBlock(node, bw - (node.tag || node.change ? 20 : 0) - (node.kind === "call" ? 12 : 0));
         tb.h += node.tag || node.change ? 8 : 0;
+        // an edited or removed box says why, right on the diagram (first sentence of the change note)
+        const why = (node.change === "modified" || node.change === "removed") && node.changeNote ? node.changeNote.split(/(?<=[.!?])\s/)[0] : "";
+        const noteLines = why ? wrap(why, FONT.note, bw - 28, 2) : [];
+        const noteY = cursor + tb.h - PAD_Y + 4;
+        if (noteLines.length) tb.h += 6 + noteLines.length * FONT.note.lh;
         const bx = x + (w - bw) / 2;
         const removed = node.change === "removed";
-        boxes.push({ id, x: bx, y: cursor, w: bw, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node, clipped: tb.clipped, change: node.change });
+        boxes.push({ id, x: bx, y: cursor, w: bw, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node, clipped: tb.clipped, change: node.change, noteLines, noteY, noteKind: noteLines.length ? node.change : "" });
         connect({ x: cx, y: cursor }, removed);
         merged = false;
         if (node.kind === "end" && !removed) { prev = null; ended = true; }
@@ -306,13 +312,14 @@
       return tb.h;
     }
 
-    function questionLabel(text, x, y, anchor, parallel) {
+    function questionLabel(text, x, y, anchor, parallel, change) {
       if (!text) return;
+      if (change) text = { added: "+ ", modified: "~ ", removed: "− " }[change] + text;
       const f = FONT.label;
       const t = wrap(text, f, 260, 1)[0];
       const tw = measure(t, f) + 14;
       const lx = anchor === "end" ? x - tw : x;
-      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text, parallel: !!parallel });
+      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text, parallel: !!parallel, change: change || "" });
     }
 
     // shared with the lane layouts in layout-lanes.js

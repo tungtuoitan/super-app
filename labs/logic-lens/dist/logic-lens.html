@@ -27,7 +27,7 @@
   --mod-soft: #fff3d6;
   --del: #c8462f;
   --del-soft: #fcebe8;
-  --hl-line: #fff3cc;
+  --hl-line: #e6eefc;
   --dot: #d9dee3;
   --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.05);
   --shadow: 0 8px 28px rgba(17, 24, 39, 0.1), 0 1px 3px rgba(17, 24, 39, 0.06);
@@ -35,8 +35,8 @@
   --t-c: #8a96a3; --t-s: #0f7b5f; --t-n: #a1440c; --t-k: #7048b6; --t-f: #1f5fa8;
   /* diagram (read by the SVG; light values are also the SVG's own fallbacks) */
   --ll-step-bg: #ffffff; --ll-step-line: #c3ccd5; --ll-stage-bg: #eaf2f8; --ll-stage-line: #8db3cd; --ll-stage-strong: #3c7fa8;
-  --ll-item-line: #cdd5dc; --ll-attn: #c8462f; --ll-ink: #16212b; --ll-muted: #66727e; --ll-edge: #7d8996; --ll-accent: #d4561b;
-  --ll-glow: rgba(212, 86, 27, 0.4); --ll-start-bg: #1e2935; --ll-start-ink: #ffffff; --ll-start-sub: #b8c4cf;
+  --ll-item-line: #cdd5dc; --ll-attn: #c8462f; --ll-ink: #16212b; --ll-muted: #66727e; --ll-edge: #7d8996; --ll-accent: #2563eb;
+  --ll-glow: rgba(37, 99, 235, 0.35); --ll-start-bg: #1e2935; --ll-start-ink: #ffffff; --ll-start-sub: #b8c4cf;
   --ll-end-bg: #f1f3f5; --ll-end-line: #97a2ad; --ll-loop-bg: rgba(60, 127, 168, 0.04); --ll-section-bg: #f3f5f7; --ll-section-line: #d6dce2;
   --ll-par: #6d5bd0; --ll-par-line: #a99be6; --ll-par-bg: #f1eefc; --ll-q-bg: #fff6e3; --ll-q-line: #e7c27a; --ll-q-ink: #7a5310;
   --ll-tag-bg: #eef1f4; --ll-tag-line: #d3d9df; --ll-tag-ink: #4b5763;
@@ -48,10 +48,10 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0e1216; --panel: #151b21; --panel-2: #1a2128; --ink: #e7ecf0; --ink-2: #c9d2da; --muted: #95a2ae; --faint: #66727e; --line: #26303a; --line-2: #1f2830;
   --accent: #ff8a4c; --accent-soft: #3a2316; --blue: #6fb0d8; --add: #45c784; --add-soft: #10291c; --mod: #f0b13d; --mod-soft: #2e2512; --del: #ff7a66; --del-soft: #351816;
-  --hl-line: #2f2a17; --dot: #232c35; --shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --hl-line: #1b2840; --dot: #232c35; --shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
   --t-c: #6c7a87; --t-s: #6fd3a8; --t-n: #f0a36b; --t-k: #c6a6ff; --t-f: #7fb8ff;
   --ll-step-bg: #161d24; --ll-step-line: #3a4753; --ll-stage-bg: #18293a; --ll-stage-line: #3f6e8f; --ll-stage-strong: #6fb0d8; --ll-item-line: #34404b;
-  --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #8796a5; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5);
+  --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #8796a5; --ll-accent: #6ea8ff; --ll-glow: rgba(110, 168, 255, 0.45);
   --ll-start-bg: #e5ebf0; --ll-start-ink: #10161c; --ll-start-sub: #4b5967; --ll-end-bg: #1d252d; --ll-end-line: #6d7b88; --ll-loop-bg: rgba(111, 176, 216, 0.05);
   --ll-section-bg: #1a2129; --ll-section-line: #2b3640; --ll-par: #a99bff; --ll-par-line: #5b4fa3; --ll-par-bg: #221d3d; --ll-q-bg: #33280f; --ll-q-line: #8a6a2a; --ll-q-ink: #f0c873;
   --ll-tag-bg: #222b33; --ll-tag-line: #34404b; --ll-tag-ink: #b4c0cb;
@@ -61,10 +61,10 @@
 :root[data-theme="dark"] {
   --bg: #0e1216; --panel: #151b21; --panel-2: #1a2128; --ink: #e7ecf0; --ink-2: #c9d2da; --muted: #95a2ae; --faint: #66727e; --line: #26303a; --line-2: #1f2830;
   --accent: #ff8a4c; --accent-soft: #3a2316; --blue: #6fb0d8; --add: #45c784; --add-soft: #10291c; --mod: #f0b13d; --mod-soft: #2e2512; --del: #ff7a66; --del-soft: #351816;
-  --hl-line: #2f2a17; --dot: #232c35; --shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --hl-line: #1b2840; --dot: #232c35; --shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
   --t-c: #6c7a87; --t-s: #6fd3a8; --t-n: #f0a36b; --t-k: #c6a6ff; --t-f: #7fb8ff;
   --ll-step-bg: #161d24; --ll-step-line: #3a4753; --ll-stage-bg: #18293a; --ll-stage-line: #3f6e8f; --ll-stage-strong: #6fb0d8; --ll-item-line: #34404b;
-  --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #8796a5; --ll-accent: #ff8a4c; --ll-glow: rgba(255, 138, 76, 0.5);
+  --ll-attn: #ff7a66; --ll-ink: #e5ebf0; --ll-muted: #98a5b1; --ll-edge: #8796a5; --ll-accent: #6ea8ff; --ll-glow: rgba(110, 168, 255, 0.45);
   --ll-start-bg: #e5ebf0; --ll-start-ink: #10161c; --ll-start-sub: #4b5967; --ll-end-bg: #1d252d; --ll-end-line: #6d7b88; --ll-loop-bg: rgba(111, 176, 216, 0.05);
   --ll-section-bg: #1a2129; --ll-section-line: #2b3640; --ll-par: #a99bff; --ll-par-line: #5b4fa3; --ll-par-bg: #221d3d; --ll-q-bg: #33280f; --ll-q-line: #8a6a2a; --ll-q-ink: #f0c873;
   --ll-tag-bg: #222b33; --ll-tag-line: #34404b; --ll-tag-ink: #b4c0cb;
@@ -145,6 +145,11 @@ label.check input { accent-color: var(--accent); }
 .ed-hin { padding: 10px 14px; will-change: transform; min-width: max-content; }
 .ed-l { height: 20px; font: 12.5px/20px var(--f-mono); white-space: pre; color: var(--ink); }
 .ed-l.add { background: var(--add-soft); }
+.ed-l.rm, .ed-g.rm { background: var(--del-soft); }
+.ed-g.rm::before { content: "−"; position: absolute; left: 5px; color: var(--del); font-weight: 600; }
+.ed-l.del { box-shadow: inset 0 2px 0 var(--del); } /* removed lines used to sit right above */
+.ed-l.del-after { box-shadow: inset 0 -2px 0 var(--del); }
+.ed-g.del-after::after { content: ""; position: absolute; left: 2px; bottom: -4px; border: 4px solid transparent; border-left: 6px solid var(--del); }
 .ed-l.on { background: var(--hl-line); }
 .ed-ta { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 0; margin: 0; padding: 10px 14px; resize: none; background: transparent; color: transparent; caret-color: var(--ink); font: 12.5px/20px var(--f-mono); white-space: pre; overflow: auto; tab-size: 4; }
 .ed-ta:focus { box-shadow: none; }
@@ -197,16 +202,20 @@ label.check input { accent-color: var(--accent); }
 .lg.stage { background: var(--ll-stage-bg); border-color: var(--ll-stage-line); }
 .lg.start { background: var(--ll-start-bg); border-color: var(--ll-start-bg); border-radius: 7px; }
 .lg.end { background: var(--ll-end-bg); border-color: var(--ll-end-line); border-radius: 7px; }
-.lg.call { box-shadow: inset 4px 0 0 -2.6px var(--ll-step-line), inset -4px 0 0 -2.6px var(--ll-step-line); }
+.lg.call { position: relative; } .lg.call::after { content: "↗"; position: absolute; right: 1px; bottom: -3px; font-size: 9px; color: var(--ll-muted); }
 .lg.lane { border-color: var(--ll-stage-line); border-top: 3.5px solid var(--ll-stage-strong); }
 .lg.plane { border-color: var(--ll-par-line); border-top: 3.5px solid var(--ll-par); }
 .lg.loop { background: var(--ll-loop-bg); border: 1.3px dashed var(--ll-stage-line); }
-.lg.attn { border: 1.5px dashed var(--ll-attn); }
+.lg.attn { border: 1.5px solid var(--ll-attn); position: relative; } .lg.attn::after { content: "!"; position: absolute; right: -5px; top: -6px; width: 11px; height: 11px; border-radius: 50%; background: var(--ll-attn); color: #fff; font: 700 8px/11px var(--f-body); text-align: center; }
 .lg.added { background: var(--ll-add-bg); border: 2px solid var(--ll-add); } .lg.modified { background: var(--ll-mod-bg); border: 2px solid var(--ll-mod); } .lg.removed { background: var(--ll-del-bg); border: 1.5px dashed var(--ll-del); opacity: 0.7; }
 .canvas { flex: 1; min-height: 0; overflow: auto; padding: 8px 18px 90px; overscroll-behavior: contain; }
 .canvas svg { display: block; margin: 0 auto; height: auto; }
 .canvas.fit svg { width: 100%; max-width: 1100px; }
-@media (min-width: 901px) { .pane-canvas.card-on .canvas, .pane-canvas.card-on .canvas-head { padding-right: 410px; } }
+@media (min-width: 901px) {
+  /* the open card takes the right side: the diagram makes room, the summaries shrink to one line */
+  .pane-canvas.card-on .canvas { padding-right: 410px; }
+  .pane-canvas.card-on .titles p, .pane-canvas.card-on .change-bar .cs { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; margin-right: 140px; }
+}
 .empty { margin: 60px auto; max-width: 420px; text-align: center; color: var(--muted); }
 .empty b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 4px; }
 
@@ -251,11 +260,16 @@ label.check input { accent-color: var(--accent); }
   :root { --top: 50px; }
   .topbar-in { gap: 10px; }
   .brand b { display: none; }
-  .select-quiet { flex: 1 1 auto; min-width: 0; max-width: 100%; }
-  .top-right { flex: 1 1 auto; min-width: 0; }
+  /* the examples menu becomes an icon button; the native picker still lists every example */
+  .select-quiet { flex: none; width: 40px; padding: 0; color: transparent; background: var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%238a96a3' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 5h16M4 12h16M4 19h10'/%3E%3C/svg%3E") center / 18px no-repeat; }
+  .select-quiet option, .select-quiet optgroup { color: var(--ink); background: var(--panel); }
+  .code-info { display: none; }
+  .pane-canvas.card-on .titles p, .pane-canvas.card-on .change-bar { display: none; }
+  .pane-canvas.card-on .canvas { padding-bottom: 56vh; }
+  .top-right { flex: none; }
   .mode-seg button { padding-left: 9px; padding-right: 9px; }
   .titles { flex: 1 1 100%; }
-  .titles p, .change-bar .cs { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+  .titles p, .change-bar .cs { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
   .titles p.open, .change-bar .cs.open { -webkit-line-clamp: unset; display: block; }
   .mobile-tabs { display: flex; position: fixed; inset: calc(var(--top) + env(safe-area-inset-top, 0px)) 0 auto; height: 42px; z-index: 19; background: var(--panel); border-bottom: 1px solid var(--line); padding: 0 max(12px, env(safe-area-inset-left, 0px)); gap: 4px; }
   .mobile-tabs button { flex: 1; border: 0; background: transparent; font-weight: 600; font-size: 14px; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; }
@@ -1264,20 +1278,33 @@ label.check input { accent-color: var(--accent); }
     return ops;
   }
 
-  /** Compare two versions. Returns {listing, added: Set(newLine), delAt: Map(newLine -> [old texts]), stats}. */
+  // blank lines and comment-only lines do not change behavior, so they never mark a box as changed
+  const TRIVIAL = /^\s*(\/\/.*|#(?!include|define|if|pragma|!).*|--.*|\/\*.*|\*.*|<!--.*|"""|''')?\s*$/;
+  const trivial = (line) => TRIVIAL.test(line);
+
+  /**
+   * Compare two versions. Indentation-only edits count as unchanged.
+   * Returns {listing, added: Set(newLine), delAt: Map(newLine -> [old texts]), sigAdded, sigDel, lines, stats}.
+   * sigAdded / sigDel (Map newLine -> count) leave out blank and comment-only lines. Lines removed after the last
+   * line sit at newLine = lines + 1.
+   */
   function compare(oldCode, newCode) {
     const A = splitLines(oldCode);
     const B = splitLines(newCode);
-    const ops = diffLines(A, B);
+    const ops = diffLines(A.map((l) => l.trim()), B.map((l) => l.trim()));
     const listing = [];
     const added = new Set();
+    const sigAdded = new Set();
     const delAt = new Map();
+    const sigDel = new Map();
     let nextNew = 1;
     // removed lines sit before the next surviving new line
     const pendingDel = [];
     const flush = (at) => {
       if (!pendingDel.length) return;
       delAt.set(at, (delAt.get(at) || []).concat(pendingDel.map((d) => d.text)));
+      const sig = pendingDel.filter((d) => !trivial(d.text)).length;
+      if (sig) sigDel.set(at, (sigDel.get(at) || 0) + sig);
       for (const d of pendingDel) listing.push({ type: "del", text: d.text, oldLine: d.oldLine, newLine: at });
       pendingDel.length = 0;
     };
@@ -1285,48 +1312,85 @@ label.check input { accent-color: var(--accent); }
       if (op.type === "del") { pendingDel.push({ text: A[op.a], oldLine: op.a + 1 }); continue; }
       flush(nextNew);
       if (op.type === "eq") listing.push({ type: "eq", text: B[op.b], newLine: op.b + 1, oldLine: op.a + 1 });
-      else { listing.push({ type: "add", text: B[op.b], newLine: op.b + 1 }); added.add(op.b + 1); }
+      else {
+        listing.push({ type: "add", text: B[op.b], newLine: op.b + 1 });
+        added.add(op.b + 1);
+        if (!trivial(B[op.b])) sigAdded.add(op.b + 1);
+      }
       nextNew = op.b + 2;
     }
     flush(nextNew);
     const removed = listing.filter((l) => l.type === "del").length;
-    return { listing, added, delAt, stats: { added: added.size, removed, changed: added.size + removed > 0 } };
+    return { listing, added, delAt, sigAdded, sigDel, lines: B.length, stats: { added: added.size, removed, changed: added.size + removed > 0 } };
+  }
+
+  /**
+   * Removed lines that belong to the range [a, b]: those inside it, those right after it (before line b + 1, when
+   * that line is not new), and those right before it only when line a is new (a replacement).
+   */
+  const ownsDeletionAt = (cmp, a, b, l) => (l > a && l <= b) || (l === a && cmp.added.has(a)) || (l === b + 1 && !cmp.added.has(b + 1));
+
+  function lineText(cmp, l) {
+    if (!cmp._text) { cmp._text = []; for (const x of cmp.listing) if (x.type !== "del") cmp._text[x.newLine] = x.text; }
+    return cmp._text[l] || "";
+  }
+
+  const words = (t) => new Set(String(t).toLowerCase().match(/[a-z_][a-z0-9_]*|\d+/g) || []);
+  /** Do the lines removed right before / inside [a, b] look like an earlier version of the lines in it? */
+  function resembles(cmp, a, b) {
+    const dels = cmp.listing.filter((l) => l.type === "del" && l.newLine >= a && l.newLine <= b && !trivial(l.text)).map((l) => words(l.text));
+    for (let l = a; l <= b; l++) {
+      const w = words(lineText(cmp, l));
+      for (const d of dels) {
+        let common = 0;
+        for (const x of w) if (d.has(x)) common++;
+        if (common / Math.max(1, Math.min(w.size, d.size)) >= 0.6) return true;
+      }
+    }
+    return false;
   }
 
   /**
    * Which kind of change touched new-code lines [a, b]: "added" (all new), "modified" (some change), or "".
-   * Removed lines sitting right before line a count only when line a itself is new (a replacement);
-   * otherwise they belong to the box above.
+   * Blank and comment-only lines are ignored. `skip(line)` leaves lines out (a container's children).
    */
-  function changeIn(cmp, range) {
+  function changeIn(cmp, range, skip) {
     if (!cmp || !range) return "";
     const [a, b] = range;
+    let own = 0;
     let addedCount = 0;
-    let deletedInside = false;
-    for (let l = a; l <= b; l++) {
-      if (cmp.added.has(l)) addedCount++;
-      if (l > a && cmp.delAt.has(l)) deletedInside = true;
+    let deleted = false;
+    for (let l = a; l <= b + 1; l++) {
+      const mine = !skip || !skip(l);
+      if (l <= b && mine && !trivial(lineText(cmp, l))) { own++; if (cmp.sigAdded.has(l)) addedCount++; }
+      if (mine && cmp.sigDel.has(l) && ownsDeletionAt(cmp, a, b, l)) deleted = true;
     }
-    const replaced = cmp.delAt.has(a) && cmp.added.has(a);
-    if (addedCount === b - a + 1 && !deletedInside && !replaced) return "added";
-    if (addedCount || deletedInside || replaced) return "modified";
+    // all-new lines after removed ones: an edit of those lines only if they look alike, else new logic
+    if (addedCount && addedCount === own && (!deleted || !resembles(cmp, a, b))) return "added";
+    if (addedCount || deleted) return "modified";
     return "";
   }
 
   /**
-   * Make the change marks agree with the actual diff: a box whose lines changed is at least "modified" even when
-   * the model said it did not; a box marked changed whose lines did not change keeps the model's mark only if it
-   * has a change note (a removed box, a behavior change explained elsewhere). Returns counts.
+   * Make the change marks agree with the actual diff: a box whose own lines changed is at least "modified" even
+   * when the model said it did not (a container counts only lines not covered by its children); a box marked
+   * changed whose lines did not change keeps the model's mark only if it has a change note or a changed child.
+   * The model's "added" is never downgraded. Returns counts.
    */
   function reconcileChanges(flow, cmp) {
     const counts = { added: 0, modified: 0, removed: 0, corrected: 0 };
     const visit = (n) => {
       if (n.change === "removed") { counts.removed++; return; }
-      const real = changeIn(cmp, n.lines);
+      // the paths of a new branch are new; only the first counts (the rest are drawn as new, not counted again)
+      if (n.changeKeep) { delete n.changeKeep; if (!n.changeInherited) counts.added++; return; }
+      const kids = (n.steps || []).concat(n.lanes || []).filter((k) => k.lines);
+      const skip = kids.length ? (l) => kids.some((k) => l >= k.lines[0] && l <= k.lines[1]) : null;
+      const real = changeIn(cmp, n.lines, skip);
       if (real && !n.change) { n.change = real; n.changeAuto = true; counts.corrected++; }
-      else if (!real && n.change && !n.changeNote) { delete n.change; counts.corrected++; }
-      if (n.change === "added" && real === "modified") n.change = "modified";
+      else if (!real && n.change && !n.changeNote && !kids.some((k) => k.change)) { delete n.change; counts.corrected++; }
       if (n.change) counts[n.change]++;
+      // a new branch makes its paths new too (lanes are visited right after their branch)
+      if (n.change === "added" && n.lanes) n.lanes.forEach((l, j) => { if (!l.change) { l.change = "added"; l.changeKeep = true; if (j > 0) l.changeInherited = true; } });
     };
     LL.flow.eachNode(flow, visit);
     LL.flow.eachNode(flow, (n) => { if (n.items) for (const it of n.items) { const real = changeIn(cmp, it.lines); if (real && !it.change) it.change = real; } });
@@ -1342,11 +1406,11 @@ label.check input { accent-color: var(--accent); }
     }).join("\n");
   }
 
-  /** The listing entries that belong to a box: its new lines plus removed lines inside or right before it. */
+  /** The listing entries that belong to a box: its new lines plus the removed lines it owns (see ownsDeletionAt). */
   function listingFor(cmp, range) {
     if (!cmp || !range) return [];
     const [a, b] = range;
-    return cmp.listing.filter((l) => l.newLine >= a && l.newLine <= b);
+    return cmp.listing.filter((l) => (l.type === "del" ? ownsDeletionAt(cmp, a, b, l.newLine) : l.newLine >= a && l.newLine <= b));
   }
 
   // ───────────────────────── unified diff ─────────────────────────
@@ -1357,6 +1421,16 @@ label.check input { accent-color: var(--accent); }
     let file = null;
     let hunk = null;
     for (const line of splitLines(text)) {
+      // inside a hunk every line is content, even "--- old comment" (a removed SQL comment)
+      const open = hunk && (hunk.oldLeft > 0 || hunk.newLeft > 0);
+      if (open && !line.startsWith("\\")) {
+        const t = line === "" ? " " : line[0]; // some tools strip the space of an empty context line
+        if (t !== " " && t !== "+" && t !== "-") { hunk.oldLeft = hunk.newLeft = 0; continue; } // malformed: close it
+        hunk.lines.push({ t, text: line.slice(1) });
+        if (t !== "+") hunk.oldLeft--;
+        if (t !== "-") hunk.newLeft--;
+        continue;
+      }
       if (line.startsWith("diff --git ")) { file = null; hunk = null; continue; }
       if (line.startsWith("--- ")) {
         file = { oldPath: line.slice(4).replace(/^a\//, "").trim(), newPath: "", hunks: [] };
@@ -1372,13 +1446,7 @@ label.check input { accent-color: var(--accent); }
         file.hunks.push(hunk);
         continue;
       }
-      if (!hunk || (hunk.oldLeft <= 0 && hunk.newLeft <= 0)) continue; // a hunk ends when its line counts are used up
-      if (line.startsWith("\\")) continue; // "\ No newline at end of file"
-      const t = line === "" ? " " : line[0]; // some tools strip the space of an empty context line
-      if (t !== " " && t !== "+" && t !== "-") continue;
-      hunk.lines.push({ t, text: line.slice(1) });
-      if (t !== "+") hunk.oldLeft--;
-      if (t !== "-") hunk.newLeft--;
+      // anything else between hunks ("\ No newline at end of file", index lines…) is ignored
     }
     return files.filter((f) => f.hunks.length);
   }
@@ -1460,6 +1528,7 @@ label.check input { accent-color: var(--accent); }
   const MIN_LANE = 150; // a lane never gets narrower than this
   const TOP_BOX_MIN = 340;
   const LOOP_PAD = 14;
+  const LOOP_GUTTER = 24; // room on the right of a loop body for the return arrow
   const FAMILY = '"Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif';
 
   // ───────────────────────── measurement ─────────────────────────
@@ -1540,7 +1609,7 @@ label.check input { accent-color: var(--accent); }
       } else if (n.kind === "section") {
         w = Math.max(w, minWidth(n.steps, 1, narrow));
       } else if (n.kind === "loop") {
-        w = Math.max(w, minWidth(n.steps, depth + 1, narrow) + LOOP_PAD * 2 + 16);
+        w = Math.max(w, minWidth(n.steps, depth + 1, narrow) + LOOP_PAD * 2 + LOOP_GUTTER);
       } else if (n.kind === "group") {
         w = Math.max(w, depth === 1 ? 360 : MIN_LANE);
       }
@@ -1677,26 +1746,26 @@ label.check input { accent-color: var(--accent); }
         }
 
         if (node.kind === "loop") {
-          const fw = depth === 1 ? Math.min(w, Math.max(minWidth(node.steps, depth + 1, narrow) + LOOP_PAD * 2 + 16, w * 0.72)) : w - 4;
+          const fw = depth === 1 && !narrow ? Math.min(w, Math.max(minWidth(node.steps, depth + 1, narrow) + LOOP_PAD * 2 + LOOP_GUTTER, w * 0.72)) : w - 4;
           const fx = x + (w - fw) / 2;
           const head = textBlock({ title: "↻ " + (node.title || ""), sub: node.sub }, fw - 24);
           const fy = cursor;
           connect({ x: cx, y: fy }, node.change === "removed");
           const headH = PAD_Y + head.titleLines.length * FONT.title.lh + (head.subLines.length ? 3 + head.subLines.length * FONT.sub.lh : 0) + 4;
           const ix = fx + LOOP_PAD;
-          const iw = fw - LOOP_PAD * 2 - 16; // leave room for the return arrow on the right
+          const iw = fw - LOOP_PAD * 2 - LOOP_GUTTER + 8; // leave room for the return arrow on the right
           const icx = ix + iw / 2;
           let bottom = fy + headH;
           if (node.steps.length) {
             const r = seq(node.steps, ix, iw, fy + headH + GAP - 6, id + ".", depth + 1, [{ x: icx, y: fy + headH }]);
             bottom = r.bottom;
             // return arrow: from the end of the body back up to the loop header
-            const rx = fx + fw - 10;
+            const rx = fx + fw - 13;
             const from = r.tails.length ? r.tails[r.tails.length - 1] : { x: icx, y: bottom };
             const headMid = fy + Math.min(headH / 2 + 2, 22);
-            if (!r.ended) edges.push({ d: `M${from.x} ${from.y}V${bottom + 10}H${rx}V${headMid}H${rx - 12}`, arrow: true, loop: true });
+            if (!r.ended) edges.push({ d: `M${from.x} ${from.y}V${bottom + 14}H${rx}V${headMid}H${rx - 16}`, arrow: true, loop: true });
           }
-          const fh = bottom - fy + (node.steps.length ? 22 : PAD_Y);
+          const fh = bottom - fy + (node.steps.length ? 28 : PAD_Y);
           boxes.push({ id, x: fx, y: fy, w: fw, h: fh, kind: "loop", attention: node.attention, titleLines: head.titleLines, subLines: head.subLines, node, container: true, headH, change: node.change });
           prev = [{ x: cx, y: fy + fh }];
           merged = false;
@@ -1706,13 +1775,18 @@ label.check input { accent-color: var(--accent); }
         }
 
         // start / step / call / stage / end
-        const bw = depth === 1 ? Math.min(w, Math.max(TOP_BOX_MIN, w * 0.56)) : Math.max(60, w - 8);
+        const bw = depth === 1 && !narrow ? Math.min(w, Math.max(TOP_BOX_MIN, w * 0.56)) : Math.max(60, w - 8);
         // room for the effect tag and the change chip so they never cover the title
         const tb = textBlock(node, bw - (node.tag || node.change ? 20 : 0) - (node.kind === "call" ? 12 : 0));
         tb.h += node.tag || node.change ? 8 : 0;
+        // an edited or removed box says why, right on the diagram (first sentence of the change note)
+        const why = (node.change === "modified" || node.change === "removed") && node.changeNote ? node.changeNote.split(/(?<=[.!?])\s/)[0] : "";
+        const noteLines = why ? wrap(why, FONT.note, bw - 28, 2) : [];
+        const noteY = cursor + tb.h - PAD_Y + 4;
+        if (noteLines.length) tb.h += 6 + noteLines.length * FONT.note.lh;
         const bx = x + (w - bw) / 2;
         const removed = node.change === "removed";
-        boxes.push({ id, x: bx, y: cursor, w: bw, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node, clipped: tb.clipped, change: node.change });
+        boxes.push({ id, x: bx, y: cursor, w: bw, h: tb.h, kind: node.kind, attention: node.attention, titleLines: tb.titleLines, subLines: tb.subLines, node, clipped: tb.clipped, change: node.change, noteLines, noteY, noteKind: noteLines.length ? node.change : "" });
         connect({ x: cx, y: cursor }, removed);
         merged = false;
         if (node.kind === "end" && !removed) { prev = null; ended = true; }
@@ -1741,13 +1815,14 @@ label.check input { accent-color: var(--accent); }
       return tb.h;
     }
 
-    function questionLabel(text, x, y, anchor, parallel) {
+    function questionLabel(text, x, y, anchor, parallel, change) {
       if (!text) return;
+      if (change) text = { added: "+ ", modified: "~ ", removed: "− " }[change] + text;
       const f = FONT.label;
       const t = wrap(text, f, 260, 1)[0];
       const tw = measure(t, f) + 14;
       const lx = anchor === "end" ? x - tw : x;
-      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text, parallel: !!parallel });
+      labels.push({ x: lx, y: y - 9, w: tw, h: 18, text: t, full: text, parallel: !!parallel, change: change || "" });
     }
 
     // shared with the lane layouts in layout-lanes.js
@@ -1796,7 +1871,7 @@ label.check input { accent-color: var(--accent); }
     }
     if (hasPrev) for (const c of centers) edges.push({ d: `M${c} ${busY}V${laneTop}`, arrow: true });
     const label = parallel ? "song song" + (node.title ? ": " + node.title : "") : node.title;
-    if (label) questionLabel(label, Math.min(...centers) + 8, busY + 13, "start", parallel);
+    if (label) questionLabel(label, Math.min(...centers) + 8, busY + 13, "start", parallel, node.change);
 
     const tails = [];
     let maxBottom = laneTop;
@@ -1843,7 +1918,7 @@ label.check input { accent-color: var(--accent); }
     if (hasPrev) edges.push({ d: `M${cx} ${top - GAP}V${forkY}H${railX}`, arrow: false });
     let y = forkY + 14;
     const label = parallel ? "song song" + (node.title ? ": " + node.title : "") : node.title;
-    if (label) { questionLabel(label, railX + 10, y + 4, "start", parallel); y += 24; }
+    if (label) { questionLabel(label, railX + 10, y + 4, "start", parallel, node.change); y += 24; }
     const n = node.lanes.length;
     let anyContinues = false;
     let lastHeadMid = forkY;
@@ -1856,11 +1931,15 @@ label.check input { accent-color: var(--accent); }
       edges.push({ d: `M${railX} ${mid}H${lx}`, arrow: true });
       lastHeadMid = mid;
       let bottom = y + hh;
+      let tails = [{ x: lx + lw / 2, y: bottom }];
       if (lane.steps.length) {
-        const r = seq(lane.steps, lx, lw, bottom + GAP, lid + ".", depth + 1, [{ x: lx + lw / 2, y: bottom }]);
-        if (!r.ended) anyContinues = true;
+        const r = seq(lane.steps, lx, lw, bottom + GAP, lid + ".", depth + 1, tails);
+        tails = r.ended ? [] : r.tails;
         bottom = r.bottom;
-      } else anyContinues = true;
+      }
+      // a path that carries on drops back to the rail, which leads to the join
+      if (tails.length) anyContinues = true;
+      for (const t of tails) edges.push({ d: `M${t.x} ${t.y}V${bottom + 11}H${railX}`, arrow: false });
       y = bottom + 22;
     });
     if (!anyContinues) {
@@ -1903,11 +1982,14 @@ label.check input { accent-color: var(--accent); }
   .ll-loop{fill:var(--ll-loop-bg,rgba(60,127,168,.04));stroke:var(--ll-stage-line,#8db3cd);stroke-width:1.2;stroke-dasharray:3 4}
   .ll-item{fill:var(--ll-step-bg,#fff);stroke:var(--ll-item-line,#cdd5dc);stroke-width:1}
   .ll-callbar{stroke:var(--ll-step-line,#c3ccd5);stroke-width:1.2}
-  .ll-attn{stroke:var(--ll-attn,#c8462f);stroke-dasharray:6 4;stroke-width:1.5}
+  .ll-attn{stroke:var(--ll-attn,#c8462f);stroke-width:1.6}
+  .ll-attnbg{fill:var(--ll-attn,#c8462f)}
   .ll-ch-added{fill:var(--ll-add-bg,#eaf8f0);stroke:var(--ll-add,#1f8a52);stroke-width:2;stroke-dasharray:none}
   .ll-ch-modified{fill:var(--ll-mod-bg,#fff5dd);stroke:var(--ll-mod,#c08400);stroke-width:2;stroke-dasharray:none}
   .ll-ch-removed{fill:var(--ll-del-bg,#fdf0ee);stroke:var(--ll-del,#c8462f);stroke-width:1.5;stroke-dasharray:5 4}
-  .ll-removed{opacity:.62}
+  .ll-loop.ll-cont[class*="ll-ch-"]{fill:var(--ll-loop-bg,rgba(60,127,168,.04))}
+  .ll-group.ll-cont[class*="ll-ch-"]{fill:var(--ll-stage-bg,#eaf2f8)}
+  .ll-removed>.ll-shape,.ll-removed>text,.ll-removed>path{opacity:.62}
   .ll-removed .ll-title{text-decoration:line-through}
   .ll-title{font-weight:600;font-size:14.5px;fill:var(--ll-ink,#16212b)}
   .ll-start .ll-title,.ll-on-dark{fill:var(--ll-start-ink,#fff)}
@@ -1915,6 +1997,7 @@ label.check input { accent-color: var(--accent); }
   .ll-on-dark-sub{font-size:12px;fill:var(--ll-start-sub,#b8c4cf)}
   .ll-itemt{font-weight:500;font-size:13px;fill:var(--ll-ink,#16212b)}
   .ll-note{font-size:12px;fill:var(--ll-attn,#c8462f)}
+  .ll-cn-modified{fill:var(--ll-mod,#a06d00);font-style:italic} .ll-cn-removed{fill:var(--ll-del,#c8462f);font-style:italic}
   .ll-edge{fill:none;stroke:var(--ll-edge,#7d8996);stroke-width:1.4}
   .ll-edge.ll-del{stroke:var(--ll-del,#c8462f);stroke-dasharray:4 4;opacity:.7}
   .ll-edge.ll-bar{stroke:var(--ll-ink,#16212b);stroke-width:5;stroke-linecap:round}
@@ -1931,12 +2014,16 @@ label.check input { accent-color: var(--accent); }
   .ll-q{font-size:11.5px;font-weight:500;fill:var(--ll-q-ink,#7a5310)}
   .ll-pqbg{fill:var(--ll-par-bg,#f1eefc);stroke:var(--ll-par-line,#a99be6);stroke-width:1}
   .ll-pq{font-size:11.5px;font-weight:600;fill:var(--ll-par,#6d5bd0)}
+  .ll-qc-added rect{fill:var(--ll-add-bg,#eaf8f0);stroke:var(--ll-add,#1f8a52)} .ll-qc-added text{fill:var(--ll-add,#1f8a52);font-weight:600}
+  .ll-qc-modified rect{fill:var(--ll-mod-bg,#fff5dd);stroke:var(--ll-mod,#c08400)} .ll-qc-modified text{fill:var(--ll-mod,#a06d00);font-weight:600}
+  .ll-qc-removed rect{fill:var(--ll-del-bg,#fdf0ee);stroke:var(--ll-del,#c8462f)} .ll-qc-removed text{fill:var(--ll-del,#c8462f);text-decoration:line-through}
+  .ll-callic{font-size:13px;fill:var(--ll-muted,#66727e)}
   .ll-node{cursor:pointer}
   .ll-node:focus{outline:none}
   .ll-node:hover .ll-shape{filter:brightness(.985)}
-  .ll-node:focus-visible .ll-shape,.ll-node.sel .ll-shape{stroke:var(--ll-accent,#d4561b);stroke-width:2.4;stroke-dasharray:none}
+  .ll-node:focus-visible .ll-shape,.ll-node.sel .ll-shape{stroke:var(--ll-accent,#2563eb);stroke-width:2.6;stroke-dasharray:none}
   .ll-node.dim,.ll-itemg.dim{opacity:.28}
-  .ll-node.hl .ll-shape{filter:drop-shadow(0 0 7px var(--ll-glow,rgba(212,86,27,.4)))}
+  .ll-node.hl .ll-shape{filter:drop-shadow(0 0 7px var(--ll-glow,rgba(37,99,235,.35)))}
   .ll-shadow{filter:drop-shadow(0 1px 1.5px rgba(16,24,40,.07))}
   `;
 
@@ -1997,14 +2084,15 @@ label.check input { accent-color: var(--accent); }
     const tx = left ? r1(b.x + 18) : r1(b.x + b.w / 2);
     const anchor = left ? "start" : "middle";
     const extra = b.node && (b.node.tag || b.node.change) && !b.container ? 4 : 0;
+    const noteH = b.noteKind ? 6 + b.noteLines.length * FONT.note.lh : 0;
     const textH = b.titleLines.length * FONT.title.lh + (b.subLines.length ? 3 + b.subLines.length * FONT.sub.lh : 0);
-    let yy = b.container ? b.y + PAD_Y + FONT.title.size : b.y + extra + (b.h - extra - textH) / 2 + FONT.title.size - 1 + (b.kind === "lane" || b.kind === "plane" ? 2 : 0);
+    let yy = b.container ? b.y + PAD_Y + FONT.title.size : b.y + extra + (b.h - noteH - extra - textH) / 2 + FONT.title.size - 1 + (b.kind === "lane" || b.kind === "plane" ? 2 : 0);
     for (const l of b.titleLines) { t.push(`<text class="ll-title${dark ? " ll-on-dark" : ""}" x="${tx}" y="${r1(yy)}" text-anchor="${anchor}">${esc(l)}</text>`); yy += FONT.title.lh; }
     yy += 2;
     for (const l of b.subLines) { t.push(`<text class="${dark ? "ll-on-dark-sub" : "ll-sub"}" x="${tx}" y="${r1(yy)}" text-anchor="${anchor}">${esc(l)}</text>`); yy += FONT.sub.lh; }
     if (b.noteLines && b.noteLines.length) {
       let ny = b.noteY + FONT.note.size;
-      for (const l of b.noteLines) { t.push(`<text class="ll-note" x="${r1(b.x + b.w / 2)}" y="${r1(ny)}" text-anchor="middle">${esc(l)}</text>`); ny += FONT.note.lh; }
+      for (const l of b.noteLines) { t.push(`<text class="ll-note${b.noteKind ? " ll-cn-" + b.noteKind : ""}" x="${r1(b.x + b.w / 2)}" y="${r1(ny)}" text-anchor="middle">${esc(l)}</text>`); ny += FONT.note.lh; }
     }
     return t;
   }
@@ -2013,19 +2101,24 @@ label.check input { accent-color: var(--accent); }
     const base = { item: "ll-item", group: "ll-group", loop: "ll-loop", stage: "ll-stage", lane: "ll-lane", plane: "ll-plane", end: "ll-end", start: "ll-start", section: "ll-section" }[b.kind] || "ll-box";
     const change = b.change ? " ll-ch-" + b.change : "";
     const attn = b.attention && !b.change ? " ll-attn" : "";
+    const cont = b.container ? " ll-cont" : "";
     const pill = b.kind === "end" || b.kind === "start";
     const rx = pill ? Math.min(b.h / 2, 22) : b.kind === "loop" ? 12 : b.kind === "section" ? 8 : 10;
     const shadow = !b.container && b.kind !== "section" ? " ll-shadow" : "";
-    let s = `<rect class="ll-shape ${base}${change}${attn}${shadow}" x="${r1(b.x)}" y="${r1(b.y)}" width="${r1(b.w)}" height="${r1(b.h)}" rx="${rx}"/>`;
+    let s = `<rect class="ll-shape ${base}${cont}${change}${attn}${shadow}" x="${r1(b.x)}" y="${r1(b.y)}" width="${r1(b.w)}" height="${r1(b.h)}" rx="${rx}"/>`;
     if (b.kind === "lane" || b.kind === "plane") s += `<path class="${b.kind === "plane" ? "ll-pband" : "ll-band"}" d="M${r1(b.x + 8)} ${r1(b.y + 0.6)}H${r1(b.x + b.w - 8)}a6 6 0 0 1 6 3.4v.6H${r1(b.x + 2)}v-.6a6 6 0 0 1 6-3.4z"/>`;
     if (b.kind === "section") s += `<rect class="ll-sbar" x="${r1(b.x)}" y="${r1(b.y + 8)}" width="4" height="${r1(b.h - 16)}" rx="2"/>`;
-    if (b.kind === "call") s += `<path class="ll-callbar" d="M${r1(b.x + 9)} ${r1(b.y)}V${r1(b.y + b.h)}M${r1(b.x + b.w - 9)} ${r1(b.y)}V${r1(b.y + b.h)}"/>`;
+    if (b.kind === "call") s += `<text class="ll-callic" x="${r1(b.x + b.w - 12)}" y="${r1(b.y + b.h - 9)}" text-anchor="end">↗</text>`; // calls another function
     // chips sit on the top edge: the change (left), the exit kind (left on end boxes), the effect tag (right)
     const n = b.node || {};
     if (b.change) s += chip(b.x + 10, b.y - 7.5, CHANGE_LABEL[b.change], "ll-cbg-" + b.change, "ll-ct");
     else if (b.kind === "end" && n.exit && n.exit !== "return") s += chip(b.x + 14, b.y - 7.5, EXIT_LABEL[n.exit] || n.exit.toUpperCase(), "ll-tagbg", n.exit === "throw" ? "ll-exit-throw" : "ll-exit");
-    const tag = n.tag || (b.kind === "item" ? "" : "");
-    if (tag) { const w = tag.length * 6.3 + 10; s += chip(b.x + b.w - w - 10, b.y - 7.5, tag, "ll-tagbg", "ll-tagt"); }
+    let right = b.x + b.w - 10;
+    if (b.attention && b.kind !== "item") { // "!" badge: worth a look (kept apart from the red of removed code)
+      s += `<g class="ll-chipg"><title>Đáng chú ý</title><circle class="ll-attnbg" cx="${r1(right - 7.5)}" cy="${r1(b.y)}" r="7.5"/><text class="ll-chip ll-ct" x="${r1(right - 7.5)}" y="${r1(b.y + 3.6)}" text-anchor="middle">!</text></g>`;
+      right -= 19;
+    }
+    if (n.tag) { const w = n.tag.length * 6.3 + 10; s += chip(right - w, b.y - 7.5, n.tag, "ll-tagbg", "ll-tagt"); }
     return s;
   }
 
@@ -2035,7 +2128,7 @@ label.check input { accent-color: var(--accent); }
     const L = lay || layout(flow);
     const p = [];
     p.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${L.width} ${L.height}" width="${L.width}" height="${L.height}" class="ll-svg" role="img" aria-label="${esc(flow.title || "Sơ đồ logic")}">`);
-    p.push(`<defs><marker id="ll-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ll-head"/></marker><marker id="ll-arrow-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ll-headb"/></marker><style>${SVG_STYLE}</style></defs>`);
+    p.push(`<defs><marker id="ll-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ll-head"/></marker><marker id="ll-arrow-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ll-headb"/></marker><style>${SVG_STYLE}</style></defs>`);
     if (o.background) p.push(`<rect width="100%" height="100%" fill="${esc(o.background)}"/>`);
 
     const node = (b) => {
@@ -2051,14 +2144,15 @@ label.check input { accent-color: var(--accent); }
     };
 
     // containers first, then edges (so loop bodies' arrows sit on the frame), then boxes and labels
-    for (const b of L.boxes) if (b.container) p.push(node(b));
+    const depth = (b) => String(b.id).split(".").length;
+    for (const b of L.boxes.filter((x) => x.container).sort((a, c) => depth(a) - depth(c))) p.push(node(b));
     for (const e of L.edges) {
       const cls = "ll-edge" + (e.loop ? " ll-back" : "") + (e.removed ? " ll-del" : "") + (e.bar ? " ll-bar" : "");
       const marker = e.arrow ? ` marker-end="url(#${e.loop ? "ll-arrow-b" : "ll-arrow"})"` : "";
       p.push(`<path class="${cls}" d="${e.bar ? e.d : roundPath(e.d, 7)}"${marker}/>`);
     }
     for (const b of L.boxes) if (!b.container) p.push(node(b));
-    for (const l of L.labels) p.push(`<g class="ll-qg"><rect class="${l.parallel ? "ll-pqbg" : "ll-qbg"}" x="${r1(l.x)}" y="${r1(l.y)}" width="${r1(l.w)}" height="${l.h}" rx="9"/><text class="${l.parallel ? "ll-pq" : "ll-q"}" x="${r1(l.x + 7)}" y="${r1(l.y + 12.5)}">${esc(l.text)}</text>${l.full !== l.text ? `<title>${esc(l.full)}</title>` : ""}</g>`);
+    for (const l of L.labels) p.push(`<g class="ll-qg${l.change ? " ll-qc-" + l.change : ""}"><rect class="${l.parallel ? "ll-pqbg" : "ll-qbg"}" x="${r1(l.x)}" y="${r1(l.y)}" width="${r1(l.w)}" height="${l.h}" rx="9"/><text class="${l.parallel ? "ll-pq" : "ll-q"}" x="${r1(l.x + 7)}" y="${r1(l.y + 12.5)}">${esc(l.text)}</text>${l.full !== l.text ? `<title>${esc(l.full)}</title>` : ""}</g>`);
     p.push("</svg>");
     return p.join("");
   }
@@ -2187,7 +2281,7 @@ label.check input { accent-color: var(--accent); }
     if (o.label) ta.setAttribute("aria-label", o.label);
     if (o.readOnly) ta.readOnly = true;
     let language = "code";
-    let marks = { added: new Set(), delAt: new Map() };
+    let marks = { added: new Set(), delAt: new Map(), removed: new Set() };
     let range = null;
     let timer = 0;
 
@@ -2200,10 +2294,13 @@ label.check input { accent-color: var(--accent); }
         const n = i + 1;
         const on = range && n >= range[0] && n <= range[1] ? " on" : "";
         const add = marks.added.has(n) ? " add" : "";
-        const del = marks.delAt.has(n) ? " del" : "";
-        const title = del ? ` title="${marks.delAt.get(n).length} dòng đã xoá ở đây"` : "";
-        g.push(`<div class="ed-g${on}${add}${del}"${title}>${n}</div>`);
-        h.push(`<div class="ed-l${on}${add}">${html}</div>`);
+        const gone = (marks.delAt.get(n) || []).length;
+        const tail = n === lines.length ? (marks.delAt.get(n + 1) || []).length : 0; // removed after the last line
+        const del = gone ? " del" : tail ? " del-after" : "";
+        const title = gone || tail ? ` title="${gone || tail} dòng đã xoá ${gone ? "ngay trước dòng này" : "sau dòng này"}"` : "";
+        const rm = marks.removed.has(n) ? " rm" : "";
+        g.push(`<div class="ed-g${on}${add}${del}${rm}"${title}>${n}</div>`);
+        h.push(`<div class="ed-l${on}${add}${del}${rm}">${html}</div>`);
       });
       gin.innerHTML = g.join("");
       hin.innerHTML = h.join("");
@@ -2248,7 +2345,7 @@ label.check input { accent-color: var(--accent); }
         if (l !== language) { language = l; render(); }
       },
       setMarks(m) {
-        marks = { added: (m && m.added) || new Set(), delAt: (m && m.delAt) || new Map() };
+        marks = { added: (m && m.added) || new Set(), delAt: (m && m.delAt) || new Map(), removed: (m && m.removed) || new Set() };
         render();
       },
       /** Highlight a line range and optionally scroll it into view. */
@@ -2614,6 +2711,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
     detail: "normal",
     cmp: null, // diff of before → after (change mode)
     codeAtDraw: null, // the code the diagram's line numbers refer to
+    parked: {}, // mode -> {flow, codeAtDraw}: the other mode's diagram, kept while that mode is not shown
     ctl: null,
     sample: undefined, // undefined = still checking, null = unavailable
     downloads: null,
@@ -2634,7 +2732,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
     try {
       localStorage.setItem(KEY, JSON.stringify({
         mode: S.mode, code: S.ed.code.getValue(), before: S.ed.before.getValue(), after: S.ed.after.getValue(),
-        flow: S.flow, codeAtDraw: S.codeAtDraw, lang: S.lang, detail: S.detail, example: $("example").value,
+        flow: S.flow, codeAtDraw: S.codeAtDraw, parked: S.parked, lang: S.lang, detail: S.detail, example: $("example").value,
       }));
     } catch (e) { /* storage unavailable: drafts just won't persist */ }
   }
@@ -2702,6 +2800,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
     const a = S.ed.after.getValue();
     S.cmp = b.trim() && a.trim() ? LL.diff.compare(b, a) : null;
     S.ed.after.setMarks(S.cmp ? { added: S.cmp.added, delAt: S.cmp.delAt } : null);
+    S.ed.before.setMarks(S.cmp ? { removed: new Set(S.cmp.listing.filter((l) => l.type === "del").map((l) => l.oldLine)) } : null);
     return S.cmp;
   }
 
@@ -2774,7 +2873,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
   }
 
   function changedNodes() {
-    return S.nodes.filter((x) => x.node.change);
+    return S.nodes.filter((x) => x.node.change && !x.node.changeInherited);
   }
 
   function renderChangeBar() {
@@ -2813,7 +2912,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
     svg.querySelectorAll(".ll-itemg").forEach((g) => g.addEventListener("click", () => {
       select(g.getAttribute("data-group"), { fromDiagram: true });
       const r = (g.getAttribute("data-lines") || "").split("-").map(Number);
-      if (r.length === 2 && r[0]) diagramEditor().setRange(r, true);
+      if (r.length === 2 && r[0]) diagramEditor().setRange(liveRange(r), true);
     }));
     applyZoom();
     applySelection(false);
@@ -2824,16 +2923,20 @@ router.post("/checkout", requireAuth, async (req, res) => {
     const svg = canvas.querySelector("svg");
     if (!svg || !S.lay) return;
     const cs = getComputedStyle(canvas);
-    const avail = Math.max(200, canvas.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+    const cardOn = $("pane-canvas").classList.contains("card-on") && !S.narrow && parseFloat(cs.paddingRight) > 100;
+    const avail = Math.max(200, canvas.clientWidth - parseFloat(cs.paddingLeft) - (cardOn ? parseFloat(cs.paddingLeft) : parseFloat(cs.paddingRight)));
     const fit = Math.min(1100, avail) / S.lay.width;
     let scale = null;
     if (typeof S.zoom === "number") scale = S.zoom;
     else if (S.zoom === "auto" && fit < MIN_FIT && !S.narrow) scale = MIN_FIT;
+    // the open card adds room to scroll into instead of shrinking the diagram
+    const shrunk = scale != null; // shown bigger than "fit" so it stays readable
+    if (scale == null && cardOn) scale = Math.min(1100, avail) / S.lay.width;
     canvas.classList.toggle("fit", scale == null);
     svg.style.width = scale == null ? "" : Math.round(S.lay.width * scale) + "px";
     svg.style.maxWidth = scale == null ? "" : "none";
     const btn = $("zoom-fit");
-    btn.textContent = typeof S.zoom === "number" ? Math.round(S.zoom * 100) + "%" : scale != null ? "Xem toàn bộ" : S.zoom === "all" ? "Cỡ dễ đọc" : "Vừa khung";
+    btn.textContent = typeof S.zoom === "number" ? Math.round(S.zoom * 100) + "%" : shrunk ? "Xem toàn bộ" : S.zoom === "all" ? "Cỡ dễ đọc" : "Vừa khung";
     if (canvas.scrollWidth > canvas.clientWidth + 2) {
       if (S.selected) applySelection(true);
       else canvas.scrollLeft = (canvas.scrollWidth - canvas.clientWidth) / 2;
@@ -2902,18 +3005,35 @@ router.post("/checkout", requireAuth, async (req, res) => {
     renderExplain();
     updateTourUi();
     const entry = id ? S.byId.get(id) : null;
-    diagramEditor().setRange(entry && entry.node.lines, !o.fromCode);
+    diagramEditor().setRange(entry && liveRange(entry.node.lines), !o.fromCode);
     if (id && document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("ll-node")) {
       const g = $("canvas").querySelector(`.ll-node[data-id="${CSS.escape(id)}"]`);
       if (g && g !== document.activeElement) g.focus({ preventScroll: true });
     }
   }
 
+  /** A box's line range in the code as it is now: edits made after drawing shift it (null if its lines are gone). */
+  let liveCache = null;
+  function liveRange(r) {
+    if (!r) return null;
+    const now = LL.app.diagramCode();
+    if (S.codeAtDraw == null || S.codeAtDraw === now) return r;
+    if (!liveCache || liveCache.from !== S.codeAtDraw || liveCache.to !== now) {
+      const map = [];
+      for (const l of LL.diff.compare(S.codeAtDraw, now).listing) if (l.type === "eq") map[l.oldLine] = l.newLine;
+      liveCache = { from: S.codeAtDraw, to: now, map };
+    }
+    let a = null;
+    let b = null;
+    for (let i = r[0]; i <= r[1]; i++) if (liveCache.map[i]) { if (a == null) a = liveCache.map[i]; b = liveCache.map[i]; }
+    return a == null ? null : [a, b];
+  }
+
   /** Smallest box whose line range contains this code line. */
   function boxForLine(line) {
     let best = null;
     for (const e of S.nodes) {
-      const r = e.node.lines;
+      const r = liveRange(e.node.lines);
       if (!r || line < r[0] || line > r[1] || e.node.change === "removed") continue;
       const span = r[1] - r[0];
       if (!best || span < best.span || (span === best.span && e.path.length > best.e.path.length)) best = { e, span };
@@ -2938,8 +3058,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
   /** Code lines of a box; with a change, the removed lines are shown struck through where they used to be. */
   function snippet(range) {
     const box = el("div", "snippet");
-    const code = S.codeAtDraw != null ? S.codeAtDraw : LL.app.diagramCode();
-    const ls = code.split("\n");
+    const ls = LL.app.diagramCode().split("\n");
     const rows = S.cmp ? LL.diff.listingFor(S.cmp, range) : [];
     const list = rows.length ? rows : Array.from({ length: Math.max(0, Math.min(ls.length, range[1]) - range[0] + 1) }, (_, i) => ({ type: "eq", newLine: range[0] + i, text: ls[range[0] + i - 1] }));
     const MAX = 18;
@@ -2987,19 +3106,21 @@ router.post("/checkout", requireAuth, async (req, res) => {
     if (n.kind === "stage" || n.kind === "group") tags.appendChild(el("span", "tag stage", "Giai đoạn chính"));
     if (n.attention && !n.unreachable) tags.appendChild(el("span", "tag attn", "Đáng chú ý"));
     if (n.unreachable) tags.appendChild(el("span", "tag attn", "Không bao giờ chạy tới"));
-    if (n.lines) {
-      const t = el("span", "tag lines", linesLabel(n.lines));
+    const live = liveRange(n.lines);
+    if (live) {
+      const t = el("span", "tag lines", linesLabel(live));
       t.setAttribute("role", "button");
       t.tabIndex = 0;
       t.title = "Hiện các dòng này trong khung code";
-      const go = () => { LL.app.showPane && LL.app.showPane("code"); diagramEditor().setRange(n.lines, true); };
+      const go = () => { LL.app.showPane && LL.app.showPane("code"); diagramEditor().setRange(live, true); };
       t.addEventListener("click", go);
       t.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
       tags.appendChild(t);
     }
     if (tags.childNodes.length) box.appendChild(tags);
-    if (n.lines) box.appendChild(snippet(n.lines));
-    if (S.codeAtDraw != null && S.codeAtDraw !== LL.app.diagramCode()) box.appendChild(el("p", "hint-empty", "Code đã sửa sau khi vẽ, số dòng có thể lệch. Bấm vẽ lại để cập nhật."));
+    if (live) box.appendChild(snippet(live));
+    else if (n.lines) box.appendChild(el("p", "hint-empty", "Các dòng code của ô này đã bị sửa hoặc xoá sau khi vẽ. Bấm vẽ lại để cập nhật."));
+    if (live && S.codeAtDraw != null && S.codeAtDraw !== LL.app.diagramCode()) box.appendChild(el("p", "hint-empty", "Code đã sửa sau khi vẽ; số dòng đã được dời theo. Bấm vẽ lại nếu logic thay đổi."));
   }
 
   // ───────────────────────── tour ─────────────────────────
@@ -3216,19 +3337,27 @@ router.post("/checkout", requireAuth, async (req, res) => {
   function applyDiff() {
     const text = $("diff-input").value;
     if (!LL.diff.isUnifiedDiff(text)) { toast("Không thấy diff hợp lệ (cần các dòng @@ -a,b +c,d @@)."); return; }
-    const files = LL.diff.parseUnified(text);
     const after = S.ed.after.getValue();
     const before = S.ed.before.getValue();
-    const fd = files[0];
-    if (files.length > 1) toast(`Diff có ${files.length} file, dùng file đầu: ${fd.newPath || fd.oldPath}.`);
-    let r;
-    if (after.trim()) { r = LL.diff.applyPatch(after, fd, "reverse"); S.ed.before.setValue(r.code); showTab("after"); }
-    else if (before.trim()) { r = LL.diff.applyPatch(before, fd, "forward"); S.ed.after.setValue(r.code); showTab("after"); }
-    else { toast("Dán code Trước hoặc Sau trước, rồi mới dán diff."); return; }
+    const fromAfter = !!after.trim();
+    if (!fromAfter && !before.trim()) { toast("Dán code Trước hoặc Sau trước, rồi mới dán diff."); return; }
+    // a diff of several files: use the file whose hunks fit the pasted code
+    let best = null;
+    for (const fd of LL.diff.parseUnified(text)) {
+      const r = LL.diff.applyPatch(fromAfter ? after : before, fd, fromAfter ? "reverse" : "forward");
+      if (!best || r.applied - r.failed > best.r.applied - best.r.failed) best = { fd, r };
+    }
+    if (!best || !best.r.applied) { setStatus(`Diff không khớp với code ${fromAfter ? "Sau" : "Trước"} đang có. Kiểm tra lại đúng file và đúng phiên bản.`, "err"); return; }
+    const { fd, r } = best;
+    (fromAfter ? S.ed.before : S.ed.after).setValue(r.code);
+    showTab("after");
     refreshChange();
     updateCodeInfo();
     $("diff-dialog").hidden = true;
-    setStatus(r.failed ? `Áp được ${r.applied}/${r.applied + r.failed} đoạn của diff. Kiểm tra lại code Trước / Sau.` : `Đã dựng lại từ diff (+${S.cmp ? S.cmp.stats.added : 0} −${S.cmp ? S.cmp.stats.removed : 0} dòng). Bấm “Vẽ sơ đồ thay đổi”.`, r.failed ? "err" : "");
+    const st = S.cmp ? S.cmp.stats : { added: 0, removed: 0 };
+    const file = fd.newPath || fd.oldPath;
+    if (!st.added && !st.removed) setStatus("Diff áp xong nhưng Trước và Sau giống hệt nhau. Kiểm tra lại diff.", "err");
+    else setStatus(r.failed ? `Áp được ${r.applied}/${r.applied + r.failed} đoạn của diff${file ? " (" + file + ")" : ""}. Kiểm tra lại code Trước / Sau.` : `Đã dựng lại từ diff${file ? " của " + file : ""} (+${st.added} −${st.removed} dòng). Bấm “Vẽ sơ đồ thay đổi”.`, r.failed ? "err" : "");
     saveDraft();
   }
 
@@ -3268,8 +3397,19 @@ router.post("/checkout", requireAuth, async (req, res) => {
     $("mode-seg").addEventListener("click", (e) => {
       const b = e.target.closest("button");
       if (!b || b.dataset.v === S.mode) return;
+      // each mode keeps its own diagram: a code diagram never sits next to a change, or the other way round
+      S.parked[S.mode] = S.flow ? { flow: S.flow, codeAtDraw: S.codeAtDraw } : null;
       setMode(b.dataset.v);
-      saveDraft();
+      const back = S.parked[S.mode];
+      S.parked[S.mode] = null;
+      S.codeAtDraw = back ? back.codeAtDraw : null;
+      S.selected = null;
+      S.tour = false;
+      exSel.value = "";
+      setFlow(back ? F.normalize(back.flow) : null);
+      select(null);
+      setStatus(back || S.mode === "code" ? "" : "Dán code Trước và Sau (hoặc một bên + git diff), rồi bấm “Vẽ sơ đồ thay đổi”.");
+      saveDraft(true);
     });
     $("code-tabs").addEventListener("click", (e) => { const b = e.target.closest("[role=tab]"); if (b) showTab(b.dataset.tab); });
     document.querySelectorAll(".mobile-tabs button").forEach((b) => b.addEventListener("click", () => showPane(b.dataset.pane)));
@@ -3310,7 +3450,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
     $("card-next").addEventListener("click", () => step(1));
     $("card-close").addEventListener("click", () => { S.tour = false; select(null); });
     $("only-changes").addEventListener("change", () => setOnlyChanges($("only-changes").checked));
-    // phones clamp long summaries to 2 lines; a tap shows the rest
+    // phones clamp long summaries to 1 line; a tap shows the rest
     for (const id of ["d-summary", "change-bar"]) $(id).addEventListener("click", (e) => { const p = e.target.closest("p, .cs"); if (p) p.classList.toggle("open"); });
     $("zoom-in").addEventListener("click", () => zoomBy(1.2));
     $("zoom-out").addEventListener("click", () => zoomBy(1 / 1.2));
@@ -3347,8 +3487,10 @@ router.post("/checkout", requireAuth, async (req, res) => {
 
     // keyboard: ← → move between boxes, Esc closes the explanation
     document.addEventListener("keydown", (e) => {
-      const tag = (e.target && e.target.tagName) || "";
-      if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "Escape" && !$("diff-dialog").hidden) { $("diff-dialog").hidden = true; $("paste-diff").focus(); return; }
+      const t = e.target || {};
+      const typing = /^(TEXTAREA|SELECT)$/.test(t.tagName || "") || (t.tagName === "INPUT" && t.type !== "checkbox");
+      if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === "ArrowRight" || (e.key === "ArrowDown" && S.tour)) { if (S.nodes.length) { e.preventDefault(); step(1); } }
       else if (e.key === "ArrowLeft" || (e.key === "ArrowUp" && S.tour)) { if (S.nodes.length) { e.preventDefault(); step(-1); } }
       else if (e.key === "Escape") { toggleMenu($("export-btn"), $("export-menu"), false); toggleMenu($("legend-btn"), $("legend"), false); if (S.selected || S.tour) { S.tour = false; select(null); } }
@@ -3381,6 +3523,7 @@ router.post("/checkout", requireAuth, async (req, res) => {
         S.ed.after.setValue(draft.after || "");
         setMode(draft.mode);
         S.codeAtDraw = draft.codeAtDraw != null ? draft.codeAtDraw : diagramCode();
+        if (draft.parked && typeof draft.parked === "object") S.parked = draft.parked;
         setFlow(draft.flow ? F.normalize(draft.flow) : null);
       }
     } else {

@@ -32,7 +32,7 @@
     }
     if (hasPrev) for (const c of centers) edges.push({ d: `M${c} ${busY}V${laneTop}`, arrow: true });
     const label = parallel ? "song song" + (node.title ? ": " + node.title : "") : node.title;
-    if (label) questionLabel(label, Math.min(...centers) + 8, busY + 13, "start", parallel);
+    if (label) questionLabel(label, Math.min(...centers) + 8, busY + 13, "start", parallel, node.change);
 
     const tails = [];
     let maxBottom = laneTop;
@@ -79,7 +79,7 @@
     if (hasPrev) edges.push({ d: `M${cx} ${top - GAP}V${forkY}H${railX}`, arrow: false });
     let y = forkY + 14;
     const label = parallel ? "song song" + (node.title ? ": " + node.title : "") : node.title;
-    if (label) { questionLabel(label, railX + 10, y + 4, "start", parallel); y += 24; }
+    if (label) { questionLabel(label, railX + 10, y + 4, "start", parallel, node.change); y += 24; }
     const n = node.lanes.length;
     let anyContinues = false;
     let lastHeadMid = forkY;
@@ -92,11 +92,15 @@
       edges.push({ d: `M${railX} ${mid}H${lx}`, arrow: true });
       lastHeadMid = mid;
       let bottom = y + hh;
+      let tails = [{ x: lx + lw / 2, y: bottom }];
       if (lane.steps.length) {
-        const r = seq(lane.steps, lx, lw, bottom + GAP, lid + ".", depth + 1, [{ x: lx + lw / 2, y: bottom }]);
-        if (!r.ended) anyContinues = true;
+        const r = seq(lane.steps, lx, lw, bottom + GAP, lid + ".", depth + 1, tails);
+        tails = r.ended ? [] : r.tails;
         bottom = r.bottom;
-      } else anyContinues = true;
+      }
+      // a path that carries on drops back to the rail, which leads to the join
+      if (tails.length) anyContinues = true;
+      for (const t of tails) edges.push({ d: `M${t.x} ${t.y}V${bottom + 11}H${railX}`, arrow: false });
       y = bottom + 22;
     });
     if (!anyContinues) {

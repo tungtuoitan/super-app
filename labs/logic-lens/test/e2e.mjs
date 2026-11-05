@@ -100,6 +100,7 @@ await page.keyboard.press("Escape");
 ok(await page.locator("#explain-card").isHidden(), "Escape closes the card");
 
 console.log("Click a code line → its box");
+await page.waitForTimeout(400); // let the editor's smooth scroll settle
 await page.locator("#ed-code .ed-ta").click({ position: { x: 200, y: 20 * 21 + 8 } });
 await page.waitForTimeout(150);
 ok(!(await page.locator("#explain-card").isHidden()), "clicking a line selects the box that covers it");
@@ -192,6 +193,25 @@ const p2 = await page.evaluate(() => window.__prompts.at(-1));
 ok(/\+\|/.test(p2) && /-\|/.test(p2), "change prompt marks added and removed lines");
 ok((await page.locator(".ll-chip").count()) >= 2, "changed boxes marked in the drawn diagram");
 await page.screenshot({ path: path.join(shots, "5-change-drawn.png") });
+
+console.log("Each mode keeps its own diagram");
+await page.locator('#mode-seg [data-v="code"]').click();
+ok((await page.locator("#d-title").textContent()).includes("Đếm từ trong file"), "back in Code mode: the code diagram returns");
+await page.locator('#mode-seg [data-v="change"]').click();
+ok((await page.locator("#d-title").textContent()).includes("sau khi sửa"), "back in change mode: the change diagram returns");
+
+console.log("Edits after drawing shift the highlighted lines");
+await page.locator('#mode-seg [data-v="code"]').click();
+await typeInto(page, "#ed-code", "# header\n# more\n" + MOCK_CODE);
+await page.waitForTimeout(400);
+await page.locator('.ll-node[data-id="1"]').click();
+const onLines = await page.$$eval("#ed-code .ed-g.on", (g) => g.map((x) => +x.textContent));
+ok(onLines[0] === 5 && onLines.at(-1) === 7, "box 'Đọc file' follows its code to lines 5–7: " + onLines.join(","));
+await page.keyboard.press("Escape");
+await page.locator('#mode-seg [data-v="change"]').click();
+await page.locator("#paste-diff").click();
+await page.keyboard.press("Escape");
+ok(await page.locator("#diff-dialog").isHidden(), "Esc closes the git diff box");
 
 console.log("Stop and errors");
 await page.close();
