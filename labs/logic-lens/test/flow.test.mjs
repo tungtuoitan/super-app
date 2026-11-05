@@ -161,12 +161,13 @@ test("endsPath: a lane that returns does not continue", () => {
   assert.equal(F.endsPath([{ kind: "branch", lanes: [{ steps: [{ kind: "end" }] }, { steps: [{ kind: "end" }] }] }]), true);
 });
 
-test("mermaid: ends are stadium shapes, loops are subgraphs, fork edges carry the question", () => {
+test("mermaid: ends are stadium shapes, loops are subgraphs, the question is one decision node", () => {
   const f = F.normalize({ steps: [{ title: "in" }, { kind: "branch", title: "ok?", lanes: [{ title: "no", steps: [{ kind: "end", title: "stop" }] }, { title: "yes" }] }, { kind: "loop", title: "each", steps: [{ title: "work" }] }, { title: "out" }] });
   const m = F.toMermaid(f);
   assert.ok(/\(\[".*stop.*"\]\)/.test(m), m);
   assert.ok(m.includes("subgraph"));
-  assert.ok(m.includes('-- "ok?" -->'));
+  assert.ok(/n\d+\{"ok\?"\}/.test(m), m);
+  assert.ok(!m.includes('-- "ok?" -->'), "the question is not repeated on edges");
   // the "no" lane ends: no edge from the end box to the loop
   const endId = m.match(/(n\d+)\(\[/)[1];
   assert.ok(!new RegExp(endId + " -->").test(m), "an end box has no outgoing edge");

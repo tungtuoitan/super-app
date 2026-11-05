@@ -219,7 +219,14 @@
             if (inner.first) { for (const f of inner.first) out.push(`${indent}${lid} --> ${f}`); tails.push(...inner.last); }
             else tails.push(lid);
           }
-          ends = { first: heads, last: tails, label: node.kind === "parallel" ? "song song" : node.title };
+          if (node.kind === "branch" && node.title) {
+            // the question sits once on a decision node instead of on every incoming edge
+            const did = id();
+            out.push(`${indent}${did}{"${mm(node.title)}"}`);
+            mark(did, node);
+            for (const h of heads) out.push(`${indent}${did} --> ${h}`);
+            ends = { first: [did], last: tails };
+          } else ends = { first: heads, last: tails, label: node.kind === "parallel" ? "song song" : "" };
         } else if (node.kind === "group") {
           const gid = id();
           const parts = (node.items || []).map((it) => it.title + (it.sub ? " (" + it.sub + ")" : "")).join(" · ");

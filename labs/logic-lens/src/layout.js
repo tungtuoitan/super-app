@@ -129,10 +129,10 @@
     const edges = [];
     const labels = [];
 
-    const textBlock = (node, w, maxTitle) => {
+    const textBlock = (node, w, maxTitle, maxSub) => {
       const inner = w - PAD_X * 2;
       const titleLines = wrap(node.title || "", FONT.title, inner, maxTitle || 2);
-      const subLines = node.sub ? wrap(node.sub, FONT.sub, inner, 2) : [];
+      const subLines = node.sub ? wrap(node.sub, FONT.sub, inner, maxSub || 2) : [];
       const h = PAD_Y * 2 + titleLines.length * FONT.title.lh + (subLines.length ? 3 + subLines.length * FONT.sub.lh : 0);
       return { titleLines, subLines, h: Math.max(h, subLines.length ? 52 : 40), clipped: !!(titleLines.clipped || subLines.clipped) };
     };
@@ -274,7 +274,7 @@
         // start / step / call / stage / end
         const bw = depth === 1 && !narrow ? Math.min(w, Math.max(TOP_BOX_MIN, w * 0.56)) : Math.max(60, w - 8);
         // room for the effect tag and the change chip so they never cover the title
-        const tb = textBlock(node, bw - (node.tag || node.change ? 20 : 0) - (node.kind === "call" ? 12 : 0));
+        const tb = textBlock(node, bw - (node.tag || node.change ? 20 : 0) - (node.kind === "call" ? 12 : 0), 2, depth > 1 ? 3 : 2);
         tb.h += node.tag || node.change ? 8 : 0;
         // an edited or removed box says why, right on the diagram (first sentence of the change note)
         const why = (node.change === "modified" || node.change === "removed") && node.changeNote ? node.changeNote.split(/(?<=[.!?])\s/)[0] : "";
@@ -307,7 +307,7 @@
     }
 
     function laneHead(lane, lid, x, y, w, parallel) {
-      const tb = textBlock(lane, w);
+      const tb = textBlock(lane, w, 2, 3); // lanes are narrow: one more line before cutting the text
       boxes.push({ id: lid, x, y, w, h: tb.h, kind: parallel ? "plane" : "lane", attention: lane.attention, titleLines: tb.titleLines, subLines: tb.subLines, lane: true, node: lane, clipped: tb.clipped, change: lane.change });
       return tb.h;
     }
