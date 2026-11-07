@@ -1,7 +1,7 @@
 # Structure
 
 Cấu trúc code frontend (React 18 + TypeScript, CRA/CRACO, Zustand). Chỉ nói **cái gì nằm ở đâu** và **ai được import ai**.
-Rule viết code chung: skill `code-rules`. Rule chi tiết từng loại file: `CLAUDE.md`.
+Rule chung (`G*`): skill `code-rules`. Rule React/TS từng loại file (`R*`): `~/.claude/skills/code-rules/stacks/react-ts.md`.
 
 ## 1. Ba tầng, phụ thuộc một chiều (ESLint chặn)
 
@@ -45,7 +45,7 @@ features/<tên>/
 
 Không feature nào có đủ mọi thư mục; có cái nào dùng cái đó. Tính năng lớn chia **tính năng con** thành thư mục lồng cùng khung (vd `project/task/` có `Components/ hooks/ store/ utils/`).
 
-### Tên file (chi tiết rule: `CLAUDE.md`)
+### Tên file (chi tiết: `stacks/react-ts.md`, R1–R4)
 
 | Loại | Mẫu |
 |---|---|

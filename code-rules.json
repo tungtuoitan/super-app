@@ -1,0 +1,6 @@
+{
+  "stack": "react-ts",
+  "roots": ["src/"],
+  "eslint": true,
+  "rules": {}
+}

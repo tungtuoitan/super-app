@@ -75,7 +75,7 @@
         "start": "craco start",
         "build": "craco build",
         "test": "craco test",
-        "check:structure": "node scripts/check-structure.js",
+        "check:structure": "node -e \"require(require('os').homedir()+'/.claude/skills/code-rules/check/check.js').run(process.argv.slice(1))\" --",
         "eject": "react-scripts eject",
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build"

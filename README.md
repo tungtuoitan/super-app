@@ -108,7 +108,7 @@ To add a new module:
 
 ## Code Conventions
 
-Per-module files follow a fixed naming convention (see `CLAUDE.md` for full rules):
+Per-module files follow a fixed naming convention (full rules: skill `code-rules`, `stacks/react-ts.md`):
 
 | Type | Naming |
 | --- | --- |
@@ -122,7 +122,7 @@ Per-module files follow a fixed naming convention (see `CLAUDE.md` for full rule
 | constants | `moduleName.constants.ts` |
 | utils | `moduleName.utils.ts` |
 
-Key rules: max **400 lines per file**, single responsibility per file type, no cross-file re-exports, and always destructure without aliases. See [`STRUCTURE.md`](STRUCTURE.md) (where things live) and [`CLAUDE.md`](CLAUDE.md) (per-file rules).
+Key rules: max **400 lines per file**, single responsibility per file type, no cross-file re-exports, and always destructure without aliases. See [`STRUCTURE.md`](STRUCTURE.md) (where things live) and [`CLAUDE.md`](CLAUDE.md) (which rule files apply). A pre-commit hook blocks new violations.
 
 ## Related
 
