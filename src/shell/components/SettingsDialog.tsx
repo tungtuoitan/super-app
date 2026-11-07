@@ -1,212 +1,19 @@
-import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared";
-import { Label } from "@/shared";
-import { Sun, Moon, RefreshCw, Loader2, CheckCircle2, AlertCircle, GitBranch, Download, Copy, Check } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
-import { ScrollArea } from "@/shared";
-import { keywordService, useKeywordHelper } from "@/shared";
-import type { KeywordSyncReport } from "@/shared";
-import { useAuthStore } from "@/shared";
 import { useActivityBarStore } from "../store/ActivityBar.store";
-import { useKRepoSyncStore, KRepoSyncService, KRepoDiffPanel, KRepoConflictDialog, notifyViewing } from "@/features/K";
-import type { KSyncStatus, KRepoCompareDiff, KRepoResolveConflictItem } from "@/features/K/types/kRepoSync.type";
-
-const TYPE_ORDER = ["workspace", "folder", "note", "file", "project", "task", "log", "track", "external"];
-/** Fallback sort index for types not in TYPE_ORDER — sorts them after all known types. */
-const UNKNOWN_TYPE_SORT_ORDER = TYPE_ORDER.length + 1;
-
-/** Seconds between auto-refreshes of the repo-vs-DB diff while the dialog is open. */
-const REFRESH_INTERVAL_SEC = 10;
-
-function SyncStatusChip({ status, direction }: { status: KSyncStatus; direction: "push" | "pull" | null }) {
-    const label = (() => {
-        if (status === "pushing") return direction === "push" ? "Pushing DB → repo" : "Pushing...";
-        if (status === "pulling") return direction === "pull" ? "Pulling repo → DB" : "Pulling...";
-        if (status === "behind")    return "Behind remote";
-        if (status === "conflict")  return "Conflict";
-        if (status === "error")     return "Error";
-        if (status === "synced")    return "Synced";
-        if (status === "checking")  return "Checking...";
-        return "Idle";
-    })();
-
-    const cls = (() => {
-        if (status === "pushing" || status === "pulling") return "bg-sa-hover text-muted-foreground border-sa-border-strong";
-        if (status === "behind")   return "bg-sa-amber/10 text-sa-amber-ink border-sa-amber/30";
-        if (status === "conflict" || status === "error") return "bg-sa-danger/10 text-sa-danger border-sa-danger/30";
-        if (status === "synced")   return "bg-sa-good/10 text-sa-good border-sa-good/30";
-        return "bg-muted text-muted-foreground border-border";
-    })();
-
-    const isSpinning = status === "pushing" || status === "pulling" || status === "checking";
-
-    return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-medium ${cls}`}>
-            {isSpinning && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
-            {label}
-        </span>
-    );
-}
+import { KRepoConflictDialog } from "@/features/K";
+import { useKeywordSync } from "../hooks/useKeywordSync.helper";
+import { useKRepoSyncSettings } from "../hooks/useKRepoSyncSettings.helper";
+import { SettingsThemeSection } from "./small/SettingsThemeSection";
+import { SettingsKeywordsSection } from "./small/SettingsKeywordsSection";
+import { SettingsExtensionTokenSection } from "./small/SettingsExtensionTokenSection";
+import { SettingsKRepoSyncSection } from "./small/SettingsKRepoSyncSection";
+import { SettingsKeywordSyncLists } from "./small/SettingsKeywordSyncLists";
 
 export function SettingsDialog() {
-    const { theme, setTheme } = useTheme();
     const { settingsOpen, setSettingsOpen } = useActivityBarStore();
-    const { $user } = useAuthStore();
 
-    const [isSyncing, setIsSyncing] = useState(false);
-    const [syncReport, setSyncReport] = useState<KeywordSyncReport | null>(null);
-    const [syncError, setSyncError] = useState<string | null>(null);
-    const { loadKeywords } = useKeywordHelper();
-    const [tokenCopied, setTokenCopied] = useState(false);
-
-    // K Repo Sync
-    const { syncStatus, statusMessage, syncDirection, repoUrl, lastPushAt, setRepoUrl } = useKRepoSyncStore();
-    const [repoUrlInput, setRepoUrlInput]   = useState("");
-    const [branchInput, setBranchInput]     = useState("main");
-    const [patInput, setPatInput]           = useState("");
-    const [isSavingConfig, setIsSavingConfig] = useState(false);
-    const [configError, setConfigError]     = useState<string | null>(null);
-    const [configSaved, setConfigSaved]     = useState(false);
-    const [compareDiff, setCompareDiff]     = useState<KRepoCompareDiff | null>(null);
-    const [repoActionError, setRepoActionError] = useState<string | null>(null);
-    const [reviewOpen, setReviewOpen]       = useState(false);
-    const [isResolving, setIsResolving]     = useState(false);
-    const [isComparing, setIsComparing]     = useState(false);
-    const [secondsToRefresh, setSecondsToRefresh] = useState(REFRESH_INTERVAL_SEC);
-    const isMountedRef = useRef(false);
-    const isFetchingRef = useRef(false);
-
-    const hasAnyDiff = (compareDiff?.repoOnlyCount ?? 0)
-                     + (compareDiff?.dbOnlyCount   ?? 0)
-                     + (compareDiff?.modifiedCount ?? 0) > 0;
-
-    // Background fetch — silent, skips when:
-    //   • a fetch is already in flight,
-    //   • user is applying changes (isResolving),
-    //   • Review Changes dialog is open (entries must stay stable while user inspects them).
-    const fetchCompareSilent = async () => {
-        if (isFetchingRef.current || isResolving || reviewOpen) return;
-        if (!repoUrl) return;
-        isFetchingRef.current = true;
-        if (isMountedRef.current) setIsComparing(true);
-        try {
-            const diff = await KRepoSyncService._getCompare($user.userToken);
-            if (isMountedRef.current) setCompareDiff(diff);
-        } catch {/* ignore polling errors */}
-        finally {
-            isFetchingRef.current = false;
-            if (isMountedRef.current) {
-                setIsComparing(false);
-                setSecondsToRefresh(REFRESH_INTERVAL_SEC);
-            }
-        }
-    };
-
-    useEffect(() => {
-        isMountedRef.current = true;
-        return () => { isMountedRef.current = false; };
-    }, []);
-
-    // Tell BE the user is viewing the diff popup so the daemon won't push DB → remote
-    // mid-review and invalidate what they're looking at. Best-effort: SignalR may be
-    // disconnected; daemon will just behave as before in that case.
-    useEffect(() => {
-        if (!reviewOpen) return;
-        notifyViewing("start");
-        return () => { notifyViewing("stop"); };
-    }, [reviewOpen]);
-
-    useEffect(() => {
-        if (!settingsOpen) {
-            setSyncReport(null);
-            setConfigError(null);
-            setConfigSaved(false);
-            setRepoActionError(null);
-            setCompareDiff(null);
-            return;
-        }
-        // Load current status on open
-        KRepoSyncService._getStatus($user.userToken)
-            .then((cfg) => {
-                setRepoUrlInput(cfg.repoUrl ?? "");
-                setBranchInput(cfg.branch ?? "main");
-                setRepoUrl(cfg.repoUrl ?? "");
-            })
-            .catch(() => {/* ignore */});
-    }, [settingsOpen]);
-
-    // Auto-poll diff every 10s while dialog is open and a repo is configured
-    useEffect(() => {
-        if (!settingsOpen || !repoUrl) return;
-        fetchCompareSilent();
-        setSecondsToRefresh(REFRESH_INTERVAL_SEC);
-        const tick = setInterval(() => {
-            setSecondsToRefresh(prev => {
-                if (prev <= 1) { fetchCompareSilent(); return REFRESH_INTERVAL_SEC; }
-                return prev - 1;
-            });
-        }, 1000);
-        return () => clearInterval(tick);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [settingsOpen, repoUrl]);
-
-    const handleSync = async () => {
-        setIsSyncing(true);
-        setSyncReport(null);
-        setSyncError(null);
-        try {
-            const report = await keywordService._syncKeywords($user.userToken);
-            setSyncReport(report);
-        } catch {
-            setSyncError("Failed to sync keywords. Please try again.");
-        } finally {
-            await loadKeywords();
-            setIsSyncing(false);
-        }
-    };
-
-    const handleSaveConfig = async () => {
-        setIsSavingConfig(true);
-        setConfigError(null);
-        setConfigSaved(false);
-        try {
-            await KRepoSyncService._saveConfig($user.userToken, {
-                repoUrl: repoUrlInput,
-                branch: branchInput,
-                pat: patInput,
-            });
-            setRepoUrl(repoUrlInput);
-            setPatInput("");
-            setConfigSaved(true);
-        } catch {
-            setConfigError("Failed to save configuration.");
-        } finally {
-            setIsSavingConfig(false);
-        }
-    };
-
-    const handleResolveConflicts = async (items: KRepoResolveConflictItem[]) => {
-        setIsResolving(true);
-        setRepoActionError(null);
-        try {
-            await KRepoSyncService._resolveConflicts($user.userToken, items);
-        } catch {
-            setRepoActionError("Apply changes failed.");
-        } finally {
-            setIsResolving(false);
-        }
-        // Refresh compare AFTER isResolving becomes false — fetchCompareSilent
-        // skips while resolving, so an in-try fetch would no-op.
-        await fetchCompareSilent();
-    };
-
-    const sortedTypes = syncReport
-        ? Object.entries(syncReport.countByType).sort(([a], [b]) => {
-              const ai = TYPE_ORDER.indexOf(a);
-              const bi = TYPE_ORDER.indexOf(b);
-              return (ai === -1 ? UNKNOWN_TYPE_SORT_ORDER : ai) - (bi === -1 ? UNKNOWN_TYPE_SORT_ORDER : bi);
-          })
-        : [];
+    const { isSyncing, syncReport, syncError, handleSync } = useKeywordSync(settingsOpen);
+    const repoSync = useKRepoSyncSettings(settingsOpen);
 
     return (
         <>
@@ -223,326 +30,46 @@ export function SettingsDialog() {
                     <div className="grid grid-cols-2 gap-6">
                         {/* ── Left: Theme + Keywords ── */}
                         <div className="space-y-6">
-                            {/* Theme */}
-                            <div className="space-y-3">
-                                <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Theme</Label>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setTheme("light")}
-                                        className={`
-                                            flex-1 flex items-center justify-center gap-2 h-9 px-3 rounded-lg border transition-colors duration-100
-                                            ${theme === "light" ? "border-sa-amber/70 bg-sa-surface-2 text-foreground" : "border-sa-border-strong text-muted-foreground hover:text-foreground hover:bg-sa-hover"}
-                                        `}
-                                    >
-                                        <Sun className="w-4 h-4" />
-                                        <span className="font-medium text-[13px]">Light</span>
-                                    </button>
-                                    <button
-                                        onClick={() => setTheme("dark")}
-                                        className={`
-                                            flex-1 flex items-center justify-center gap-2 h-9 px-3 rounded-lg border transition-colors duration-100
-                                            ${theme === "dark" ? "border-sa-amber/70 bg-sa-surface-2 text-foreground" : "border-sa-border-strong text-muted-foreground hover:text-foreground hover:bg-sa-hover"}
-                                        `}
-                                    >
-                                        <Moon className="w-4 h-4" />
-                                        <span className="font-medium text-[13px]">Dark</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Keywords */}
-                            <div className="space-y-3">
-                                <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Keywords</Label>
-                                <button
-                                    onClick={handleSync}
-                                    disabled={isSyncing}
-                                    className="flex items-center gap-2 h-8 px-3 rounded-lg border border-sa-border-strong hover:bg-sa-hover-strong transition-colors duration-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm w-full justify-center"
-                                >
-                                    {isSyncing
-                                        ? <Loader2 className="w-4 h-4 animate-spin" />
-                                        : <RefreshCw className="w-4 h-4" />
-                                    }
-                                    {isSyncing ? "Syncing..." : "Sync Keywords"}
-                                </button>
-                                <p className="text-xs text-muted-foreground">
-                                    Compares keyword names and links against their source data and fixes any mismatches.
-                                </p>
-
-                                {syncError && (
-                                    <div className="flex items-center gap-2 text-sm text-destructive">
-                                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                                        {syncError}
-                                    </div>
-                                )}
-
-                                {syncReport && (
-                                    <div className="space-y-3">
-                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                                            <span className="text-muted-foreground">Total</span>
-                                            <span className="font-medium">{syncReport.totalKeywords}</span>
-
-                                            <span className="text-muted-foreground">Hard deleted</span>
-                                            <span className="font-medium">{syncReport.hardDeletedCount}</span>
-
-                                            <span className="text-muted-foreground">Name fix</span>
-                                            <span className={`font-medium ${syncReport.nameMismatchCount > 0 ? "text-sa-amber-ink" : ""}`}>
-                                                {syncReport.nameMismatchCount}
-                                            </span>
-
-                                            <span className="text-muted-foreground">Link fix</span>
-                                            <span className={`font-medium ${syncReport.linkMismatchCount > 0 ? "text-sa-amber-ink" : ""}`}>
-                                                {syncReport.linkMismatchCount}
-                                            </span>
-
-                                            <span className="text-muted-foreground">Updated</span>
-                                            <span className={`font-medium ${syncReport.updatedCount > 0 ? "text-sa-good" : ""}`}>
-                                                {syncReport.updatedCount}
-                                            </span>
-
-                                            <span className="text-muted-foreground">Created</span>
-                                            <span className={`font-medium ${syncReport.createdCount > 0 ? "text-muted-foreground" : ""}`}>
-                                                {syncReport.createdCount}
-                                            </span>
-                                        </div>
-
-                                        {sortedTypes.length > 0 && (
-                                            <div>
-                                                <p className="text-xs text-muted-foreground mb-1.5">By type</p>
-                                                <div className="flex flex-wrap gap-1">
-                                                    {sortedTypes.map(([type, count]) => (
-                                                        <span key={type} className="px-2 py-0.5 rounded-full bg-muted text-xs border border-border">
-                                                            {type} <span className="font-semibold">{count}</span>
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {syncReport.updates.length === 0 && syncReport.created.length === 0 && (
-                                            <div className="flex items-center gap-1.5 text-xs text-sa-good">
-                                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                                All keywords are up to date
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Extension Token */}
-                            <div className="space-y-2">
-                                <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Extension Token</Label>
-                                <p className="text-xs text-muted-foreground">
-                                    Copy your JWT to paste into the SuperApp Chrome extension.
-                                </p>
-                                <button
-                                    onClick={() => {
-                                        if (!$user?.userToken) return;
-                                        navigator.clipboard.writeText($user.userToken);
-                                        setTokenCopied(true);
-                                        setTimeout(() => setTokenCopied(false), 2000);
-                                    }}
-                                    className="flex items-center gap-2 h-8 px-3 rounded-lg border border-sa-border-strong hover:bg-sa-hover-strong transition-colors duration-100 text-sm w-full justify-center"
-                                >
-                                    {tokenCopied
-                                        ? <><Check className="w-4 h-4 text-sa-good" /><span className="text-sa-good">Copied!</span></>
-                                        : <><Copy className="w-4 h-4" />Copy Token</>
-                                    }
-                                </button>
-                            </div>
+                            <SettingsThemeSection />
+                            <SettingsKeywordsSection
+                                isSyncing={isSyncing}
+                                syncReport={syncReport}
+                                syncError={syncError}
+                                onSync={handleSync}
+                            />
+                            <SettingsExtensionTokenSection />
                         </div>
 
                         {/* ── Right: K Repo Sync ── */}
-                        <div className="space-y-3">
-                            <Label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
-                                <GitBranch className="w-3.5 h-3.5" />
-                                K Repo Sync
-                            </Label>
-
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <SyncStatusChip status={syncStatus} direction={syncDirection} />
-                                {lastPushAt && (
-                                    <span className="text-[11px] text-muted-foreground">
-                                        last push {new Date(lastPushAt).toLocaleString()}
-                                    </span>
-                                )}
-                            </div>
-
-                            {statusMessage && (syncStatus === "error" || syncStatus === "conflict") && (
-                                <p className="text-xs text-muted-foreground">{statusMessage}</p>
-                            )}
-
-                            <div className="space-y-1">
-                                <label className="text-xs text-muted-foreground">Repo URL</label>
-                                <input
-                                    type="text"
-                                    value={repoUrlInput}
-                                    onChange={(e) => { setRepoUrlInput(e.target.value); setConfigSaved(false); }}
-                                    placeholder="https://github.com/user/repo.git"
-                                    className="w-full h-8 px-2.5 rounded-lg border border-input bg-transparent text-[13px] focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="space-y-1">
-                                    <label className="text-xs text-muted-foreground">Branch</label>
-                                    <input
-                                        type="text"
-                                        value={branchInput}
-                                        onChange={(e) => { setBranchInput(e.target.value); setConfigSaved(false); }}
-                                        placeholder="K"
-                                        className="w-full h-8 px-2.5 rounded-lg border border-input bg-transparent text-[13px] focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs text-muted-foreground">Personal Access Token</label>
-                                    <input
-                                        type="password"
-                                        value={patInput}
-                                        onChange={(e) => { setPatInput(e.target.value); setConfigSaved(false); }}
-                                        placeholder={repoUrl ? "Leave blank to keep" : "ghp_..."}
-                                        className="w-full h-8 px-2.5 rounded-lg border border-input bg-transparent text-[13px] focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring"
-                                    />
-                                </div>
-                            </div>
-
-                            {configError && (
-                                <div className="flex items-center gap-1.5 text-xs text-destructive">
-                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                                    {configError}
-                                </div>
-                            )}
-                            {configSaved && (
-                                <div className="flex items-center gap-1.5 text-xs text-sa-good">
-                                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                                    Configuration saved
-                                </div>
-                            )}
-
-                            <button
-                                onClick={handleSaveConfig}
-                                disabled={isSavingConfig || !repoUrlInput}
-                                className="flex items-center gap-2 h-8 px-3 rounded-lg border border-sa-border-strong hover:bg-sa-hover-strong transition-colors duration-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm w-full justify-center"
-                            >
-                                {isSavingConfig ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                                Save config
-                            </button>
-
-                            {!repoUrl && (
-                                <p className="text-xs text-muted-foreground">Configure a repo to enable sync.</p>
-                            )}
-
-                            {repoUrl && (
-                                <div className="space-y-2">
-                                    {/* Status / countdown */}
-                                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                                        {isComparing ? (
-                                            <><Loader2 className="w-3 h-3 animate-spin" /> Comparing repo vs DB…</>
-                                        ) : compareDiff && !hasAnyDiff ? (
-                                            <><CheckCircle2 className="w-3 h-3 text-sa-good" /> Repo and DB are in sync · next check in {secondsToRefresh}s</>
-                                        ) : (
-                                            <><RefreshCw className="w-3 h-3" /> Next check in {secondsToRefresh}s</>
-                                        )}
-                                    </div>
-
-                                    {/* View Changes — opens review dialog when there are changes from remote */}
-                                    <button
-                                        onClick={() => setReviewOpen(true)}
-                                        disabled={!hasAnyDiff || isResolving}
-                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs w-full"
-                                        title={hasAnyDiff
-                                            ? "Review changes coming from remote"
-                                            : "No changes from remote"}
-                                    >
-                                        {isResolving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-                                        {compareDiff && hasAnyDiff
-                                            ? `View Changes (${(compareDiff.repoOnlyCount ?? 0) + (compareDiff.modifiedCount ?? 0) + (compareDiff.dbOnlyCount ?? 0)} change${(compareDiff.repoOnlyCount + compareDiff.modifiedCount + compareDiff.dbOnlyCount) === 1 ? "" : "s"})`
-                                            : "View Changes"}
-                                    </button>
-                                </div>
-                            )}
-                            {repoActionError && (
-                                <div className="flex items-center gap-1.5 text-xs text-destructive">
-                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                                    {repoActionError}
-                                </div>
-                            )}
-                        </div>
+                        <SettingsKRepoSyncSection
+                            syncStatus={repoSync.syncStatus}
+                            syncDirection={repoSync.syncDirection}
+                            statusMessage={repoSync.statusMessage}
+                            lastPushAt={repoSync.lastPushAt}
+                            repoUrl={repoSync.repoUrl}
+                            repoUrlInput={repoSync.repoUrlInput}
+                            branchInput={repoSync.branchInput}
+                            patInput={repoSync.patInput}
+                            onRepoUrlInputChange={(value) => { repoSync.setRepoUrlInput(value); repoSync.setConfigSaved(false); }}
+                            onBranchInputChange={(value) => { repoSync.setBranchInput(value); repoSync.setConfigSaved(false); }}
+                            onPatInputChange={(value) => { repoSync.setPatInput(value); repoSync.setConfigSaved(false); }}
+                            isSavingConfig={repoSync.isSavingConfig}
+                            configError={repoSync.configError}
+                            configSaved={repoSync.configSaved}
+                            onSaveConfig={repoSync.handleSaveConfig}
+                            isComparing={repoSync.isComparing}
+                            compareDiff={repoSync.compareDiff}
+                            hasAnyDiff={repoSync.hasAnyDiff}
+                            secondsToRefresh={repoSync.secondsToRefresh}
+                            isResolving={repoSync.isResolving}
+                            onViewChanges={() => repoSync.setReviewOpen(true)}
+                            repoActionError={repoSync.repoActionError}
+                        />
                     </div>
 
                     {/* Bottom row (conditional, full width): Sync result lists */}
                     {syncReport && (syncReport.updates.length > 0 || syncReport.created.length > 0) && (
-                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
-                            {/* Updated list */}
-                            {syncReport.updates.length > 0 && (
-                                <div className="flex flex-col gap-2 min-w-0">
-                                    <p className="text-xs text-muted-foreground font-medium">
-                                        Updated ({syncReport.updates.length})
-                                    </p>
-                                    <ScrollArea className="h-72 rounded-md border">
-                                        <div className="p-2 space-y-1">
-                                            {syncReport.updates.map((u) => (
-                                                <div key={u.id} className="rounded-md bg-muted/50 p-2 space-y-1">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="px-1.5 py-0.5 rounded bg-primary/15 text-primary text-[10px] font-medium shrink-0">
-                                                            {u.type}
-                                                        </span>
-                                                        {u.nameChanged && (
-                                                            <span className="text-[10px] text-sa-amber-ink font-medium">name</span>
-                                                        )}
-                                                        {u.linkChanged && (
-                                                            <span className="text-[10px] text-muted-foreground font-medium">link</span>
-                                                        )}
-                                                    </div>
-                                                    {u.nameChanged && (
-                                                        <div className="text-xs text-muted-foreground">
-                                                            <span className="line-through opacity-60">{u.oldName}</span>
-                                                            <span className="mx-1">→</span>
-                                                            <span className="text-foreground font-medium">{u.newName}</span>
-                                                        </div>
-                                                    )}
-                                                    {u.linkChanged && (
-                                                        <div className="text-[10px] font-mono text-muted-foreground break-all">
-                                                            <span className="line-through opacity-60">{u.oldLink}</span>
-                                                            <span className="mx-1">→</span>
-                                                            <span className="text-foreground">{u.newLink}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </ScrollArea>
-                                </div>
-                            )}
-
-                            {/* Created list */}
-                            {syncReport.created.length > 0 && (
-                                <div className="flex flex-col gap-2 min-w-0">
-                                    <p className="text-xs text-muted-foreground font-medium">
-                                        Created ({syncReport.created.length})
-                                    </p>
-                                    <ScrollArea className="h-72 rounded-md border">
-                                        <div className="p-2 space-y-1">
-                                            {syncReport.created.map((c, i) => (
-                                                <div key={`${c.type}-${i}`} className="rounded-lg bg-sa-surface border border-sa-border p-2 space-y-1">
-                                                    <div className="flex items-center gap-1.5 min-w-0">
-                                                        <span className="px-1.5 py-0.5 rounded-md border border-sa-border-strong text-muted-foreground text-[10px] font-medium shrink-0">
-                                                            {c.type}
-                                                        </span>
-                                                        <span className="text-xs font-medium truncate">{c.newName}</span>
-                                                        {c.description && (
-                                                            <span className="text-xs text-muted-foreground truncate" title={c.description}>
-                                                                — {c.description}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <div className="text-[10px] font-mono text-muted-foreground">{c.newLink}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </ScrollArea>
-                                </div>
-                            )}
-                        </div>
+                        <SettingsKeywordSyncLists syncReport={syncReport} />
                     )}
                 </div>
                 </div>{/* end scroll wrapper */}
@@ -550,11 +77,11 @@ export function SettingsDialog() {
         </Dialog>
 
         <KRepoConflictDialog
-            open={reviewOpen}
-            onOpenChange={setReviewOpen}
-            entries={compareDiff?.entries ?? []}
-            onResolve={handleResolveConflicts}
-            isResolving={isResolving}
+            open={repoSync.reviewOpen}
+            onOpenChange={repoSync.setReviewOpen}
+            entries={repoSync.compareDiff?.entries ?? []}
+            onResolve={repoSync.handleResolveConflicts}
+            isResolving={repoSync.isResolving}
         />
         </>
     );

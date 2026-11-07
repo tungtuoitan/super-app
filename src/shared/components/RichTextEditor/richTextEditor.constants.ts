@@ -68,3 +68,16 @@ export const richTextEditorConstants = {
         },
     } as const,
 } as const;
+
+// Basic text colors
+export const TEXT_COLORS = [
+    { name: "Default", color: null },
+    { name: "Red", color: "#ef4444" },
+    { name: "Orange", color: "#f97316" },
+    { name: "Yellow", color: "#eab308" },
+    { name: "Green", color: "#22c55e" },
+    { name: "Blue", color: "#3b82f6" },
+    { name: "Purple", color: "#a855f7" },
+    { name: "Pink", color: "#ec4899" },
+    { name: "Gray", color: "#6b7280" },
+];

@@ -48,7 +48,8 @@ export { RichTextEditor } from "./RichTextEditor/RichTextEditor";
 
 // ── Date / Time ───────────────────────────────────────────────────────────
 export { DateTimePicker } from "./DateTimePicker/DateTimePicker";
-export { DateRangePicker, type DateRangePickerProps } from "./DateTimePicker/DateRangePicker";
+export { DateRangePicker } from "./DateTimePicker/DateRangePicker";
+export type { DateRangePickerProps } from "./DateTimePicker/dateRangePicker.type";
 
 // ── Error Boundary ────────────────────────────────────────────────────────
 export { ErrorBoundary, useErrorBoundary, withErrorBoundary } from "react-error-boundary";

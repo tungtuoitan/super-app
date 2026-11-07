@@ -2,8 +2,9 @@
  * DateRangePicker pure helpers (#1514 — moved out of DateRangePicker.tsx, unchanged)
  */
 
-import { format, isToday, isTomorrow, isSameWeek, addWeeks, isSameYear, startOfWeek, endOfWeek, differenceInDays } from "date-fns";
-import type { DateWarningResult } from "./dateRangePicker.type";
+import { format, isToday, isTomorrow, isSameWeek, addWeeks, isSameYear, startOfWeek, endOfWeek, differenceInDays, isSameDay, startOfDay } from "date-fns";
+import type { Matcher } from "react-day-picker";
+import type { DateWarningResult, SelectionMode } from "./dateRangePicker.type";
 
 /**
  * Check if dates exceed limits
@@ -85,4 +86,50 @@ export function formatSmartDate(date: Date, hasTime: boolean): string {
     }
 
     return dateStr;
+}
+
+/**
+ * Create modifiers for today highlight and range display
+ */
+export function buildCalendarModifiers(
+    startDate: Date | null | undefined,
+    endDate: Date | null | undefined,
+    selectionMode: SelectionMode,
+    limitStartDate: Date | null | undefined,
+    limitEndDate: Date | null | undefined
+): Record<string, Matcher> {
+    const modifiers: Record<string, Matcher> = {};
+    // Today modifier - always show indicator
+    modifiers.todayMarker = (date: Date) => isToday(date);
+    // Start date modifier
+    if (startDate) {
+        modifiers.rangeStart = (date: Date) => isSameDay(date, startDate);
+    }
+    // End date modifier
+    if (endDate) {
+        modifiers.rangeEnd = (date: Date) => isSameDay(date, endDate);
+    }
+    // The edge being edited (From in "From" mode, To in "To" mode) gets a border
+    const activeEdgeDate = selectionMode === "start" ? startDate : endDate;
+    if (activeEdgeDate) {
+        modifiers.activeEdge = (date: Date) => isSameDay(date, activeEdgeDate);
+    }
+    // Range middle modifier
+    if (startDate && endDate) {
+        modifiers.rangeMiddle = (date: Date) => {
+            const day = startOfDay(date);
+            const start = startOfDay(startDate);
+            const end = startOfDay(endDate);
+            return day > start && day < end;
+        };
+    }
+    // Limit start date modifier (project/parent start)
+    if (limitStartDate) {
+        modifiers.limitStart = (date: Date) => isSameDay(date, limitStartDate);
+    }
+    // Limit end date modifier (project/parent end)
+    if (limitEndDate) {
+        modifiers.limitEnd = (date: Date) => isSameDay(date, limitEndDate);
+    }
+    return modifiers;
 }

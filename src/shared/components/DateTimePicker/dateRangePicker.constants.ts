@@ -31,3 +31,14 @@ export const QUICK_DATE_OPTIONS = [
         return d;
     }},
 ];
+
+// Custom class names for modifiers
+export const MODIFIERS_CLASS_NAMES = {
+    todayMarker: "today-marker",
+    rangeStart: "range-start",
+    rangeEnd: "range-end",
+    rangeMiddle: "range-middle",
+    activeEdge: "active-edge",
+    limitStart: "limit-start",
+    limitEnd: "limit-end",
+};
