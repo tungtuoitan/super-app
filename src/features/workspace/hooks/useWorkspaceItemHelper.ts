@@ -4,7 +4,7 @@ import { useEditorTabBarHelper } from "@/shell";
 import { useAuthStore } from "@/shared";
 import { useWorkspaceStore } from "../store/workspace.store";
 import { workspaceService } from "../service/workspace.service";
-import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspace.types";
+import { WorkspaceItemAction, UpsertWorkspaceItemRequest } from "../types/workspaceRequest.types";
 import { useWorkspaceLoader } from "./useWorkspace.helper";
 import { isNumber } from "lodash";
 import {useConsoleHelper} from "@/shared";

@@ -3,7 +3,8 @@
  */
 
 import { config } from "config/app.config";
-import type { DeleteItemsRequest, WorkspaceOperationResult, WsResponse, UpsertWorkspaceItemRequest } from "../types/workspace.types";
+import type { DeleteItemsRequest, WorkspaceOperationResult, UpsertWorkspaceItemRequest } from "../types/workspaceRequest.types";
+import type { WsResponse } from "../types/workspace.types";
 import type { WorkspaceDTO } from "../types/workspace-dto.types";
 import type { ResultOptions } from "@/shared";
 import { apiFetch } from "@/shared";

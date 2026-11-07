@@ -7,7 +7,7 @@ import { workspaceService } from "../service/workspace.service";
 import type { FolderDialogFormErrors } from "../store/FolderDialog.store";
 import type { Folder } from "@/features/workspace/types/folder.types";
 import { constants, useKeywordHelper } from "@/shared";
-import { WorkspaceItemAction } from "../types/workspace.types";
+import { WorkspaceItemAction } from "../types/workspaceRequest.types";
 import { useConsoleHelper } from "@/shared";
 import { treeMiniHelper } from "../utils/workspace.tree.utils";
 import { isFolder } from "@/features/workspace/types/workspace-v2.types";

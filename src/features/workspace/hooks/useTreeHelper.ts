@@ -5,7 +5,7 @@ import { useFolderDialogHelper } from "./useFolderDialog.helper";
 import { useWorkspaceLoader } from "./useWorkspace.helper";
 import { constants, useKeywordHelper } from "@/shared";
 import { workspaceService } from "../service/workspace.service";
-import { WorkspaceItemAction } from "../types/workspace.types";
+import { WorkspaceItemAction } from "../types/workspaceRequest.types";
 import { useAuthStore } from "@/shared";
 import { WorkspaceItemV2 } from "@/features/workspace/types/workspace-v2.types";
 import {useConsoleHelper} from "@/shared";

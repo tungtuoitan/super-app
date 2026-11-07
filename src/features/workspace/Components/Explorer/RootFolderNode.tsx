@@ -6,7 +6,7 @@ import { useSideBarHelper } from "@/shell";
 import { useTreeHelper } from "../../hooks/useTreeHelper";
 import { useWorkspaceLoader } from "../../hooks/useWorkspace.helper";
 import { treeMiniHelper, TreeFolder } from "../../utils/workspace.tree.utils";
-import { FolderItem } from "../../types/workspace.types";
+import { FolderItem } from "../../types/workspaceItem.types";
 import { useMenuContextHelper } from "@/shared";
 import { constants } from "@/shared";
 import { HighlightText } from "./HighlightText";

@@ -37,7 +37,7 @@ export { useMovingTreeStore } from "./store/MovingTree.store";
 export { useTreeStatusHelper } from "./hooks/useTreeStatusHelper";
 // Types
 export type { Ws } from "./types/workspace.types";
-export { WorkspaceItemAction } from "./types/workspace.types";
+export { WorkspaceItemAction } from "./types/workspaceRequest.types";
 export type { Folder } from "./types/folder.types";
 
 

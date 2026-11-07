@@ -11,7 +11,7 @@ import { useWorkspaceItemHelper } from "./useWorkspaceItemHelper";
 import type { BaseTab } from "@/shell";
 import { findNoteByEntityId } from "../utils/workspace.find.utils";
 import type { Note } from "@/features/note";
-import { WorkspaceItemAction } from "../types/workspace.types";
+import { WorkspaceItemAction } from "../types/workspaceRequest.types";
 import {useConsoleHelper} from "@/shared";
 
 /**

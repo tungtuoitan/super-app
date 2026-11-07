@@ -5,7 +5,7 @@
  * This mapper bridges the gap between backend and frontend type systems
  */
 
-import { WorkspaceItem, FolderItem, NoteItem, FileItem, FolderMetadata, NoteMetadata, FileMetadata } from "../types/workspace.types";
+import { WorkspaceItem, FolderItem, NoteItem, FileItem, FolderMetadata, NoteMetadata, FileMetadata } from "../types/workspaceItem.types";
 import { constants } from "@/shared";
 import {workspaceConstants} from "../workspace.constants";
 

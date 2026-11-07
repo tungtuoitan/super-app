@@ -1,7 +1,7 @@
 import { useAuthStore, useConsoleHelper, useMenuContextHelper, useLinkDialogHelper, linkService, linkConstants, parseApiError, _isLinkMime, _openExternalUrl, _linkDefaultName } from "@/shared";
 import { useWorkspaceStore } from "../store/workspace.store";
 import { workspaceService } from "../service/workspace.service";
-import { WorkspaceItemAction } from "../types/workspace.types";
+import { WorkspaceItemAction } from "../types/workspaceRequest.types";
 import { useWorkspaceLoader } from "./useWorkspace.helper";
 import type { WorkspaceFileItem } from "../types/workspace-v2.types";
 
