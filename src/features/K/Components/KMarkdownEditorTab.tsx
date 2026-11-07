@@ -7,7 +7,9 @@ import { richTextEditorConstants, useConsoleHelper } from "@/shared";
 import type { KQuestion } from "../types/kQuiz.type";
 import { dispatchKFlowQuestionsChanged } from "../utils/kEvents.utils";
 import { kMarkdownActions } from "../utils/kMarkdownActions";
-import { buildMarkdown, parseMarkdown, validateMarkdown } from "../utils/kMarkdownEditor.utils";
+import { buildMarkdown } from "../utils/kMarkdownBuild.utils";
+import { parseMarkdown } from "../utils/kMarkdownParse.utils";
+import { validateMarkdown } from "../utils/kMarkdownValidate.utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

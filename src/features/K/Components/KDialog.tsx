@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { workspaceConstants } from "@/features/workspace/workspace.constants";
-import { Loader2, Code2, Link2, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, getAllIconLabel, IconKey } from "@/shared";
 import { Button } from "@/shared";
 import { GenericTextField, IconPicker } from "@/shared";
@@ -21,6 +21,7 @@ import {isFolder, KItemV2} from "../types/kV2.type";
 import { KAttachmentService } from "../service/kAttachment.service";
 import type { KAttachment } from "../types/kAttachment.type";
 import { KAttachmentViewerDialog } from "./small/KAttachmentViewerDialog";
+import { KDialogAttachments } from "./small/KDialogAttachments";
 
 export function KDialog() {
     // Get state from ExplorerStore
@@ -314,88 +315,18 @@ export function KDialog() {
 
                     {/* Attachments — edit mode only */}
                     {mode === "edit" && editingNode && (
-                        <div className="border border-sa-border rounded-xl overflow-hidden">
-                            <button
-                                type="button"
-                                onClick={() => setAttSectionOpen(o => !o)}
-                                className="w-full flex items-center justify-between px-3 h-9 text-[11px] font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground hover:bg-sa-hover transition-colors duration-100"
-                            >
-                                <span>Attachments {nodeAttachments.length > 0 && `(${nodeAttachments.length})`}</span>
-                                {attSectionOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                            </button>
-
-                            {attSectionOpen && (
-                                <div className="px-3 pb-3 space-y-2 border-t border-sa-border">
-                                    {nodeAttachments.length === 0 && (
-                                        <p className="text-xs text-muted-foreground pt-2">No attachments linked to this node.</p>
-                                    )}
-                                    {nodeAttachments.map(att => (
-                                        <div key={att.id} className="flex items-center gap-2 pt-2">
-                                            <Code2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                                            <button
-                                                type="button"
-                                                onClick={() => setViewingAtt(att)}
-                                                className="flex-1 text-left text-xs font-mono text-foreground/90 hover:text-foreground truncate transition-colors duration-100"
-                                                title="Click to view"
-                                            >
-                                                {att.title}
-                                            </button>
-                                            {att.language && (
-                                                <span className="text-[11px] px-1.5 rounded-md border border-sa-border-strong text-muted-foreground font-mono">{att.language}</span>
-                                            )}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleUnlinkFromNode(att)}
-                                                className="text-muted-foreground hover:text-sa-danger transition-colors duration-100"
-                                            >
-                                                <X className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                    ))}
-
-                                    {/* Link picker */}
-                                    <div className="relative pt-1">
-                                        <button
-                                            type="button"
-                                            onClick={() => { setAttPickerOpen(o => !o); loadAttPool(); }}
-                                            className="flex items-center gap-1.5 px-2 h-7 text-xs rounded-md border border-sa-border-strong text-muted-foreground hover:bg-sa-hover hover:text-foreground transition-colors duration-100"
-                                        >
-                                            <Link2 className="w-3 h-3" />
-                                            Link attachment
-                                        </button>
-                                        {attPickerOpen && (
-                                            <div className="absolute left-0 top-full mt-1 z-20 w-64 rounded-lg border border-sa-border-strong bg-popover sa-shadow-pop p-1">
-                                                {attPool.length === 0 ? (
-                                                    <div className="p-3 text-xs text-muted-foreground">No attachments available</div>
-                                                ) : (
-                                                    <ul className="max-h-48 overflow-y-auto">
-                                                        {attPool
-                                                            .filter(a => !nodeAttachments.some(n => n.id === a.id))
-                                                            .map(att => (
-                                                                <li key={att.id}>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleLinkToNode(att)}
-                                                                        disabled={linkingAttId === att.id}
-                                                                        className="w-full flex items-center gap-2 px-2 h-7 rounded-md text-left text-xs text-foreground hover:bg-sa-hover-strong transition-colors duration-100"
-                                                                    >
-                                                                        {linkingAttId === att.id
-                                                                            ? <Loader2 className="w-3 h-3 animate-spin" />
-                                                                            : <Code2 className="w-3 h-3 text-muted-foreground" />
-                                                                        }
-                                                                        <span className="truncate font-mono">{att.title}</span>
-                                                                    </button>
-                                                                </li>
-                                                            ))
-                                                        }
-                                                    </ul>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        <KDialogAttachments
+                            attachments={nodeAttachments}
+                            pool={attPool}
+                            sectionOpen={attSectionOpen}
+                            pickerOpen={attPickerOpen}
+                            linkingAttId={linkingAttId}
+                            onToggleSection={() => setAttSectionOpen(o => !o)}
+                            onTogglePicker={() => { setAttPickerOpen(o => !o); loadAttPool(); }}
+                            onView={(att) => setViewingAtt(att)}
+                            onUnlink={handleUnlinkFromNode}
+                            onLink={handleLinkToNode}
+                        />
                     )}
                 </div>
 
