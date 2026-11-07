@@ -27,7 +27,8 @@ import { useTaskDetailChecklistSelector } from "../Selectors/TaskDetailChecklist
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useTaskChecklistHeadless } from "../hooks/taskChecklist/useTaskChecklist.headless";
 import {useTaskChecklistHelper} from "../hooks/taskChecklist/useTaskChecklist.helper";
-import {checklistProgress, flatItemIndex, getChecklistTypeLabel, getItemCheckState} from "../utils/checklist.utils";
+import {checklistProgress, flatItemIndex, getItemCheckState} from "../utils/checklist.utils";
+import {getChecklistTypeLabel} from "../utils/checklistTemplate.utils";
 
 export function TaskChecklist() {
     return <TaskChecklistInner />;

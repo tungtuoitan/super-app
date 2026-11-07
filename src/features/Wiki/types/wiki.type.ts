@@ -35,3 +35,18 @@ export interface WikiExtractResult {
 export type WikiTabData = {
     keywordId: number | null; // null = show all
 };
+
+export type InputMode = "form" | "text";
+
+export interface KeywordRow {
+    id: string;
+    name: string;
+    synonyms: string[];
+    synonymInput: string;
+    showSynonyms: boolean;
+}
+
+export interface ParsedEntry {
+    name: string;
+    synonyms: string[];
+}

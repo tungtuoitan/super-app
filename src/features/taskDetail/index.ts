@@ -32,8 +32,8 @@ export type { TaskDTO } from "./service/task.service";
 
 // Utils
 export { getTaskStatusColors, getTaskPriorityColors, transformTaskData } from "./utils/TaskDetail.utils";
+export { parseChecklistJson } from "./utils/checklistTemplate.utils";
 export {
-    parseChecklistJson,
     checklistProgress,
     toggleChecklistItem,
     getItemCheckState,

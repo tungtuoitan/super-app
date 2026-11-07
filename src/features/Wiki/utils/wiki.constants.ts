@@ -33,3 +33,21 @@ export const WIKI_MENTION = {
     // (only when a selection is active — draws focus to the matching lines)
     lineDimOpacity: 0.25,
 } as const;
+
+// Placeholder shown in the "Add Keywords" text mode textarea
+export const WIKI_KEYWORD_PLACEHOLDER = `# React
+- ReactJS
+- React.js
+
+# TypeScript
+- TS
+
+# dependency injection
+`;
+
+// Graph canvas animation / simulation tuning
+export const INIT_SIM_STEPS = 400;
+export const LERP_SPEED     = 0.1;   // alpha lerp per frame
+export const ALPHA_DIM      = 0.08;  // dimmed node/edge opacity
+export const ALPHA_NEIGHBOR = 0.55;  // connected-but-not-selected
+export const LABEL_FONT     = "Geist, -apple-system, sans-serif";

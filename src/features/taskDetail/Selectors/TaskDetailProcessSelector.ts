@@ -6,7 +6,7 @@
  * Depends on: useTaskDetailSelector (for selectedTask).
  */
 
-import {parseChecklistJson} from "../utils/checklist.utils";
+import {parseChecklistJson} from "../utils/checklistTemplate.utils";
 import { useTaskDetailSelector } from "./TaskDetailSelector";
 
 export const useTaskDetailProcessSelector = () => {

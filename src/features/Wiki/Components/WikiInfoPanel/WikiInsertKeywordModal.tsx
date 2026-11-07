@@ -1,65 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Plus, Loader2, ChevronDown, AlignLeft, List } from "lucide-react";
+import { X, Loader2, AlignLeft, List } from "lucide-react";
 import { useWikiStore } from "../../store/useWiki.store";
 import { useWikiLoader } from "../../hooks/useWikiLoader.helper";
 import { wikiService } from "../../service/wiki.service";
-import type { WikiKeyword } from "../../types/wiki.type";
+import type { InputMode, KeywordRow, ParsedEntry } from "../../types/wiki.type";
+import { mkRow, parseMarkdownKeywords } from "../../utils/wikiKeyword.utils";
+import WikiKeywordTextMode from "../small/WikiKeywordTextMode";
+import WikiKeywordFormMode from "../small/WikiKeywordFormMode";
 
 interface Props {
     onClose: () => void;
 }
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type InputMode = "form" | "text";
-
-interface KeywordRow {
-    id: string;
-    name: string;
-    synonyms: string[];
-    synonymInput: string;
-    showSynonyms: boolean;
-}
-
-interface ParsedEntry {
-    name: string;
-    synonyms: string[];
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function mkRow(): KeywordRow {
-    return { id: crypto.randomUUID(), name: "", synonyms: [], synonymInput: "", showSynonyms: false };
-}
-
-function parseMarkdownKeywords(text: string): ParsedEntry[] {
-    const result: ParsedEntry[] = [];
-    let current: ParsedEntry | null = null;
-
-    for (const raw of text.split("\n")) {
-        const line = raw.trim();
-        if (line.startsWith("# ")) {
-            if (current) result.push(current);
-            const name = line.slice(2).trim();
-            current = name ? { name, synonyms: [] } : null;
-        } else if (line.startsWith("- ") && current) {
-            const syn = line.slice(2).trim();
-            if (syn && !current.synonyms.includes(syn)) current.synonyms.push(syn);
-        }
-    }
-    if (current) result.push(current);
-    return result;
-}
-
-const PLACEHOLDER = `# React
-- ReactJS
-- React.js
-
-# TypeScript
-- TS
-
-# dependency injection
-`;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -193,7 +144,7 @@ export default function WikiInsertKeywordModal({ onClose }: Props) {
                 {/* Body */}
                 <div className="flex-1 overflow-y-auto">
                     {mode === "text" ? (
-                        <TextMode
+                        <WikiKeywordTextMode
                             textareaRef={textareaRef}
                             mdText={mdText}
                             setMdText={setMdText}
@@ -201,7 +152,7 @@ export default function WikiInsertKeywordModal({ onClose }: Props) {
                             existingNames={existingNames}
                         />
                     ) : (
-                        <FormMode
+                        <WikiKeywordFormMode
                             listRef={listRef}
                             rows={rows}
                             keywords={keywords}
@@ -237,203 +188,6 @@ export default function WikiInsertKeywordModal({ onClose }: Props) {
                     </div>
                 </div>
             </div>
-        </div>
-    );
-}
-
-// ─── Text mode ────────────────────────────────────────────────────────────────
-
-interface TextModeProps {
-    textareaRef: React.RefObject<HTMLTextAreaElement>;
-    mdText: string;
-    setMdText: (v: string) => void;
-    parsedEntries: ParsedEntry[];
-    existingNames: Set<string>;
-}
-
-function TextMode({ textareaRef, mdText, setMdText, parsedEntries, existingNames }: TextModeProps) {
-    const seen = new Set<string>();
-
-    return (
-        <div className="flex flex-col gap-0">
-            {/* Textarea */}
-            <div className="px-5 pt-4 pb-3">
-                <textarea
-                    ref={textareaRef}
-                    autoFocus
-                    className="w-full h-48 bg-sa-surface-2 border border-sa-border rounded-xl px-4 py-3 font-mono text-[12px] text-foreground resize-none outline-none focus:border-ring leading-relaxed placeholder:text-muted-foreground transition-colors"
-                    placeholder={PLACEHOLDER}
-                    value={mdText}
-                    onChange={e => setMdText(e.target.value)}
-                    spellCheck={false}
-                />
-                <p className="text-[10px] text-muted-foreground/70 mt-1.5">
-                    <span className="text-muted-foreground font-mono"># keyword</span> để thêm keyword&ensp;·&ensp;
-                    <span className="text-muted-foreground font-mono">- synonym</span> để thêm synonym cho keyword phía trên
-                </p>
-            </div>
-
-            {/* Parsed preview */}
-            {parsedEntries.length > 0 && (
-                <div className="px-5 pb-4 flex flex-col gap-1.5">
-                    <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide mb-0.5">
-                        Preview — {parsedEntries.length} parsed
-                    </div>
-                    {parsedEntries.map((entry, i) => {
-                        const lo      = entry.name.toLowerCase();
-                        const isDupe  = existingNames.has(lo);
-                        const isBatch = seen.has(lo);
-                        if (!isDupe && !isBatch) seen.add(lo);
-                        const invalid = isDupe || isBatch;
-
-                        return (
-                            <div
-                                key={i}
-                                className={`flex items-start gap-2 px-3 py-2 rounded-lg border ${
-                                    invalid
-                                        ? "border-sa-danger/20 bg-sa-danger/10"
-                                        : "border-sa-border bg-sa-surface-2"
-                                }`}
-                            >
-                                <span className={`text-[12px] font-semibold flex-shrink-0 ${invalid ? "text-sa-danger" : "text-foreground"}`}>
-                                    {entry.name}
-                                </span>
-                                {invalid && (
-                                    <span className="text-[10px] text-sa-danger self-center">
-                                        {isDupe ? "already exists" : "duplicate"}
-                                    </span>
-                                )}
-                                {entry.synonyms.length > 0 && !invalid && (
-                                    <div className="flex flex-wrap gap-1 mt-px">
-                                        {entry.synonyms.map(s => (
-                                            <span key={s} className="h-4 px-1.5 border border-sa-border-strong rounded-md text-[10px] text-muted-foreground">
-                                                {s}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-        </div>
-    );
-}
-
-// ─── Form mode ────────────────────────────────────────────────────────────────
-
-interface FormModeProps {
-    listRef: React.RefObject<HTMLDivElement>;
-    rows: KeywordRow[];
-    keywords: WikiKeyword[];
-    updateRow: (id: string, patch: Partial<KeywordRow>) => void;
-    removeRow: (id: string) => void;
-    addRow: () => void;
-    addSynonym: (rowId: string) => void;
-    removeSynonym: (rowId: string, syn: string) => void;
-}
-
-function FormMode({ listRef, rows, keywords, updateRow, removeRow, addRow, addSynonym, removeSynonym }: FormModeProps) {
-    return (
-        <div ref={listRef} className="px-5 py-3 flex flex-col gap-2">
-            {rows.map((row, idx) => {
-                const isDupe    = !!row.name.trim() && keywords.some(k => k.name.toLowerCase() === row.name.trim().toLowerCase());
-                const batchDupe = !!row.name.trim() && rows.some((r, i) => i !== idx && r.name.trim().toLowerCase() === row.name.trim().toLowerCase());
-                const isInvalid = isDupe || batchDupe;
-
-                return (
-                    <div key={row.id} className="bg-sa-surface-2 border border-sa-border rounded-xl p-3 flex flex-col gap-2">
-                        {/* Name row */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-muted-foreground/70 font-mono w-4 text-right flex-shrink-0">{idx + 1}</span>
-                            <input
-                                className={`kw-name-input flex-1 h-8 bg-sa-surface-2 border rounded-lg px-3 text-[13px] font-medium text-foreground outline-none placeholder:text-muted-foreground transition-colors ${
-                                    isInvalid ? "border-sa-danger/50 focus:border-sa-danger/35" : "border-sa-border focus:border-ring"
-                                }`}
-                                placeholder={idx === 0 ? "e.g. Dependency Injection" : "Keyword name…"}
-                                value={row.name}
-                                onChange={e => updateRow(row.id, { name: e.target.value })}
-                                onKeyDown={e => {
-                                    if (e.key === "Enter" && !e.shiftKey) {
-                                        e.preventDefault();
-                                        if (idx === rows.length - 1) addRow();
-                                        else listRef.current?.querySelectorAll<HTMLInputElement>("input.kw-name-input")?.[idx + 1]?.focus();
-                                    }
-                                }}
-                            />
-                            <button
-                                onClick={() => updateRow(row.id, { showSynonyms: !row.showSynonyms })}
-                                className={`flex items-center gap-1 h-8 px-2 rounded-lg border text-[10px] font-medium transition-colors flex-shrink-0 ${
-                                    row.synonyms.length > 0
-                                        ? "border-sa-amber/40 bg-sa-amber/10 text-sa-amber-ink"
-                                        : "border-sa-border bg-sa-surface-2 text-muted-foreground hover:text-foreground"
-                                }`}
-                            >
-                                {row.synonyms.length > 0 ? `≈ ${row.synonyms.length}` : "≈"}
-                                <ChevronDown className={`w-3 h-3 transition-transform ${row.showSynonyms ? "rotate-180" : ""}`} />
-                            </button>
-                            {rows.length > 1 && (
-                                <button
-                                    onClick={() => removeRow(row.id)}
-                                    className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground/70 hover:bg-sa-danger/10 hover:text-sa-danger transition-colors flex-shrink-0"
-                                >
-                                    <X className="w-3.5 h-3.5" />
-                                </button>
-                            )}
-                        </div>
-
-                        {isInvalid && (
-                            <p className="text-[10px] text-sa-danger pl-6">
-                                {isDupe ? "Already exists in your wiki" : "Duplicate in this batch"}
-                            </p>
-                        )}
-
-                        {row.showSynonyms && (
-                            <div className="pl-6 flex flex-col gap-2">
-                                {row.synonyms.length > 0 && (
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {row.synonyms.map(s => (
-                                            <span key={s} className="flex items-center gap-1 h-5 pl-2 pr-1 border border-sa-border-strong rounded-md text-[11px] text-foreground">
-                                                {s}
-                                                <button
-                                                    onClick={() => removeSynonym(row.id, s)}
-                                                    className="w-3.5 h-3.5 flex items-center justify-center rounded-full hover:bg-sa-hover-strong text-muted-foreground hover:text-foreground transition-colors"
-                                                >
-                                                    <X className="w-2 h-2" />
-                                                </button>
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                                <div className="flex gap-1.5">
-                                    <input
-                                        className="flex-1 h-7 bg-transparent border border-sa-border-strong rounded-lg px-2.5 text-[11px] text-foreground outline-none focus:border-ring placeholder:text-muted-foreground transition-colors"
-                                        placeholder="Add synonym…"
-                                        value={row.synonymInput}
-                                        onChange={e => updateRow(row.id, { synonymInput: e.target.value })}
-                                        onKeyDown={e => e.key === "Enter" && addSynonym(row.id)}
-                                    />
-                                    <button
-                                        onClick={() => addSynonym(row.id)}
-                                        disabled={!row.synonymInput.trim()}
-                                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-sa-surface-2 border border-sa-border text-muted-foreground hover:text-foreground hover:bg-sa-hover-strong disabled:opacity-30 transition-colors"
-                                    >
-                                        <Plus className="w-3 h-3" />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                );
-            })}
-
-            <button
-                onClick={addRow}
-                className="flex items-center gap-1.5 w-full h-8 px-3 rounded-xl border border-dashed border-sa-border text-muted-foreground/70 text-xs hover:border-sa-amber/40 hover:text-sa-amber-ink transition-colors"
-            >
-                <Plus className="w-3.5 h-3.5" /> Add another keyword
-            </button>
         </div>
     );
 }

@@ -12,7 +12,8 @@ import { useAuthStore, useGetStandardRegistry } from "@/shared";
 import { IAutoCompleteOptions, IStatusOption } from "@/shared";
 import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useEditorTabBarHelper } from "@/shell";
-import {getChecklistTemplate, parseTextToChecklist} from "../utils/checklist.utils";
+import {parseTextToChecklist} from "../utils/checklistText.utils";
+import {getChecklistTemplate} from "../utils/checklistTemplate.utils";
 
 export const useTaskDetailFormHelper = () => {
     const { $user } = useAuthStore();

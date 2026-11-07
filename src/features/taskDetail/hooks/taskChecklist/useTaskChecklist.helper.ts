@@ -15,7 +15,8 @@ import {useTaskChecklistStore} from "../../store/useTaskChecklist.store";
 import {useTaskSectionStore} from "../../store/useTaskSection.store";
 import {useTaskDetailChecklistHelper} from "./useTaskDetailChecklist.helper";
 import {useTaskCommentHelper} from "../taskComment/useTaskComment.helper";
-import {checklistToText, findItemCursorOffset, flatItemIndex, getFlatItems, getItemCheckState, migrateFromTestcase, migrateToTestcase, parseTextToChecklist, toggleChecklistItem, validateChecklistText} from "../../utils/checklist.utils";
+import {flatItemIndex, getFlatItems, getItemCheckState, migrateFromTestcase, migrateToTestcase, toggleChecklistItem} from "../../utils/checklist.utils";
+import {checklistToText, findItemCursorOffset, parseTextToChecklist, validateChecklistText} from "../../utils/checklistText.utils";
 
 export const useTaskChecklistHelper = () => {
     // ── Read from selectors ───────────────────────────────────────────────────

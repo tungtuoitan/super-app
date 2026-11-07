@@ -8,7 +8,7 @@
 
 import { useGetStandardRegistry } from "@/shared";
 import { useTaskDetailSelector } from "./TaskDetailSelector";
-import {getChecklistTemplate, parseChecklistJson} from "../utils/checklist.utils";
+import {getChecklistTemplate, parseChecklistJson} from "../utils/checklistTemplate.utils";
 
 export const useTaskDetailChecklistSelector = () => {
     const { selectedTask } = useTaskDetailSelector();
