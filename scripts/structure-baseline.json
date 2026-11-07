@@ -1,0 +1,5 @@
+{
+  "destructure-alias": {
+    "src/features/project/task/contexts/helpers/useTaskTimelineMenu.helper.ts": 2
+  }
+}

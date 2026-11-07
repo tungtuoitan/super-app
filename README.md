@@ -16,7 +16,7 @@ A modular, VSCode-style single-page application built with **React 18 + TypeScri
 - **Routing:** React Router 6
 - **Real-time:** SignalR (`@microsoft/signalr`) — used by the K module for repo sync
 - **Auth:** Local login + Google OAuth (PKCE), JWT access token + HttpOnly refresh cookie
-- **Testing:** `craco test` (Jest via Create React App). Testing Library and Vitest are installed but there are currently no test files in `src/`.
+- **Testing:** `craco test` (Jest via Create React App). Testing Library and Vitest are installed; a few `*.test.ts` exist under `src/features/*/utils/`.
 - **Component dev:** Storybook 9 is configured (`npm run storybook`), but no `*.stories.tsx` exist yet.
 
 ## Getting Started
@@ -52,11 +52,13 @@ cp .env.example .env
 ```bash
 npm start            # dev server (http://localhost:3000)
 npm run build        # production build
-npm test             # Jest test runner (no tests in src/ yet)
+npm test             # Jest test runner
 npm run storybook    # Storybook on :6006 (no stories yet)
 ```
 
 ## Architecture
+
+> Full layout, import rules and how to add a feature: [`STRUCTURE.md`](STRUCTURE.md).
 
 The codebase follows a strict **layered, feature-based architecture** enforced by ESLint.
 
@@ -120,7 +122,7 @@ Per-module files follow a fixed naming convention (see `CLAUDE.md` for full rule
 | constants | `moduleName.constants.ts` |
 | utils | `moduleName.utils.ts` |
 
-Key rules: max **400 lines per file**, single responsibility per file type, no cross-file re-exports, and always destructure without aliases. See [`CLAUDE.md`](CLAUDE.md) and [`BEST_PRACTICES.md`](BEST_PRACTICES.md).
+Key rules: max **400 lines per file**, single responsibility per file type, no cross-file re-exports, and always destructure without aliases. See [`STRUCTURE.md`](STRUCTURE.md) (where things live) and [`CLAUDE.md`](CLAUDE.md) (per-file rules).
 
 ## Related
 

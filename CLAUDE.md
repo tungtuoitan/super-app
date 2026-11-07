@@ -1,5 +1,7 @@
 # Code Validation Rules
 
+Where things live and import boundaries: `STRUCTURE.md`. Generic rules: skill `code-rules`.
+
 Validate all new/modified code against these rules before committing.
 
 ## Module Structure
