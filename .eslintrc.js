@@ -27,9 +27,9 @@ const SHELL  = { group: ["@/shell/**"],  allowTypeImports: true, message: "Impor
 const SHARED = { group: ["@/shared/**"], allowTypeImports: true, message: "Import from '@/shared' (index) only. Exception: 'import type' allowed from subdirectories." };
 
 // ─── Feature list ─────────────────────────────────────────────────────────────
-// To add a new feature: append its name here. Done.
+// One source: the "app" module in code-rules.json. To add a feature, add its name there (code-rules hook treats it as tightening).
 
-const FEATURES = ["project", "taskDetail", "multiProject", "K", "Wiki", "lifeLog", "note", "workspace", "dailyLog", "home"];
+const FEATURES = require("./code-rules.json").modules.find((m) => m.name === "app").features;
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 

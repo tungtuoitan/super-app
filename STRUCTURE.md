@@ -23,7 +23,7 @@ Ngoài ba tầng: `config/` (env, cấu hình app), `contexts/` (Navigation, The
 - Qua ranh giới tầng/feature **chỉ import qua `index.ts`**: `@/features/project`, `@/shell`, `@/shared`.
 - Trong cùng một feature dùng đường dẫn tương đối.
 - Ngoại lệ được import thẳng file con: `import type ...`, `*.constants.ts`, `*.types.ts` (không được import feature khác).
-- Thêm feature mới: thêm tên vào mảng `FEATURES` trong `.eslintrc.js`.
+- Thêm feature mới: thêm tên vào `features` của module `app` trong `code-rules.json` (`.eslintrc.js` đọc từ đó).
 
 ## 3. Bên trong một feature
 
@@ -45,7 +45,7 @@ features/<tên>/
 
 Không feature nào có đủ mọi thư mục; có cái nào dùng cái đó. Tính năng lớn chia **tính năng con** thành thư mục lồng cùng khung (vd `project/task/` có `Components/ hooks/ store/ utils/`).
 
-### Tên file (chi tiết: `stacks/react-ts.md`, R1–R4)
+### Tên file (chi tiết: `stacks/react-ts.md`, R1–R4; máy kiểm theo bản đồ layout trong `stacks/react-ts.json`, G21)
 
 | Loại | Mẫu |
 |---|---|
@@ -58,7 +58,7 @@ Không feature nào có đủ mọi thư mục; có cái nào dùng cái đó. T
 Feature tự đăng ký, **không sửa shell**:
 1. Tạo `features/<tên>/shell/<tên>.module.ts(x)`.
 2. Import nó **trực tiếp** (không qua cổng, tránh vòng khởi tạo) và đăng ký trong `shell/modules.config.ts`.
-3. Thêm tên vào `FEATURES` trong `.eslintrc.js`.
+3. Thêm tên vào `features` của module `app` trong `code-rules.json`.
 
 Cùng file `module` đăng ký luôn context menu, filter, plugin command palette.
 
@@ -74,3 +74,16 @@ database-objects/                Định nghĩa đối tượng DB
 test/                            Test ngoài src
 public/, build/                  Tĩnh / kết quả build
 ```
+
+## 7. Module kiểm tra (code-rules)
+
+Repo chia thành module trong `code-rules.json`, mỗi module một stack; mọi file code phải thuộc một module hoặc một `exclude` có lý do:
+
+| Module | Thư mục | Stack |
+|---|---|---|
+| `app` | `src/` | `react-ts` (+ ESLint) |
+| `extension` | `extension/` | `react-ts`, bản đồ layout riêng |
+| `browser-extension` | `browser-extension/` | `js` (rule chung) |
+| `test`, `root-scripts` | `test/`, `recovery.ps1` | `test` (rule chung, nới) |
+
+Không kiểm: `database-objects/` (kéo về từ DB), file cấu hình build ở gốc. Xem `node ~/.claude/skills/code-rules/check/check.js coverage`.

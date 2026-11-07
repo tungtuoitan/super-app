@@ -1,6 +1,96 @@
 {
-  "stack": "react-ts",
-  "roots": ["src/"],
-  "eslint": true,
-  "rules": {}
+  "modules": [
+    {
+      "name": "app",
+      "roots": [
+        "src/"
+      ],
+      "stack": "react-ts",
+      "eslint": true,
+      "features": [
+        "project",
+        "taskDetail",
+        "multiProject",
+        "K",
+        "Wiki",
+        "lifeLog",
+        "note",
+        "workspace",
+        "dailyLog",
+        "home"
+      ]
+    },
+    {
+      "name": "extension",
+      "roots": [
+        "extension/"
+      ],
+      "stack": "react-ts",
+      "layout": {
+        "replace": true,
+        "anywhere": [
+          "*.d.ts",
+          "*.md"
+        ],
+        "map": {
+          "": [
+            "*.config.ts",
+            "*.config.js"
+          ],
+          "src/": [
+            "background.ts",
+            "content.ts"
+          ],
+          "src/lib/": [
+            "*.ts"
+          ],
+          "src/popup/": [
+            "*.tsx",
+            "*.css"
+          ],
+          "src/review/": [
+            "*.tsx",
+            "*.ts"
+          ]
+        }
+      },
+      "eslint": true
+    },
+    {
+      "name": "browser-extension",
+      "roots": [
+        "browser-extension/"
+      ],
+      "stack": "js"
+    },
+    {
+      "name": "test",
+      "roots": [
+        "test/"
+      ],
+      "stack": "test"
+    },
+    {
+      "name": "root-scripts",
+      "roots": [
+        "recovery.ps1"
+      ],
+      "stack": "test"
+    }
+  ],
+  "exclude": [
+    {
+      "path": "database-objects/",
+      "why": "Bản kéo về từ DB (Tung chốt 07/11), không viết tay trong repo"
+    },
+    {
+      "path": "*.config.js",
+      "why": "Cấu hình công cụ build ở gốc (tailwind, postcss, craco), không phải code app"
+    },
+    {
+      "path": ".eslintrc.js",
+      "why": "Cấu hình ESLint, không phải code app"
+    }
+  ],
+  "exceptions": []
 }
