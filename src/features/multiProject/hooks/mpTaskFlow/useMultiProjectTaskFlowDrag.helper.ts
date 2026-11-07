@@ -13,7 +13,8 @@ import { useAuthStore } from "@/shared";
 import { flowService } from "@/shared";
 import { useDebugLog } from "@/shared";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
-import { estimateNodeHeight, NODE_WIDTH } from "../../utils/multiProjectTaskFlow.utils";
+import { NODE_WIDTH } from "../../utils/multiProjectTaskFlow.utils";
+import { estimateNodeHeight } from "../../utils/multiProjectTaskFlowArrange.utils";
 
 const SNAP_THRESHOLD = 20;
 const AXIS_LOCK_MIN = 8;

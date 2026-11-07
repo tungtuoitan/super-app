@@ -10,179 +10,27 @@ import { useMultiProjectTaskFlowSelector } from "../../Selectors/useMultiProject
 import { useMpTaskStore } from "@/features/multiProject/store/useMpTask.store";
 import { useAuthStore } from "@/shared";
 import { useConsoleHelper } from "@/shared";
-import { taskService, transformTaskData } from "@/features/taskDetail";
-import type { TaskDTO } from "@/features/taskDetail";
+import { taskService } from "@/features/taskDetail";
 import { flowService } from "@/shared";
-import { toDateOnly } from "@/shared";
 import { useMultiProjectTaskFlowProcessHelper } from "./useMultiProjectTaskFlowProcess.helper";
+import { useMultiProjectTaskFlowNodeRenameHelper } from "./useMultiProjectTaskFlowNodeRename.helper";
+import { useMultiProjectTaskFlowNodeUpdateHelper } from "./useMultiProjectTaskFlowNodeUpdate.helper";
 import type { TaskFlowNodeData, FlowEdgeData } from "../../types/multiProjectTaskFlow.type";
 import type { Task } from "@/features/taskDetail";
 import { useMultiProjectTaskFlowHelper } from "./useMultiProjectTaskFlow.helper";
-import { useTaskFolderHelper } from "@/features/taskDetail";
-import { useProjectWorkspaceResolver } from "@/features/project";
 import { useDebugLog } from "@/shared";
 
 export const useMultiProjectTaskFlowNodeHelper = () => {
     const { setFlowNodes, setEditingNodeId, taskFlowTasks, setTaskFlowTasks, savedEdges, setSavedEdges, setFlowEdges } = useMultiTaskFlowStore();
     const { handleToggleProcess } = useMultiProjectTaskFlowProcessHelper();
-    const { filteredTasks, flowNodes: currentFlowNodes, projectNameMap, filteredProjectIds, allProjects } = useMultiProjectTaskFlowSelector();
+    const { filteredTasks, flowNodes, projectNameMap, filteredProjectIds, allProjects } = useMultiProjectTaskFlowSelector();
     const { tasks, setTasks } = useMpTaskStore();
     const { $user } = useAuthStore();
     const _console = useConsoleHelper();
     const { isNodeLocked } = useMultiProjectTaskFlowHelper();
-    const { createTaskFolder } = useTaskFolderHelper();
-    const { resolveWorkspaceId } = useProjectWorkspaceResolver();
+    const { handleRenameStart, handleRenameCancel, handleRenameConfirm } = useMultiProjectTaskFlowNodeRenameHelper();
+    const { handleChangeProject, handleChangeStatus } = useMultiProjectTaskFlowNodeUpdateHelper();
     const debugLog = useDebugLog();
-    // ── Rename ──────────────────────────────────────────────────────────────
-
-    const handleRenameStart = (nodeId: string) => setEditingNodeId(nodeId)
-    const handleRenameCancel = () => setEditingNodeId(null)
-
-    const handleRenameConfirm = 
-        async (nodeId: string, newTitle: string) => {
-            const isTempNode = nodeId.startsWith("temp-node-");
-            const trimmed = newTitle.trim();
-
-            // ── Temp node: create task or discard ───────────────────────────
-            if (isTempNode) {
-                setEditingNodeId(null);
-                if (!trimmed) {
-                    setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));
-                    return;
-                }
-
-                const tempNode = currentFlowNodes.find((n) => n.id === nodeId);
-                if (!tempNode) return;
-                const tempData = tempNode.data as TaskFlowNodeData;
-
-                // Optimistic: show trimmed title immediately (prevents "Untitled" flash)
-                setFlowNodes((prev) =>
-                    prev.map((n) =>
-                        n.id === nodeId
-                            ? { ...n, data: { ...tempData, task: { ...tempData.task, title: trimmed } } }
-                            : n,
-                    ),
-                );
-
-                try {
-                    const taskResult = await taskService._upsertTaskBatch($user.userToken, [{
-                        projectId: tempData.task.projectId,
-                        parentTaskId: null,
-                        type: tempData.task.type,
-                        title: trimmed,
-                        status: "open",
-                        priority: "medium",
-                        orderIndex: 0,
-                        description: null,
-                        startDate: null,
-                        endDate: null,
-                        checklistJson: null,
-                        processJson: null,
-                        customTabsJson: null,
-                        isMilestone: false,
-                    }]);
-
-                    if (!taskResult.success || !taskResult.data?.length) throw new Error(taskResult.message);
-                    const [newTask] = transformTaskData([taskResult.data[0] as unknown as TaskDTO]);
-                    const realId = String(newTask.id);
-
-                    debugLog.log("task-upsert", "flow-task-created", {
-                        taskId: newTask.id,
-                        folderWorkspaceItemId: newTask.folderWorkspaceItemId,
-                        title: trimmed,
-                        source: "useMultiProjectTaskFlowNode",
-                    });
-
-                    setFlowNodes((prev) =>
-                        prev.map((n) =>
-                            n.id === nodeId
-                                ? { ...n, id: realId, data: { task: newTask, projectName: tempData.projectName } }
-                                : n,
-                        ),
-                    );
-                    setTasks((prev) => [...prev, newTask]);
-
-                    flowService._upsertPositions($user.userToken, [
-                        { nodeId: newTask.id, nodeType: "task", x: tempNode.position.x, y: tempNode.position.y },
-                    ]).catch(() => {});
-
-                    const workspaceId = await resolveWorkspaceId(newTask.projectId);
-                    await createTaskFolder(newTask, workspaceId, (taskId, folderId) => {
-                        // Update task store
-                        setTasks((prev) => prev.map((t) =>
-                            t.id === taskId ? { ...t, folderWorkspaceItemId: folderId } : t
-                        ));
-                        // Update flow node so openTaskTab(data.task) picks up folderWorkspaceItemId
-                        setFlowNodes((prev) => prev.map((n) => {
-                            const nodeData = n.data as TaskFlowNodeData;
-                            if (nodeData?.task?.id === taskId) {
-                                return { ...n, data: { ...nodeData, task: { ...nodeData.task, folderWorkspaceItemId: folderId } } };
-                            }
-                            return n;
-                        }));
-                    });
-
-                    _console.success("Task created");
-                    debugLog.flush();
-                } catch {
-                    setFlowNodes((prev) => prev.filter((n) => n.id !== nodeId));
-                    _console.error("Failed to create task");
-                }
-                return;
-            }
-
-            // ── Existing node: rename ───────────────────────────────────────
-            setEditingNodeId(null);
-            if (!trimmed) return;
-
-            if (isNodeLocked(nodeId)) {
-                debugLog.log("taskflow", "locked-node-blocked", { action: "rename", nodeId });
-                return;
-            }
-
-            const taskId = parseInt(nodeId, 10);
-            const task = taskFlowTasks.find((t) => t.id === taskId);
-            if (!task || task.title === trimmed) return;
-
-            setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, title: trimmed } : t)));
-            setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, title: trimmed } : t)));
-            setFlowNodes((prev) =>
-                prev.map((n) =>
-                    n.id === nodeId
-                        ? { ...n, data: { ...(n.data as TaskFlowNodeData), task: { ...(n.data as TaskFlowNodeData).task, title: trimmed } } }
-                        : n,
-                ),
-            );
-
-            try {
-                debugLog.log("task-upsert", "flow-rename-upsert", {
-                    taskId: task.id, folderWorkspaceItemId: task.folderWorkspaceItemId,
-                    title: trimmed, source: "useMultiProjectTaskFlowNode.rename",
-                });
-                const result = await taskService._upsertTaskBatch($user.userToken, [{
-                    id: task.id, projectId: task.projectId, parentTaskId: task.parentTaskId,
-                    type: task.type, title: trimmed, description: task.description, status: task.status,
-                    priority: task.priority, startDate: toDateOnly(task.startDate),
-                    endDate: toDateOnly(task.endDate), orderIndex: task.orderIndex,
-                    folderWorkspaceItemId: task.folderWorkspaceItemId,
-                    checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
-                    isMilestone: task.isMilestone,
-                }]);
-                if (!result.success) throw new Error(result.message);
-                _console.success("Task renamed");
-            } catch {
-                setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, title: task.title } : t)));
-                setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, title: task.title } : t)));
-                setFlowNodes((prev) =>
-                    prev.map((n) =>
-                        n.id === nodeId
-                            ? { ...n, data: { ...(n.data as TaskFlowNodeData), task: { ...(n.data as TaskFlowNodeData).task, title: task.title } } }
-                            : n,
-                    ),
-                );
-                _console.error("Failed to rename task");
-            }
-        }
 
     // ── Add task at position (right-click canvas) ─────────────────────────
     // Only creates a temp node — backend call happens on rename confirm.
@@ -198,9 +46,9 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
             const tasksOnNonDeletedProjects = filteredTasks.filter((t) => nonDeletedProjectIds.has(t.projectId));
             if (tasksOnNonDeletedProjects.length > 0) {
                 let nearestTask = tasksOnNonDeletedProjects[0];
-                if (currentFlowNodes.length > 0) {
+                if (flowNodes.length > 0) {
                     let minDist = Infinity;
-                    for (const n of currentFlowNodes) {
+                    for (const n of flowNodes) {
                         const t = (n.data as TaskFlowNodeData).task;
                         if (!t || !nonDeletedProjectIds.has(t.projectId)) continue;
                         const dx = n.position.x - posX;
@@ -272,115 +120,6 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
             setEditingNodeId(tempId);
         }
 
-    // ── Change project of a task node ──────────────────────────────────────
-
-    const handleChangeProject =
-        async (nodeId: string, newProjectId: number) => {
-            if (isNodeLocked(nodeId)) {
-                debugLog.log("taskflow", "locked-node-blocked", { action: "changeProject", nodeId });
-                return;
-            }
-            const taskId = parseInt(nodeId, 10);
-            // Look up in taskFlowTasks first — contains ALL tasks regardless of selected-project filter,
-            // so tasks on deleted/unselected projects (shown as "unknown") are still found.
-            const task = taskFlowTasks.find((t) => t.id === taskId) ?? tasks.find((t) => t.id === taskId);
-            if (!task || task.projectId === newProjectId) return;
-
-            const newProjectName = projectNameMap.get(newProjectId) ?? "";
-
-            setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, projectId: newProjectId } : t)));
-            setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, projectId: newProjectId } : t)));
-            setFlowNodes((prev) =>
-                prev.map((n) =>
-                    n.id === nodeId
-                        ? { ...n, data: { ...(n.data as TaskFlowNodeData), task: { ...(n.data as TaskFlowNodeData).task, projectId: newProjectId }, projectName: newProjectName } }
-                        : n,
-                ),
-            );
-
-            try {
-                debugLog.log("task-upsert", "flow-changeProject-upsert", {
-                    taskId: task.id, folderWorkspaceItemId: task.folderWorkspaceItemId,
-                    oldProjectId: task.projectId, newProjectId,
-                    source: "useMultiProjectTaskFlowNode.changeProject",
-                });
-                const result = await taskService._upsertTaskBatch($user.userToken, [{
-                    id: task.id, projectId: newProjectId, parentTaskId: task.parentTaskId,
-                    type: task.type, title: task.title, description: task.description, status: task.status,
-                    priority: task.priority, startDate: toDateOnly(task.startDate),
-                    endDate: toDateOnly(task.endDate), orderIndex: task.orderIndex,
-                    folderWorkspaceItemId: task.folderWorkspaceItemId,
-                    checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
-                    isMilestone: task.isMilestone,
-                }]);
-                if (!result.success) throw new Error(result.message);
-            } catch {
-                setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, projectId: task.projectId } : t)));
-                setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, projectId: task.projectId } : t)));
-                setFlowNodes((prev) =>
-                    prev.map((n) =>
-                        n.id === nodeId
-                            ? { ...n, data: { ...(n.data as TaskFlowNodeData), task: { ...(n.data as TaskFlowNodeData).task, projectId: task.projectId }, projectName: projectNameMap.get(task.projectId) ?? "" } }
-                            : n,
-                    ),
-                );
-                _console.error("Failed to change project");
-            }
-        }
-
-    // ── Change status of a task node ─────────────────────────────────────
-
-    const handleChangeStatus =
-        async (nodeId: string, newStatus: string) => {
-            if (isNodeLocked(nodeId)) {
-                debugLog.log("taskflow", "locked-node-blocked", { action: "changeStatus", nodeId, newStatus });
-                return;
-            }
-            const taskId = parseInt(nodeId, 10);
-            const task = taskFlowTasks.find((t) => t.id === taskId) ?? tasks.find((t) => t.id === taskId);
-            if (!task || task.status === newStatus) return;
-
-            const oldStatus = task.status;
-
-            setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)));
-            setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)));
-            setFlowNodes((prev) =>
-                prev.map((n) =>
-                    n.id === nodeId
-                        ? { ...n, data: { ...(n.data as TaskFlowNodeData), task: { ...(n.data as TaskFlowNodeData).task, status: newStatus } } }
-                        : n,
-                ),
-            );
-
-            try {
-                debugLog.log("task-upsert", "flow-changeStatus-upsert", {
-                    taskId: task.id, folderWorkspaceItemId: task.folderWorkspaceItemId,
-                    oldStatus: task.status, newStatus,
-                    source: "useMultiProjectTaskFlowNode.changeStatus",
-                });
-                const result = await taskService._upsertTaskBatch($user.userToken, [{
-                    id: task.id, projectId: task.projectId, parentTaskId: task.parentTaskId,
-                    type: task.type, title: task.title, description: task.description, status: newStatus,
-                    priority: task.priority, startDate: toDateOnly(task.startDate),
-                    endDate: toDateOnly(task.endDate), orderIndex: task.orderIndex,
-                    folderWorkspaceItemId: task.folderWorkspaceItemId,
-                    checklistJson: task.checklistJson, processJson: task.processJson, customTabsJson: task.customTabsJson,
-                    isMilestone: task.isMilestone,
-                }]);
-                if (!result.success) throw new Error(result.message);
-            } catch {
-                setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: oldStatus } : t)));
-                setTaskFlowTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: oldStatus } : t)));
-                setFlowNodes((prev) =>
-                    prev.map((n) =>
-                        n.id === nodeId
-                            ? { ...n, data: { ...(n.data as TaskFlowNodeData), task: { ...(n.data as TaskFlowNodeData).task, status: oldStatus } } }
-                            : n,
-                    ),
-                );
-                _console.error("Failed to change status");
-            }
-        }
     // ── Delete nodes ─────────────────────────────────────────────────────────
 
     const handleDeleteNodes =
@@ -391,7 +130,7 @@ export const useMultiProjectTaskFlowNodeHelper = () => {
             const taskIds = unlocked.map((id) => parseInt(id, 10));
             const tasksToDelete = taskFlowTasks.filter((t) => taskIds.includes(t.id));
             const gridTasksToDelete = tasks.filter((t) => taskIds.includes(t.id));
-            const nodesToRestore = currentFlowNodes.filter((n) => unlocked.includes(n.id));
+            const nodesToRestore = flowNodes.filter((n) => unlocked.includes(n.id));
 
             const connectedEdgeIds = new Set(
                 savedEdges

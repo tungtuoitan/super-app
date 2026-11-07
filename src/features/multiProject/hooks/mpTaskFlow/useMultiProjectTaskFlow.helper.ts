@@ -17,7 +17,8 @@ import type { TaskDTO } from "@/features/taskDetail";
 import { projectService } from "@/features/project";
 import type { ProjectDTO } from "@/features/project";
 import type { TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
-import { smartWand, NODE_WIDTH } from "../../utils/multiProjectTaskFlow.utils";
+import { NODE_WIDTH } from "../../utils/multiProjectTaskFlow.utils";
+import { smartWand } from "../../utils/multiProjectTaskFlowArrange.utils";
 
 export const useMultiProjectTaskFlowHelper = () => {
     const { setFlowNodes, setFlowEdges, setSavedPositions, flowNodes, flowEdges, lockOldNodes, setTaskFlowTasks, setIsTaskFlowLoading, setAllProjectsForPicker } = useMultiTaskFlowStore();

@@ -13,7 +13,9 @@ import { useConsoleHelper } from "@/shared";
 import { flowService } from "@/shared";
 import { useDebugLog } from "@/shared";
 import type { FlowEdgeData, ArrowDirection, TaskFlowNodeData } from "../../types/multiProjectTaskFlow.type";
-import { nearestHandlePair, NODE_WIDTH, estimateNodeHeight } from "../../utils/multiProjectTaskFlow.utils";
+import { NODE_WIDTH } from "../../utils/multiProjectTaskFlow.utils";
+import { estimateNodeHeight } from "../../utils/multiProjectTaskFlowArrange.utils";
+import { nearestHandlePair } from "../../utils/multiProjectTaskFlowHandle.utils";
 
 export const useMultiProjectTaskFlowEdgeHelper = () => {
     const { setFlowEdges, setEditingEdgeId, setSavedEdges, setConnectingSourceId, flowNodes } = useMultiTaskFlowStore();
