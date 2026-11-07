@@ -280,7 +280,7 @@ export async function expandPathToItem(
             try {
                 treeRef.current.scrollTo(id.toString());
                 await waitForRender(30);
-            } catch (_) {}
+            } catch (_) { /* node chưa render hoặc cây đã đóng: bỏ qua việc cuộn */ }
         }
     }
 
@@ -301,7 +301,7 @@ export async function expandPathToItem(
 
     closeNonPathNodes(treeData);
 
-    try { treeRef.current.scrollTo(targetId.toString()); } catch (_) {}
+    try { treeRef.current.scrollTo(targetId.toString()); } catch (_) { /* node chưa render hoặc cây đã đóng: bỏ qua việc cuộn */ }
 
     return true;
 }

@@ -22,7 +22,7 @@ import {KTreeNode} from "../../types/kV2.type";
 import {kconstants} from "../../utils/k.constants";
 
 export function KTree() {
-    const { isDragging, currentK, allK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, treeData: _storeTD, setTreeData, lastSelectedItemId, setRenamingNodeId, setRenamingNodeValue } = useKStore();
+    const { isDragging, currentK, allK, _treeRef, containerHeight, treeContainerRef, dropZoneHeight, setDropZoneHeight, setTreeData, lastSelectedItemId, setRenamingNodeId, setRenamingNodeValue } = useKStore();
     const { openTabs, patchTab, openSingletonTab, updateActiveTab } = useEditorTabBarHelper();
     const { searchQuery } = useSideBarHelper();
     const { handleSelectionChange, handleKeyDown } = useKTreeSelectionHelper();

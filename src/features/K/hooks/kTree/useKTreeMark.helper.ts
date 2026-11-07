@@ -54,7 +54,7 @@ export function useKTreeMark(treeData: KTreeNode[]) {
                 await openWithRetry(pathIds[i], i);
             }
 
-            try { _treeRef.current?.scrollTo(nodeId.toString()); } catch (_) {}
+            try { _treeRef.current?.scrollTo(nodeId.toString()); } catch (_) { /* node chưa render hoặc cây đã đóng: bỏ qua việc cuộn */ }
             await waitForRender(60);
 
             function findNode(nodes: KTreeNode[], targetId: number): KTreeNode | null {

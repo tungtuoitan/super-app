@@ -68,7 +68,7 @@ interface ActivityBarProps {
 
 export function ActivityBar({ horizontal, withDialogs = true }: ActivityBarProps) {
     const { setAccountsOpen, setSettingsOpen, setIsSideBarVisible } = useActivityBarStore();
-    const { setIsOpen: setIsCommandPaletteOpen } = useCommandPaletteStore();
+    const { setIsOpen } = useCommandPaletteStore();
     const { handleActivityClick } = useActivityBarHelper();
     const { isAuthenticated, $user } = useAuthStore();
     const { moduleName } = useSideBarStore();
@@ -173,7 +173,7 @@ export function ActivityBar({ horizontal, withDialogs = true }: ActivityBarProps
                 <button onClick={() => setIsSideBarVisible(true)} className="w-12 h-12 flex items-center justify-center text-muted-foreground/70 hover:text-foreground transition-colors duration-100" aria-label="Expand sidebar" title="Expand sidebar">
                     <PanelLeftOpen className="w-5 h-5" strokeWidth={1.75} />
                 </button>
-                <button onClick={() => setIsCommandPaletteOpen(true)} className="w-12 h-12 flex items-center justify-center text-muted-foreground/70 hover:text-foreground transition-colors duration-100" aria-label="Search (Ctrl+P)" title="Search (Ctrl+P)">
+                <button onClick={() => setIsOpen(true)} className="w-12 h-12 flex items-center justify-center text-muted-foreground/70 hover:text-foreground transition-colors duration-100" aria-label="Search (Ctrl+P)" title="Search (Ctrl+P)">
                     <Search className="w-5 h-5" strokeWidth={1.75} />
                 </button>
                 <div className="flex-1">

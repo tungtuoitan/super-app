@@ -15,7 +15,7 @@ import { useProjectDetailSelector } from "../Selectors/useProjectDetail.selector
 import type { Project } from "../types/project.types";
 
 export const useProjectReflectHelper = () => {
-    const { currentTab, selectedProject, isDisabled: projectDisabled } = useProjectDetailSelector();
+    const { currentTab, selectedProject, isDisabled } = useProjectDetailSelector();
     const { $user } = useAuthStore();
     const { patchTab } = useEditorTabBarHelper();
 
@@ -88,7 +88,7 @@ export const useProjectReflectHelper = () => {
         rows,
         isDirty,
         isNewProject,
-        isDisabled: projectDisabled || isNewProject,
+        isDisabled: isDisabled || isNewProject,
         hasProjectChanges: currentTab?.hasUnsavedChanges ?? false,
         typeOptions: buildReflectTypeOptions(rows),
         feedback,

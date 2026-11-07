@@ -69,9 +69,9 @@ function KQFlowCanvasContent({ nodeId, questions, showDeleted, loading }: Canvas
         useKQFlowDragHelper(selectionLockRef, lockSelection);
     const { handleDeleteQuestion, handlePasteQuestions } = useKQFlowHelper();
     const { showContextMenu } = useMenuContextHelper();
-    const { handleOpen: openSearch } = useKQFlowSearchHelper();
+    const { handleOpen } = useKQFlowSearchHelper();
 
-    useGlobalShortcut("ctrl+k", { id: "kqflow-search-open", priority: 50, enabled: editingNodeId === null }, openSearch);
+    useGlobalShortcut("ctrl+k", { id: "kqflow-search-open", priority: 50, enabled: editingNodeId === null }, handleOpen);
 
     // ── Keyboard shortcuts (delete / cut / paste / escape / ctrl+o) ──────────
     // Shortcuts are disabled on mobile (read-only) — passing empty arrays turns off all enabled flags

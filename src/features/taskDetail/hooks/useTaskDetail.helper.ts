@@ -27,9 +27,6 @@ import { useTaskDetailSelector } from "../Selectors/TaskDetailSelector";
 import { useDebugLog } from "@/shared";
 import { usePTaskStore } from "@/features/project";
 
-// Re-export utils for backward compatibility
-export { getTaskStatusColors, getTaskPriorityColors, formatDate, transformTaskData } from "../utils/TaskDetail.utils";
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Main hook
 // ─────────────────────────────────────────────────────────────────────────────

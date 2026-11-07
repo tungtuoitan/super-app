@@ -23,7 +23,7 @@ import { moduleRegistry } from "@/shell/moduleRegistry";
 
 export function AppSidebar({ moduleName }: { moduleName: string }) {
     const { isSideBarVisible, setIsSideBarVisible, isHomeOpen, setIsHomeOpen } = useActivityBarStore();
-    const { setIsOpen: setIsCommandPaletteOpen } = useCommandPaletteStore();
+    const { setIsOpen } = useCommandPaletteStore();
     const showDevBadge = envConfig.REACT_APP_ENVIRONMENT?.toLowerCase() !== constants.environments.production.toLowerCase();
 
     const module = moduleRegistry.getById(moduleName);
@@ -74,7 +74,7 @@ export function AppSidebar({ moduleName }: { moduleName: string }) {
                     <div className="shrink-0 px-2 pb-2">
                         <button
                             type="button"
-                            onClick={() => setIsCommandPaletteOpen(true)}
+                            onClick={() => setIsOpen(true)}
                             className="flex h-8 w-full items-center gap-2 rounded-lg border border-sa-border bg-sa-surface px-2.5 text-[13px] text-muted-foreground transition-colors duration-100 hover:border-sa-border-strong hover:text-foreground"
                             title="Search keywords (Ctrl+P)"
                         >

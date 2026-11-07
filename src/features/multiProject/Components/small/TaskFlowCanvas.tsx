@@ -58,7 +58,7 @@ export function TaskFlowCanvas() {
 
     const { viewMode, showMiniMap, setShowMiniMap, dynMinZoomRef, handleF1Toggle, handleBackToCenter } = useTaskFlowViewControlsHelper(containerRef);
     const { isMobile } = useDeviceStore();
-    const { handleOpen: openSearch } = useTaskFlowSearchHelper();
+    const { handleOpen } = useTaskFlowSearchHelper();
 
     // Drag-select only nodes — deselect edges caught in the selection box
     const handleSelectionChange = ({ nodes: selectedNodes, edges: selectedEdges }: { nodes: { id: string }[]; edges: { id: string }[] }) => {
@@ -134,12 +134,12 @@ export function TaskFlowCanvas() {
                 const isTyping = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || (active as HTMLElement)?.isContentEditable;
                 if (isTyping) return;
                 e.preventDefault();
-                openSearch();
+                handleOpen();
             }
         };
         document.addEventListener("keydown", onKeyDown);
         return () => document.removeEventListener("keydown", onKeyDown);
-    }, [openSearch]);
+    }, [handleOpen]);
 
     const onDeleteNodes = async (ids: string[]) => {
         await handleDeleteNodes(ids);

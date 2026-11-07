@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useDeviceStore } from "@/shared";
-import { KQuizService } from "../../service/kQuiz.service";
-import type { KDailySessionQuestion, KDailyAnswerItem } from "../../types/kQuiz.type";
-import { REVEAL_DELAY_MS, SCORE_DELAY_MS, BALL_BG } from "./kDailyReviewSession.constants";
-import { scoreFromSamples } from "./kDailyReviewSession.utils";
+import { KQuizService } from "../service/kQuiz.service";
+import type { KDailySessionQuestion, KDailyAnswerItem } from "../types/kQuiz.type";
+import { REVEAL_DELAY_MS, SCORE_DELAY_MS, BALL_BG } from "../utils/kDailyReviewSession.constants";
+import { scoreFromSamples } from "../utils/kDailyReviewSession.utils";
 
 export interface KDailyReviewSessionProps {
     nodeId: number;

@@ -181,7 +181,7 @@ export function useAuthHelper() {
         });
         debugLog.flush();
 
-        try { await authApi.logout(); } catch {}
+        try { await authApi.logout(); } catch { /* đăng xuất phía máy chủ lỗi vẫn phải xoá phiên cục bộ */ }
 
         set$User(DEFAULT_USER);
         setIsAuthenticated(false);
