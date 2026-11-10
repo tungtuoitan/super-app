@@ -17,6 +17,7 @@ export type TabType =
     | typeof shellConstants.vscode.tab.tabTypes.lifeLog
     | typeof shellConstants.vscode.tab.tabTypes.lifeLogGraph
     | typeof shellConstants.vscode.tab.tabTypes.lifeLogTrack
+    | typeof shellConstants.vscode.tab.tabTypes.reflect
     | typeof shellConstants.vscode.tab.tabTypes.kKnowledge
     | typeof shellConstants.vscode.tab.tabTypes.kNode
     | typeof shellConstants.vscode.tab.tabTypes.kDailyReview

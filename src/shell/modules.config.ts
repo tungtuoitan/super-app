@@ -19,6 +19,7 @@ import { projectModule }   from "@/features/project/shell/project.module";
 import { lifeLogModule }   from "@/features/lifeLog/shell/lifeLog.module";
 import { dailyLogModule }  from "@/features/dailyLog/shell/dailyLog.module";
 import { noteModule }      from "@/features/note/shell/note.module";
+import { reflectModule }   from "@/features/reflect/shell/reflect.module";
 import { homeModule }      from "@/features/home/shell/home.module";
 import { menuContextRegistry } from "@/shared";
 
@@ -56,6 +57,7 @@ moduleRegistry.register(kModule);
 moduleRegistry.register(lifeLogModule);
 moduleRegistry.register(dailyLogModule);
 moduleRegistry.register(noteModule);
+moduleRegistry.register(reflectModule);
 moduleRegistry.register(homeModule);
 
 // ── Filter configuration ──────────────────────────────────────────────────────
