@@ -66,7 +66,7 @@ export function ReflectSheet({ rows, isDisabled, typeOptions, onFieldChange, onA
 
     return (
         <div ref={containerRef} className="flex h-full flex-col gap-2 overflow-y-auto pt-1">
-            <div className="overflow-hidden rounded-xl border border-sa-border">
+            <div className="shrink-0 overflow-hidden rounded-xl border border-sa-border">
                 <HeaderRow />
                 {rows.length === 0 && (
                     <div className="px-3 py-6 text-center text-[13px] text-muted-foreground">
