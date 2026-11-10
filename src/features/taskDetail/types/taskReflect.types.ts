@@ -12,6 +12,8 @@ export interface ReflectRow {
     /** Written afterwards (by the user or an AI) */
     real: string;
     updatedAt: string;
+    /** When the row was first saved; only rows of the Reflect journal set it (it starts the "I think" edit window) */
+    createdAt?: string;
 }
 
 export type ReflectField = "type" | "think" | "real";

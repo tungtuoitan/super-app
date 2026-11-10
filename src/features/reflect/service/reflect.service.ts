@@ -16,8 +16,10 @@ const upsertEntry = async (request: UpsertReflectEntryRequest): Promise<ResultOp
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request),
     });
-    if (res.ok) return (await res.json()) as ResultOptions<ReflectEntryDTO>;
-    return Promise.reject(res);
+    if (!res.ok) return Promise.reject(res);
+    const result = (await res.json()) as ResultOptions<ReflectEntryDTO>;
+    // The server answers 200 even when it refuses (e.g. "I think" is locked), so check the result itself
+    return result.success ? result : Promise.reject(new Error(result.message ?? "Reflect save refused"));
 };
 
 const deleteEntry = async (id: string): Promise<ResultOptions> => {

@@ -3,6 +3,7 @@
  * own (see useReflectSaver), so there is no Save button.
  */
 
+import { nowInstantISO } from "@/shared";
 import { buildReflectTypeOptions } from "@/features/taskDetail";
 import type { ReflectField } from "@/features/taskDetail";
 import { useReflectRows, useReflectStoreActions } from "../Selectors/useReflect.selector";
@@ -14,7 +15,7 @@ export const useReflectJournalHelper = () => {
     const { scheduleSave } = useReflectSaverHelper();
 
     const handleFieldChange = (rowId: string, field: ReflectField, value: string) => {
-        fieldChanged(rowId, field, value);
+        fieldChanged({ rowId, field, value, nowIso: nowInstantISO() });
         scheduleSave(rowId);
     };
 

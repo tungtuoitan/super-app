@@ -10,6 +10,7 @@ import type { IAutoCompleteOptions } from "@/shared";
 import { cn } from "@/lib/utils";
 import type { ReflectField, ReflectRow } from "../../types/taskReflect.types";
 import { REFLECT_COLUMN_COLORS } from "../../task.constants";
+import { useReflectThinkLockHelper } from "../../hooks/taskReflect/useReflectThinkLock.helper";
 
 const GRID = "grid grid-cols-1 md:grid-cols-[9.5rem_minmax(0,1fr)_minmax(0,1fr)]";
 
@@ -54,6 +55,7 @@ interface ReflectSheetProps {
 
 export function ReflectSheet({ rows, isDisabled, typeOptions, onFieldChange, onAddRow, regrowKey }: ReflectSheetProps) {
     const containerRef = useRef<HTMLDivElement>(null);
+    const { isThinkLocked } = useReflectThinkLockHelper();
 
     useEffect(() => {
         const frame = requestAnimationFrame(() => {
@@ -88,7 +90,7 @@ export function ReflectSheet({ rows, isDisabled, typeOptions, onFieldChange, onA
                                 ref={autoGrow}
                                 rows={1}
                                 value={row.think}
-                                disabled={isDisabled}
+                                disabled={isDisabled || isThinkLocked(row)}
                                 placeholder="I think…"
                                 aria-label="I think"
                                 className={CELL_TEXTAREA}

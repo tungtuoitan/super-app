@@ -81,3 +81,8 @@ export const REFLECT_COLUMN_COLORS = {
     think: { tint: "bg-sky-500/[0.06]", dot: "bg-sky-400", text: "text-sky-300" },
     real: { tint: "bg-emerald-500/[0.06]", dot: "bg-emerald-400", text: "text-emerald-300" },
 } as const;
+
+/** A Reflect row that has a creation time (the journal's rows) can change "I think" only this long after it; the server enforces the same rule */
+export const REFLECT_THINK_EDIT_WINDOW_MS = 3 * 60 * 1000;
+/** How often an open Reflect sheet re-checks which rows have just become locked */
+export const REFLECT_LOCK_CHECK_INTERVAL_MS = 5000;

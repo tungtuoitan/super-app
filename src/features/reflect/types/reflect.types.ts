@@ -22,11 +22,19 @@ export interface UpsertReflectEntryRequest {
     real: string;
 }
 
+/** One edit of a row field; `nowIso` is the moment of the edit (it becomes the row's creation time the first time the row gets text) */
+export interface ReflectFieldChange {
+    rowId: string;
+    field: ReflectField;
+    value: string;
+    nowIso: string;
+}
+
 export interface ReflectActions {
     loadStarted: () => void;
     loaded: (rows: ReflectRow[]) => void;
     loadFailed: () => void;
-    fieldChanged: (rowId: string, field: ReflectField, value: string) => void;
+    fieldChanged: (change: ReflectFieldChange) => void;
     rowAdded: () => void;
     saveStarted: () => void;
     rowStored: (rowId: string) => void;

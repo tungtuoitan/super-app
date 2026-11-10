@@ -6,7 +6,7 @@
 import { create } from "zustand";
 import { createReflectRow } from "@/features/taskDetail";
 import type { ReflectState } from "../types/reflect.types";
-import { withTrailingBlankReflectRow } from "../utils/reflect.utils";
+import { withReflectCreatedAt, withTrailingBlankReflectRow } from "../utils/reflect.utils";
 
 export const useReflectStore = create<ReflectState>((set) => ({
     rows: [],
@@ -16,8 +16,8 @@ export const useReflectStore = create<ReflectState>((set) => ({
         loadStarted: () => set({ saveState: "loading" }),
         loaded: (rows) => set({ rows: withTrailingBlankReflectRow(rows, createReflectRow), storedIds: new Set(rows.map((r) => r.id)), saveState: "idle" }),
         loadFailed: () => set({ saveState: "error" }),
-        fieldChanged: (rowId, field, value) =>
-            set((s) => ({ rows: withTrailingBlankReflectRow(s.rows.map((r) => (r.id === rowId ? { ...r, [field]: value } : r)), createReflectRow) })),
+        fieldChanged: ({ rowId, field, value, nowIso }) =>
+            set((s) => ({ rows: withTrailingBlankReflectRow(s.rows.map((r) => (r.id === rowId ? withReflectCreatedAt({ ...r, [field]: value }, nowIso) : r)), createReflectRow) })),
         rowAdded: () => set((s) => ({ rows: withTrailingBlankReflectRow(s.rows, createReflectRow) })),
         saveStarted: () => set({ saveState: "saving" }),
         rowStored: (rowId) => set((s) => ({ storedIds: new Set(s.storedIds).add(rowId), saveState: "saved" })),

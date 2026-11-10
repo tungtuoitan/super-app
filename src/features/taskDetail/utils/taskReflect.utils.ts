@@ -1,5 +1,6 @@
+import { parseInstant } from "@/shared";
 import type { IAutoCompleteOptions } from "@/shared";
-import { REFLECT_DEFAULT_TYPES } from "../task.constants";
+import { REFLECT_DEFAULT_TYPES, REFLECT_THINK_EDIT_WINDOW_MS } from "../task.constants";
 import type { ReflectRow } from "../types/taskReflect.types";
 import { parseCustomTabs, serializeCustomTabs } from "./customTab.utils";
 
@@ -73,4 +74,10 @@ export function buildReflectTypeOptions(rows: ReflectRow[]): IAutoCompleteOption
             return true;
         })
         .map((t) => ({ id: t, label: t }));
+}
+
+/** True once a row with a creation time is older than the edit window (rows without one are never locked) */
+export function isReflectThinkLocked(row: ReflectRow, nowMs: number): boolean {
+    const created = parseInstant(row.createdAt);
+    return !!created && nowMs - created.getTime() > REFLECT_THINK_EDIT_WINDOW_MS;
 }

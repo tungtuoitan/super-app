@@ -20,6 +20,16 @@ const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})/;
 
 const pad2 = (n: number): string => String(n).padStart(2, "0");
 
+/** The one place the app reads the clock: the current instant as epoch milliseconds. */
+export function nowMs(): number {
+    return Date.now();
+}
+
+/** The current instant as an ISO 8601 string (UTC "Z"). */
+export function nowInstantISO(): string {
+    return new Date(nowMs()).toISOString();
+}
+
 /**
  * Parse an INSTANT string from the API (ISO 8601 with offset) into a Date.
  * @returns Date, or null if input is empty/invalid
