@@ -33,6 +33,7 @@ import { AuthStoreProvider } from "@/shared";
 import { AuthGuard } from "@/shared";
 import {ConsoleProvider} from "@/shared";
 import {ConfirmationPopoverContainer} from "@/shared";
+import { PrivacyShortcut } from "@/shared";
 
 /**
  * Main application layout component.
@@ -99,6 +100,7 @@ export function Main() {
                                                         </AuthCallbackProvider>
                                                         <ConfirmationPopoverContainer />
                                                         <LinkDialog />
+                                                        <PrivacyShortcut />
                                                     </ConfirmationPopoverProvider>
                                                 </MenuContextStoreProvider>
                                             </CommandPaletteProvider>

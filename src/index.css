@@ -368,3 +368,24 @@ div[data-workspace-tree="true"] {
 [data-radix-select-item][data-state="checked"] {
     background-color: var(--sa-hover) !important;
 }
+
+/*
+ * Privacy mode: while <html data-privacy="hidden"> (shared/privacy), every [data-private] zone shows
+ * text too small for anyone nearby to read. Toggle: PrivacyToggle button or ctrl+alt+h.
+ * To cover a new area just add data-private to its root (privacyConstants.zoneProps);
+ * autosizing textareas must also re-measure when usePrivacyIsHidden() changes.
+ */
+html[data-privacy="hidden"] [data-private],
+html[data-privacy="hidden"] [data-private] * {
+    font-size: 3px !important;
+    line-height: 4px !important;
+}
+html[data-privacy="hidden"] [data-private] textarea {
+    min-height: 12px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+html[data-privacy="hidden"] [data-private] button {
+    height: 12px !important;
+    min-height: 0 !important;
+}

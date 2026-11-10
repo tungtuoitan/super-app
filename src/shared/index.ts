@@ -219,3 +219,9 @@ export { parseInstant, toInstantISO, parseDateOnly, toDateOnly } from "./utils/d
 export { fuzzyMatchWithDiacritics, removeDiacritics, containsNormalized } from "./utils/fuzzy-search.utils";
 export { getDeviceFingerprint } from "./device/deviceFingerprint";
 export { formatDate, formatDateTime, isEmpty, truncateText, getMonthFromIndex, getIndexFromMonth, formatMonthLabel, formatTaskLabel } from "./utils/formatters";
+
+// ── privacy (hide text app-wide; mark a region with privacyConstants.zoneProps) ──
+export { privacyConstants } from "./privacy/privacy.constants";
+export { usePrivacyIsHidden } from "./privacy/usePrivacy.selector";
+export { PrivacyToggle } from "./privacy/PrivacyToggle";
+export { PrivacyShortcut } from "./privacy/PrivacyShortcut";
