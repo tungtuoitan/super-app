@@ -9,6 +9,7 @@ import { GenericAutoComplete, Textarea } from "@/shared";
 import type { IAutoCompleteOptions } from "@/shared";
 import { cn } from "@/lib/utils";
 import type { ReflectField, ReflectRow } from "../../types/taskReflect.types";
+import { REFLECT_COLUMN_COLORS } from "../../task.constants";
 
 const GRID = "grid grid-cols-1 md:grid-cols-[9.5rem_minmax(0,1fr)_minmax(0,1fr)]";
 
@@ -29,8 +30,14 @@ function HeaderRow() {
     return (
         <div className={cn(GRID, "hidden border-b border-sa-border bg-sa-surface-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground md:grid")}>
             <div className="px-3 py-1.5">Type</div>
-            <div className="border-l border-sa-border px-3 py-1.5">I think</div>
-            <div className="border-l border-sa-border px-3 py-1.5">Reality</div>
+            <div className={cn("flex items-center gap-1.5 border-l border-sa-border px-3 py-1.5", REFLECT_COLUMN_COLORS.think.tint)}>
+                <span className={cn("h-1.5 w-1.5 rounded-full", REFLECT_COLUMN_COLORS.think.dot)} />
+                <span className={REFLECT_COLUMN_COLORS.think.text}>I think</span>
+            </div>
+            <div className={cn("flex items-center gap-1.5 border-l border-sa-border px-3 py-1.5", REFLECT_COLUMN_COLORS.real.tint)}>
+                <span className={cn("h-1.5 w-1.5 rounded-full", REFLECT_COLUMN_COLORS.real.dot)} />
+                <span className={REFLECT_COLUMN_COLORS.real.text}>Reality</span>
+            </div>
         </div>
     );
 }
@@ -76,7 +83,7 @@ export function ReflectSheet({ rows, isDisabled, typeOptions, onFieldChange, onA
                                 onChange={(_, option) => onFieldChange(row.id, "type", option?.label ?? "")}
                             />
                         </div>
-                        <div className="md:border-l md:border-sa-border">
+                        <div className={cn("md:border-l md:border-sa-border", REFLECT_COLUMN_COLORS.think.tint)}>
                             <Textarea
                                 ref={autoGrow}
                                 rows={1}
@@ -88,7 +95,7 @@ export function ReflectSheet({ rows, isDisabled, typeOptions, onFieldChange, onA
                                 onChange={(e) => onFieldChange(row.id, "think", e.target.value)}
                             />
                         </div>
-                        <div className="md:border-l md:border-sa-border">
+                        <div className={cn("md:border-l md:border-sa-border", REFLECT_COLUMN_COLORS.real.tint)}>
                             <Textarea
                                 ref={autoGrow}
                                 rows={1}

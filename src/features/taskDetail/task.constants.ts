@@ -75,3 +75,9 @@ export const COLLAPSE_HEIGHT = 120;
 // ── Drag-and-drop type identifier ─────────────────────────────────────────────
 /** DnD accept type for task row dragging (used by TaskGrid and MultiProjectTaskList). */
 export const TASK_ROW = "TASK_ROW";
+
+// One colour per Reflect column so "what I thought" and "what happened" read as two different things
+export const REFLECT_COLUMN_COLORS = {
+    think: { tint: "bg-sky-500/[0.06]", dot: "bg-sky-400", text: "text-sky-300" },
+    real: { tint: "bg-emerald-500/[0.06]", dot: "bg-emerald-400", text: "text-emerald-300" },
+} as const;
