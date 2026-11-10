@@ -15,3 +15,9 @@ export const decideReflectSave = (row: ReflectRow, isStored: boolean): "upsert" 
 
 /** The request that writes a row */
 export const toReflectUpsertRequest = (row: ReflectRow): UpsertReflectEntryRequest => ({ id: row.id, type: row.type.trim(), think: row.think, real: row.real });
+
+/** The rows with an empty row at the end to type into (made by `makeRow`, added only when the last row has text) */
+export const withTrailingBlankReflectRow = (rows: ReflectRow[], makeRow: () => ReflectRow): ReflectRow[] => {
+    const last = rows[rows.length - 1];
+    return last && isBlankReflectRow(last) ? rows : [...rows, makeRow()];
+};

@@ -7,8 +7,8 @@ export const reflectConstants = {
     /** Wait after the last keystroke before a row is written to the database */
     saveDelayMs: 800,
     color: "#f59e0b",
-    /** Makes every text cell of the sheet two lines tall before it grows */
-    sheetCellClass: "[&_textarea]:min-h-14",
+    /** Every text cell of the sheet is two lines tall before it grows; the sheet's own Add row button is hidden (an empty row is always there) */
+    sheetCellClass: "[&_textarea]:min-h-14 [&>div>button]:hidden",
     journalTitle: "Reflect",
     viewButtonLabel: "Reflect journal",
     viewHint: "Write what you think before you start. Fill in the reality afterwards.",
