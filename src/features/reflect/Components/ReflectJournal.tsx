@@ -15,7 +15,7 @@ import { useReflectHasError, useReflectIsLoading, useReflectSaveState } from "..
 
 export function ReflectJournal() {
     useReflectLoadHeadless();
-    const { rows, searchText, setSearchText, typeOptions, handleFieldChange, handleAddRow } = useReflectJournalHelper();
+    const { rows, searchText, searchInputRef, setSearchText, typeOptions, handleFieldChange, handleAddRow } = useReflectJournalHelper();
     const saveState = useReflectSaveState();
     const isLoading = useReflectIsLoading();
     const hasError = useReflectHasError();
@@ -29,6 +29,7 @@ export function ReflectJournal() {
                     <div className="relative">
                         <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                         <input
+                            ref={searchInputRef}
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
                             placeholder={reflectConstants.searchPlaceholder}
@@ -47,8 +48,8 @@ export function ReflectJournal() {
                     typeOptions={typeOptions}
                     onFieldChange={handleFieldChange}
                     onAddRow={handleAddRow}
-                    regrowKey={`${isLoading}-${isPrivacyHidden}-${searchText}`}
-                    searchText={searchText}
+                    regrowKey={`${isLoading}-${isPrivacyHidden}-${searchText.trim()}`}
+                    searchText={searchText.trim()}
                 />
             </div>
         </div>

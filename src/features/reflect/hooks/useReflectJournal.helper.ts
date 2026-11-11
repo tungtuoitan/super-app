@@ -3,7 +3,7 @@
  * own (see useReflectSaver), so there is no Save button.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { nowInstantISO } from "@/shared";
 import { buildReflectTypeOptions, reflectRowMatchesSearch } from "@/features/taskDetail";
 import type { ReflectField } from "@/features/taskDetail";
@@ -13,6 +13,22 @@ import { useReflectSaverHelper } from "./useReflectSaver.helper";
 export const useReflectJournalHelper = () => {
     const rows = useReflectRows();
     const [searchText, setSearchText] = useState("");
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // Ctrl+F searches the journal instead of the browser page (only while this journal is on screen)
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            const input = searchInputRef.current;
+            if (!input || input.offsetParent === null) return;
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "f") {
+                e.preventDefault();
+                input.focus();
+                input.select();
+            }
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, []);
     const { fieldChanged, rowAdded } = useReflectStoreActions();
     const { scheduleSave } = useReflectSaverHelper();
 
@@ -30,7 +46,8 @@ export const useReflectJournalHelper = () => {
 
     return {
         rows: shownRows,
-        searchText: searchText.trim(),
+        searchText,
+        searchInputRef,
         setSearchText,
         typeOptions: buildReflectTypeOptions(rows),
         handleFieldChange,
