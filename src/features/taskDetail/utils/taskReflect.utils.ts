@@ -81,3 +81,23 @@ export function isReflectThinkLocked(row: ReflectRow, nowMs: number): boolean {
     const created = parseInstant(row.createdAt);
     return !!created && nowMs - created.getTime() > REFLECT_THINK_EDIT_WINDOW_MS;
 }
+
+/** Splits text at every case-insensitive match of `search`; the pieces alternate non-match / match / non-match... */
+export function splitBySearch(text: string, search: string): { text: string; isMatch: boolean }[] {
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const needle = search.toLowerCase();
+    return text.split(new RegExp(`(${escaped})`, "gi")).map((part) => ({ text: part, isMatch: part.toLowerCase() === needle }));
+}
+
+/** True when any column of the row contains `search` (case-insensitive); an empty search matches every row */
+export function reflectRowMatchesSearch(row: ReflectRow, search: string): boolean {
+    const needle = search.trim().toLowerCase();
+    return !needle || [row.type, row.think, row.real].some((v) => v.toLowerCase().includes(needle));
+}
+
+/** Sizes a textarea to its content (the Reflect cells grow instead of scrolling) */
+export function autoGrowTextarea(el: HTMLTextAreaElement | null) {
+    if (!el) return;
+    el.style.height = "auto";
+    if (el.scrollHeight > 0) el.style.height = `${el.scrollHeight}px`;
+}

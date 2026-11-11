@@ -3,14 +3,16 @@
  * own (see useReflectSaver), so there is no Save button.
  */
 
+import { useState } from "react";
 import { nowInstantISO } from "@/shared";
-import { buildReflectTypeOptions } from "@/features/taskDetail";
+import { buildReflectTypeOptions, reflectRowMatchesSearch } from "@/features/taskDetail";
 import type { ReflectField } from "@/features/taskDetail";
 import { useReflectRows, useReflectStoreActions } from "../Selectors/useReflect.selector";
 import { useReflectSaverHelper } from "./useReflectSaver.helper";
 
 export const useReflectJournalHelper = () => {
     const rows = useReflectRows();
+    const [searchText, setSearchText] = useState("");
     const { fieldChanged, rowAdded } = useReflectStoreActions();
     const { scheduleSave } = useReflectSaverHelper();
 
@@ -22,5 +24,16 @@ export const useReflectJournalHelper = () => {
     // The store keeps oldest first with the empty row last; the journal shows the newest on top, so the empty row is on top
     const newestFirstRows = [...rows].reverse();
 
-    return { rows: newestFirstRows, typeOptions: buildReflectTypeOptions(rows), handleFieldChange, handleAddRow: rowAdded };
+    // While searching, only the rows that contain the text (in any column) stay
+    const needle = searchText.trim().toLowerCase();
+    const shownRows = needle ? newestFirstRows.filter((r) => reflectRowMatchesSearch(r, needle)) : newestFirstRows;
+
+    return {
+        rows: shownRows,
+        searchText: searchText.trim(),
+        setSearchText,
+        typeOptions: buildReflectTypeOptions(rows),
+        handleFieldChange,
+        handleAddRow: rowAdded,
+    };
 };

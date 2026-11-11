@@ -4,6 +4,7 @@
  * The sheet is a privacy zone: its text is tiny until the app-wide privacy mode is switched to visible.
  */
 
+import { Search } from "lucide-react";
 import { ReflectSheet } from "@/features/taskDetail";
 import { PrivacyToggle, privacyConstants, usePrivacyIsHidden } from "@/shared";
 import { cn } from "@/lib/utils";
@@ -14,7 +15,7 @@ import { useReflectHasError, useReflectIsLoading, useReflectSaveState } from "..
 
 export function ReflectJournal() {
     useReflectLoadHeadless();
-    const { rows, typeOptions, handleFieldChange, handleAddRow } = useReflectJournalHelper();
+    const { rows, searchText, setSearchText, typeOptions, handleFieldChange, handleAddRow } = useReflectJournalHelper();
     const saveState = useReflectSaveState();
     const isLoading = useReflectIsLoading();
     const hasError = useReflectHasError();
@@ -25,6 +26,16 @@ export function ReflectJournal() {
             <div className="flex h-6 items-center justify-between">
                 <h2 className="text-[13px] font-medium text-foreground">{reflectConstants.journalTitle}</h2>
                 <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            placeholder={reflectConstants.searchPlaceholder}
+                            aria-label={reflectConstants.searchLabel}
+                            className={reflectConstants.searchInputClass}
+                        />
+                    </div>
                     <span className={hasError ? "text-[12px] text-destructive" : "text-[12px] text-muted-foreground"}>{reflectConstants.stateLabels[saveState]}</span>
                     <PrivacyToggle />
                 </div>
@@ -36,7 +47,8 @@ export function ReflectJournal() {
                     typeOptions={typeOptions}
                     onFieldChange={handleFieldChange}
                     onAddRow={handleAddRow}
-                    regrowKey={`${isLoading}-${isPrivacyHidden}`}
+                    regrowKey={`${isLoading}-${isPrivacyHidden}-${searchText}`}
+                    searchText={searchText}
                 />
             </div>
         </div>

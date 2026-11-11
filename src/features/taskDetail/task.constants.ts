@@ -86,3 +86,14 @@ export const REFLECT_COLUMN_COLORS = {
 export const REFLECT_THINK_EDIT_WINDOW_MS = 3 * 60 * 1000;
 /** How often an open Reflect sheet re-checks which rows have just become locked */
 export const REFLECT_LOCK_CHECK_INTERVAL_MS = 5000;
+
+// Reflect sheet layout (classes shared by the header and the rows)
+export const REFLECT_SHEET_GRID = "grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_9.5rem]";
+export const REFLECT_CELL_TEXT = "px-3 py-2 text-[13px] leading-5";
+export const REFLECT_CELL_TEXTAREA =
+    "relative block min-h-[2.25rem] w-full resize-none overflow-hidden rounded-none border-0 bg-transparent px-3 py-2 text-[13px] leading-5 shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100";
+// The focus tint sits on the wrapper so the search highlight behind the textarea stays visible
+export const REFLECT_CELL_WRAPPER = "relative focus-within:bg-sa-hover";
+// The clear (x) button of the type picker only shows while the cell is hovered or focused
+export const REFLECT_TYPE_CELL =
+    "group/type [&_button_span.rounded-sm]:opacity-0 [&_button_span.rounded-sm]:transition-opacity group-hover/type:[&_button_span.rounded-sm]:opacity-100 group-focus-within/type:[&_button_span.rounded-sm]:opacity-100 [&_button]:h-9 [&_button]:rounded-none [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-3 [&_button]:text-[13px] [&_button]:shadow-none [&_button:hover]:bg-sa-hover";

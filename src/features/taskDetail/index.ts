@@ -16,6 +16,7 @@ export { SectionSaveBar } from "./Components/small/SectionSaveBar";
 export {
     createReflectRow,
     buildReflectTypeOptions,
+    reflectRowMatchesSearch,
     keepFilledReflectRows,
     countReflectRows,
     isSameReflectRows,

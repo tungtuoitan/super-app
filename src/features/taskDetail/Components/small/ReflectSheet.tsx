@@ -3,35 +3,20 @@
  * the project Reflect tab. Presentational: rows and handlers come from the caller's helper.
  */
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Plus } from "lucide-react";
-import { GenericAutoComplete, Textarea } from "@/shared";
 import type { IAutoCompleteOptions } from "@/shared";
 import { cn } from "@/lib/utils";
 import type { ReflectField, ReflectRow } from "../../types/taskReflect.types";
-import { REFLECT_COLUMN_COLORS } from "../../task.constants";
+import { REFLECT_COLUMN_COLORS, REFLECT_SHEET_GRID } from "../../task.constants";
 import { useReflectThinkLockHelper } from "../../hooks/taskReflect/useReflectThinkLock.helper";
-
-const GRID = "grid grid-cols-1 md:grid-cols-[9.5rem_minmax(0,1fr)_minmax(0,1fr)]";
-
-const CELL_TEXTAREA =
-    "block min-h-[2.25rem] w-full resize-none overflow-hidden rounded-none border-0 bg-transparent px-3 py-2 text-[13px] leading-5 shadow-none focus-visible:bg-sa-hover focus-visible:ring-0 disabled:cursor-default disabled:opacity-100";
-
-// The clear (x) button of the type picker only shows while the cell is hovered or focused
-const TYPE_CELL =
-    "group/type [&_button_span.rounded-sm]:opacity-0 [&_button_span.rounded-sm]:transition-opacity group-hover/type:[&_button_span.rounded-sm]:opacity-100 group-focus-within/type:[&_button_span.rounded-sm]:opacity-100 [&_button]:h-9 [&_button]:rounded-none [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-3 [&_button]:text-[13px] [&_button]:shadow-none [&_button:hover]:bg-sa-hover";
-
-function autoGrow(el: HTMLTextAreaElement | null) {
-    if (!el) return;
-    el.style.height = "auto";
-    if (el.scrollHeight > 0) el.style.height = `${el.scrollHeight}px`;
-}
+import { autoGrowTextarea } from "../../utils/taskReflect.utils";
+import { ReflectRowView } from "./ReflectRowView";
 
 function HeaderRow() {
     return (
-        <div className={cn(GRID, "sticky top-0 z-10 hidden border-b border-sa-border bg-sa-surface-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground md:grid")}>
-            <div className="px-3 py-1.5">Type</div>
-            <div className={cn("flex items-center gap-1.5 border-l border-sa-border px-3 py-1.5", REFLECT_COLUMN_COLORS.think.tint)}>
+        <div className={cn(REFLECT_SHEET_GRID, "sticky top-0 z-10 hidden border-b border-sa-border bg-sa-surface-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground md:grid")}>
+            <div className={cn("flex items-center gap-1.5 px-3 py-1.5", REFLECT_COLUMN_COLORS.think.tint)}>
                 <span className={cn("h-1.5 w-1.5 rounded-full", REFLECT_COLUMN_COLORS.think.dot)} />
                 <span className={REFLECT_COLUMN_COLORS.think.text}>I think</span>
             </div>
@@ -39,6 +24,7 @@ function HeaderRow() {
                 <span className={cn("h-1.5 w-1.5 rounded-full", REFLECT_COLUMN_COLORS.real.dot)} />
                 <span className={REFLECT_COLUMN_COLORS.real.text}>Reality</span>
             </div>
+            <div className="border-l border-sa-border px-3 py-1.5">Type</div>
         </div>
     );
 }
@@ -51,18 +37,24 @@ interface ReflectSheetProps {
     onAddRow: () => void;
     /** Changes when the sheet becomes visible (tabs are mounted while hidden, so cell heights must be measured again) */
     regrowKey: string;
+    /** Text to highlight in the cells (rows are already narrowed by the caller); empty means no highlight */
+    searchText?: string;
 }
 
-export function ReflectSheet({ rows, isDisabled, typeOptions, onFieldChange, onAddRow, regrowKey }: ReflectSheetProps) {
+export function ReflectSheet({ rows, isDisabled, typeOptions, onFieldChange, onAddRow, regrowKey, searchText = "" }: ReflectSheetProps) {
+    // A stable handler, so the memoized rows are not re-rendered by every keystroke
+    const onFieldChangeRef = useRef(onFieldChange);
+    onFieldChangeRef.current = onFieldChange;
+    const handleFieldChange = useCallback((rowId: string, field: ReflectField, value: string) => onFieldChangeRef.current(rowId, field, value), []);
     const containerRef = useRef<HTMLDivElement>(null);
     const { isThinkLocked } = useReflectThinkLockHelper();
 
     useEffect(() => {
         const frame = requestAnimationFrame(() => {
-            containerRef.current?.querySelectorAll("textarea").forEach(autoGrow);
+            containerRef.current?.querySelectorAll("textarea").forEach(autoGrowTextarea);
         });
         return () => cancelAnimationFrame(frame);
-    }, [regrowKey, rows]);
+    }, [regrowKey, rows.length]);
 
     return (
         <div ref={containerRef} className="flex h-full flex-col gap-2 pt-1">
@@ -75,42 +67,16 @@ export function ReflectSheet({ rows, isDisabled, typeOptions, onFieldChange, onA
                     </div>
                 )}
                 {rows.map((row, index) => (
-                    <div key={row.id} className={cn(GRID, index > 0 && "border-t border-sa-border")}>
-                        <div className={TYPE_CELL}>
-                            <GenericAutoComplete
-                                size="tiny"
-                                value={row.type ? { id: row.type, label: row.type } : null}
-                                allOptions={typeOptions}
-                                disabled={isDisabled}
-                                inputProps={{ name: "reflect-type", label: "", placeholder: "Type" }}
-                                onChange={(_, option) => onFieldChange(row.id, "type", option?.label ?? "")}
-                            />
-                        </div>
-                        <div className={cn("md:border-l md:border-sa-border", REFLECT_COLUMN_COLORS.think.tint)}>
-                            <Textarea
-                                ref={autoGrow}
-                                rows={1}
-                                value={row.think}
-                                disabled={isDisabled || isThinkLocked(row)}
-                                placeholder="I think…"
-                                aria-label="I think"
-                                className={CELL_TEXTAREA}
-                                onChange={(e) => onFieldChange(row.id, "think", e.target.value)}
-                            />
-                        </div>
-                        <div className={cn("md:border-l md:border-sa-border", REFLECT_COLUMN_COLORS.real.tint)}>
-                            <Textarea
-                                ref={autoGrow}
-                                rows={1}
-                                value={row.real}
-                                disabled={isDisabled}
-                                placeholder="Reality…"
-                                aria-label="Reality"
-                                className={CELL_TEXTAREA}
-                                onChange={(e) => onFieldChange(row.id, "real", e.target.value)}
-                            />
-                        </div>
-                    </div>
+                    <ReflectRowView
+                        key={row.id}
+                        row={row}
+                        hasBorder={index > 0}
+                        isDisabled={isDisabled}
+                        isThinkDisabled={isDisabled || isThinkLocked(row)}
+                        typeOptions={typeOptions}
+                        searchText={searchText}
+                        onFieldChange={handleFieldChange}
+                    />
                 ))}
             </div>
             {!isDisabled && (
