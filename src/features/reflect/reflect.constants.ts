@@ -15,6 +15,7 @@ export const reflectConstants = {
     viewButtonLabel: "Reflect journal",
     searchPlaceholder: "Search",
     searchLabel: "Search Reflect",
+    searchDebounceMs: 300,
     searchInputClass: "h-6 w-44 rounded-md border border-sa-border bg-transparent pl-7 pr-2 text-[12px] outline-none focus:bg-sa-hover",
     viewHint: "Write what you think before you start. Fill in the reality afterwards.",
     stateLabels: {

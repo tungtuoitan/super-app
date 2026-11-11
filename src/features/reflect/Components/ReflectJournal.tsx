@@ -15,7 +15,7 @@ import { useReflectHasError, useReflectIsLoading, useReflectSaveState } from "..
 
 export function ReflectJournal() {
     useReflectLoadHeadless();
-    const { rows, searchText, searchInputRef, setSearchText, typeOptions, handleFieldChange, handleAddRow } = useReflectJournalHelper();
+    const { rows, searchText, appliedSearch, searchInputRef, setSearchText, typeOptions, handleFieldChange, handleAddRow } = useReflectJournalHelper();
     const saveState = useReflectSaveState();
     const isLoading = useReflectIsLoading();
     const hasError = useReflectHasError();
@@ -48,8 +48,8 @@ export function ReflectJournal() {
                     typeOptions={typeOptions}
                     onFieldChange={handleFieldChange}
                     onAddRow={handleAddRow}
-                    regrowKey={`${isLoading}-${isPrivacyHidden}-${searchText.trim()}`}
-                    searchText={searchText.trim()}
+                    regrowKey={`${isLoading}-${isPrivacyHidden}-${appliedSearch}`}
+                    searchText={appliedSearch}
                 />
             </div>
         </div>
