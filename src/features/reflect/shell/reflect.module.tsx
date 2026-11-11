@@ -9,7 +9,6 @@ export const reflectModule: ModuleDefinition = {
     id: reflectConstants.moduleId,
     icon: NotebookPen,
     label: reflectConstants.journalTitle,
-    hideRightSideBarFilter: true,
     SidebarView: ReflectView,
     editorPanels: {
         [shellConstants.vscode.tab.tabTypes.reflect]: ReflectJournal,
@@ -18,5 +17,5 @@ export const reflectModule: ModuleDefinition = {
         icon: <NotebookPen className="w-4 h-4" style={{ color: reflectConstants.color }} />,
         color: reflectConstants.color,
     }),
-    filterViewKey: null,
+    filterViewKey: reflectConstants.filterViewKey,
 };

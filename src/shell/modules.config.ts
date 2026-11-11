@@ -38,6 +38,7 @@ import { registerKFilters } from "@/features/K";
 import { registerNoteFilters } from "@/features/note";
 import { registerTaskFilters } from "@/features/taskDetail";
 import { registerProjectFilters } from "@/features/project";
+import { registerReflectFilters } from "@/features/reflect";
 import {shellConstants} from "./shell.constants";
 
 // ── Global panel tabs ─────────────────────────────────────────────────────────
@@ -66,6 +67,7 @@ registerKFilters();
 registerNoteFilters();
 registerTaskFilters();
 registerProjectFilters();
+registerReflectFilters();
 
 // ── Context menu registration ─────────────────────────────────────────────────
 menuContextRegistry.register({ handles: ["folder"],                component: WorkspaceFolderNodeMenu });

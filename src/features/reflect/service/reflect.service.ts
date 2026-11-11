@@ -1,11 +1,18 @@
 import { config } from "config/app.config";
 import { ResultOptions, apiFetch } from "@/shared";
+import { filterUtils } from "@/shell";
 import type { ReflectEntryDTO, UpsertReflectEntryRequest } from "../types/reflect.types";
 
 const URL = () => `${config.api.baseURL}/api/reflect`;
 
-const getEntries = async (): Promise<ResultOptions<ReflectEntryDTO>> => {
-    const res = await apiFetch(URL(), { method: "GET", headers: { "Content-Type": "application/json" } });
+/** `createdAt` is the saved filter value ("YYYY-MM,YYYY-MM"); the server reads the months in the user's timezone */
+const getEntries = async (createdAt?: string): Promise<ResultOptions<ReflectEntryDTO>> => {
+    const range = filterUtils.parseDateRange(createdAt);
+    const query = new URLSearchParams();
+    if (range.from) query.set("createdAtFrom", range.from);
+    if (range.to) query.set("createdAtTo", range.to);
+    const queryText = query.toString();
+    const res = await apiFetch(queryText ? `${URL()}?${queryText}` : URL(), { method: "GET", headers: { "Content-Type": "application/json" } });
     if (res.ok) return (await res.json()) as ResultOptions<ReflectEntryDTO>;
     return Promise.reject(res);
 };

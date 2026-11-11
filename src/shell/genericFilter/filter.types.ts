@@ -36,6 +36,7 @@ export interface UserFilters {
     k?: ViewFilter;
     projectGrid?: ViewFilter;
     taskGrid?: ViewFilter;
+    reflect?: ViewFilter;
 }
 
 /**

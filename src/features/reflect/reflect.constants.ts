@@ -4,6 +4,8 @@ export const reflectConstants = {
     moduleId: "Reflect",
     tabId: "reflect-tab",
     tabTitle: "Reflect",
+    /** Key of this view in the user's saved filters (UserFilters) and in the filter registry */
+    filterViewKey: "reflect",
     /** Wait after the last keystroke before a row is written to the database */
     saveDelayMs: 800,
     color: "#f59e0b",

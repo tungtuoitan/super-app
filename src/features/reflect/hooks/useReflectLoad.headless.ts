@@ -1,17 +1,22 @@
-/** Loads the saved rows once when the journal opens */
+/** Loads the saved rows when the journal opens, and again whenever the saved Created Date filter changes */
 
 import { useEffect } from "react";
+import { useAuthStore } from "@/shared";
+import { reflectConstants } from "../reflect.constants";
 import { reflectService } from "../service/reflect.service";
 import { useReflectStore } from "../store/useReflect.store";
 import { toReflectRow } from "../utils/reflect.utils";
 
 export const useReflectLoadHeadless = () => {
+    const $user = useAuthStore((s) => s.$user);
+    const createdAtFilter = $user.filters?.[reflectConstants.filterViewKey]?.createdAt;
+
     useEffect(() => {
         let alive = true;
         const { loadStarted, loaded, loadFailed } = useReflectStore.getState().actions;
         loadStarted();
         reflectService
-            .getEntries()
+            .getEntries(createdAtFilter)
             .then((res) => {
                 if (alive) loaded((res.data ?? []).map(toReflectRow));
             })
@@ -22,5 +27,5 @@ export const useReflectLoadHeadless = () => {
         return () => {
             alive = false;
         };
-    }, []);
+    }, [createdAtFilter]);
 };
