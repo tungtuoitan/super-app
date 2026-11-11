@@ -19,5 +19,8 @@ export const useReflectJournalHelper = () => {
         scheduleSave(rowId);
     };
 
-    return { rows, typeOptions: buildReflectTypeOptions(rows), handleFieldChange, handleAddRow: rowAdded };
+    // The store keeps oldest first with the empty row last; the journal shows the newest on top, so the empty row is on top
+    const newestFirstRows = [...rows].reverse();
+
+    return { rows: newestFirstRows, typeOptions: buildReflectTypeOptions(rows), handleFieldChange, handleAddRow: rowAdded };
 };

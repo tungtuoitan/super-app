@@ -29,7 +29,7 @@ function autoGrow(el: HTMLTextAreaElement | null) {
 
 function HeaderRow() {
     return (
-        <div className={cn(GRID, "hidden border-b border-sa-border bg-sa-surface-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground md:grid")}>
+        <div className={cn(GRID, "sticky top-0 z-10 hidden border-b border-sa-border bg-sa-surface-2 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground md:grid")}>
             <div className="px-3 py-1.5">Type</div>
             <div className={cn("flex items-center gap-1.5 border-l border-sa-border px-3 py-1.5", REFLECT_COLUMN_COLORS.think.tint)}>
                 <span className={cn("h-1.5 w-1.5 rounded-full", REFLECT_COLUMN_COLORS.think.dot)} />
@@ -65,8 +65,9 @@ export function ReflectSheet({ rows, isDisabled, typeOptions, onFieldChange, onA
     }, [regrowKey, rows]);
 
     return (
-        <div ref={containerRef} className="flex h-full flex-col gap-2 overflow-y-auto pt-1">
-            <div className="shrink-0 overflow-hidden rounded-xl border border-sa-border">
+        <div ref={containerRef} className="flex h-full flex-col gap-2 pt-1">
+            {/* The table fills the height it is given and scrolls inside itself; the header stays put */}
+            <div className="min-h-0 overflow-y-auto rounded-xl border border-sa-border">
                 <HeaderRow />
                 {rows.length === 0 && (
                     <div className="px-3 py-6 text-center text-[13px] text-muted-foreground">
