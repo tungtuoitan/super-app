@@ -32,7 +32,7 @@ export function TaskPropertyChips() {
     const { currentProjectValue, currentParentTaskValue } = useTaskDetailFormSelector();
     const { projectOptions, isLoadingProjects, parentTaskOptions, isLoadingParentTasks } = useTaskDetailStore();
     const {
-        handleInstantFieldChange,
+        handleFieldChange,
         handleStatusChange,
         handlePriorityChange,
         handleTaskTypeChange,
@@ -86,8 +86,8 @@ export function TaskPropertyChips() {
                 <DateRangePicker
                     startDate={selectedTask.startDate}
                     endDate={selectedTask.endDate}
-                    onStartDateChange={(date: Date | null) => handleInstantFieldChange("startDate", date)}
-                    onEndDateChange={(date: Date | null) => handleInstantFieldChange("endDate", date)}
+                    onStartDateChange={(date: Date | null) => handleFieldChange("startDate", date)}
+                    onEndDateChange={(date: Date | null) => handleFieldChange("endDate", date)}
                     placeholder="Dates"
                     disabled={isDisabled}
                     showTime={false}
@@ -133,7 +133,7 @@ export function TaskPropertyChips() {
             >
                 <Checkbox
                     checked={!!selectedTask.isMilestone}
-                    onCheckedChange={(v) => handleInstantFieldChange("isMilestone", v === true)}
+                    onCheckedChange={(v) => handleFieldChange("isMilestone", v === true)}
                     disabled={isDisabled}
                 />
                 <Diamond className="h-3.5 w-3.5 text-sa-amber" />
