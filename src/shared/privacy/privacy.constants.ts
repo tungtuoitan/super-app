@@ -8,4 +8,6 @@ export const privacyConstants = {
     shortcut: "ctrl+alt+h",
     shortcutId: "privacy-toggle",
     labels: { show: "Show text", hide: "Hide text" },
+    /** Revealed text goes back to small after this long, so it is never left readable by accident */
+    autoHideMs: 5 * 60 * 1000,
 } as const;
