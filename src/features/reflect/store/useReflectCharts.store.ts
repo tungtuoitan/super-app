@@ -10,11 +10,12 @@ export const useReflectChartsStore = create<ReflectChartsState>((set) => ({
     series: [],
     isLoading: false,
     isScanning: false,
+    scanMessage: "",
     actions: {
         loadStarted: () => set({ isLoading: true }),
         loaded: (series) => set({ series, isLoading: false }),
         loadFailed: () => set({ isLoading: false }),
-        scanStarted: () => set({ isScanning: true }),
-        scanEnded: () => set({ isScanning: false }),
+        scanStarted: () => set({ isScanning: true, scanMessage: "" }),
+        scanEnded: (scanMessage) => set({ isScanning: false, scanMessage }),
     },
 }));

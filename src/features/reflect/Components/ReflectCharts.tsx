@@ -5,7 +5,7 @@
 
 import { reflectConstants } from "../reflect.constants";
 import { useReflectChartsHelper } from "../hooks/useReflectCharts.helper";
-import { useReflectChartsIsLoading, useReflectChartsIsScanning, useReflectSeriesList } from "../Selectors/useReflectCharts.selector";
+import { useReflectChartsIsLoading, useReflectChartsIsScanning, useReflectScanMessage, useReflectSeriesList } from "../Selectors/useReflectCharts.selector";
 import { ReflectChartCard } from "./ReflectChartCard";
 
 export function ReflectCharts() {
@@ -13,10 +13,12 @@ export function ReflectCharts() {
     const series = useReflectSeriesList();
     const isLoading = useReflectChartsIsLoading();
     const isScanning = useReflectChartsIsScanning();
+    const scanMessage = useReflectScanMessage();
 
     return (
         <div className="h-full overflow-y-auto pb-4 pt-1">
-            <div className="mb-2 flex justify-end">
+            <div className="mb-2 flex items-center justify-end gap-3">
+                {scanMessage && <span className={reflectConstants.scanMessageClass}>{scanMessage}</span>}
                 <button onClick={scanNow} disabled={isScanning} className={reflectConstants.scanButtonClass}>
                     {isScanning ? reflectConstants.scanningLabel : reflectConstants.scanLabel}
                 </button>

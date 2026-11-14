@@ -3,6 +3,7 @@
 import { useCallback, useEffect } from "react";
 import { reflectConstants } from "../reflect.constants";
 import { reflectService } from "../service/reflect.service";
+import { formatReflectScanResult } from "../utils/reflect.utils";
 import { useReflectChartsActions } from "../Selectors/useReflectCharts.selector";
 
 export const useReflectChartsHelper = () => {
@@ -24,13 +25,16 @@ export const useReflectChartsHelper = () => {
 
     const scanNow = async () => {
         scanStarted();
+        let message = "";
         try {
-            await reflectService.scanNow();
+            const result = await reflectService.scanNow();
+            message = formatReflectScanResult(result);
             await load();
         } catch (error) {
             console.error(reflectConstants.messages.scanFailed, error);
+            message = reflectConstants.messages.scanFailed;
         } finally {
-            scanEnded();
+            scanEnded(message);
         }
     };
 

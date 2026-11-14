@@ -1,5 +1,6 @@
+import { reflectConstants } from "../reflect.constants";
 import type { ReflectRow } from "@/features/taskDetail";
-import type { ReflectChartPoint, ReflectEntryDTO, ReflectSeriesPointDTO, UpsertReflectEntryRequest } from "../types/reflect.types";
+import type { ReflectChartPoint, ReflectEntryDTO, ReflectScanResultDTO, ReflectSeriesPointDTO, UpsertReflectEntryRequest } from "../types/reflect.types";
 
 /** A saved row from the server as a sheet row */
 export const toReflectRow = (e: ReflectEntryDTO): ReflectRow => ({ id: e.id, type: e.type, think: e.think, real: e.real, updatedAt: e.updatedAt, createdAt: e.createdAt, tag: e.tag ?? undefined });
@@ -38,3 +39,7 @@ export const reflectTagOptions = (rows: ReflectRow[]): string[] =>
 
 /** The rows of one tag; an empty tag keeps every row */
 export const filterReflectRowsByTag = (rows: ReflectRow[], tag: string): ReflectRow[] => (tag ? rows.filter((r) => r.tag === tag) : rows);
+
+/** What a scan did, in words: how many rows were read, and how many could not be (they are tried again next time) */
+export const formatReflectScanResult = (r: ReflectScanResultDTO): string =>
+    r.failed > 0 ? reflectConstants.messages.scanPartial(r.scanned, r.failed) : reflectConstants.messages.scanDone(r.scanned);

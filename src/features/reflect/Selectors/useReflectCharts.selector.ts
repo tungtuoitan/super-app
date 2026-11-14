@@ -5,3 +5,4 @@ export const useReflectSeriesByCode = (code: string) => useReflectChartsStore((s
 export const useReflectChartsIsLoading = () => useReflectChartsStore((s) => s.isLoading);
 export const useReflectChartsIsScanning = () => useReflectChartsStore((s) => s.isScanning);
 export const useReflectChartsActions = () => useReflectChartsStore((s) => s.actions);
+export const useReflectScanMessage = () => useReflectChartsStore((s) => s.scanMessage);

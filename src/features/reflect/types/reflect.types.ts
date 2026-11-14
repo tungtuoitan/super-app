@@ -81,13 +81,15 @@ export interface ReflectChartsActions {
     loaded: (series: ReflectSeriesDTO[]) => void;
     loadFailed: () => void;
     scanStarted: () => void;
-    scanEnded: () => void;
+    scanEnded: (message: string) => void;
 }
 
 export interface ReflectChartsState {
     series: ReflectSeriesDTO[];
     isLoading: boolean;
     isScanning: boolean;
+    /** Result of the last scan, shown under the Scan now button; empty before any scan */
+    scanMessage: string;
     actions: ReflectChartsActions;
 }
 
