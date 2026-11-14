@@ -10,3 +10,4 @@ export const useReflectHasError = () => useReflectStore((s) => s.saveState === "
 
 /** The saved Created Date filter ("YYYY-MM,YYYY-MM") of the user; empty when no filter is set */
 export const useReflectCreatedAtFilter = () => useAuthStore().$user.filters?.[reflectConstants.filterViewKey]?.createdAt;
+export const useReflectLoadedIds = () => useReflectStore((s) => s.loadedIds);

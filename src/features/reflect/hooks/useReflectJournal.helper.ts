@@ -8,16 +8,17 @@ import { nowInstantISO } from "@/shared";
 import { buildReflectTypeOptions, reflectRowMatchesSearch } from "@/features/taskDetail";
 import type { ReflectField } from "@/features/taskDetail";
 import { reflectConstants } from "../reflect.constants";
-import { filterReflectRowsByTag } from "../utils/reflect.utils";
-import { useReflectRows, useReflectStoreActions } from "../Selectors/useReflect.selector";
-import { useReflectSearchText, useReflectTagFilter, useReflectViewName } from "../Selectors/useReflectView.selector";
+import { filterReflectRowsByTag, isReflectRowShownByDefault } from "../utils/reflect.utils";
+import { useReflectLoadedIds, useReflectRows, useReflectStoreActions } from "../Selectors/useReflect.selector";
+import { useReflectSearchText, useReflectShowAll, useReflectTagFilter } from "../Selectors/useReflectView.selector";
 import { useReflectSaverHelper } from "./useReflectSaver.helper";
 
 export const useReflectJournalHelper = () => {
     const rows = useReflectRows();
     const searchText = useReflectSearchText();
     const tagFilter = useReflectTagFilter();
-    const view = useReflectViewName();
+    const showAll = useReflectShowAll();
+    const loadedIds = useReflectLoadedIds();
 
     // The box answers every key at once; the (heavier) filter and highlight follow once typing pauses
     const [appliedSearch, setAppliedSearch] = useState("");
@@ -42,12 +43,16 @@ export const useReflectJournalHelper = () => {
     const searchedRows = needle ? newestFirstRows.filter((r) => reflectRowMatchesSearch(r, needle)) : newestFirstRows;
 
     // A chosen tag narrows the rows to that kind
-    const shownRows = filterReflectRowsByTag(searchedRows, tagFilter);
+    const taggedRows = filterReflectRowsByTag(searchedRows, tagFilter);
+
+    // By default only the rows worth reading; a search or "Show all" looks through every row
+    const isNarrowed = !showAll && !needle;
+    const shownRows = isNarrowed ? taggedRows.filter((r) => isReflectRowShownByDefault(r, loadedIds)) : taggedRows;
 
     return {
         rows: shownRows,
         appliedSearch,
-        view,
+        hiddenCount: taggedRows.length - shownRows.length,
         typeOptions: buildReflectTypeOptions(rows),
         handleFieldChange,
         handleAddRow: rowAdded,

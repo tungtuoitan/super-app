@@ -1,34 +1,27 @@
 /**
- * ReflectCharts — the Charts view of the journal: one card per number the nightly scan read out of it.
- * Read-only; the only action is scanning right away.
+ * ReflectCharts — the charts at the top of the journal page: one card per thing read out of the rows (written by
+ * Claude through the talk-log skill) plus how much the journal is used each day. Read-only.
  */
 
 import { reflectConstants } from "../reflect.constants";
 import { useReflectChartsHelper } from "../hooks/useReflectCharts.helper";
-import { useReflectChartsIsLoading, useReflectChartsIsScanning, useReflectScanMessage, useReflectSeriesList } from "../Selectors/useReflectCharts.selector";
+import { useReflectChartsIsLoading, useReflectSeriesList } from "../Selectors/useReflectCharts.selector";
 import { ReflectChartCard } from "./ReflectChartCard";
 
 export function ReflectCharts() {
-    const { scanNow } = useReflectChartsHelper();
+    useReflectChartsHelper();
     const series = useReflectSeriesList();
     const isLoading = useReflectChartsIsLoading();
-    const isScanning = useReflectChartsIsScanning();
-    const scanMessage = useReflectScanMessage();
 
     return (
-        <div className="h-full overflow-y-auto pb-4 pt-1">
-            <div className="mb-2 flex items-center justify-end gap-3">
-                {scanMessage && <span className={reflectConstants.scanMessageClass}>{scanMessage}</span>}
-                <button onClick={scanNow} disabled={isScanning} className={reflectConstants.scanButtonClass}>
-                    {isScanning ? reflectConstants.scanningLabel : reflectConstants.scanLabel}
-                </button>
-            </div>
+        <section>
+            <div className={reflectConstants.sectionTitleClass}>{reflectConstants.chartsTitle}</div>
             {!isLoading && series.length === 0 && <div className={reflectConstants.chartsEmptyClass}>{reflectConstants.chartsEmpty}</div>}
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {series.map((s) => (
                     <ReflectChartCard key={s.code} code={s.code} />
                 ))}
             </div>
-        </div>
+        </section>
     );
 }

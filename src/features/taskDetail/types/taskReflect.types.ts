@@ -14,8 +14,10 @@ export interface ReflectRow {
     updatedAt: string;
     /** When the row was first saved; only rows of the Reflect journal set it (it starts the "I think" edit window) */
     createdAt?: string;
-    /** Kind of entry set by the nightly scan (Reflect journal only); read-only */
+    /** Kind of entry set when Claude processed the row (Reflect journal only); read-only */
     tag?: string;
+    /** Worth reading: marked by Claude when it processed the row (Reflect journal only); read-only */
+    isHighlight?: boolean;
 }
 
 export type ReflectField = "type" | "think" | "real";

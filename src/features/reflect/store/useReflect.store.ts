@@ -12,9 +12,10 @@ export const useReflectStore = create<ReflectState>((set) => ({
     rows: [],
     saveState: "loading",
     storedIds: new Set(),
+    loadedIds: new Set(),
     actions: {
         loadStarted: () => set({ saveState: "loading" }),
-        loaded: (rows) => set({ rows: withTrailingBlankReflectRow(rows, createReflectRow), storedIds: new Set(rows.map((r) => r.id)), saveState: "idle" }),
+        loaded: (rows) => set({ rows: withTrailingBlankReflectRow(rows, createReflectRow), storedIds: new Set(rows.map((r) => r.id)), loadedIds: new Set(rows.map((r) => r.id)), saveState: "idle" }),
         loadFailed: () => set({ saveState: "error" }),
         fieldChanged: ({ rowId, field, value, nowIso }) =>
             set((s) => ({ rows: withTrailingBlankReflectRow(s.rows.map((r) => (r.id === rowId ? withReflectCreatedAt({ ...r, [field]: value }, nowIso) : r)), createReflectRow) })),
