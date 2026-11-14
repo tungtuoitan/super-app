@@ -97,3 +97,6 @@ export const REFLECT_CELL_WRAPPER = "relative focus-within:bg-sa-hover";
 // The clear (x) button of the type picker only shows while the cell is hovered or focused
 export const REFLECT_TYPE_CELL =
     "group/type [&_button_span.rounded-sm]:opacity-0 [&_button_span.rounded-sm]:transition-opacity group-hover/type:[&_button_span.rounded-sm]:opacity-100 group-focus-within/type:[&_button_span.rounded-sm]:opacity-100 [&_button]:h-9 [&_button]:rounded-none [&_button]:border-0 [&_button]:bg-transparent [&_button]:px-3 [&_button]:text-[13px] [&_button]:shadow-none [&_button:hover]:bg-sa-hover";
+
+// Read-only kind label under the Type picker (set by the Reflect nightly scan)
+export const REFLECT_TAG_CHIP = "mx-3 mb-1 inline-block rounded bg-sa-hover px-1.5 text-[11px] capitalize leading-4 text-muted-foreground";

@@ -8,7 +8,7 @@ import { GenericAutoComplete, Textarea } from "@/shared";
 import type { IAutoCompleteOptions } from "@/shared";
 import { cn } from "@/lib/utils";
 import type { ReflectField, ReflectRow } from "../../types/taskReflect.types";
-import { REFLECT_CELL_TEXTAREA, REFLECT_CELL_WRAPPER, REFLECT_COLUMN_COLORS, REFLECT_SHEET_GRID, REFLECT_TYPE_CELL } from "../../task.constants";
+import { REFLECT_CELL_TEXTAREA, REFLECT_CELL_WRAPPER, REFLECT_COLUMN_COLORS, REFLECT_SHEET_GRID, REFLECT_TAG_CHIP, REFLECT_TYPE_CELL } from "../../task.constants";
 import { autoGrowTextarea } from "../../utils/taskReflect.utils";
 import { ReflectSearchMirror } from "./ReflectSearchMirror";
 
@@ -65,6 +65,7 @@ function ReflectRowViewBase({ row, hasBorder, isDisabled, isThinkDisabled, typeO
                     inputProps={{ name: "reflect-type", label: "", placeholder: "Type" }}
                     onChange={(_, option) => onFieldChange(row.id, "type", option?.label ?? "")}
                 />
+                {row.tag && <span className={REFLECT_TAG_CHIP}>{row.tag}</span>}
             </div>
         </div>
     );

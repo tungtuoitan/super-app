@@ -1,7 +1,7 @@
 import { config } from "config/app.config";
 import { ResultOptions, apiFetch } from "@/shared";
 import { filterUtils } from "@/shell";
-import type { ReflectEntryDTO, UpsertReflectEntryRequest } from "../types/reflect.types";
+import type { ReflectEntryDTO, ReflectScanResultDTO, ReflectSeriesDTO, UpsertReflectEntryRequest } from "../types/reflect.types";
 
 const URL = () => `${config.api.baseURL}/api/reflect`;
 
@@ -38,4 +38,18 @@ const deleteEntry = async (id: string): Promise<ResultOptions> => {
     return Promise.reject(res);
 };
 
-export const reflectService = { getEntries, upsertEntry, deleteEntry };
+/** The numbers read out of the journal, one series per metric */
+const getSeries = async (): Promise<ReflectSeriesDTO[]> => {
+    const res = await apiFetch(`${URL()}/series`, { method: "GET", headers: { "Content-Type": "application/json" } });
+    if (res.ok) return (await res.json()) as ReflectSeriesDTO[];
+    return Promise.reject(res);
+};
+
+/** Reads the new and edited rows now instead of waiting for the nightly scan */
+const scanNow = async (): Promise<ReflectScanResultDTO> => {
+    const res = await apiFetch(`${URL()}/scan`, { method: "POST", headers: { "Content-Type": "application/json" } });
+    if (res.ok) return (await res.json()) as ReflectScanResultDTO;
+    return Promise.reject(res);
+};
+
+export const reflectService = { getEntries, upsertEntry, deleteEntry, getSeries, scanNow };

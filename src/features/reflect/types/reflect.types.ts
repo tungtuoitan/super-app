@@ -13,6 +13,8 @@ export interface ReflectEntryDTO {
     createdAt: string;
     updatedAt: string;
     deletedAt?: string | null;
+    /** Kind of entry set by the nightly scan; empty until the row was scanned */
+    tag?: string | null;
 }
 
 export interface UpsertReflectEntryRequest {
@@ -48,4 +50,70 @@ export interface ReflectState {
     /** Ids of rows that exist in the database (a cleared row is only deleted when it is in here) */
     storedIds: ReadonlySet<string>;
     actions: ReflectActions;
+}
+
+export interface ReflectSeriesPointDTO {
+    /** Calendar day, "YYYY-MM-DD" */
+    date: string;
+    value: number;
+}
+
+/** One chart: a number read out of the journal (km run, hours slept...) with its daily values */
+export interface ReflectSeriesDTO {
+    code: string;
+    label: string;
+    unit: string;
+    /** How values of one day combine: sum (amounts), avg (levels) or max */
+    aggregate: "sum" | "avg" | "max";
+    points: ReflectSeriesPointDTO[];
+}
+
+export interface ReflectScanResultDTO {
+    scanned: number;
+    failed: number;
+}
+
+/** The two ways to look at the journal: the table of rows, or the charts of the numbers read out of it */
+export type ReflectView = "table" | "charts";
+
+export interface ReflectChartsActions {
+    loadStarted: () => void;
+    loaded: (series: ReflectSeriesDTO[]) => void;
+    loadFailed: () => void;
+    scanStarted: () => void;
+    scanEnded: () => void;
+}
+
+export interface ReflectChartsState {
+    series: ReflectSeriesDTO[];
+    isLoading: boolean;
+    isScanning: boolean;
+    actions: ReflectChartsActions;
+}
+
+/** One point as the chart library wants it */
+export interface ReflectChartPoint {
+    label: string;
+    value: number;
+}
+
+export interface ReflectViewActions {
+    viewChanged: (view: ReflectView) => void;
+    tagChanged: (tag: string) => void;
+    searchChanged: (text: string) => void;
+}
+
+export interface ReflectViewState {
+    view: ReflectView;
+    /** Empty means every tag */
+    tagFilter: string;
+    searchText: string;
+    actions: ReflectViewActions;
+}
+
+/** What every chart shape gets: the points, and the unit and name for the tooltip */
+export interface ReflectChartKindProps {
+    data: ReflectChartPoint[];
+    unit: string;
+    label: string;
 }
